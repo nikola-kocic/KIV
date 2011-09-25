@@ -39,7 +39,7 @@ HEADERS += \
 RESOURCES +=
 
 win32{
-    INCLUDEPATH   += C:/QtSDK/QtSources/4.7.4/src/3rdparty/zlib
+    INCLUDEPATH   += zlib
     RC_FILE = komicviewer.rc
 }
 
@@ -47,23 +47,3 @@ DEFINES += QUAZIP_BUILD
 
 FORMS += \
     settings_dialog.ui
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
