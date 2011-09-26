@@ -254,6 +254,7 @@ void KomicViewer::keyPressEvent(QKeyEvent *event)
 void KomicViewer::createActions()
 {
 //    qDebug() << QIcon::themeSearchPaths();
+//qDebug() << QCoreApplication::applicationDirPath();
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "glyphs";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
@@ -261,6 +262,7 @@ void KomicViewer::createActions()
         //use an icon theme that we provide via a icons folder
         //This case happens under Windows and Mac OS X
         //This does not happen under GNOME or KDE
+//        QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
         QIcon::setThemeName(FALLBACK_ICON_THEME);
 //        qDebug() << "theme fall back";
     }

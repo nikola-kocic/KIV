@@ -14,7 +14,8 @@ SOURCES += \
     quazip/JlCompress.cpp \
     system_icons.cpp \
     settings_dialog.cpp \
-    settings.cpp
+    settings.cpp \
+    pixmapholder.cpp
 
 HEADERS += \
     PictureItem.h \
@@ -34,7 +35,8 @@ HEADERS += \
     system_icons.h \
     settings_dialog.h \
     settings.h \
-    KomicViewer.h
+    KomicViewer.h \
+    pixmapholder.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -48,4 +50,7 @@ DEFINES += QUAZIP_BUILD
 
 FORMS += \
     settings_dialog.ui
+
+QT += opengl
+
 

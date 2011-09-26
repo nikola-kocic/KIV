@@ -3,14 +3,16 @@
 
 #include <QtGui/qlabel.h>
 #include <QtCore/qtimer.h>
+#include "pixmapholder.h"
+
+#include <QtOpenGl/QGLWidget>
 
 namespace LockMode
 {
     enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
 }
 
-
-class PictureItem : public QLabel
+class PictureItem : public QGLWidget
 {
     Q_OBJECT
 
@@ -27,6 +29,7 @@ public:
     LockMode::Mode getLockMode();
 
 private:
+    PixmapHolder *ph;
     QPoint pointToOrigin(int width, int height);
     void avoidOutOfScreen();
     void drag(const QPoint &pt);
@@ -44,7 +47,6 @@ private:
     qreal zoom;
     qreal rotation;
     QRect boundingRect;
-    QPixmap bmp;
     bool dragging;
     bool rotating;
     QPoint dragPoint;
