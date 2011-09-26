@@ -36,7 +36,8 @@ HEADERS += \
     settings.h \
     KomicViewer.h
 
-RESOURCES +=
+RESOURCES += \
+    komicviewer.qrc
 
 win32{
     INCLUDEPATH   += zlib
@@ -47,3 +48,4 @@ DEFINES += QUAZIP_BUILD
 
 FORMS += \
     settings_dialog.ui
+

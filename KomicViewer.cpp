@@ -1,9 +1,8 @@
-#include <QtCore/qdebug.h>
-#include <QtCore/qdatetime.h>
+//#include <QtCore/qdebug.h>
+//#include <QtCore/qdatetime.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
 
-#include <QtGui/qmainwindow.h>
 #include <QtGui/qapplication.h>
 #include <QtGui/qaction.h>
 #include <QtGui/qevent.h>
@@ -12,9 +11,9 @@
 #include <QtGui/qfiledialog.h>
 #include <QtGui/qheaderview.h>
 #include <QtGui/qfileiconprovider.h>
-#include <QtGui/QMessageBox>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QSpacerItem>
+//#include <QtGui/qmessagebox.h>
+#include <QtGui/qdesktopwidget.h>
+//#include <QtGui/QSpacerItem>
 #include <QtGui/qcompleter.h>
 
 #include "KomicViewer.h"
@@ -25,13 +24,11 @@
 
 KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
-    Settings::Instance()->getMiddleClick();
-
     resize(QApplication::desktop()->width() - 100,
 		QApplication::desktop()->height() - 100);
     setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    setWindowIcon(QIcon("icons/komicviewer.svg"));
+    setWindowIcon(QIcon(":/icons/komicviewer.svg"));
 
 
     createActions();
@@ -120,20 +117,14 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     //Content start
 
-
-    QMainWindow *contentWindow = new QMainWindow(this);
-    contentWindow->setObjectName("right");
+    imageDisplay = new PictureItem(this);
 
     QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
-    contentWindow->setSizePolicy(policy);
+    imageDisplay->setSizePolicy(policy);
 
-    imageDisplay = new PictureItem(this);
-
-    contentWindow->setCentralWidget(imageDisplay);
-
-    splitterMain->addWidget(contentWindow);
+    splitterMain->addWidget(imageDisplay);
 
     //Content end
 
@@ -238,7 +229,7 @@ void KomicViewer::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-	qDebug() << "kv" << event->key();
+//	qDebug() << "kv" << event->key();
 	if(lineEditPath->hasFocus())
 	{
 //	    if(lineEditPath->palette() != QApplication::palette())
@@ -262,6 +253,7 @@ void KomicViewer::keyPressEvent(QKeyEvent *event)
 
 void KomicViewer::createActions()
 {
+//    qDebug() << QIcon::themeSearchPaths();
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "glyphs";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
@@ -270,6 +262,7 @@ void KomicViewer::createActions()
         //This case happens under Windows and Mac OS X
         //This does not happen under GNOME or KDE
         QIcon::setThemeName(FALLBACK_ICON_THEME);
+//        qDebug() << "theme fall back";
     }
 
     openAct = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
@@ -864,7 +857,6 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
 
 void KomicViewer::open()
 {
-    qDebug() << splitterPanel->width();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Zip files (*.zip *.cbz)"));
     if (!fileName.isEmpty())
     {

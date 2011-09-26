@@ -1,9 +1,10 @@
+//#include <QtCore/qdebug.h>
 #include <QtGui/qpixmap.h>
-#include <QtGui/qevent.h>
 #include <QtGui/qpainter.h>
+#include <QtGui/qevent.h>
+
 #include "KomicViewer.h"
 #include "settings.h"
-#include <QtCore/qdebug.h>
 
 PictureItem::PictureItem(QWidget * parent, Qt::WindowFlags f )
 {
@@ -112,8 +113,8 @@ void PictureItem::paintEvent(QPaintEvent *event)
 {
     if(bmp.isNull()) return;
 
-    QTime myTimer;
-    myTimer.start();
+//    QTime myTimer;
+//    myTimer.start();
 
     QPainter p(this);
     p.setClipRect(event->region().boundingRect());
@@ -145,23 +146,29 @@ void PictureItem::setRotation(qreal r)
 {
     if(bmp.isNull()) return;
 
-    QTime myTimer;
-    myTimer.start();
+//    QTime myTimer;
+//    myTimer.start();
 
     rotation = r;
 
-    QTransform tRot;
-    tRot.rotate(rotation);
+    if((int)rotation%360==0)
+    {
+        pixmap_edited = bmp;
+    }
+    else
+    {
+        QTransform tRot;
+        tRot.rotate(rotation);
 
-    Qt::TransformationMode rotateMode;
-    rotateMode = Qt::SmoothTransformation;
-//    rotateMode = Qt::FastTransformation;
+        Qt::TransformationMode rotateMode;
+        rotateMode = Qt::SmoothTransformation;
+    //    rotateMode = Qt::FastTransformation;
 
-    pixmap_edited = bmp.transformed(tRot, rotateMode);
+        pixmap_edited = bmp.transformed(tRot, rotateMode);
+    }
 
     boundingRect.setWidth(pixmap_edited.width() * zoom);
     boundingRect.setHeight(pixmap_edited.height()  * zoom);
-
     avoidOutOfScreen();
     update();
 

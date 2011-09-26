@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/komicviewer.svg</file>
+    </qresource>
+</RCC>
