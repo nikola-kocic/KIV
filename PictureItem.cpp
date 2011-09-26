@@ -8,7 +8,6 @@
 
 PictureItem::PictureItem(QWidget * parent, Qt::WindowFlags f )
 {
-    ph = new PixmapHolder();
     zoom = 1;
     dragging = false;
     rotation = 0;
@@ -23,23 +22,16 @@ PictureItem::PictureItem(QWidget * parent, Qt::WindowFlags f )
 
 void PictureItem::setPixmap(const QPixmap &p)
 {
-    //    if (p.isNull()==false)
-    //    {
+    //    if (p.isNull()=) return;
 
-    ph->setOrgPixmap(p);
+    this->bmp = p;
 
-//    this->bmp = p;
-    this->pixmap_edited = p;
-
-    boundingRect = QRect(0, 0, p.width(), p.height());
-    //    setRotation(0);
-    //    setZoom(1);
+    setRotation(0);
     if(lockMode != LockMode::Zoom)
     {
-	zoom = 1.0;
+        setZoom(1);
     }
-    rotation = 0.0;
-    emit zoomChanged();
+    boundingRect = QRect(0, 0, p.width() * zoom, p.height() * zoom);
 
     updateLockMode();
 
@@ -63,10 +55,7 @@ void PictureItem::setPixmap(const QPixmap &p)
         flagJumpToEnd = false;
     }
 
-//    editPixmap();
-
     update();
-    //    }
 }
 
 void PictureItem::ScrollPageVertical(int value)
@@ -109,37 +98,37 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
 
 QPixmap PictureItem::getPixmap()
 {
-    return ph->getOrgPixmap();
+    return bmp;
 }
 
 void PictureItem::paintEvent(QPaintEvent *event)
 {
-    if(ph->isNull()) return;
-
-//    QTime myTimer;
-//    myTimer.start();
+    if(bmp.isNull()) return;
 
     QPainter p(this);
     p.setClipRect(event->region().boundingRect());
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
-
-    QRect sourceRect = QRect(-boundingRect.x() / zoom, -boundingRect.y() / zoom, event->region().boundingRect().width() / zoom, event->region().boundingRect().height() / zoom);
 
     int x = event->region().boundingRect().x();
     int y = event->region().boundingRect().y();
     int w = event->region().boundingRect().width();
     int h = event->region().boundingRect().height();
 
-    if(w  > (pixmap_edited.size().width() * zoom)) x = (w - (pixmap_edited.size().width() * zoom)) / 2;
-    if(h  > (pixmap_edited.size().height() * zoom)) y = (h - (pixmap_edited.size().height() * zoom)) / 2;
+    if(w  > boundingRect.width()) x = (w - boundingRect.width()) / 2;
+    if(h  > boundingRect.height()) y = (h - boundingRect.height()) / 2;
 
-    QRect drawRect = QRect(x, y, w, h);
+//	qDebug() << x << y;
+//	qDebug()<<"zoom" << zoom << "boundingRect: " << boundingRect<< "this size" << this->size();
 
-    p.drawPixmap(drawRect,pixmap_edited, sourceRect);
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
 
+    p.translate(boundingRect.x() + translatePoint.x() + x, boundingRect.y() + translatePoint.y() + y);
+    p.scale(zoom,zoom);
+    p.translate(bmp.height()/2, bmp.width()/2);
+    p.rotate(rotation);
+    p.translate(-bmp.height()/2, -bmp.width()/2);
+
+    p.drawPixmap(0,0,bmp);
     p.end();
-
-//    qDebug() << "Paint: " << myTimer.elapsed();
 }
 
 
@@ -147,36 +136,33 @@ void PictureItem::paintEvent(QPaintEvent *event)
 
 void PictureItem::setRotation(qreal r)
 {
-    if(ph->isNull()) return;
-
-//    QTime myTimer;
-//    myTimer.start();
+    if(bmp.isNull()) return;
 
     rotation = r;
 
-    if((int)rotation%360==0)
+    QTransform tRot;
+    tRot.translate(boundingRect.x(), boundingRect.y());
+    tRot.scale(zoom,zoom);
+    tRot.translate(bmp.height()/2, bmp.width()/2);
+    tRot.rotate(rotation);
+    tRot.translate(-bmp.height()/2, -bmp.width()/2);
+    QRect transformedRot = tRot.mapRect(bmp.rect());
+
+    translatePoint = QPoint(boundingRect.x() - transformedRot.x(), boundingRect.y() - transformedRot.y());
+    boundingRect.setWidth(transformedRot.width());
+    boundingRect.setHeight(transformedRot.height());
+
+    if(boundingRect.height() + boundingRect.y() < this->height())
     {
-        pixmap_edited = ph->getOrgPixmap();
+        boundingRect.translate(0, this->height() - (boundingRect.height() + boundingRect.y()));
     }
-    else
+
+    if(boundingRect.height()  < this->height())
     {
-        QTransform tRot;
-        tRot.rotate(rotation);
-
-        Qt::TransformationMode rotateMode;
-        rotateMode = Qt::SmoothTransformation;
-    //    rotateMode = Qt::FastTransformation;
-
-        pixmap_edited = ph->getOrgPixmap().transformed(tRot, rotateMode);
+        boundingRect.moveTop(0);
     }
 
-    boundingRect.setWidth(pixmap_edited.size().width() * zoom);
-    boundingRect.setHeight(pixmap_edited.size().height()  * zoom);
-    avoidOutOfScreen();
     update();
-
-//    qDebug() << "Rotate: " << myTimer.elapsed();
-
 }
 
 
@@ -193,22 +179,21 @@ qreal PictureItem::getRotation()
 
 void PictureItem::setZoom(qreal z)
 {
-    if(ph->isNull()) return;
+    if (this->bmp.isNull()==false)
+    {
+        if(z < 0.001) z = 0.001;
+        else if(z > 1000) z = 1000;
+        QPoint p = pointToOrigin((boundingRect.width() / zoom) * z, (boundingRect.height() / zoom) * z);
+        boundingRect = QRect(p.x(), p.y(), (boundingRect.width() / zoom) * z, (boundingRect.height() / zoom) * z);
 
-    if(z < 0.001) z = 0.001;
-    else if(z > 1000) z = 1000;
+        zoom = z;
 
-    QPoint p = pointToOrigin((int)(pixmap_edited.size().width() * z), (int)(pixmap_edited.size().height() * z));
-    boundingRect = QRect(p.x(), p.y(), (int)(pixmap_edited.size().width() * z), (int)(pixmap_edited.size().height() * z));
+        setRotation(rotation);
+        avoidOutOfScreen();
 
-    zoom = z;
-
-    avoidOutOfScreen();
-    update();
-
-    emit zoomChanged();
+        update();
+    }
 }
-
 
 QPoint PictureItem::pointToOrigin(int width, int height)
 {
@@ -294,7 +279,7 @@ void PictureItem::zoomOut()
 
 void PictureItem::fitToScreen()
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     QRect temp = QRect(boundingRect.x(), boundingRect.y(), boundingRect.width() / zoom, boundingRect.height() / zoom);
 
@@ -317,7 +302,7 @@ void PictureItem::fitToScreen()
 
 void PictureItem::fitWidth()
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     qreal tw = boundingRect.width() / zoom;
 
@@ -335,7 +320,7 @@ void PictureItem::fitWidth()
 
 void PictureItem::fitHeight()
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     qreal th = boundingRect.height() / zoom;
 
@@ -354,7 +339,7 @@ void PictureItem::fitHeight()
 
 void PictureItem::updateLockMode()
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     //use in setpixmap and resize events
     switch (lockMode)
@@ -387,7 +372,7 @@ LockMode::Mode PictureItem::getLockMode()
 
 void PictureItem::avoidOutOfScreen()
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     // Am I lined out to the left?
     if (boundingRect.x() >= 0)
@@ -436,7 +421,7 @@ void PictureItem::avoidOutOfScreen()
 
 void PictureItem::drag(const QPoint &pt)
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     if (dragging == true)
     {
@@ -564,7 +549,7 @@ void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 
 void PictureItem::beginDrag(const QPoint &pt)
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     // Initial drag position
     dragPoint.setX(pt.x() - boundingRect.x());
@@ -577,7 +562,7 @@ void PictureItem::beginDrag(const QPoint &pt)
 void PictureItem::endDrag()
 {
 
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     dragging = false;
     setCursor(Qt::OpenHandCursor);
@@ -591,7 +576,7 @@ void PictureItem::endDrag()
 
 void PictureItem::resizeEvent(QResizeEvent *)
 {
-    if(ph->isNull()) return;
+    if(bmp.isNull()) return;
 
     avoidOutOfScreen();
     updateLockMode();
