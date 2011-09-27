@@ -117,14 +117,14 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     //Content start
 
-    imageDisplay = new PictureItem(this);
+    imageDisplayGL = new PictureItemGL(this);
 
     QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
-    imageDisplay->setSizePolicy(policy);
+    imageDisplayGL->setSizePolicy(policy);
 
-    splitterMain->addWidget(imageDisplay);
+    splitterMain->addWidget(imageDisplayGL);
 
     //Content end
 
@@ -147,7 +147,7 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     foreach (const QByteArray &ext, QImageReader::supportedImageFormats()) filters_image << ext;
 
-    foreach(const qreal &i, imageDisplay->getDefaultZoomSizes())
+    foreach(const qreal &i, imageDisplayGL->getDefaultZoomSizes())
     {
 	comboBoxZoom->addItem(QString::number((int)(i * 100)) + "%");
 	if(i == 1) comboBoxZoom->setCurrentIndex(comboBoxZoom->count() - 1);
@@ -192,10 +192,10 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
     connect(treeViewFilesystem, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
     connect(treeWidgetFiles, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(OnTreeFileWidgetCurrentChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
     connect(treeWidgetFiles, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(OnTreeFileWidgetItemActivated(QTreeWidgetItem*,int)));
-    connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
-    connect(imageDisplay, SIGNAL(pageNext()), this, SLOT(pageNext()));
-    connect(imageDisplay, SIGNAL(pagePrevious()), this, SLOT(pagePrevious()));
-    connect(imageDisplay, SIGNAL(zoomChanged()), this, SLOT(OnZoomChanged()));
+    connect(imageDisplayGL, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
+    connect(imageDisplayGL, SIGNAL(pageNext()), this, SLOT(pageNext()));
+    connect(imageDisplayGL, SIGNAL(pagePrevious()), this, SLOT(pagePrevious()));
+    connect(imageDisplayGL, SIGNAL(zoomChanged()), this, SLOT(OnZoomChanged()));
     connect(comboBoxZoom, SIGNAL(currentIndexChanged(int)), this, SLOT(OnComboBoxZoomIndexChanged(int)));
     connect(comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(OnComboBoxZoomTextChanged()));
 
@@ -443,12 +443,12 @@ void KomicViewer::connectActions()
     connect(rotateLeftAct, SIGNAL(triggered()), this, SLOT(rotateLeft()));
     connect(rotateRightAct, SIGNAL(triggered()), this, SLOT(rotateRight()));
     connect(rotateResetAct, SIGNAL(triggered()), this, SLOT(rotateReset()));
-    connect(zoomInAct, SIGNAL(triggered()), imageDisplay, SLOT(zoomIn()));
-    connect(zoomOutAct, SIGNAL(triggered()), imageDisplay, SLOT(zoomOut()));
+    connect(zoomInAct, SIGNAL(triggered()), imageDisplayGL, SLOT(zoomIn()));
+    connect(zoomOutAct, SIGNAL(triggered()), imageDisplayGL, SLOT(zoomOut()));
     connect(zoomResetAct, SIGNAL(triggered()), this, SLOT(zoomReset()));
-    connect(fitToWindowAct, SIGNAL(triggered()), imageDisplay, SLOT(fitToScreen()));
-    connect(fitToWidthAct, SIGNAL(triggered()), imageDisplay, SLOT(fitWidth()));
-    connect(fitToHeightAct, SIGNAL(triggered()), imageDisplay, SLOT(fitHeight()));
+    connect(fitToWindowAct, SIGNAL(triggered()), imageDisplayGL, SLOT(fitToScreen()));
+    connect(fitToWidthAct, SIGNAL(triggered()), imageDisplayGL, SLOT(fitWidth()));
+    connect(fitToHeightAct, SIGNAL(triggered()), imageDisplayGL, SLOT(fitHeight()));
 
     connect(lockNoneAct, SIGNAL(triggered()), this, SLOT(lockNone()));
     connect(lockZoomAct, SIGNAL(triggered()), this, SLOT(lockZoom()));
@@ -775,7 +775,7 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
 {
     if(current == NULL || current->type() == LV_TYPE_DIR || current->type() == LV_TYPE_ARCHIVE)
     {
-	imageDisplay->setPixmap(NULL);
+        imageDisplayGL->setPixmap(NULL);
     }
     else
     {
@@ -786,7 +786,7 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
         {
             QString path = filepath + "/" + current->text(LV_COLNAME);
 
-	    imageDisplay->setPixmap(QPixmap(path));
+            imageDisplayGL->setPixmap(QPixmap(path));
         }
         else
         {
@@ -794,7 +794,7 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
 
             if(SelectedZipFileIndex < 0)
             {
-		imageDisplay->setPixmap(NULL);
+                imageDisplayGL->setPixmap(NULL);
             }
             else
             {
@@ -837,12 +837,12 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
 
 		QPixmap pm;
 		pm.loadFromData(out.buffer());
-		imageDisplay->setPixmap(pm);
+                imageDisplayGL->setPixmap(pm);
             }
         }
     }
 
-    bool enableActions = !imageDisplay->getPixmap().isNull();
+    bool enableActions = !imageDisplayGL->getPixmap().isNull();
 
     saveAct->setEnabled(enableActions);
     zoomInAct->setEnabled(enableActions);
@@ -877,7 +877,7 @@ bool KomicViewer::saveAs()
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    imageDisplay->getPixmap().save(fileName);
+    imageDisplayGL->getPixmap().save(fileName);
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
@@ -887,47 +887,47 @@ bool KomicViewer::saveAs()
 
 void KomicViewer::zoomReset()
 {
-    imageDisplay->setZoom(1);
+    imageDisplayGL->setZoom(1);
 }
 
 void KomicViewer::lockZoom()
 {
-    imageDisplay->setLockMode(LockMode::Zoom);
+    imageDisplayGL->setLockMode(LockMode::Zoom);
 }
 
 void KomicViewer::lockNone()
 {
-    imageDisplay->setLockMode(LockMode::None);
+    imageDisplayGL->setLockMode(LockMode::None);
 }
 
 void KomicViewer::lockAutofit()
 {
-    imageDisplay->setLockMode(LockMode::Autofit);
+    imageDisplayGL->setLockMode(LockMode::Autofit);
 }
 
 void KomicViewer::lockFitWidth()
 {
-    imageDisplay->setLockMode(LockMode::FitWidth);
+    imageDisplayGL->setLockMode(LockMode::FitWidth);
 }
 
 void KomicViewer::lockFitHeight()
 {
-    imageDisplay->setLockMode(LockMode::FitHeight);
+    imageDisplayGL->setLockMode(LockMode::FitHeight);
 }
 
 void KomicViewer::rotateLeft()
 {
-    imageDisplay->setRotation(imageDisplay->getRotation()-10);
+    imageDisplayGL->setRotation(imageDisplayGL->getRotation()-10);
 }
 
 void KomicViewer::rotateRight()
 {
-    imageDisplay->setRotation(imageDisplay->getRotation()+10);
+    imageDisplayGL->setRotation(imageDisplayGL->getRotation()+10);
 }
 
 void KomicViewer::rotateReset()
 {
-    imageDisplay->setRotation(0);
+    imageDisplayGL->setRotation(0);
 }
 
 void KomicViewer::settingsDialog()
@@ -1027,7 +1027,7 @@ void KomicViewer::pagePrevious()
 
 void KomicViewer::OnZoomChanged()
 {
-    QString zoomText = QString::number((int)(imageDisplay->getZoom() * 100)) + "%";
+    QString zoomText = QString::number((int)(imageDisplayGL->getZoom() * 100)) + "%";
     comboBoxZoom->setEditText(zoomText);
 }
 
@@ -1042,7 +1042,7 @@ bool KomicViewer::parseZoom(const QString &zoomText)
     if(ok)
     {
         qreal z = (qreal)dec / 100;
-        imageDisplay->setZoom(z);
+        imageDisplayGL->setZoom(z);
     }
 
     return ok;
@@ -1058,7 +1058,7 @@ void KomicViewer::OnComboBoxZoomTextChanged()
 
 void KomicViewer::OnComboBoxZoomIndexChanged(const int &index)
 {
-    imageDisplay->setZoom(imageDisplay->getDefaultZoomSizes().at(index));
+    imageDisplayGL->setZoom(imageDisplayGL->getDefaultZoomSizes().at(index));
 }
 
 int getArchiveNumberFromTreewidget(int number)

@@ -12,7 +12,8 @@
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
-#include "PictureItem.h"
+#include "pictureitemraster.h"
+#include "pictureitemgl.h"
 
 class KomicViewer : public QWidget
 {
@@ -71,7 +72,8 @@ private:
     QStringList filters_image;
     QStringList filters_archive;
 
-    PictureItem *imageDisplay;
+    PictureItemRaster *imageDisplayRaster;
+    PictureItemGL *imageDisplayGL;
     QSplitter *splitterPanel;
     QLineEdit* lineEditPath;
     QTreeView *treeViewFilesystem;

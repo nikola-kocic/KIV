@@ -1,7 +1,6 @@
 
 SOURCES += \
     main.cpp \
-    PictureItem.cpp \
     KomicViewer.cpp \
     quazip/zip.c \
     quazip/unzip.c \
@@ -14,10 +13,11 @@ SOURCES += \
     quazip/JlCompress.cpp \
     system_icons.cpp \
     settings_dialog.cpp \
-    settings.cpp
+    settings.cpp \
+    pictureitemgl.cpp \
+    pictureitemraster.cpp
 
 HEADERS += \
-    PictureItem.h \
     quazip/zip.h \
     quazip/unzip.h \
     quazip/quazipnewinfo.h \
@@ -34,7 +34,10 @@ HEADERS += \
     system_icons.h \
     settings_dialog.h \
     settings.h \
-    KomicViewer.h
+    KomicViewer.h \
+    pictureitemgl.h \
+    KomicViewerEnums.h \
+    pictureitemraster.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -50,6 +53,21 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

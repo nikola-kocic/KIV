@@ -1,21 +1,18 @@
-#ifndef PICTUREITEM_H
-#define PICTUREITEM_H
+#ifndef PICTUREITEMGL_H
+#define PICTUREITEMGL_H
 
 #include <QtGui/qlabel.h>
 #include <QtCore/qtimer.h>
 #include <QtOpenGL/QGLWidget>
 
-namespace LockMode
-{
-    enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
-}
+#include "KomicViewerEnums.h"
 
-class PictureItem : public QGLWidget
+class PictureItemGL : public QGLWidget
 {
     Q_OBJECT
 
 public:
-    PictureItem( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    PictureItemGL( QWidget * parent = 0, Qt::WindowFlags f = 0 );
     QPixmap getPixmap();
     void setZoom(qreal z);
     qreal getZoom();
@@ -80,4 +77,5 @@ private slots:
 
 };
 
-#endif // PICTUREITEM_H
+
+#endif // PICTUREITEMGL_H
