@@ -14,8 +14,9 @@ SOURCES += \
     system_icons.cpp \
     settings_dialog.cpp \
     settings.cpp \
-    pictureitemgl.cpp \
-    pictureitemraster.cpp
+    pictureitem.cpp \
+    pictureitem_gl.cpp \
+    pictureitem_raster.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -35,9 +36,10 @@ HEADERS += \
     settings_dialog.h \
     settings.h \
     KomicViewer.h \
-    pictureitemgl.h \
-    KomicViewerEnums.h \
-    pictureitemraster.h
+    komicviewer_enums.h \
+    pictureitem.h \
+    pictureitem_gl.h \
+    pictureitem_raster.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -53,6 +55,26 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

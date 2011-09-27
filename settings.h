@@ -1,8 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
+
 #include <QtCore/qsettings.h>
 #include <QtCore/qhash.h>
-
 
 namespace MiddleClick
 {
@@ -43,6 +43,8 @@ public:
   bool getJumpToEnd();
   void setJumpToEnd(bool b);
 
+  bool getHardwareAcceleration();
+  void setHardwareAcceleration(bool b);
 
 private:
 
@@ -70,6 +72,7 @@ private:
         bool RightToLeft;
         int PageChangeTimeout;
         bool JumpToEnd;
+        bool HardwareAcceleration;
 };
 
 

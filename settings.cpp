@@ -1,31 +1,33 @@
 #include "settings.h"
+
 #include <QtGui/qapplication.h>
 
 Settings::Settings()
 {
     settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
 
-    middleClickHash["none"] = MiddleClick::None;
-    middleClickHash["fullscreen"] = MiddleClick::Fullscreen;
-    middleClickHash["autofit"] = MiddleClick::AutoFit;
-    middleClickHash["zoomreset"] = MiddleClick::ZoomReset;
-    middleClickHash["followmouse"] = MiddleClick::FollowMouse;
-    middleClickHash["nextpage"] = MiddleClick::NextPage;
+    middleClickHash["none"]         = MiddleClick::None;
+    middleClickHash["fullscreen"]   = MiddleClick::Fullscreen;
+    middleClickHash["autofit"]      = MiddleClick::AutoFit;
+    middleClickHash["zoomreset"]    = MiddleClick::ZoomReset;
+    middleClickHash["followmouse"]  = MiddleClick::FollowMouse;
+    middleClickHash["nextpage"]     = MiddleClick::NextPage;
     middleClick = getMiddleClickFromString(settings->value("Mouse/MiddleClick", "fullscreen").toString());
 
-    wheelHash["none"] = Wheel::None;
-    wheelHash["scroll"] = Wheel::Scroll;
+    wheelHash["none"]       = Wheel::None;
+    wheelHash["scroll"]     = Wheel::Scroll;
     wheelHash["changepage"] = Wheel::ChangePage;
-    wheelHash["zoom"] = Wheel::Zoom;
+    wheelHash["zoom"]       = Wheel::Zoom;
     wheel = getWheelFromString(settings->value("Mouse/Wheel", "scroll").toString());
 
-    ScrollPageByWidth = settings->value("Behavior/ScrollPageByWidth", false).toBool();
-    RightToLeft = settings->value("Behavior/RightToLeft", false).toBool();
-    PageChangeTimeout = settings->value("Behavior/PageChangeTimeout", "300").toInt();
+    JumpToEnd           = settings->value("Behavior/JumpToBottom",         false).toBool();
+    ScrollPageByWidth   = settings->value("Behavior/ScrollPageByWidth",    false).toBool();
+    RightToLeft         = settings->value("Behavior/RightToLeft",          false).toBool();
+    PageChangeTimeout   = settings->value("Behavior/PageChangeTimeout",    "300").toInt();
 
-    LargeIcons = settings->value("Interface/LargeIcons", false).toBool();
-    LastPath = settings->value("Interface/LastPath", "").toString();
-    JumpToEnd = settings->value("Behavior/JumpToBottom", false).toBool();
+    LargeIcons          = settings->value("Interface/LargeIcons", false).toBool();
+    LastPath            = settings->value("Interface/LastPath", "").toString();
+    HardwareAcceleration= settings->value("Interface/HardwareAcceleration", false).toBool();
 }
 
 Settings *Settings::Instance()
@@ -141,4 +143,14 @@ void Settings::setJumpToEnd(bool b)
 {
     JumpToEnd = b;
     settings->setValue("Behavior/JumpToBottom", JumpToEnd);
+}
+
+bool Settings::getHardwareAcceleration()
+{
+    return HardwareAcceleration;
+}
+void Settings::setHardwareAcceleration(bool b)
+{
+    HardwareAcceleration = b;
+    settings->setValue("Interface/HardwareAcceleration", HardwareAcceleration);
 }

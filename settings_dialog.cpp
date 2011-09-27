@@ -1,5 +1,6 @@
 #include "settings_dialog.h"
 #include "ui_settings_dialog.h"
+
 #include <QtGui/qpushbutton.h>
 #include <QtGui/qvalidator.h>
 
@@ -60,6 +61,7 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
     ui->tbWaitTime->setText(QString::number(Settings::Instance()->getPageChangeTimeout()));
     ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
+    ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
 }
 
 Settings_Dialog::~Settings_Dialog()
@@ -72,6 +74,7 @@ Settings_Dialog::~Settings_Dialog()
         Settings::Instance()->setScrollPageByWidth(ui->cbScrollByWidth->isChecked());
         Settings::Instance()->setRightToLeft(ui->cbRTL->isChecked());
         Settings::Instance()->setJumpToEnd(ui->cbJumpToEnd->isChecked());
+        Settings::Instance()->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
 
         bool ok;
         int dec = ui->tbWaitTime->text().toInt(&ok, 10);

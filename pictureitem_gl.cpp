@@ -1,10 +1,9 @@
+#include "pictureitem_gl.h"
+#include "settings.h"
+
 //#include <QtCore/qdebug.h>
-#include <QtGui/qpixmap.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qevent.h>
-
-#include "pictureitemgl.h"
-#include "settings.h"
 
 PictureItemGL::PictureItemGL(QWidget * parent, Qt::WindowFlags f )
 {
@@ -56,44 +55,6 @@ void PictureItemGL::setPixmap(const QPixmap &p)
     }
 
     update();
-}
-
-void PictureItemGL::ScrollPageVertical(int value)
-{
-    beginDrag(QPoint(0,0));
-    drag(QPoint(0,value));
-    endDrag();
-}
-
-void PictureItemGL::ScrollPageHorizontal(int value)
-{
-    beginDrag(QPoint(0,0));
-    drag(QPoint(value,0));
-    endDrag();
-}
-
-void PictureItemGL::keyPressEvent(QKeyEvent *ev)
-{
-    if(ev->key() == Qt::Key_Up)
-    {
-        ScrollPageVertical(120);
-        ev->accept();
-    }
-    else if(ev->key() == Qt::Key_Down)
-    {
-        ScrollPageVertical(-120);
-        ev->accept();
-    }
-    else if(ev->key() == Qt::Key_Left)
-    {
-        ScrollPageHorizontal(120);
-        ev->accept();
-    }
-    else if(ev->key() == Qt::Key_Right)
-    {
-        ScrollPageHorizontal(-120);
-        ev->accept();
-    }
 }
 
 QPixmap PictureItemGL::getPixmap()
@@ -192,6 +153,8 @@ void PictureItemGL::setZoom(qreal z)
         avoidOutOfScreen();
 
         update();
+
+        emit zoomChanged();
     }
 }
 
@@ -580,6 +543,45 @@ void PictureItemGL::resizeEvent(QResizeEvent *)
 
     avoidOutOfScreen();
     updateLockMode();
+}
+
+
+void PictureItemGL::ScrollPageVertical(int value)
+{
+    beginDrag(QPoint(0,0));
+    drag(QPoint(0,value));
+    endDrag();
+}
+
+void PictureItemGL::ScrollPageHorizontal(int value)
+{
+    beginDrag(QPoint(0,0));
+    drag(QPoint(value,0));
+    endDrag();
+}
+
+void PictureItemGL::keyPressEvent(QKeyEvent *ev)
+{
+    if(ev->key() == Qt::Key_Up)
+    {
+        ScrollPageVertical(120);
+        ev->accept();
+    }
+    else if(ev->key() == Qt::Key_Down)
+    {
+        ScrollPageVertical(-120);
+        ev->accept();
+    }
+    else if(ev->key() == Qt::Key_Left)
+    {
+        ScrollPageHorizontal(120);
+        ev->accept();
+    }
+    else if(ev->key() == Qt::Key_Right)
+    {
+        ScrollPageHorizontal(-120);
+        ev->accept();
+    }
 }
 
 void PictureItemGL::wheelEvent( QWheelEvent *event )

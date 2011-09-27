@@ -1,11 +1,10 @@
 #ifndef PICTUREITEMGL_H
 #define PICTUREITEMGL_H
 
-#include <QtGui/qlabel.h>
-#include <QtCore/qtimer.h>
-#include <QtOpenGL/QGLWidget>
+#include "komicviewer_enums.h"
 
-#include "KomicViewerEnums.h"
+#include <QtCore/qtimer.h>
+#include <QtOpenGL/qgl.h>
 
 class PictureItemGL : public QGLWidget
 {
@@ -33,22 +32,22 @@ private:
     void ScrollPageHorizontal(int value);
     void ScrollPageVertical(int value);
     void start_timerScrollPage();
-    bool flagJumpToEnd;
-    QPixmap bmp;
-//    MiddleClick::Action middleClickAction;
-//    Wheel::Action wheelAction;
 
+    QPixmap bmp;
     qreal zoom;
     qreal rotation;
     QRect boundingRect;
     bool dragging;
     bool rotating;
+    bool flagJumpToEnd;
     QPoint dragPoint;
     QPoint translatePoint;
     QVector<qreal> defaultZoomSizes;
     LockMode::Mode lockMode;
     QTimer *timerScrollPage;
 //    bool LockDrag;
+    //    MiddleClick::Action middleClickAction;
+    //    Wheel::Action wheelAction;
 
 protected:
     void paintEvent(QPaintEvent *event);

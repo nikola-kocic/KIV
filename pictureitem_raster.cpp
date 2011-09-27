@@ -1,10 +1,9 @@
+#include "pictureitem_raster.h"
+#include "settings.h"
+
 //#include <QtCore/qdebug.h>
-#include <QtGui/qpixmap.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qevent.h>
-
-#include "KomicViewer.h"
-#include "settings.h"
 
 PictureItemRaster::PictureItemRaster(QWidget * parent, Qt::WindowFlags f )
 {
@@ -64,44 +63,6 @@ void PictureItemRaster::setPixmap(const QPixmap &p)
 
     update();
     //    }
-}
-
-void PictureItemRaster::ScrollPageVertical(int value)
-{
-    beginDrag(QPoint(0,0));
-    drag(QPoint(0,value));
-    endDrag();
-}
-
-void PictureItemRaster::ScrollPageHorizontal(int value)
-{
-    beginDrag(QPoint(0,0));
-    drag(QPoint(value,0));
-    endDrag();
-}
-
-void PictureItemRaster::keyPressEvent(QKeyEvent *ev)
-{
-    if(ev->key() == Qt::Key_Up)
-    {
-        ScrollPageVertical(120);
-        ev->accept();
-    }
-    else if(ev->key() == Qt::Key_Down)
-    {
-        ScrollPageVertical(-120);
-        ev->accept();
-    }
-    else if(ev->key() == Qt::Key_Left)
-    {
-        ScrollPageHorizontal(120);
-        ev->accept();
-    }
-    else if(ev->key() == Qt::Key_Right)
-    {
-        ScrollPageHorizontal(-120);
-        ev->accept();
-    }
 }
 
 QPixmap PictureItemRaster::getPixmap()
@@ -591,6 +552,45 @@ void PictureItemRaster::resizeEvent(QResizeEvent *)
 
     avoidOutOfScreen();
     updateLockMode();
+}
+
+
+void PictureItemRaster::ScrollPageVertical(int value)
+{
+    beginDrag(QPoint(0,0));
+    drag(QPoint(0,value));
+    endDrag();
+}
+
+void PictureItemRaster::ScrollPageHorizontal(int value)
+{
+    beginDrag(QPoint(0,0));
+    drag(QPoint(value,0));
+    endDrag();
+}
+
+void PictureItemRaster::keyPressEvent(QKeyEvent *ev)
+{
+    if(ev->key() == Qt::Key_Up)
+    {
+        ScrollPageVertical(120);
+        ev->accept();
+    }
+    else if(ev->key() == Qt::Key_Down)
+    {
+        ScrollPageVertical(-120);
+        ev->accept();
+    }
+    else if(ev->key() == Qt::Key_Left)
+    {
+        ScrollPageHorizontal(120);
+        ev->accept();
+    }
+    else if(ev->key() == Qt::Key_Right)
+    {
+        ScrollPageHorizontal(-120);
+        ev->accept();
+    }
 }
 
 void PictureItemRaster::wheelEvent( QWheelEvent *event )
