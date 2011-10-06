@@ -2,8 +2,9 @@
 #include "settings_dialog.h"
 #include "system_icons.h"
 #include "settings.h"
+#include "loadpixmap.h"
 
-#include <QtCore/qdebug.h>
+//#include <QtCore/qdebug.h>
 //#include <QtCore/qdatetime.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
@@ -24,6 +25,8 @@
 KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
     qRegisterMetaType<IconInfo>("IconInfo");
+    threadImage = new QThread();
+
     resize(QApplication::desktop()->width() - 100,
 		QApplication::desktop()->height() - 100);
     setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
@@ -745,7 +748,10 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
                 }
             }
         }
-        startShowingThumbnails();
+        threadThumbnails->wait();
+        threadThumbnails = new QThread();
+        thumbCount = 0;
+        showThumbnails();
     }
 }
 
@@ -770,11 +776,6 @@ void KomicViewer::togglePanel(bool value)
 {
     splitterPanel->setVisible(value);
     toolbarFiles->setVisible(value);
-//    refreshPathAct->setVisible(value);
-//    dirUpAct->setVisible(value);
-//    lineEditPath->setEnabled(value);
-//    lineEditPathAction->setVisible(value);
-
 }
 
 void KomicViewer::toggleFullscreen(bool value)
@@ -839,8 +840,11 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
 	if(fsm->isDir(treeViewFilesystem->currentIndex()))
         {
             QString path = filepath + "/" + current->text(LV_COLNAME);
-
-            imageDisplay->setPixmap(QPixmap(path));
+            loadPixmap* lp = new loadPixmap(path);
+            connect(threadImage, SIGNAL(started()), lp, SLOT(loadFromFile()));
+            connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(onPixmalLoaderFinished(QPixmap)));
+            lp->moveToThread(threadImage);
+            threadImage->start();
         }
         else
         {
@@ -1122,59 +1126,68 @@ void KomicViewer::toggleShowThumbnails(bool)
     delete imageDisplay;
     listThumbnails = new QListWidget();
     threadThumbnails = new QThread();
-    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
     listThumbnails->setIconSize(QSize(200, 200));
     listThumbnails->setGridSize(QSize(200, 250));
     listThumbnails->setViewMode(QListView::IconMode);
     splitterMain->addWidget(listThumbnails);
 }
 
-void KomicViewer::startShowingThumbnails()
+void KomicViewer::showThumbnails()
 {
-    thumbCount = 0;
-    qDebug() << listThumbnails->count();
-    showThumbnails();
-}
+    if(listThumbnails->count() == 0)
+    {
+        return;
+    }
+    while(listThumbnails->item(thumbCount)->type() != TYPE_FILE)
+    {
+        thumbCount++;
+        if(thumbCount >= listThumbnails->count())
+        {
+            return;
+        }
+    }
 
+    const QString& path = fsm->filePath(treeViewFilesystem->currentIndex()) + "/" +  listThumbnails->item(thumbCount)->text();
+    generateThumbnail* gt = new generateThumbnail(path, 200,thumbCount);
+    gt->moveToThread(threadThumbnails);
+    connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
+    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
+    connect(gt, SIGNAL(finished(IconInfo)), this, SLOT(onThumbnailFinished(IconInfo)));
+
+//    qDebug() << "started for" << thumbCount << "/" << (listThumbnails->count() - 1 )<< path;
+    threadThumbnails->start();
+}
 
 void KomicViewer::onThreadThumbsFinished()
 {
-    qDebug() << "thread finished" << thumbCount;
-//    threadThumbnails->exit();
-//    if(thumbCount < listThumbnails->count() - 1)
-//    {
-//        thumbCount++;
-//        showThumbnails();
-//    }
-}
-
-
-void KomicViewer::showThumbnails()
-{
-    const QString& path = fsm->filePath(treeViewFilesystem->currentIndex()) + "/" +  listThumbnails->item(thumbCount)->text();
-    gt = new generateThumbnail(path, 200,thumbCount);
-    threadThumbnails = new QThread();
-    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
-    gt->moveToThread(threadThumbnails);
-    connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
-    connect(gt, SIGNAL(finished(IconInfo)), this, SLOT(onThumbnailFinished(IconInfo)));
-
-    qDebug() << "started for" << thumbCount << path;
-    threadThumbnails->start();
-
-    //imageDisplay->setPixmap(generateThumbnail::returnThumbnail("D:/testimages/gamesiso.png"), 200);
-}
-
-void KomicViewer::onThumbnailFinished(IconInfo ii)
-{
-    threadThumbnails->exit();
-    qDebug() << "finished for" << thumbCount;
-    listThumbnails->item(ii.index)->setIcon(ii.icon);
+    threadThumbnails->disconnect();
+//    qDebug() << "thread finished" << thumbCount;
     if(thumbCount < listThumbnails->count() - 1)
     {
         thumbCount++;
         showThumbnails();
     }
+    else
+    {
+        thumbCount = 0;
+    }
+}
+
+void KomicViewer::onThumbnailFinished(IconInfo ii)
+{
+//    qDebug() << "finished for" << thumbCount;
+    if(ii.error == false)
+    {
+        listThumbnails->item(ii.index)->setIcon(ii.icon);
+    }
+    threadThumbnails->exit();
+}
+
+void KomicViewer::onPixmalLoaderFinished(QPixmap p)
+{
+    threadImage->disconnect();
+    imageDisplay->setPixmap(p);
+    threadImage->exit();
 }
 
 int getArchiveNumberFromTreewidget(int number)

@@ -11,6 +11,7 @@ class IconInfo
 public:
     int index;
     QIcon icon;
+    bool error;
 };
 
 class generateThumbnail : public QObject

@@ -12,7 +12,10 @@ generateThumbnail::generateThumbnail(const QString& path, int length, int index)
 
 void generateThumbnail::returnThumbnail()
 {
+    bool error = false;
     QImageReader image_reader(path);
+//    qDebug() << "image_reader";
+    if(!image_reader.canRead()) error = true;
     int image_width = image_reader.size().width();
     int image_height = image_reader.size().height();
     if (image_width > image_height) {
@@ -25,12 +28,21 @@ void generateThumbnail::returnThumbnail()
       image_width = length;
       image_height = length;
     }
+//    qDebug() << "image_height";
     image_reader.setScaledSize(QSize(image_width, image_height));
+//    qDebug() << "setScaledSize";
     QIcon icon;
     icon.addPixmap(QPixmap::fromImage(image_reader.read()));
-
+//    qDebug() << "addPixmap";
     IconInfo ii;
     ii.index = index;
     ii.icon = icon;
+    if(ii.icon.isNull())
+    {
+        error = true;
+    }
+    ii.error = error;
+//    qDebug() << "finished";
     emit finished(ii);
+    return;
 }

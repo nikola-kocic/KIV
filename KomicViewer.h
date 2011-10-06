@@ -59,6 +59,7 @@ private slots:
     void OnTreeViewItemActivated ( const QModelIndex & index );
     void OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
     void OnTreeFileWidgetItemActivated (QTreeWidgetItem * item, int column);
+    void onPixmalLoaderFinished(QPixmap);
     void onThreadThumbsFinished();
 
 private:
@@ -70,7 +71,6 @@ private:
     void openFile(const QString &source);
     void updatePath(const QString &filePath);
     bool parseZoom(const QString &zoomText);
-    void startShowingThumbnails();
     void showThumbnails();
     bool thumbs;
     int thumbCount;
@@ -79,7 +79,6 @@ private:
     QList<QuaZipFileInfo> archive_files;
     QStringList filters_image;
     QStringList filters_archive;
-generateThumbnail* gt;
     QSplitter *splitterMain;
     PictureItem *imageDisplay;
     QSplitter *splitterPanel;
@@ -91,6 +90,7 @@ generateThumbnail* gt;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
     QThread *threadThumbnails;
+    QThread *threadImage;
 
     QListWidget *listThumbnails;
 
