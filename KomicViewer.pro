@@ -16,7 +16,8 @@ SOURCES += \
     settings.cpp \
     pictureitem.cpp \
     pictureitem_gl.cpp \
-    pictureitem_raster.cpp
+    pictureitem_raster.cpp \
+    generatethumbnail.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -39,7 +40,8 @@ HEADERS += \
     komicviewer_enums.h \
     pictureitem.h \
     pictureitem_gl.h \
-    pictureitem_raster.h
+    pictureitem_raster.h \
+    generatethumbnail.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -49,39 +51,18 @@ win32{
     RC_FILE = komicviewer.rc
 }
 
+unix {
+    #documentation.path = $(DESTDIR)
+    #documentation.files = icons/*
+    #INSTALLS += documentation
+}
+
 DEFINES += QUAZIP_BUILD
 
 FORMS += \
     settings_dialog.ui
 
 QT += opengl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

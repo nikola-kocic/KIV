@@ -3,7 +3,7 @@
 #include "system_icons.h"
 #include "settings.h"
 
-//#include <QtCore/qdebug.h>
+#include <QtCore/qdebug.h>
 //#include <QtCore/qdatetime.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
@@ -23,6 +23,7 @@
 
 KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
+    qRegisterMetaType<IconInfo>("IconInfo");
     resize(QApplication::desktop()->width() - 100,
 		QApplication::desktop()->height() - 100);
     setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
@@ -30,9 +31,10 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
     setWindowIcon(QIcon(":/icons/komicviewer.svg"));
 
 
+    thumbs = false;
     createActions();
 
-    QSplitter *splitterMain = new QSplitter(Qt::Horizontal, this);
+    splitterMain = new QSplitter(Qt::Horizontal, this);
 
     QVBoxLayout *vboxMain = new QVBoxLayout(this);
     vboxMain->setSpacing(0);
@@ -298,6 +300,9 @@ void KomicViewer::createActions()
     rotateResetAct = new QAction(tr("R&eset Rotation"), this);
     rotateResetAct->setEnabled(false);
 
+    showThumbnailsAct = new QAction(QIcon::fromTheme("view-list-icons"), tr("&Show Thumbnails"), this);
+    showThumbnailsAct->setCheckable(true);
+
     toggleFullscreenAct = new QAction(QIcon::fromTheme("view-fullscreen"), tr("&Full Screen"), this);
     toggleFullscreenAct->setShortcut(Qt::Key_F11);
     toggleFullscreenAct->setCheckable(true);
@@ -414,6 +419,7 @@ void KomicViewer::createMenus(QMenuBar *parent)
     optionsMenu->addAction(pagePreviousAct);
     optionsMenu->addAction(pageNextAct);
     optionsMenu->addSeparator();
+    optionsMenu->addAction(showThumbnailsAct);
     this->addAction(toggleFullscreenAct);
     optionsMenu->addAction(toggleFullscreenAct);
     optionsMenu->addAction(togglePanelAct);
@@ -435,6 +441,9 @@ void KomicViewer::connectActions()
     connect(settingsAct, SIGNAL(triggered()), this, SLOT(settingsDialog()));
     connect(pagePreviousAct, SIGNAL(triggered()), this, SLOT(pagePrevious()));
     connect(pageNextAct, SIGNAL(triggered()), this, SLOT(pageNext()));
+
+
+    connect(showThumbnailsAct, SIGNAL(toggled(bool)), this, SLOT(toggleShowThumbnails(bool)));
     connect(toggleFullscreenAct, SIGNAL(toggled(bool)), this, SLOT(toggleFullscreen(bool)));
     connect(largeIconsAct, SIGNAL(toggled(bool)), this, SLOT(toggleLargeIcons(bool)));
     connect(togglePanelAct, SIGNAL(toggled(bool)), this, SLOT(togglePanel(bool)));
@@ -584,113 +593,159 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
     setWindowTitle(fsm->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
     updatePath(filePath);
-    if(fsm->isDir(current))
+    if(thumbs == false)
     {
-	fsm->fetchMore(current);
-
-        QDir dir(filePath);
-
-//        dir.setNameFilters(imagefilter);
-        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
-        QList<QTreeWidgetItem*> items;
-        QFileIconProvider fip;
-        for (int i=0; i < list.count(); i++)
+        if(fsm->isDir(current))
         {
-            QTreeWidgetItem* ntvfi = NULL;
+            fsm->fetchMore(current);
 
-            QFileInfo info = list.at(i);
-            if(info.isDir())
+            QDir dir(filePath);
+
+    //        dir.setNameFilters(imagefilter);
+            QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
+            QList<QTreeWidgetItem*> items;
+            QFileIconProvider fip;
+            for (int i=0; i < list.count(); i++)
             {
-                ntvfi = new QTreeWidgetItem(LV_TYPE_DIR);
-            }
-            else if(filters_archive.contains(info.suffix().toLower()))
-            {
-                ntvfi = new QTreeWidgetItem(LV_TYPE_ARCHIVE);
-            }
-            else if (filters_image.contains(info.suffix().toLower()))
-            {
-                ntvfi = new QTreeWidgetItem(LV_TYPE_FILE);
-            }
+                QTreeWidgetItem* ntvfi = NULL;
 
-            if(ntvfi != NULL)
-            {
-                ntvfi->setText(LV_COLNAME, info.fileName());
-                ntvfi->setIcon(LV_COLNAME, fip.icon(info));
-                items << ntvfi;
-            }
-
-        }
-        treeWidgetFiles->clear();
-        treeWidgetFiles->setRootIsDecorated(false);
-        treeWidgetFiles->addTopLevelItems(items);
-
-        for(int i = 0; i < treeWidgetFiles->header()->count(); i++)
-        {
-            treeWidgetFiles->resizeColumnToContents(i);
-        }
-
-	archive_files.clear();
-    }
-    else
-    {
-        // Read info from zip file
-
-        QFile zipFile(filePath);
-        QuaZip zip(&zipFile);
-        if(!zip.open(QuaZip::mdUnzip))
-        {
-            qWarning("testRead(): zip.open(): %d", zip.getZipError());
-            return;
-        }
-        zip.setFileNameCodec("UTF-8");
-
-        archive_files = zip.getFileInfoList();
-
-        zip.close();
-        if(zip.getZipError()!=UNZ_OK) {
-            qWarning("testRead(): zip.close(): %d", zip.getZipError());
-            return;
-        }
-
-
-        //Populate treeViewFile
-
-
-        QTreeWidgetItem* root = new QTreeWidgetItem(LV_TYPE_ARCHIVE);
-        QTreeWidgetItem* node = root;
-        QFileIconProvider fip;
-        root->setIcon(LV_COLNAME, fip.icon(QFileInfo(zipFile)));
-	root->setText(LV_COLNAME, fsm->fileInfo(current).fileName());
-
-        for(int i=0; i < archive_files.count() ; i++)
-        {
-            node = root;
-            QStringList file_path_parts = archive_files.at(i).name.split('/');
-            for (int j = 0; j < file_path_parts.count(); j++)
-            {
-                if (file_path_parts.at(j).count() > 0)
+                QFileInfo info = list.at(i);
+                if(info.isDir())
                 {
-                    if (j < file_path_parts.count() - 1)
+                    ntvfi = new QTreeWidgetItem(TYPE_DIR);
+                }
+                else if(filters_archive.contains(info.suffix().toLower()))
+                {
+                    ntvfi = new QTreeWidgetItem(TYPE_ARCHIVE);
+                }
+                else if (filters_image.contains(info.suffix().toLower()))
+                {
+                    ntvfi = new QTreeWidgetItem(TYPE_FILE);
+                }
+
+                if(ntvfi != NULL)
+                {
+                    ntvfi->setText(LV_COLNAME, info.fileName());
+                    ntvfi->setIcon(LV_COLNAME, fip.icon(info));
+                    items << ntvfi;
+                }
+
+            }
+
+
+            treeWidgetFiles->clear();
+            treeWidgetFiles->setRootIsDecorated(false);
+            treeWidgetFiles->addTopLevelItems(items);
+
+            for(int i = 0; i < treeWidgetFiles->header()->count(); i++)
+            {
+                treeWidgetFiles->resizeColumnToContents(i);
+            }
+
+            archive_files.clear();
+        }
+        else
+        {
+            // Read info from zip file
+
+            QFile zipFile(filePath);
+            QuaZip zip(&zipFile);
+            if(!zip.open(QuaZip::mdUnzip))
+            {
+                qWarning("testRead(): zip.open(): %d", zip.getZipError());
+                return;
+            }
+            zip.setFileNameCodec("UTF-8");
+
+            archive_files = zip.getFileInfoList();
+
+            zip.close();
+            if(zip.getZipError()!=UNZ_OK) {
+                qWarning("testRead(): zip.close(): %d", zip.getZipError());
+                return;
+            }
+
+
+            //Populate treeViewFile
+
+
+            QTreeWidgetItem* root = new QTreeWidgetItem(TYPE_ARCHIVE);
+            QTreeWidgetItem* node = root;
+            QFileIconProvider fip;
+            root->setIcon(LV_COLNAME, fip.icon(QFileInfo(zipFile)));
+            root->setText(LV_COLNAME, fsm->fileInfo(current).fileName());
+
+            for(int i=0; i < archive_files.count() ; i++)
+            {
+                node = root;
+                QStringList file_path_parts = archive_files.at(i).name.split('/');
+                for (int j = 0; j < file_path_parts.count(); j++)
+                {
+                    if (file_path_parts.at(j).count() > 0)
                     {
-                        node = AddNode(node, file_path_parts.at(j), LV_TYPE_DIR);
-                    }
-                    else
-                        //if (j == file_path_parts.count() - 1)
-                    {
-                        QFileInfo fi(archive_files.at(i).name);
-                        if(filters_image.contains(fi.suffix().toLower()))
+                        if (j < file_path_parts.count() - 1)
                         {
-//                            qDebug() << fi.completeBaseName() << fi.suffix();
-                            node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForTreewidget(i));
+                            node = AddNode(node, file_path_parts.at(j), TYPE_DIR);
+                        }
+                        else
+                            //if (j == file_path_parts.count() - 1)
+                        {
+                            QFileInfo fi(archive_files.at(i).name);
+                            if(filters_image.contains(fi.suffix().toLower()))
+                            {
+    //                            qDebug() << fi.completeBaseName() << fi.suffix();
+                                node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForTreewidget(i));
+                            }
                         }
                     }
                 }
             }
-        }
 
-        treeWidgetFiles->clear();
-	treeWidgetFiles->setRootIsDecorated(true);
-        treeWidgetFiles->addTopLevelItems(root->takeChildren());
+            treeWidgetFiles->clear();
+            treeWidgetFiles->setRootIsDecorated(true);
+            treeWidgetFiles->addTopLevelItems(root->takeChildren());
+        }
+    }
+    else
+    {
+        if(fsm->isDir(current))
+        {
+            listThumbnails->clear();
+
+            fsm->fetchMore(current);
+
+            QDir dir(filePath);
+
+    //        dir.setNameFilters(imagefilter);
+            QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
+            QFileIconProvider fip;
+            for (int i=0; i < list.count(); i++)
+            {
+                QListWidgetItem* nlvfi = NULL;
+
+                QFileInfo info = list.at(i);
+                if(info.isDir())
+                {
+                    nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_DIR);
+                }
+                else if(filters_archive.contains(info.suffix().toLower()))
+                {
+                    nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_ARCHIVE);
+                }
+                else if (filters_image.contains(info.suffix().toLower()))
+                {
+                    nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_FILE);
+                }
+
+                if(nlvfi != NULL)
+                {
+                    nlvfi->setIcon(fip.icon(info));
+
+                    listThumbnails->addItem(nlvfi);
+                }
+            }
+        }
+        startShowingThumbnails();
     }
 }
 
@@ -706,7 +761,7 @@ QTreeWidgetItem* KomicViewer::AddNode(QTreeWidgetItem* node, QString name, int i
 
     QTreeWidgetItem* ntvi = new QTreeWidgetItem(index);
     ntvi->setText(LV_COLNAME, name);
-    if(index == LV_TYPE_DIR) ntvi->setIcon(LV_COLNAME, System_icons::getDirectoryIcon());
+    if(index == TYPE_DIR) ntvi->setIcon(LV_COLNAME, System_icons::getDirectoryIcon());
     node->addChild(ntvi);
     return ntvi;
 }
@@ -744,7 +799,7 @@ void KomicViewer::OnTreeFileWidgetItemActivated ( QTreeWidgetItem * item, int co
 {
     if(fsm->isDir(treeViewFilesystem->currentIndex()))
     {
-        if(item->type() == LV_TYPE_DIR || item->type() == LV_TYPE_ARCHIVE)
+        if(item->type() == TYPE_DIR || item->type() == TYPE_ARCHIVE)
 	{
 	    treeViewFilesystem->setCurrentIndex(fsm->index(fsm->filePath(treeViewFilesystem->currentIndex()) + "/" + item->text(LV_COLNAME)));
 
@@ -772,7 +827,7 @@ void KomicViewer::dirUp()
 
 void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous)
 {
-    if(current == NULL || current->type() == LV_TYPE_DIR || current->type() == LV_TYPE_ARCHIVE)
+    if(current == NULL || current->type() == TYPE_DIR || current->type() == TYPE_ARCHIVE)
     {
         imageDisplay->setPixmap(NULL);
     }
@@ -971,7 +1026,7 @@ void KomicViewer::pageNext()
 
         for(int i = curr + 1; i < max; i++)
         {
-            if(treeWidgetFiles->topLevelItem(i)->type() == LV_TYPE_FILE)
+            if(treeWidgetFiles->topLevelItem(i)->type() == TYPE_FILE)
             {
                 treeWidgetFiles->setCurrentItem(treeWidgetFiles->topLevelItem(i));
                 break;
@@ -987,7 +1042,7 @@ void KomicViewer::pageNext()
 
         for(int i = curr + 1; i < max; i++)
         {
-            if(ctwip->child(i)->type() != LV_TYPE_DIR)
+            if(ctwip->child(i)->type() != TYPE_DIR)
             {
                 treeWidgetFiles->setCurrentItem(ctwip->child(i));
                 break;
@@ -1004,7 +1059,7 @@ void KomicViewer::pagePrevious()
         int curr = treeWidgetFiles->indexOfTopLevelItem(treeWidgetFiles->currentItem());
 
         for(int i = curr - 1; i >= 0; i--){
-            if(treeWidgetFiles->topLevelItem(i)->type() == LV_TYPE_FILE) {
+            if(treeWidgetFiles->topLevelItem(i)->type() == TYPE_FILE) {
                 treeWidgetFiles->setCurrentItem(treeWidgetFiles->topLevelItem(i));
                 break;
             }
@@ -1017,7 +1072,7 @@ void KomicViewer::pagePrevious()
         int curr = ctwip->indexOfChild(treeWidgetFiles->currentItem());
 
         for(int i = curr - 1; i >= 0; i--){
-            if(ctwip->child(i)->type() != LV_TYPE_DIR) {
+            if(ctwip->child(i)->type() != TYPE_DIR) {
                 treeWidgetFiles->setCurrentItem(ctwip->child(i));
                 break;
             }
@@ -1059,6 +1114,67 @@ void KomicViewer::OnComboBoxZoomTextChanged()
 void KomicViewer::OnComboBoxZoomIndexChanged(const int &index)
 {
     imageDisplay->setZoom(imageDisplay->getDefaultZoomSizes().at(index));
+}
+
+void KomicViewer::toggleShowThumbnails(bool)
+{
+    thumbs = true;
+    delete imageDisplay;
+    listThumbnails = new QListWidget();
+    threadThumbnails = new QThread();
+    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
+    listThumbnails->setIconSize(QSize(200, 200));
+    listThumbnails->setGridSize(QSize(200, 250));
+    listThumbnails->setViewMode(QListView::IconMode);
+    splitterMain->addWidget(listThumbnails);
+}
+
+void KomicViewer::startShowingThumbnails()
+{
+    thumbCount = 0;
+    qDebug() << listThumbnails->count();
+    showThumbnails();
+}
+
+
+void KomicViewer::onThreadThumbsFinished()
+{
+    qDebug() << "thread finished" << thumbCount;
+//    threadThumbnails->exit();
+//    if(thumbCount < listThumbnails->count() - 1)
+//    {
+//        thumbCount++;
+//        showThumbnails();
+//    }
+}
+
+
+void KomicViewer::showThumbnails()
+{
+    const QString& path = fsm->filePath(treeViewFilesystem->currentIndex()) + "/" +  listThumbnails->item(thumbCount)->text();
+    gt = new generateThumbnail(path, 200,thumbCount);
+    threadThumbnails = new QThread();
+    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
+    gt->moveToThread(threadThumbnails);
+    connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
+    connect(gt, SIGNAL(finished(IconInfo)), this, SLOT(onThumbnailFinished(IconInfo)));
+
+    qDebug() << "started for" << thumbCount << path;
+    threadThumbnails->start();
+
+    //imageDisplay->setPixmap(generateThumbnail::returnThumbnail("D:/testimages/gamesiso.png"), 200);
+}
+
+void KomicViewer::onThumbnailFinished(IconInfo ii)
+{
+    threadThumbnails->exit();
+    qDebug() << "finished for" << thumbCount;
+    listThumbnails->item(ii.index)->setIcon(ii.icon);
+    if(thumbCount < listThumbnails->count() - 1)
+    {
+        thumbCount++;
+        showThumbnails();
+    }
 }
 
 int getArchiveNumberFromTreewidget(int number)

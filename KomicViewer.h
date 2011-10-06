@@ -1,6 +1,7 @@
 #ifndef KOMICVIEWER_H
 #define KOMICVIEWER_H
 
+#include "generatethumbnail.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
@@ -13,6 +14,7 @@
 #include <QtGui/qmenubar.h>
 #include <QtGui/qtoolbar.h>
 #include <QtGui/qcombobox.h>
+#include <QtGui/qlistwidget.h>
 
 class KomicViewer : public QWidget
 {
@@ -44,6 +46,8 @@ private slots:
     void togglePanel(bool);
     void toggleLargeIcons(bool);
     void settingsDialog();
+    void toggleShowThumbnails(bool);
+    void onThumbnailFinished(IconInfo);
 
     void refreshPath();
     void dirUp();
@@ -55,6 +59,7 @@ private slots:
     void OnTreeViewItemActivated ( const QModelIndex & index );
     void OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
     void OnTreeFileWidgetItemActivated (QTreeWidgetItem * item, int column);
+    void onThreadThumbsFinished();
 
 private:
     void createActions();
@@ -65,12 +70,17 @@ private:
     void openFile(const QString &source);
     void updatePath(const QString &filePath);
     bool parseZoom(const QString &zoomText);
+    void startShowingThumbnails();
+    void showThumbnails();
+    bool thumbs;
+    int thumbCount;
     QTreeWidgetItem* AddNode(QTreeWidgetItem* node, QString name, int index);
 
     QList<QuaZipFileInfo> archive_files;
     QStringList filters_image;
     QStringList filters_archive;
-
+generateThumbnail* gt;
+    QSplitter *splitterMain;
     PictureItem *imageDisplay;
     QSplitter *splitterPanel;
     QLineEdit* lineEditPath;
@@ -80,6 +90,9 @@ private:
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
+    QThread *threadThumbnails;
+
+    QListWidget *listThumbnails;
 
     QAction *lineEditPathAction;
 
@@ -107,6 +120,7 @@ private:
     QAction *pagePreviousAct;
     QAction *pageNextAct;
     QAction *toggleFullscreenAct;
+    QAction *showThumbnailsAct;
     QAction *togglePanelAct;
     QAction *largeIconsAct;
     QAction *settingsAct;
@@ -126,9 +140,9 @@ protected:
 
 const int LV_COLNAME = 0;
 
-const int LV_TYPE_FILE = 1001;
-const int LV_TYPE_DIR = 1002;
-const int LV_TYPE_ARCHIVE = 1004;
+const int TYPE_FILE = 1001;
+const int TYPE_DIR = 1002;
+const int TYPE_ARCHIVE = 1003;
 
 int makeArchiveNumberForTreewidget(int number);
 int getArchiveNumberFromTreewidget(int number);
