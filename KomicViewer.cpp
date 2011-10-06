@@ -24,7 +24,6 @@
 
 KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
-    qRegisterMetaType<IconInfo>("IconInfo");
     threadImage = new QThread();
 
     resize(QApplication::desktop()->width() - 100,
@@ -1148,11 +1147,11 @@ void KomicViewer::showThumbnails()
     }
 
     const QString& path = fsm->filePath(treeViewFilesystem->currentIndex()) + "/" +  listThumbnails->item(thumbCount)->text();
-    generateThumbnail* gt = new generateThumbnail(path, 200,thumbCount);
+    generateThumbnail* gt = new generateThumbnail(path, 200);
     gt->moveToThread(threadThumbnails);
     connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
     connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
-    connect(gt, SIGNAL(finished(IconInfo)), this, SLOT(onThumbnailFinished(IconInfo)));
+    connect(gt, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
 
 //    qDebug() << "started for" << thumbCount << "/" << (listThumbnails->count() - 1 )<< path;
     threadThumbnails->start();
@@ -1173,12 +1172,12 @@ void KomicViewer::onThreadThumbsFinished()
     }
 }
 
-void KomicViewer::onThumbnailFinished(IconInfo ii)
+void KomicViewer::onThumbnailFinished(QIcon icon)
 {
 //    qDebug() << "finished for" << thumbCount;
-    if(ii.error == false)
+    if(!icon.isNull())
     {
-        listThumbnails->item(ii.index)->setIcon(ii.icon);
+        listThumbnails->item(thumbCount)->setIcon(icon);
     }
     threadThumbnails->exit();
 }

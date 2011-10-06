@@ -47,7 +47,6 @@ private slots:
     void toggleLargeIcons(bool);
     void settingsDialog();
     void toggleShowThumbnails(bool);
-    void onThumbnailFinished(IconInfo);
 
     void refreshPath();
     void dirUp();
@@ -61,6 +60,7 @@ private slots:
     void OnTreeFileWidgetItemActivated (QTreeWidgetItem * item, int column);
     void onPixmalLoaderFinished(QPixmap);
     void onThreadThumbsFinished();
+    void onThumbnailFinished(QIcon);
 
 private:
     void createActions();

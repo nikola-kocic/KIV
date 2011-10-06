@@ -6,19 +6,11 @@
 #include <QtGui/QImageReader>
 #include <QtGui/qicon.h>
 
-class IconInfo
-{
-public:
-    int index;
-    QIcon icon;
-    bool error;
-};
-
 class generateThumbnail : public QObject
 {
     Q_OBJECT
 public:
-    generateThumbnail(const QString& path, int length, int index);
+    generateThumbnail(const QString& path, int length);
 
 public slots:
     void returnThumbnail();
@@ -26,10 +18,9 @@ public slots:
 private:
     QString path;
     int length;
-    int index;
 
 signals:
-    void finished(IconInfo);
+    void finished(QIcon);
 };
 
 #endif // GENERATETHUMBNAIL_H
