@@ -2,7 +2,7 @@
 #define THUMBNAILVIEWER_H
 
 #include "komicviewer_enums.h"
-#include "generatethumbnail.h"
+#include "thumbnail_generator.h"
 
 #include <QtGui/qlistwidget.h>
 #include <QtCore/qthread.h>

@@ -6,11 +6,11 @@
 #include <QtGui/QImageReader>
 #include <QtGui/qicon.h>
 
-class generateThumbnail : public QObject
+class thumbnailGenerator : public QObject
 {
     Q_OBJECT
 public:
-    generateThumbnail(const QString& path, int length);
+    thumbnailGenerator(const QString& path, int length);
 
 public slots:
     void returnThumbnail();

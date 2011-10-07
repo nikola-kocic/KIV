@@ -1,4 +1,4 @@
-#include "thumbnailviewer.h"
+#include "thumbnail_viewer.h"
 
 ThumbnailViewer::ThumbnailViewer(QWidget * parent)
 {
@@ -29,7 +29,7 @@ void ThumbnailViewer::showThumbnails()
     }
 
     const QString& filepath = path + this->item(thumbCount)->text();
-    generateThumbnail* gt = new generateThumbnail(filepath, 200);
+    thumbnailGenerator* gt = new thumbnailGenerator(filepath, 200);
     gt->moveToThread(threadThumbnails);
     connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
     connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));

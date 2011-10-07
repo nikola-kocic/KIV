@@ -17,9 +17,9 @@ SOURCES += \
     pictureitem.cpp \
     pictureitem_gl.cpp \
     pictureitem_raster.cpp \
-    generatethumbnail.cpp \
     loadpixmap.cpp \
-    thumbnailviewer.cpp
+    thumbnail_generator.cpp \
+    thumbnail_viewer.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -43,9 +43,9 @@ HEADERS += \
     pictureitem.h \
     pictureitem_gl.h \
     pictureitem_raster.h \
-    generatethumbnail.h \
     loadpixmap.h \
-    thumbnailviewer.h
+    thumbnail_generator.h \
+    thumbnail_viewer.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -67,6 +67,14 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
+
+
+
+
+
+
 
 
 

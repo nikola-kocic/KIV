@@ -1,15 +1,15 @@
-#include "generatethumbnail.h"
+#include "thumbnail_generator.h"
 
 #include <QtGui>
 #include <QtCore>
 
-generateThumbnail::generateThumbnail(const QString& path, int length)
+thumbnailGenerator::thumbnailGenerator(const QString& path, int length)
 {
     this->path = path;
     this->length = length;
 }
 
-void generateThumbnail::returnThumbnail()
+void thumbnailGenerator::returnThumbnail()
 {
     QImageReader image_reader(path);
     int image_width = image_reader.size().width();
