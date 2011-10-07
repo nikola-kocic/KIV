@@ -1,7 +1,7 @@
 #ifndef KOMICVIEWER_H
 #define KOMICVIEWER_H
 
-#include "generatethumbnail.h"
+#include "thumbnailviewer.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
@@ -22,7 +22,6 @@ class KomicViewer : public QWidget
 
 public:
     KomicViewer(QStringList args, QWidget * parent = 0, Qt::WindowFlags f = 0 );
-    //KomicViewer();
 
 private slots:
     void open();
@@ -59,8 +58,6 @@ private slots:
     void OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
     void OnTreeFileWidgetItemActivated (QTreeWidgetItem * item, int column);
     void onPixmalLoaderFinished(QPixmap);
-    void onThreadThumbsFinished();
-    void onThumbnailFinished(QIcon);
 
 private:
     void createActions();
@@ -71,9 +68,7 @@ private:
     void openFile(const QString &source);
     void updatePath(const QString &filePath);
     bool parseZoom(const QString &zoomText);
-    void showThumbnails();
     bool thumbs;
-    int thumbCount;
     QTreeWidgetItem* AddNode(QTreeWidgetItem* node, QString name, int index);
 
     QList<QuaZipFileInfo> archive_files;
@@ -89,10 +84,9 @@ private:
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
-    QThread *threadThumbnails;
     QThread *threadImage;
 
-    QListWidget *listThumbnails;
+    ThumbnailViewer *thumbnailViewer;
 
     QAction *lineEditPathAction;
 
@@ -139,10 +133,6 @@ protected:
 };
 
 const int LV_COLNAME = 0;
-
-const int TYPE_FILE = 1001;
-const int TYPE_DIR = 1002;
-const int TYPE_ARCHIVE = 1003;
 
 int makeArchiveNumberForTreewidget(int number);
 int getArchiveNumberFromTreewidget(int number);

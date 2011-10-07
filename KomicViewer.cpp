@@ -712,7 +712,7 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
     {
         if(fsm->isDir(current))
         {
-            listThumbnails->clear();
+            thumbnailViewer->clear();
 
             fsm->fetchMore(current);
 
@@ -743,14 +743,12 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
                 {
                     nlvfi->setIcon(fip.icon(info));
 
-                    listThumbnails->addItem(nlvfi);
+                    thumbnailViewer->addItem(nlvfi);
                 }
             }
         }
-        threadThumbnails->wait();
-        threadThumbnails = new QThread();
-        thumbCount = 0;
-        showThumbnails();
+
+        thumbnailViewer->startShowingThumbnails(fsm->filePath(treeViewFilesystem->currentIndex()) + "/");
     }
 }
 
@@ -1123,63 +1121,11 @@ void KomicViewer::toggleShowThumbnails(bool)
 {
     thumbs = true;
     delete imageDisplay;
-    listThumbnails = new QListWidget();
-    threadThumbnails = new QThread();
-    listThumbnails->setIconSize(QSize(200, 200));
-    listThumbnails->setGridSize(QSize(200, 250));
-    listThumbnails->setViewMode(QListView::IconMode);
-    splitterMain->addWidget(listThumbnails);
-}
-
-void KomicViewer::showThumbnails()
-{
-    if(listThumbnails->count() == 0)
-    {
-        return;
-    }
-    while(listThumbnails->item(thumbCount)->type() != TYPE_FILE)
-    {
-        thumbCount++;
-        if(thumbCount >= listThumbnails->count())
-        {
-            return;
-        }
-    }
-
-    const QString& path = fsm->filePath(treeViewFilesystem->currentIndex()) + "/" +  listThumbnails->item(thumbCount)->text();
-    generateThumbnail* gt = new generateThumbnail(path, 200);
-    gt->moveToThread(threadThumbnails);
-    connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
-    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
-    connect(gt, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
-
-//    qDebug() << "started for" << thumbCount << "/" << (listThumbnails->count() - 1 )<< path;
-    threadThumbnails->start();
-}
-
-void KomicViewer::onThreadThumbsFinished()
-{
-    threadThumbnails->disconnect();
-//    qDebug() << "thread finished" << thumbCount;
-    if(thumbCount < listThumbnails->count() - 1)
-    {
-        thumbCount++;
-        showThumbnails();
-    }
-    else
-    {
-        thumbCount = 0;
-    }
-}
-
-void KomicViewer::onThumbnailFinished(QIcon icon)
-{
-//    qDebug() << "finished for" << thumbCount;
-    if(!icon.isNull())
-    {
-        listThumbnails->item(thumbCount)->setIcon(icon);
-    }
-    threadThumbnails->exit();
+    thumbnailViewer = new ThumbnailViewer();
+    thumbnailViewer->setIconSize(QSize(200, 200));
+    thumbnailViewer->setGridSize(QSize(200, 250));
+    thumbnailViewer->setViewMode(QListView::IconMode);
+    splitterMain->addWidget(thumbnailViewer);
 }
 
 void KomicViewer::onPixmalLoaderFinished(QPixmap p)
