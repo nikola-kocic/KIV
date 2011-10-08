@@ -10,7 +10,11 @@ class thumbnailGenerator : public QObject
 {
     Q_OBJECT
 public:
-    thumbnailGenerator(const QString& path, int length);
+    thumbnailGenerator();
+    void setPath(const QString& path);
+    QString getPath();
+    void setLength(const int& length);
+    int getLength();
 
 public slots:
     void returnThumbnail();

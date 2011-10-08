@@ -1119,13 +1119,35 @@ void KomicViewer::OnComboBoxZoomIndexChanged(const int &index)
 
 void KomicViewer::toggleShowThumbnails(bool)
 {
-    thumbs = true;
-    delete imageDisplay;
-    thumbnailViewer = new ThumbnailViewer();
-    thumbnailViewer->setIconSize(QSize(200, 200));
-    thumbnailViewer->setGridSize(QSize(200, 250));
-    thumbnailViewer->setViewMode(QListView::IconMode);
-    splitterMain->addWidget(thumbnailViewer);
+    if(thumbs == false)
+    {
+        thumbs = true;
+        imageDisplay->hide();
+        if(thumbnailViewer != NULL)
+        {
+            thumbnailViewer = new ThumbnailViewer();
+            thumbnailViewer->setIconSize(QSize(200, 200));
+            thumbnailViewer->setGridSize(QSize(200, 250));
+            thumbnailViewer->setViewMode(QListView::IconMode);
+
+            QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+            policy.setHorizontalStretch(1);
+            policy.setVerticalStretch(0);
+            thumbnailViewer->setSizePolicy(policy);
+
+            splitterMain->addWidget(thumbnailViewer);
+        }
+        else
+        {
+            thumbnailViewer->show();
+        }
+    }
+    else
+    {
+        thumbs = false;
+        imageDisplay->show();
+        thumbnailViewer->hide();
+    }
 }
 
 void KomicViewer::onPixmalLoaderFinished(QPixmap p)

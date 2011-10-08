@@ -1,7 +1,7 @@
 #ifndef KOMICVIEWER_H
 #define KOMICVIEWER_H
 
-#include "thumbnailviewer.h"
+#include "thumbnail_viewer.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 

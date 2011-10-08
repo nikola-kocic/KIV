@@ -3,10 +3,28 @@
 #include <QtGui>
 #include <QtCore>
 
-thumbnailGenerator::thumbnailGenerator(const QString& path, int length)
+thumbnailGenerator::thumbnailGenerator()
+{
+}
+
+void thumbnailGenerator::setPath(const QString& path)
 {
     this->path = path;
+}
+
+QString thumbnailGenerator::getPath()
+{
+    return this->path;
+}
+
+void thumbnailGenerator::setLength(const int& length)
+{
     this->length = length;
+}
+
+int thumbnailGenerator::getLength()
+{
+    return this->length;
 }
 
 void thumbnailGenerator::returnThumbnail()
