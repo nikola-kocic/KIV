@@ -22,6 +22,7 @@ PictureItemShared::PictureItemShared()
 void PictureItemShared::setPixmap(const QPixmap &p)
 {
     this->bmp = p;
+    pixmapSize = this->bmp.size();
 
     emit pixmapChanged();
 }
@@ -59,9 +60,10 @@ void PictureItemShared::setZoom(qreal z)
     if(z < 0.001) z = 0.001;
     else if(z > 1000) z = 1000;
 
+    qreal previous = zoom;
     zoom = z;
 
-    emit zoomChanged();
+    emit zoomChanged(zoom, previous);
 }
 
 
@@ -623,4 +625,9 @@ void PictureItemShared::afterPixmapLoad()
         }
         flagJumpToEnd = false;
     }
+}
+
+QSize PictureItemShared::getPixmapSize()
+{
+    return this->pixmapSize;
 }

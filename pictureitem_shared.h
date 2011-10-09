@@ -38,6 +38,7 @@ public:
     QRectF boundingRect;
     qreal rotation;
     void afterPixmapLoad();
+    QSize getPixmapSize();
 
 private:
     void start_timerScrollPage();
@@ -52,6 +53,7 @@ private:
     QVector<qreal> defaultZoomSizes;
     LockMode::Mode lockMode;
     QTimer *timerScrollPage;
+    QSize pixmapSize;
     //    MiddleClick::Action middleClickAction;
     //    Wheel::Action wheelAction;
 //    bool LockDrag;
@@ -60,7 +62,7 @@ signals:
     void pageNext();
     void pagePrevious();
     void toggleFullscreen();
-    void zoomChanged();
+    void zoomChanged(qreal current, qreal previous);
     void updateCursor(Qt::CursorShape);
     void pixmapChanged();
     void update();

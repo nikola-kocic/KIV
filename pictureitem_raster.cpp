@@ -9,14 +9,11 @@ PictureItemRaster::PictureItemRaster( PictureItemShared* pis, QWidget * parent, 
 {
     this->pis = pis;
     connect(pis, SIGNAL(pixmapChanged()), this, SLOT(setPixmap()));
-    connect(pis, SIGNAL(zoomChanged()), this, SLOT(setZoom()));
-    setCursor(Qt::OpenHandCursor);
-//    LockDrag = false;
+    connect(pis, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(setZoom(qreal,qreal)));
 }
 
 void PictureItemRaster::setPixmap()
 {
-
     this->pixmap_edited = pis->getPixmap();
 
     pis->boundingRect = QRect( 0, 0, pis->getPixmap().width(), pis->getPixmap().height() );
@@ -63,6 +60,7 @@ void PictureItemRaster::paintEvent( QPaintEvent *event )
 
     p.drawPixmap( drawRect, this->pixmap_edited, sourceRect );
     p.end();
+
 
 //    qDebug() << "Paint: " << myTimer.elapsed();
 }
@@ -111,15 +109,13 @@ void PictureItemRaster::setRotation( qreal r )
 
 //Region Zoom
 
-void PictureItemRaster::setZoom()
+void PictureItemRaster::setZoom(qreal current, qreal previous)
 {
     if( pis->isPixmapNull() ) return;
 
-    qreal z = pis->getZoom();
+    QPointF p = pis->pointToOrigin( (this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current) );
 
-    QPointF p = pis->pointToOrigin( (this->pixmap_edited.width() * z), (this->pixmap_edited.height() * z) );
-
-    pis->boundingRect = QRectF( p.x(), p.y(), (this->pixmap_edited.width() * z), (this->pixmap_edited.height() * z ) );
+    pis->boundingRect = QRectF( p.x(), p.y(), (this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current ) );
 
     pis->avoidOutOfScreen();
     this->update();

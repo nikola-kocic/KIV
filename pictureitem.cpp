@@ -22,7 +22,7 @@ void PictureItem::initPictureItem()
 {
     if(this->opengl == true)
     {
-        imageDisplayGL = new PictureItemGL();
+        imageDisplayGL = new PictureItemGL(pis);
         connect(pis, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayGL, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
         connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));

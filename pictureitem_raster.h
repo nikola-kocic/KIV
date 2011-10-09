@@ -18,12 +18,9 @@ public:
 private:
     QPixmap pixmap_edited;
     PictureItemShared* pis;
-//    MiddleClick::Action middleClickAction;
-//    Wheel::Action wheelAction;
-//    bool LockDrag;
 
 public slots:
-    void setZoom();
+    void setZoom(qreal current, qreal previous);
 
 private slots:
     void setPixmap();
