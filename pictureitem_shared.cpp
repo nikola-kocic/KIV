@@ -1,16 +1,16 @@
-#include "pictureitem_gl.h"
+#include "pictureitem_raster.h"
 #include "settings.h"
 
 //#include <QtCore/qdebug.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qevent.h>
 
-PictureItemGL::PictureItemGL(QWidget * parent, Qt::WindowFlags f )
+PictureItemShared::PictureItemShared()
 {
     zoom = 1;
     dragging = false;
     rotation = 0;
-    setCursor(Qt::OpenHandCursor);
+    bmp = NULL;
     lockMode = LockMode::None;
     timerScrollPage = new QTimer();
     connect(timerScrollPage, SIGNAL(timeout()), this, SLOT(on_timerScrollPage_timeout()));
@@ -19,118 +19,29 @@ PictureItemGL::PictureItemGL(QWidget * parent, Qt::WindowFlags f )
     defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1 << 1.25 << 1.5 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
 }
 
-void PictureItemGL::setPixmap(const QPixmap &p)
+void PictureItemShared::setPixmap(const QPixmap &p)
 {
-    //    if (p.isNull()=) return;
-
     this->bmp = p;
 
-    setRotation(0);
-    if(lockMode != LockMode::Zoom)
-    {
-        setZoom(1);
-    }
-    boundingRect = QRect(0, 0, p.width() * zoom, p.height() * zoom);
-
-    updateLockMode();
-
-    if(boundingRect.width() > this->width())
-    {
-        if((Settings::Instance()->getRightToLeft() == true && flagJumpToEnd == false)
-                || (Settings::Instance()->getRightToLeft() == false && flagJumpToEnd == true)
-
-                )
-        {
-            boundingRect.moveLeft(-(boundingRect.width() - this->width()));
-        }
-    }
-
-    if(flagJumpToEnd == true)
-    {
-        if(boundingRect.height() > this->height())
-        {
-            boundingRect.moveTop(-(boundingRect.height() - this->height()));
-        }
-        flagJumpToEnd = false;
-    }
-
-    update();
+    emit pixmapChanged();
 }
 
-QPixmap PictureItemGL::getPixmap()
+QPixmap PictureItemShared::getPixmap()
 {
     return bmp;
 }
 
-void PictureItemGL::paintEvent(QPaintEvent *event)
-{
-    if(bmp.isNull()) return;
-
-    QPainter p(this);
-    p.setClipRect(event->region().boundingRect());
-
-    qreal x = event->region().boundingRect().x();
-    qreal y = event->region().boundingRect().y();
-    qreal w = event->region().boundingRect().width();
-    qreal h = event->region().boundingRect().height();
-
-    if(w  > boundingRect.width())
-    {
-        x = (w - boundingRect.width()) / 2;
-    }
-    if(h  > boundingRect.height())
-    {
-        y = (h - boundingRect.height()) / 2;
-    }
-
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
-
-    p.translate(boundingRect.x() + translatePoint.x() + x, boundingRect.y() + translatePoint.y() + y);
-    p.scale(zoom,zoom);
-    p.translate(bmp.height()/2, bmp.width()/2);
-    p.rotate(rotation);
-    p.translate(-bmp.height()/2, -bmp.width()/2);
-
-    p.drawPixmap(0, 0, bmp);
-    p.end();
-}
-
-
 //Region Rotation
 
-void PictureItemGL::setRotation(qreal r)
+void PictureItemShared::setRotation(qreal r)
 {
     if(bmp.isNull()) return;
 
     rotation = r;
-
-    QTransform tRot;
-    tRot.translate(boundingRect.x(), boundingRect.y());
-    tRot.scale(zoom,zoom);
-    tRot.translate(bmp.height()/2, bmp.width()/2);
-    tRot.rotate(rotation);
-    tRot.translate(-bmp.height()/2, -bmp.width()/2);
-    QRect transformedRot = tRot.mapRect(bmp.rect());
-
-    translatePoint = QPoint(boundingRect.x() - transformedRot.x(), boundingRect.y() - transformedRot.y());
-    boundingRect.setWidth(transformedRot.width());
-    boundingRect.setHeight(transformedRot.height());
-
-    if(boundingRect.height() + boundingRect.y() < this->height())
-    {
-        boundingRect.translate(0, this->height() - (boundingRect.height() + boundingRect.y()));
-    }
-
-    if(boundingRect.height()  < this->height())
-    {
-        boundingRect.moveTop(0);
-    }
-
-    update();
 }
 
 
-qreal PictureItemGL::getRotation()
+qreal PictureItemShared::getRotation()
 {
     return rotation;
 }
@@ -141,37 +52,67 @@ qreal PictureItemGL::getRotation()
 
 //Region Zoom
 
-void PictureItemGL::setZoom(qreal z)
+void PictureItemShared::setZoom(qreal z)
 {
-    if ( this->bmp.isNull() == false )
+    if(bmp.isNull()) return;
+
+    if(z < 0.001) z = 0.001;
+    else if(z > 1000) z = 1000;
+
+    zoom = z;
+
+    emit zoomChanged();
+}
+
+
+QPoint PictureItemShared::pointToOrigin(int width, int height)
+{
+    qreal zoomX = (qreal)width / (qreal)boundingRect.width();
+    qreal zoomY = (qreal)height / (qreal)boundingRect.height();
+
+    if (width > widgetSize.width())
     {
-        if(z < 0.001) z = 0.001;
-        else if(z > 1000) z = 1000;
-        QPointF p = pis.pointToOrigin( (boundingRect.width() / zoom) * z, (boundingRect.height() / zoom) * z );
-        boundingRect = QRectF(p.x(), p.y(), (boundingRect.width() / zoom) * z, (boundingRect.height() / zoom) * z);
+        qreal oldX = (boundingRect.x() - (boundingRect.x() * 2)) + (widgetSize.width() / 2);
+        qreal oldY = (boundingRect.y() - (boundingRect.y() * 2)) + (widgetSize.height() / 2);
 
-        zoom = z;
+        qreal newX = oldX * zoomX;
+        qreal newY = oldY * zoomY;
 
-        setRotation(rotation);
-        pis.avoidOutOfScreen();
+        qreal originX = newX - (widgetSize.width() / 2) - ((newX - (widgetSize.width() / 2)) * 2);
+        qreal originY = newY - (widgetSize.height() / 2) - ((newY - (widgetSize.height() / 2)) * 2);
 
-        update();
+        return QPoint(originX, originY);
+    }
+    else
+    {
+        if (height > widgetSize.height())
+        {
+            qreal oldY = (boundingRect.y() - (boundingRect.y() * 2)) + (widgetSize.height() / 2);
 
-        emit zoomChanged();
+            qreal newY = oldY * zoomY;
+
+            qreal originY = newY - (widgetSize.height() / 2) - ((newY - (widgetSize.height() / 2)) * 2);
+
+            return QPoint(0, originY);
+        }
+        else
+        {
+            return QPoint(0, 0);
+        }
     }
 }
 
-qreal PictureItemGL::getZoom()
+qreal PictureItemShared::getZoom()
 {
     return zoom;
 }
 
-QVector<qreal> PictureItemGL::getDefaultZoomSizes()
+QVector<qreal> PictureItemShared::getDefaultZoomSizes()
 {
     return defaultZoomSizes;
 }
 
-void PictureItemGL::zoomIn()
+void PictureItemShared::zoomIn()
 {
     for(int i=0; i<defaultZoomSizes.count(); i++)
     {
@@ -185,7 +126,7 @@ void PictureItemGL::zoomIn()
     setZoom(zoom * 1.25);
 }
 
-void PictureItemGL::zoomOut()
+void PictureItemShared::zoomOut()
 {
     for(int i=0; i<defaultZoomSizes.count(); i++)
     {
@@ -206,20 +147,20 @@ void PictureItemGL::zoomOut()
     setZoom(zoom / 1.25);
 }
 
-void PictureItemGL::fitToScreen()
+void PictureItemShared::fitToScreen()
 {
     if(bmp.isNull()) return;
 
     QRect temp = QRect(boundingRect.x(), boundingRect.y(), boundingRect.width() / zoom, boundingRect.height() / zoom);
 
-    qreal x_ratio = (qreal)this->width() / temp.width();
-    qreal y_ratio = (qreal)this->height() / temp.height();
+    qreal x_ratio = (qreal)widgetSize.width() / temp.width();
+    qreal y_ratio = (qreal)widgetSize.height() / temp.height();
 
-    if ((temp.width() <= this->width()) && (temp.height() <= this->height()))
+    if ((temp.width() <= widgetSize.width()) && (temp.height() <= widgetSize.height()))
     {
         setZoom(1);
     }
-    else if ((x_ratio * temp.height()) < this->height())
+    else if ((x_ratio * temp.height()) < widgetSize.height())
     {
         setZoom(x_ratio);
     }
@@ -229,15 +170,15 @@ void PictureItemGL::fitToScreen()
     }
 }
 
-void PictureItemGL::fitWidth()
+void PictureItemShared::fitWidth()
 {
     if(bmp.isNull()) return;
 
     qreal tw = boundingRect.width() / zoom;
 
-    qreal x_ratio = (qreal)this->width() / tw;
+    qreal x_ratio = (qreal)widgetSize.width() / tw;
 
-    if (tw <= this->width())
+    if (tw <= widgetSize.width())
     {
         setZoom(1);
     }
@@ -247,15 +188,15 @@ void PictureItemGL::fitWidth()
     }
 }
 
-void PictureItemGL::fitHeight()
+void PictureItemShared::fitHeight()
 {
     if(bmp.isNull()) return;
 
     qreal th = boundingRect.height() / zoom;
 
-    qreal y_ratio = (qreal)this->height() / th;
+    qreal y_ratio = (qreal)widgetSize.height() / th;
 
-    if (th <= this->height())
+    if (th <= widgetSize.height())
     {
         setZoom(1);
     }
@@ -266,7 +207,7 @@ void PictureItemGL::fitHeight()
 
 }
 
-void PictureItemGL::updateLockMode()
+void PictureItemShared::updateLockMode()
 {
     if(bmp.isNull()) return;
 
@@ -287,16 +228,59 @@ void PictureItemGL::updateLockMode()
     }
 }
 
-void PictureItemGL::setLockMode(LockMode::Mode mode)
+void PictureItemShared::setLockMode(LockMode::Mode mode)
 {
     lockMode = mode;
 
     updateLockMode();
 }
 
-LockMode::Mode PictureItemGL::getLockMode()
+LockMode::Mode PictureItemShared::getLockMode()
 {
     return lockMode;
+}
+
+void PictureItemShared::avoidOutOfScreen()
+{
+    if(bmp.isNull()) return;
+
+    // Am I lined out to the left?
+    if (boundingRect.x() >= 0)
+    {
+        boundingRect.moveLeft(0);
+    }
+    else if ((boundingRect.x() <= (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)))
+    {
+        if ((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2) <= 0)
+        {
+            // I am too far to the left!
+            boundingRect.moveLeft((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2));
+        }
+        else
+        {
+            // I am too far to the right!
+            boundingRect.moveLeft(0);
+        }
+    }
+
+    // Am I lined out to the top?
+    if (boundingRect.y() >= 0)
+    {
+        boundingRect.moveTop(0);
+    }
+    else if ((boundingRect.y() <= (boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2)))
+    {
+        if ((boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2) <= 0)
+        {
+            // I am too far to the top!
+            boundingRect.moveTop((boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2));
+        }
+        else
+        {
+            // I am too far to the bottom!
+            boundingRect.moveTop(0);
+        }
+    }
 }
 
 //End Region Zoom
@@ -305,14 +289,14 @@ LockMode::Mode PictureItemGL::getLockMode()
 
 //Region Drag
 
-void PictureItemGL::drag(const QPoint &pt)
+void PictureItemShared::drag(const QPoint &pt)
 {
     if(bmp.isNull()) return;
 
     if (dragging == true)
     {
         // Am I dragging it outside of the panel?
-        if ((pt.x() - dragPoint.x() >= (boundingRect.width() - this->width()) - ((boundingRect.width() - this->width()) * 2)) && (pt.x() - dragPoint.x() <= 0))
+        if ((pt.x() - dragPoint.x() >= (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)) && (pt.x() - dragPoint.x() <= 0))
         {
             // No, everything is just fine
             boundingRect.moveLeft(pt.x() - dragPoint.x());
@@ -322,18 +306,18 @@ void PictureItemGL::drag(const QPoint &pt)
             // Now don't drag it out of the panel please
             boundingRect.moveLeft(0);
         }
-        else if ((pt.x() - dragPoint.x() < (boundingRect.width() - this->width()) - ((boundingRect.width() - this->width()) * 2)))
+        else if ((pt.x() - dragPoint.x() < (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)))
         {
             // I am dragging it out of my panel. How many pixels do I have left?
-            if ((boundingRect.width() - this->width()) - ((boundingRect.width() - this->width()) * 2) <= 0)
+            if ((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2) <= 0)
             {
                 // Make it fit perfectly
-                boundingRect.moveLeft((boundingRect.width() - this->width()) - ((boundingRect.width() - this->width()) * 2));
+                boundingRect.moveLeft((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2));
             }
         }
 
         // Am I dragging it outside of the panel?
-        if (pt.y() - dragPoint.y() >= (boundingRect.height() - this->height()) - ((boundingRect.height() - this->height()) * 2) && (pt.y() - dragPoint.y() <= 0))
+        if (pt.y() - dragPoint.y() >= (boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2) && (pt.y() - dragPoint.y() <= 0))
         {
             // No, everything is just fine
             boundingRect.moveTop(pt.y() - dragPoint.y());
@@ -343,25 +327,22 @@ void PictureItemGL::drag(const QPoint &pt)
             // Now don't drag it out of the panel please
             boundingRect.moveTop(0);
         }
-        else if (pt.y() - dragPoint.y() < (boundingRect.height() - this->height()) - ((boundingRect.height() - this->height()) * 2))
+        else if (pt.y() - dragPoint.y() < (boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2))
         {
             // I am dragging it out of my panel. How many pixels do I have left?
-            if ((boundingRect.height() - this->height()) - ((boundingRect.height() - this->height()) * 2) <= 0)
+            if ((boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2) <= 0)
             {
                 // Make it fit perfectly
-                boundingRect.moveTop((boundingRect.height() - this->height()) - ((boundingRect.height()- this->height()) * 2));
+                boundingRect.moveTop((boundingRect.height() - widgetSize.height()) - ((boundingRect.height()- widgetSize.height()) * 2));
             }
         }
-        update();
+        emit update();
     }
 }
 
 
-void PictureItemGL::mousePressEvent(QMouseEvent *ev)
+void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
 {
-    setFocus();
-
-
     if (ev->button() ==  Qt::RightButton)
     {
         if(ev->buttons() == (Qt::LeftButton | Qt::RightButton))
@@ -417,23 +398,7 @@ void PictureItemGL::mousePressEvent(QMouseEvent *ev)
     }
 }
 
-void PictureItemGL::mouseMoveEvent(QMouseEvent *ev)
-{
-    if(dragging == true)
-    {
-        drag(ev->pos());
-    }
-}
-
-void PictureItemGL::mouseReleaseEvent(QMouseEvent *ev)
-{
-    if(dragging == true && ev->button() == Qt::LeftButton)
-    {
-        endDrag();
-    }
-}
-
-void PictureItemGL::beginDrag(const QPoint &pt)
+void PictureItemShared::beginDrag(const QPoint &pt)
 {
     if(bmp.isNull()) return;
 
@@ -441,74 +406,60 @@ void PictureItemGL::beginDrag(const QPoint &pt)
     dragPoint.setX(pt.x() - boundingRect.x());
     dragPoint.setY(pt.y() - boundingRect.y());
     dragging = true;
-    setCursor(Qt::ClosedHandCursor);
-
+    emit updateCursor(Qt::ClosedHandCursor);
 }
 
-void PictureItemGL::endDrag()
+void PictureItemShared::endDrag()
 {
-
     if(bmp.isNull()) return;
 
     dragging = false;
-    setCursor(Qt::OpenHandCursor);
+    emit updateCursor(Qt::OpenHandCursor);
 }
 
 //End Region Drag
 
-
-
-
-
-void PictureItemGL::resizeEvent(QResizeEvent *)
-{
-    if(bmp.isNull()) return;
-
-    pis.widgetSize = this->size();
-    pis.avoidOutOfScreen();
-    updateLockMode();
-}
-
-
-void PictureItemGL::ScrollPageVertical(int value)
+void PictureItemShared::ScrollPageVertical(int value)
 {
     beginDrag(QPoint(0,0));
     drag(QPoint(0,value));
     endDrag();
 }
 
-void PictureItemGL::ScrollPageHorizontal(int value)
+void PictureItemShared::ScrollPageHorizontal(int value)
 {
     beginDrag(QPoint(0,0));
     drag(QPoint(value,0));
     endDrag();
 }
 
-void PictureItemGL::keyPressEvent(QKeyEvent *ev)
+bool PictureItemShared::processKeyPressEvent(int key)
 {
-    if(ev->key() == Qt::Key_Up)
+    if(key == Qt::Key_Up)
     {
         ScrollPageVertical(120);
-        ev->accept();
+        return true;
     }
-    else if(ev->key() == Qt::Key_Down)
+    else if(key == Qt::Key_Down)
     {
         ScrollPageVertical(-120);
-        ev->accept();
+        return true;
     }
-    else if(ev->key() == Qt::Key_Left)
+    else if(key == Qt::Key_Left)
     {
         ScrollPageHorizontal(120);
-        ev->accept();
+        return true;
     }
-    else if(ev->key() == Qt::Key_Right)
+    else if(key == Qt::Key_Right)
     {
         ScrollPageHorizontal(-120);
-        ev->accept();
+        return true;
     }
+
+    return false;
 }
 
-void PictureItemGL::wheelEvent( QWheelEvent *event )
+void PictureItemShared::processWheelEvent( QWheelEvent *event )
 {
     if(event->modifiers() == Qt::ControlModifier
             || (event->modifiers() == Qt::NoModifier && Settings::Instance()->getWheel() == Wheel::Zoom)
@@ -550,10 +501,10 @@ void PictureItemGL::wheelEvent( QWheelEvent *event )
         }
         else if(Settings::Instance()->getWheel() == Wheel::Scroll)
         {
-            if((Settings::Instance()->getPageChangeTimeout() > 0) && (boundingRect.height() > this->height() || boundingRect.width() > this->width()))
+            if((Settings::Instance()->getPageChangeTimeout() > 0) && (boundingRect.height() > widgetSize.height() || boundingRect.width() > widgetSize.width()))
             {
                 //If we scroll to bottom of page, start timer
-                if (event->delta() < 0 && -boundingRect.y() + this->height() >= boundingRect.height() && timerScrollPage->isActive() == false)
+                if (event->delta() < 0 && -boundingRect.y() + widgetSize.height() >= boundingRect.height() && timerScrollPage->isActive() == false)
                 {
                     if (Settings::Instance()->getScrollPageByWidth() == true)
                     {
@@ -572,12 +523,12 @@ void PictureItemGL::wheelEvent( QWheelEvent *event )
                         }
                         else
                         {
-                            if((boundingRect.width() + boundingRect.x()) > this->width() )
+                            if((boundingRect.width() + boundingRect.x()) > widgetSize.width() )
                             {
                                 ScrollPageHorizontal(event->delta());
 
 
-                                if(boundingRect.width() + boundingRect.x() == this->width())
+                                if(boundingRect.width() + boundingRect.x() == widgetSize.width())
                                 {
                                     start_timerScrollPage();
                                 }
@@ -603,7 +554,7 @@ void PictureItemGL::wheelEvent( QWheelEvent *event )
                     // Keep dragging
                     ScrollPageVertical(event->delta());
 
-                    if((boundingRect.height() + boundingRect.y() == this->height()
+                    if((boundingRect.height() + boundingRect.y() == widgetSize.height()
                         || boundingRect.y() == 0)
                             && timerScrollPage->isActive() == false
                             )
@@ -630,7 +581,7 @@ void PictureItemGL::wheelEvent( QWheelEvent *event )
     }
 }
 
-void PictureItemGL::start_timerScrollPage()
+void PictureItemShared::start_timerScrollPage()
 {
     if(Settings::Instance()->getPageChangeTimeout() > 0)
     {
@@ -638,8 +589,38 @@ void PictureItemGL::start_timerScrollPage()
     }
 }
 
-void PictureItemGL::on_timerScrollPage_timeout()
+void PictureItemShared::on_timerScrollPage_timeout()
 {
     timerScrollPage->stop();
 }
 
+bool PictureItemShared::isPixmapNull()
+{
+    return this->bmp.isNull();
+}
+
+void PictureItemShared::afterPixmapLoad()
+{
+
+    updateLockMode();
+
+    if(boundingRect.width() > widgetSize.width())
+    {
+        if((Settings::Instance()->getRightToLeft() == true && flagJumpToEnd == false)
+                || (Settings::Instance()->getRightToLeft() == false && flagJumpToEnd == true)
+
+                )
+        {
+            boundingRect.moveLeft(-(boundingRect.width() - widgetSize.width()));
+        }
+    }
+
+    if(flagJumpToEnd == true)
+    {
+        if(boundingRect.height() > widgetSize.height())
+        {
+            boundingRect.moveTop(-(boundingRect.height() - widgetSize.height()));
+        }
+        flagJumpToEnd = false;
+    }
+}

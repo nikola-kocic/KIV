@@ -3,6 +3,7 @@
 
 #include "pictureitem_raster.h"
 #include "pictureitem_gl.h"
+#include "pictureitem_shared.h"
 
 #include <QtGui/qboxlayout.h>
 
@@ -30,6 +31,7 @@ private:
     bool opengl;
     void initPictureItem();
     QVBoxLayout *vboxMain;
+    PictureItemShared* pis;
 
 signals:
     void pageNext();
@@ -43,6 +45,17 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
+
+private slots:
+    void setMouseCursor(Qt::CursorShape);
+
+protected:
+    void wheelEvent( QWheelEvent* );
+    void mousePressEvent( QMouseEvent *ev );
+    void mouseMoveEvent( QMouseEvent *ev );
+    void mouseReleaseEvent( QMouseEvent *ev );
+    void resizeEvent( QResizeEvent * );
+    void keyPressEvent( QKeyEvent *ev );
 
 };
 

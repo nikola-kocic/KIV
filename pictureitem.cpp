@@ -1,8 +1,13 @@
 #include "pictureitem.h"
+#include <QtGui/qevent.h>
 
 PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
 {
     this->opengl = opengl;
+    setCursor(Qt::OpenHandCursor);
+    pis = new PictureItemShared();
+    connect(pis, SIGNAL(updateCursor(Qt::CursorShape)), this, SLOT(setMouseCursor(Qt::CursorShape)));
+    connect(pis, SIGNAL(update()), this, SLOT(update()));
 
     vboxMain = new QVBoxLayout(this);
     vboxMain->setSpacing(0);
@@ -18,21 +23,21 @@ void PictureItem::initPictureItem()
     if(this->opengl == true)
     {
         imageDisplayGL = new PictureItemGL();
-        connect(imageDisplayGL, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
+        connect(pis, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayGL, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
-        connect(imageDisplayGL, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
-        connect(imageDisplayGL, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
+        connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
+        connect(pis, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
         imageDisplayRaster = NULL;
         vboxMain->addWidget(imageDisplayGL);
     }
     else
     {
-        imageDisplayRaster = new PictureItemRaster();
-        connect(imageDisplayRaster, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
+        imageDisplayRaster = new PictureItemRaster(pis);
+        connect(pis, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayRaster, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
-        connect(imageDisplayRaster, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
-        connect(imageDisplayRaster, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
+        connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
+        connect(pis, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
         imageDisplayGL = NULL;
         vboxMain->addWidget(imageDisplayRaster);
@@ -65,50 +70,23 @@ bool PictureItem::getHardwareAcceleration()
 
 QPixmap PictureItem::getPixmap()
 {
-    if(opengl == true)
-    {
-        return imageDisplayGL->getPixmap();
-    }
-    else
-    {
-        return imageDisplayRaster->getPixmap();
-    }
+    return pis->getPixmap();
 }
 
 void PictureItem::setZoom(qreal z)
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->setZoom(z);
-    }
-    else
-    {
-        imageDisplayRaster->setZoom(z);
-    }
+    pis->setZoom(z);
 }
 
 qreal PictureItem::getZoom()
 {
-    if(opengl == true)
-    {
-        return imageDisplayGL->getZoom();
-    }
-    else
-    {
-        return imageDisplayRaster->getZoom();
-    }
+    return pis->getZoom();
 }
 
 void PictureItem::setPixmap(const QPixmap &p)
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->setPixmap(p);
-    }
-    else
-    {
-        imageDisplayRaster->setPixmap(p);
-    }
+    pis->widgetSize = this->size();
+    pis->setPixmap(p);
 }
 
 void PictureItem::setRotation(qreal r)
@@ -125,108 +103,101 @@ void PictureItem::setRotation(qreal r)
 
 qreal PictureItem::getRotation()
 {
-    if(opengl == true)
-    {
-        return imageDisplayGL->getRotation();
-    }
-    else
-    {
-        return imageDisplayRaster->getRotation();
-    }
+    return pis->getRotation();
 }
 
 void PictureItem::setLockMode(LockMode::Mode mode)
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->setLockMode(mode);
-    }
-    else
-    {
-        imageDisplayRaster->setLockMode(mode);
-    }
+    pis->setLockMode(mode);
 }
 
 QVector<qreal> PictureItem::getDefaultZoomSizes()
 {
-    if(opengl == true)
-    {
-        return imageDisplayGL->getDefaultZoomSizes();
-    }
-    else
-    {
-        return imageDisplayRaster->getDefaultZoomSizes();
-    }
+    return pis->getDefaultZoomSizes();
 }
 
 LockMode::Mode PictureItem::getLockMode()
 {
-    if(opengl == true)
-    {
-        return imageDisplayGL->getLockMode();
-    }
-    else
-    {
-        return imageDisplayRaster->getLockMode();
-    }
+    return pis->getLockMode();
 }
 
 void PictureItem::zoomIn()
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->zoomIn();
-    }
-    else
-    {
-        imageDisplayRaster->zoomIn();
-    }
+    pis->zoomIn();
 }
 
 void PictureItem::zoomOut()
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->zoomOut();
-    }
-    else
-    {
-        imageDisplayRaster->zoomOut();
-    }
+    pis->zoomOut();
 }
 
 void PictureItem::fitToScreen()
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->fitToScreen();
-    }
-    else
-    {
-        imageDisplayRaster->fitToScreen();
-    }
+    pis->fitToScreen();
 }
 
 void PictureItem::fitWidth()
 {
-    if(opengl == true)
-    {
-        imageDisplayGL->fitWidth();
-    }
-    else
-    {
-        imageDisplayRaster->fitWidth();
-    }
+    pis->fitWidth();
 }
 
 void PictureItem::fitHeight()
 {
-    if(opengl == true)
+    pis->fitHeight();
+}
+
+
+
+void PictureItem::mousePressEvent(QMouseEvent *ev)
+{
+    setFocus();
+
+    pis->processMousePressEvent(ev);
+}
+
+void PictureItem::mouseMoveEvent(QMouseEvent *ev)
+{
+    pis->drag( ev->pos() );
+}
+
+void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
+{
+    if(pis->dragging == true && ev->button() == Qt::LeftButton)
     {
-        imageDisplayGL->fitHeight();
+        pis->endDrag();
+        setCursor(Qt::OpenHandCursor);
     }
-    else
+}
+
+//End Region Drag
+
+
+
+void PictureItem::resizeEvent(QResizeEvent *)
+{
+    if( pis->isPixmapNull() ) return;
+
+    pis->widgetSize = this->size();
+    pis->avoidOutOfScreen();
+    pis->updateLockMode();
+}
+
+
+void PictureItem::keyPressEvent(QKeyEvent *ev)
+{
+    if(pis->processKeyPressEvent(ev->key()) == true)
     {
-        imageDisplayRaster->fitHeight();
+        ev->accept();
     }
+}
+
+void PictureItem::wheelEvent( QWheelEvent *event )
+{
+    pis->processWheelEvent(event);
+    update();
+}
+
+void PictureItem::setMouseCursor(Qt::CursorShape cursor)
+{
+    setCursor(cursor);
 }

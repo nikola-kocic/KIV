@@ -1,18 +1,17 @@
-#ifndef PICTUREITEMGL_H
-#define PICTUREITEMGL_H
+#ifndef PICTUREITEMSHARED_H
+#define PICTUREITEMSHARED_H
 
 #include "komicviewer_enums.h"
-#include "pictureitem_shared.h"
 
 #include <QtCore/qtimer.h>
-#include <QtOpenGL/qgl.h>
+#include <QtGui/qwidget.h>
 
-class PictureItemGL : public QGLWidget
+class PictureItemShared : public QObject
 {
     Q_OBJECT
 
 public:
-    PictureItemGL( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    PictureItemShared();
     QPixmap getPixmap();
     void setZoom(qreal z);
     qreal getZoom();
@@ -23,47 +22,48 @@ public:
     QVector<qreal> getDefaultZoomSizes();
     LockMode::Mode getLockMode();
 
-private:
-    QPointF pointToOrigin( qreal width, qreal height );
+    void processWheelEvent( QWheelEvent* );
+    bool processKeyPressEvent(int key);
+    void processMousePressEvent(QMouseEvent *ev);
+
+    QPoint pointToOrigin(int width, int height);
+    void avoidOutOfScreen();
     void drag(const QPoint &pt);
     void beginDrag(const QPoint &pt);
     void endDrag();
     void updateLockMode();
+    bool dragging;
+    bool isPixmapNull();
+    QSize widgetSize;
+    QRectF boundingRect;
+    qreal rotation;
+    void afterPixmapLoad();
+
+private:
+    void start_timerScrollPage();
     void ScrollPageHorizontal(int value);
     void ScrollPageVertical(int value);
-    void start_timerScrollPage();
-
     QPixmap bmp;
     qreal zoom;
-    qreal rotation;
-    QRectF boundingRect;
-    bool dragging;
+    bool rotating;
     bool flagJumpToEnd;
     QPoint dragPoint;
-    QPointF translatePoint;
+    QPoint translatePoint;
     QVector<qreal> defaultZoomSizes;
     LockMode::Mode lockMode;
     QTimer *timerScrollPage;
-    PictureItemShared pis;
-//    bool LockDrag;
     //    MiddleClick::Action middleClickAction;
     //    Wheel::Action wheelAction;
-
-protected:
-    void paintEvent(QPaintEvent *event);
-//    QSize sizeHint();
-    void wheelEvent( QWheelEvent* );
-    void mousePressEvent(QMouseEvent *ev);
-    void mouseMoveEvent(QMouseEvent *ev);
-    void mouseReleaseEvent(QMouseEvent *ev);
-    void resizeEvent(QResizeEvent *);
-    void keyPressEvent(QKeyEvent *ev);
+//    bool LockDrag;
 
 signals:
     void pageNext();
     void pagePrevious();
     void toggleFullscreen();
     void zoomChanged();
+    void updateCursor(Qt::CursorShape);
+    void pixmapChanged();
+    void update();
 
 public slots:
     void zoomIn();
@@ -76,5 +76,4 @@ private slots:
 
 };
 
-
-#endif // PICTUREITEMGL_H
+#endif // PICTUREITEMSHARED_H
