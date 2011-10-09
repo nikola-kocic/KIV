@@ -1,5 +1,5 @@
-#ifndef PICTUREITEMWIDGET_H
-#define PICTUREITEMWIDGET_H
+#ifndef PICTUREITEM_H
+#define PICTUREITEM_H
 
 #include "pictureitem_raster.h"
 #include "pictureitem_gl.h"
@@ -40,4 +40,4 @@ public slots:
 
 };
 
-#endif // PICTUREITEMWIDGET_H
+#endif // PICTUREITEM_H

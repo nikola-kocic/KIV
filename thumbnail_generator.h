@@ -1,16 +1,16 @@
-#ifndef GENERATETHUMBNAIL_H
-#define GENERATETHUMBNAIL_H
+#ifndef THUMBNAILGENERATOR_H
+#define THUMBNAILGENERATOR_H
 
 #include <QtCore/QThread>
 #include <QtGui/QPixmap>
 #include <QtGui/QImageReader>
 #include <QtGui/qicon.h>
 
-class thumbnailGenerator : public QObject
+class ThumbnailGenerator : public QObject
 {
     Q_OBJECT
 public:
-    thumbnailGenerator();
+    ThumbnailGenerator();
     void setPath(const QString& path);
     QString getPath();
     void setLength(const int& length);
@@ -27,4 +27,4 @@ signals:
     void finished(QIcon);
 };
 
-#endif // GENERATETHUMBNAIL_H
+#endif // THUMBNAILGENERATOR_H

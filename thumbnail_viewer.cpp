@@ -1,9 +1,11 @@
 #include "thumbnail_viewer.h"
 
+#include <QtCore/qdebug.h>
+
 ThumbnailViewer::ThumbnailViewer(QWidget * parent)
 {
     threadThumbnails = new QThread();
-    gt = new thumbnailGenerator();
+    gt = new ThumbnailGenerator();
     gt->setLength(200);
     gt->moveToThread(threadThumbnails);
     connect(threadThumbnails, SIGNAL(started()), gt, SLOT(returnThumbnail()));
@@ -55,6 +57,7 @@ void ThumbnailViewer::onThumbnailFinished(QIcon icon)
 {
     if(!icon.isNull())
     {
+        qDebug() << "onThumbnailFinished:" << thumbCount;
         this->item(thumbCount)->setIcon(icon);
     }
     threadThumbnails->exit();

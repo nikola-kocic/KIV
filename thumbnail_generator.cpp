@@ -3,31 +3,31 @@
 #include <QtGui>
 #include <QtCore>
 
-thumbnailGenerator::thumbnailGenerator()
+ThumbnailGenerator::ThumbnailGenerator()
 {
 }
 
-void thumbnailGenerator::setPath(const QString& path)
+void ThumbnailGenerator::setPath(const QString& path)
 {
     this->path = path;
 }
 
-QString thumbnailGenerator::getPath()
+QString ThumbnailGenerator::getPath()
 {
     return this->path;
 }
 
-void thumbnailGenerator::setLength(const int& length)
+void ThumbnailGenerator::setLength(const int& length)
 {
     this->length = length;
 }
 
-int thumbnailGenerator::getLength()
+int ThumbnailGenerator::getLength()
 {
     return this->length;
 }
 
-void thumbnailGenerator::returnThumbnail()
+void ThumbnailGenerator::returnThumbnail()
 {
     QImageReader image_reader(path);
     int image_width = image_reader.size().width();

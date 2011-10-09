@@ -20,7 +20,7 @@ private:
     QThread *threadThumbnails;
     int thumbCount;
     QString path;
-    thumbnailGenerator* gt;
+    ThumbnailGenerator* gt;
 
 private slots:
     void onThreadThumbsFinished();

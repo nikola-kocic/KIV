@@ -2,9 +2,7 @@
 #define KOMICVIEWER_H
 
 #include "thumbnail_viewer.h"
-#include "quazip/quazip.h"
-#include "quazip/quazipfile.h"
-
+#include "pixmap_loader.h"
 #include "pictureitem.h"
 
 #include <QtGui/qtreewidget.h>
@@ -85,6 +83,7 @@ private:
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
     QThread *threadImage;
+    PixmapLoader* lp;
 
     ThumbnailViewer *thumbnailViewer;
 

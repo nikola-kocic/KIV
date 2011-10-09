@@ -1,5 +1,5 @@
-#ifndef PICTUREITEM_H
-#define PICTUREITEM_H
+#ifndef PICTUREITEMRASTER_H
+#define PICTUREITEMRASTER_H
 
 #include "komicviewer_enums.h"
 
@@ -77,4 +77,4 @@ private slots:
 
 };
 
-#endif // PICTUREITEM_H
+#endif // PICTUREITEMRASTER_H

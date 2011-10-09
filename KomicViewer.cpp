@@ -2,7 +2,6 @@
 #include "settings_dialog.h"
 #include "system_icons.h"
 #include "settings.h"
-#include "loadpixmap.h"
 
 //#include <QtCore/qdebug.h>
 //#include <QtCore/qdatetime.h>
@@ -204,6 +203,11 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     connect(refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
+
+    lp = new PixmapLoader();
+    connect(threadImage, SIGNAL(started()), lp, SLOT(loadPixmap()));
+    connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(onPixmalLoaderFinished(QPixmap)));
+    lp->moveToThread(threadImage);
 
     QCompleter *completer = new QCompleter(this);
     completer->setModel(fsm);
@@ -764,7 +768,7 @@ QTreeWidgetItem* KomicViewer::AddNode(QTreeWidgetItem* node, QString name, int i
 
     QTreeWidgetItem* ntvi = new QTreeWidgetItem(index);
     ntvi->setText(LV_COLNAME, name);
-    if(index == TYPE_DIR) ntvi->setIcon(LV_COLNAME, System_icons::getDirectoryIcon());
+    if(index == TYPE_DIR) ntvi->setIcon(LV_COLNAME, SystemIcons::getDirectoryIcon());
     node->addChild(ntvi);
     return ntvi;
 }
@@ -831,16 +835,11 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
     }
     else
     {
-
 	QString filepath = fsm->filePath(treeViewFilesystem->currentIndex());
 
 	if(fsm->isDir(treeViewFilesystem->currentIndex()))
         {
-            QString path = filepath + "/" + current->text(LV_COLNAME);
-            loadPixmap* lp = new loadPixmap(path);
-            connect(threadImage, SIGNAL(started()), lp, SLOT(loadFromFile()));
-            connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(onPixmalLoaderFinished(QPixmap)));
-            lp->moveToThread(threadImage);
+            lp->setFilePath(filepath + "/" + current->text(LV_COLNAME));
             threadImage->start();
         }
         else
@@ -853,63 +852,11 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
             }
             else
             {
-                QFile zipFile(filepath);
-                QuaZip zip(&zipFile);
-                if(!zip.open(QuaZip::mdUnzip))
-                {
-                    qWarning("testRead(): zip.open(): %d", zip.getZipError());
-                    return;
-                }
-                zip.setFileNameCodec("UTF-8");
-                zip.setCurrentFile(archive_files.at(SelectedZipFileIndex).name);
-
-                QuaZipFile file(&zip);
-                char c;
-                if(!file.open(QIODevice::ReadOnly))
-                {
-                    qWarning("testRead(): file.open(): %d", file.getZipError());
-                    return;
-                }
-
-                QBuffer out;
-                out.open(QIODevice::WriteOnly);
-                char buf[4096];
-                int len = 0;
-                while (file.getChar(&c))
-                {
-                    buf[len++] = c;
-                    if (len >= 4096)
-                    {
-                        out.write(buf, len);
-                        len = 0;
-                    }
-                }
-                if (len > 0)
-                {
-                    out.write(buf, len);
-                }
-                out.close();
-
-		QPixmap pm;
-		pm.loadFromData(out.buffer());
-                imageDisplay->setPixmap(pm);
+                lp->setFilePath(filepath, true, archive_files.at(SelectedZipFileIndex).name);
+                threadImage->start();
             }
         }
     }
-
-    bool enableActions = !imageDisplay->getPixmap().isNull();
-
-    saveAct->setEnabled(enableActions);
-    zoomInAct->setEnabled(enableActions);
-    zoomOutAct->setEnabled(enableActions);
-    rotateLeftAct->setEnabled(enableActions);
-    rotateRightAct->setEnabled(enableActions);
-    zoomResetAct->setEnabled(enableActions);
-    fitToWindowAct->setEnabled(enableActions);
-    fitToWidthAct->setEnabled(enableActions);
-    fitToHeightAct->setEnabled(enableActions);
-    rotateResetAct->setEnabled(enableActions);
-    comboBoxZoom->setEnabled(enableActions);
 }
 
 void KomicViewer::open()
@@ -1152,9 +1099,22 @@ void KomicViewer::toggleShowThumbnails(bool)
 
 void KomicViewer::onPixmalLoaderFinished(QPixmap p)
 {
-    threadImage->disconnect();
     imageDisplay->setPixmap(p);
     threadImage->exit();
+
+    bool enableActions = !imageDisplay->getPixmap().isNull();
+
+    saveAct->setEnabled(enableActions);
+    zoomInAct->setEnabled(enableActions);
+    zoomOutAct->setEnabled(enableActions);
+    rotateLeftAct->setEnabled(enableActions);
+    rotateRightAct->setEnabled(enableActions);
+    zoomResetAct->setEnabled(enableActions);
+    fitToWindowAct->setEnabled(enableActions);
+    fitToWidthAct->setEnabled(enableActions);
+    fitToHeightAct->setEnabled(enableActions);
+    rotateResetAct->setEnabled(enableActions);
+    comboBoxZoom->setEnabled(enableActions);
 }
 
 int getArchiveNumberFromTreewidget(int number)

@@ -3,7 +3,7 @@
 #include <QtGui/QApplication>
 #include <QtGui/QStyle>
 
-QIcon System_icons::getDirectoryIcon()
+QIcon SystemIcons::getDirectoryIcon()
 {
     return QApplication::style()->standardIcon(QStyle::SP_DirIcon);
 }

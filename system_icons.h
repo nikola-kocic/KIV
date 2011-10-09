@@ -1,12 +1,12 @@
-#ifndef SYSTEM_ICONS_H
-#define SYSTEM_ICONS_H
+#ifndef SYSTEMICONS_H
+#define SYSTEMICONS_H
 
 #include <QtGui/QApplication>
 
-class System_icons
+class SystemIcons
 {
 public:
     static QIcon getDirectoryIcon();
 };
 
-#endif // SYSTEM_ICONS_H
+#endif // SYSTEMICONS_H
