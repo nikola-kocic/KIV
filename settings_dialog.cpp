@@ -64,25 +64,25 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
 }
 
+void Settings_Dialog::on_buttonBox_accepted()
+{
+    Settings::Instance()->setMiddleClick(ddMidleClickOrder.at(ui->ddMiddleClick->currentIndex()));
+    Settings::Instance()->setWheel(ddWheelOrder.at(ui->ddWheel->currentIndex()));
+
+    Settings::Instance()->setScrollPageByWidth(ui->cbScrollByWidth->isChecked());
+    Settings::Instance()->setRightToLeft(ui->cbRTL->isChecked());
+    Settings::Instance()->setJumpToEnd(ui->cbJumpToEnd->isChecked());
+    Settings::Instance()->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
+
+    bool ok;
+    int dec = ui->tbWaitTime->text().toInt(&ok, 10);
+    if(ok)
+    {
+        Settings::Instance()->setPageChangeTimeout(dec);
+    }
+}
+
 Settings_Dialog::~Settings_Dialog()
 {
-    if(this->result() == QDialog::Accepted)
-    {
-        Settings::Instance()->setMiddleClick(ddMidleClickOrder.at(ui->ddMiddleClick->currentIndex()));
-        Settings::Instance()->setWheel(ddWheelOrder.at(ui->ddWheel->currentIndex()));
-
-        Settings::Instance()->setScrollPageByWidth(ui->cbScrollByWidth->isChecked());
-        Settings::Instance()->setRightToLeft(ui->cbRTL->isChecked());
-        Settings::Instance()->setJumpToEnd(ui->cbJumpToEnd->isChecked());
-        Settings::Instance()->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
-
-        bool ok;
-        int dec = ui->tbWaitTime->text().toInt(&ok, 10);
-        if(ok)
-        {
-            Settings::Instance()->setPageChangeTimeout(dec);
-        }
-    }
-
     delete ui;
 }

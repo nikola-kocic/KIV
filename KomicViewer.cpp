@@ -118,7 +118,6 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
 
     //Content start
-
     imageDisplay = new PictureItem(Settings::Instance()->getHardwareAcceleration());
 
     QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -127,7 +126,6 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
     imageDisplay->setSizePolicy(policy);
 
     splitterMain->addWidget(imageDisplay);
-
     //Content end
 
 
@@ -229,7 +227,12 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
 void KomicViewer::closeEvent(QCloseEvent *event)
 {
-    Settings::Instance()->setLastPath(fsm->filePath(treeViewFilesystem->currentIndex()));
+    Settings::Instance()->setLastPath(getCurrentPath());
+}
+
+QString KomicViewer::getCurrentPath()
+{
+    return fsm->filePath(treeViewFilesystem->currentIndex());
 }
 
 void KomicViewer::keyPressEvent(QKeyEvent *event)
@@ -607,7 +610,6 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
 
             QDir dir(filePath);
 
-    //        dir.setNameFilters(imagefilter);
             QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
             QList<QTreeWidgetItem*> items;
             QFileIconProvider fip;
@@ -674,7 +676,6 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
 
             //Populate treeViewFile
 
-
             QTreeWidgetItem* root = new QTreeWidgetItem(TYPE_ARCHIVE);
             QTreeWidgetItem* node = root;
             QFileIconProvider fip;
@@ -716,43 +717,11 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
     {
         if(fsm->isDir(current))
         {
-            thumbnailViewer->clear();
-
             fsm->fetchMore(current);
 
-            QDir dir(filePath);
-
-    //        dir.setNameFilters(imagefilter);
-            QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
-            QFileIconProvider fip;
-            for (int i=0; i < list.count(); i++)
-            {
-                QListWidgetItem* nlvfi = NULL;
-
-                QFileInfo info = list.at(i);
-                if(info.isDir())
-                {
-                    nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_DIR);
-                }
-                else if(filters_archive.contains(info.suffix().toLower()))
-                {
-                    nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_ARCHIVE);
-                }
-                else if (filters_image.contains(info.suffix().toLower()))
-                {
-                    nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_FILE);
-                }
-
-                if(nlvfi != NULL)
-                {
-                    nlvfi->setIcon(fip.icon(info));
-
-                    thumbnailViewer->addItem(nlvfi);
-                }
-            }
         }
 
-        thumbnailViewer->startShowingThumbnails(fsm->filePath(treeViewFilesystem->currentIndex()) + "/");
+        thumbnailViewer->startShowingThumbnails(filePath, filters_archive, filters_image);
     }
 }
 
@@ -803,7 +772,7 @@ void KomicViewer::OnTreeFileWidgetItemActivated ( QTreeWidgetItem * item, int co
     {
         if(item->type() == TYPE_DIR || item->type() == TYPE_ARCHIVE)
 	{
-	    treeViewFilesystem->setCurrentIndex(fsm->index(fsm->filePath(treeViewFilesystem->currentIndex()) + "/" + item->text(LV_COLNAME)));
+            treeViewFilesystem->setCurrentIndex(fsm->index(getCurrentPath() + "/" + item->text(LV_COLNAME)));
 
 //	    for(int i = 0; i < fsm->rowCount(treeViewFilesystem->currentIndex()); i++)
 //            {
@@ -835,7 +804,7 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
     }
     else
     {
-	QString filepath = fsm->filePath(treeViewFilesystem->currentIndex());
+        QString filepath = getCurrentPath();
 
 	if(fsm->isDir(treeViewFilesystem->currentIndex()))
         {
@@ -938,6 +907,11 @@ void KomicViewer::settingsDialog()
     if(sd.exec() == QDialog::Accepted)
     {
         //update settings
+        if(Settings::Instance()->getHardwareAcceleration() != imageDisplay->getHardwareAcceleration())
+        {
+            imageDisplay->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
+            threadImage->start();
+        }
     }
 }
 
@@ -1073,9 +1047,6 @@ void KomicViewer::toggleShowThumbnails(bool)
         if(thumbnailViewer != NULL)
         {
             thumbnailViewer = new ThumbnailViewer();
-            thumbnailViewer->setIconSize(QSize(200, 200));
-            thumbnailViewer->setGridSize(QSize(200, 250));
-            thumbnailViewer->setViewMode(QListView::IconMode);
 
             QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
             policy.setHorizontalStretch(1);
@@ -1088,6 +1059,8 @@ void KomicViewer::toggleShowThumbnails(bool)
         {
             thumbnailViewer->show();
         }
+
+        thumbnailViewer->startShowingThumbnails(getCurrentPath(), filters_archive, filters_image);
     }
     else
     {

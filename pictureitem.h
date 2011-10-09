@@ -4,6 +4,8 @@
 #include "pictureitem_raster.h"
 #include "pictureitem_gl.h"
 
+#include <QtGui/qboxlayout.h>
+
 class PictureItem : public QWidget
 {
     Q_OBJECT
@@ -19,11 +21,15 @@ public:
     void setLockMode(LockMode::Mode);
     QVector<qreal> getDefaultZoomSizes();
     LockMode::Mode getLockMode();
+    void setHardwareAcceleration(bool b);
+    bool getHardwareAcceleration();
 
 private:
     PictureItemGL *imageDisplayGL;
     PictureItemRaster *imageDisplayRaster;
     bool opengl;
+    void initPictureItem();
+    QVBoxLayout *vboxMain;
 
 signals:
     void pageNext();

@@ -66,6 +66,7 @@ private:
     void openFile(const QString &source);
     void updatePath(const QString &filePath);
     bool parseZoom(const QString &zoomText);
+    QString getCurrentPath();
     bool thumbs;
     QTreeWidgetItem* AddNode(QTreeWidgetItem* node, QString name, int index);
 

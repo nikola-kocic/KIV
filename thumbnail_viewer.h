@@ -13,7 +13,7 @@ class ThumbnailViewer : public QListWidget
 
 public:
     ThumbnailViewer (QWidget * parent = 0);
-    void startShowingThumbnails(const QString& path);
+    void startShowingThumbnails(const QString& path, const QStringList &filters_archive, const QStringList &filters_image);
 
 private:
     void showThumbnails();
@@ -21,6 +21,7 @@ private:
     int thumbCount;
     QString path;
     ThumbnailGenerator* gt;
+    int thumbSize;
 
 private slots:
     void onThreadThumbsFinished();

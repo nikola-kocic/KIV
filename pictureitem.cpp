@@ -1,14 +1,20 @@
 #include "pictureitem.h"
 
-#include <QtGui/qboxlayout.h>
-
 PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
 {
-    QVBoxLayout *vboxMain = new QVBoxLayout(this);
+    this->opengl = opengl;
+
+    vboxMain = new QVBoxLayout(this);
     vboxMain->setSpacing(0);
     vboxMain->setMargin(0);
 
-    this->opengl = opengl;
+    initPictureItem();
+
+    this->setLayout(vboxMain);
+}
+
+void PictureItem::initPictureItem()
+{
     if(this->opengl == true)
     {
         imageDisplayGL = new PictureItemGL();
@@ -31,9 +37,31 @@ PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
         imageDisplayGL = NULL;
         vboxMain->addWidget(imageDisplayRaster);
     }
-    this->setLayout(vboxMain);
 }
 
+void PictureItem::setHardwareAcceleration(bool b)
+{
+    if(this->opengl != b)
+    {
+        if(this->opengl == true)
+        {
+
+            imageDisplayGL->deleteLater();
+        }
+        else
+        {
+            imageDisplayRaster->deleteLater();
+        }
+
+        this->opengl = b;
+        initPictureItem();
+    }
+}
+
+bool PictureItem::getHardwareAcceleration()
+{
+    return opengl;
+}
 
 QPixmap PictureItem::getPixmap()
 {
