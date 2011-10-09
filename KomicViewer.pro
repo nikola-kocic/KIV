@@ -17,7 +17,6 @@ SOURCES += \
     pictureitem.cpp \
     pictureitem_gl.cpp \
     pictureitem_raster.cpp \
-    thumbnail_generator.cpp \
     thumbnail_viewer.cpp \
     pixmap_loader.cpp \
     pictureitem_shared.cpp
@@ -44,7 +43,6 @@ HEADERS += \
     pictureitem.h \
     pictureitem_gl.h \
     pictureitem_raster.h \
-    thumbnail_generator.h \
     thumbnail_viewer.h \
     pixmap_loader.h \
     pictureitem_shared.h
@@ -69,6 +67,8 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
 
 
 

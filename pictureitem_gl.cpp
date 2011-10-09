@@ -3,6 +3,7 @@
 
 //#include <QtCore/qdebug.h>
 #include <QtGui/qpainter.h>
+#include <QtGui/qpalette.h>
 #include <QtGui/qevent.h>
 
 PictureItemGL::PictureItemGL( PictureItemShared* pis, QWidget * parent, Qt::WindowFlags f )
@@ -29,34 +30,39 @@ void PictureItemGL::setPixmap()
 
 void PictureItemGL::paintEvent(QPaintEvent *event)
 {
-    if( pis->isPixmapNull() ) return;
-
     QPainter p(this);
     p.setClipRect(event->region().boundingRect());
+    QPalette obj;
+    QBrush bg = obj.window();
+    p.fillRect(event->region().boundingRect(), bg);
 
-    qreal x = event->region().boundingRect().x();
-    qreal y = event->region().boundingRect().y();
-    qreal w = event->region().boundingRect().width();
-    qreal h = event->region().boundingRect().height();
-
-    if(w  > pis->boundingRect.width())
+    if(! pis->isPixmapNull() )
     {
-        x = (w - pis->boundingRect.width()) / 2;
+        qreal x = event->region().boundingRect().x();
+        qreal y = event->region().boundingRect().y();
+        qreal w = event->region().boundingRect().width();
+        qreal h = event->region().boundingRect().height();
+
+        if(w  > pis->boundingRect.width())
+        {
+            x = (w - pis->boundingRect.width()) / 2;
+        }
+        if(h  > pis->boundingRect.height())
+        {
+            y = (h - pis->boundingRect.height()) / 2;
+        }
+
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+
+        p.translate(pis->boundingRect.x() + translatePoint.x() + x, pis->boundingRect.y() + translatePoint.y() + y);
+        p.scale(pis->getZoom(),pis->getZoom());
+        p.translate(pis->getPixmapSize().height()/2, pis->getPixmapSize().width()/2);
+        p.rotate(pis->getRotation());
+        p.translate(-pis->getPixmapSize().height()/2, -pis->getPixmapSize().width()/2);
+
+        p.drawPixmap(0, 0, pis->getPixmap());
     }
-    if(h  > pis->boundingRect.height())
-    {
-        y = (h - pis->boundingRect.height()) / 2;
-    }
 
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
-
-    p.translate(pis->boundingRect.x() + translatePoint.x() + x, pis->boundingRect.y() + translatePoint.y() + y);
-    p.scale(pis->getZoom(),pis->getZoom());
-    p.translate(pis->getPixmapSize().height()/2, pis->getPixmapSize().width()/2);
-    p.rotate(pis->getRotation());
-    p.translate(-pis->getPixmapSize().height()/2, -pis->getPixmapSize().width()/2);
-
-    p.drawPixmap(0, 0, pis->getPixmap());
     p.end();
 }
 

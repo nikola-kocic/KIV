@@ -602,126 +602,119 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
     setWindowTitle(fsm->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
     updatePath(filePath);
-    if(thumbs == false)
+
+    if(fsm->isDir(current))
     {
-        if(fsm->isDir(current))
+        fsm->fetchMore(current);
+
+        QDir dir(filePath);
+
+        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
+        QList<QTreeWidgetItem*> items;
+        QFileIconProvider fip;
+        for (int i=0; i < list.count(); i++)
         {
-            fsm->fetchMore(current);
+            QTreeWidgetItem* ntvfi = NULL;
 
-            QDir dir(filePath);
-
-            QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
-            QList<QTreeWidgetItem*> items;
-            QFileIconProvider fip;
-            for (int i=0; i < list.count(); i++)
+            QFileInfo info = list.at(i);
+            if(info.isDir())
             {
-                QTreeWidgetItem* ntvfi = NULL;
-
-                QFileInfo info = list.at(i);
-                if(info.isDir())
-                {
-                    ntvfi = new QTreeWidgetItem(TYPE_DIR);
-                }
-                else if(filters_archive.contains(info.suffix().toLower()))
-                {
-                    ntvfi = new QTreeWidgetItem(TYPE_ARCHIVE);
-                }
-                else if (filters_image.contains(info.suffix().toLower()))
-                {
-                    ntvfi = new QTreeWidgetItem(TYPE_FILE);
-                }
-
-                if(ntvfi != NULL)
-                {
-                    ntvfi->setText(LV_COLNAME, info.fileName());
-                    ntvfi->setIcon(LV_COLNAME, fip.icon(info));
-                    items << ntvfi;
-                }
-
+                ntvfi = new QTreeWidgetItem(TYPE_DIR);
+            }
+            else if(filters_archive.contains(info.suffix().toLower()))
+            {
+                ntvfi = new QTreeWidgetItem(TYPE_ARCHIVE);
+            }
+            else if (filters_image.contains(info.suffix().toLower()))
+            {
+                ntvfi = new QTreeWidgetItem(TYPE_FILE);
             }
 
-
-            treeWidgetFiles->clear();
-            treeWidgetFiles->setRootIsDecorated(false);
-            treeWidgetFiles->addTopLevelItems(items);
-
-            for(int i = 0; i < treeWidgetFiles->header()->count(); i++)
+            if(ntvfi != NULL)
             {
-                treeWidgetFiles->resizeColumnToContents(i);
+                ntvfi->setText(LV_COLNAME, info.fileName());
+                ntvfi->setIcon(LV_COLNAME, fip.icon(info));
+                items << ntvfi;
             }
 
-            archive_files.clear();
         }
-        else
+
+
+        treeWidgetFiles->clear();
+        treeWidgetFiles->setRootIsDecorated(false);
+        treeWidgetFiles->addTopLevelItems(items);
+
+        for(int i = 0; i < treeWidgetFiles->header()->count(); i++)
         {
-            // Read info from zip file
+            treeWidgetFiles->resizeColumnToContents(i);
+        }
 
-            QFile zipFile(filePath);
-            QuaZip zip(&zipFile);
-            if(!zip.open(QuaZip::mdUnzip))
-            {
-                qWarning("testRead(): zip.open(): %d", zip.getZipError());
-                return;
-            }
-            zip.setFileNameCodec("UTF-8");
+        archive_files.clear();
 
-            archive_files = zip.getFileInfoList();
-
-            zip.close();
-            if(zip.getZipError()!=UNZ_OK) {
-                qWarning("testRead(): zip.close(): %d", zip.getZipError());
-                return;
-            }
-
-
-            //Populate treeViewFile
-
-            QTreeWidgetItem* root = new QTreeWidgetItem(TYPE_ARCHIVE);
-            QTreeWidgetItem* node = root;
-            QFileIconProvider fip;
-            root->setIcon(LV_COLNAME, fip.icon(QFileInfo(zipFile)));
-            root->setText(LV_COLNAME, fsm->fileInfo(current).fileName());
-
-            for(int i=0; i < archive_files.count() ; i++)
-            {
-                node = root;
-                QStringList file_path_parts = archive_files.at(i).name.split('/');
-                for (int j = 0; j < file_path_parts.count(); j++)
-                {
-                    if (file_path_parts.at(j).count() > 0)
-                    {
-                        if (j < file_path_parts.count() - 1)
-                        {
-                            node = AddNode(node, file_path_parts.at(j), TYPE_DIR);
-                        }
-                        else
-                            //if (j == file_path_parts.count() - 1)
-                        {
-                            QFileInfo fi(archive_files.at(i).name);
-                            if(filters_image.contains(fi.suffix().toLower()))
-                            {
-    //                            qDebug() << fi.completeBaseName() << fi.suffix();
-                                node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForTreewidget(i));
-                            }
-                        }
-                    }
-                }
-            }
-
-            treeWidgetFiles->clear();
-            treeWidgetFiles->setRootIsDecorated(true);
-            treeWidgetFiles->addTopLevelItems(root->takeChildren());
+        if(thumbs == true)
+        {
+            thumbnailViewer->startShowingThumbnails(filePath);
         }
     }
     else
     {
-        if(fsm->isDir(current))
-        {
-            fsm->fetchMore(current);
+        // Read info from zip file
 
+        QFile zipFile(filePath);
+        QuaZip zip(&zipFile);
+        if(!zip.open(QuaZip::mdUnzip))
+        {
+            qWarning("testRead(): zip.open(): %d", zip.getZipError());
+            return;
+        }
+        zip.setFileNameCodec("UTF-8");
+
+        archive_files = zip.getFileInfoList();
+
+        zip.close();
+        if(zip.getZipError()!=UNZ_OK) {
+            qWarning("testRead(): zip.close(): %d", zip.getZipError());
+            return;
         }
 
-        thumbnailViewer->startShowingThumbnails(filePath, filters_archive, filters_image);
+
+        //Populate treeViewFile
+
+        QTreeWidgetItem* root = new QTreeWidgetItem(TYPE_ARCHIVE);
+        QTreeWidgetItem* node = root;
+        QFileIconProvider fip;
+        root->setIcon(LV_COLNAME, fip.icon(QFileInfo(zipFile)));
+        root->setText(LV_COLNAME, fsm->fileInfo(current).fileName());
+
+        for(int i=0; i < archive_files.count() ; i++)
+        {
+            node = root;
+            QStringList file_path_parts = archive_files.at(i).name.split('/');
+            for (int j = 0; j < file_path_parts.count(); j++)
+            {
+                if (file_path_parts.at(j).count() > 0)
+                {
+                    if (j < file_path_parts.count() - 1)
+                    {
+                        node = AddNode(node, file_path_parts.at(j), TYPE_DIR);
+                    }
+                    else
+                        //if (j == file_path_parts.count() - 1)
+                    {
+                        QFileInfo fi(archive_files.at(i).name);
+                        if(filters_image.contains(fi.suffix().toLower()))
+                        {
+//                            qDebug() << fi.completeBaseName() << fi.suffix();
+                            node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForTreewidget(i));
+                        }
+                    }
+                }
+            }
+        }
+
+        treeWidgetFiles->clear();
+        treeWidgetFiles->setRootIsDecorated(true);
+        treeWidgetFiles->addTopLevelItems(root->takeChildren());
     }
 }
 
@@ -1046,7 +1039,7 @@ void KomicViewer::toggleShowThumbnails(bool)
         imageDisplay->hide();
         if(thumbnailViewer != NULL)
         {
-            thumbnailViewer = new ThumbnailViewer();
+            thumbnailViewer = new ThumbnailViewer(filters_archive, filters_image);
 
             QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
             policy.setHorizontalStretch(1);
@@ -1060,7 +1053,7 @@ void KomicViewer::toggleShowThumbnails(bool)
             thumbnailViewer->show();
         }
 
-        thumbnailViewer->startShowingThumbnails(getCurrentPath(), filters_archive, filters_image);
+        thumbnailViewer->startShowingThumbnails(getCurrentPath());
     }
     else
     {

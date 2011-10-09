@@ -1,9 +1,11 @@
 #include "pixmap_loader.h"
 #include <QtCore/qfile.h>
 #include <QtCore/qbuffer.h>
+#include <QtGui/qimagereader.h>
 
 PixmapLoader::PixmapLoader()
 {
+    this->length = 0;
     this->filepath = "/";
 }
 
@@ -12,7 +14,6 @@ void PixmapLoader::setFilePath(const QString &filepath, bool isZip, const QStrin
     this->filepath = filepath;
     this->isZip = isZip;
     this->zipFileName = zipFileName;
-
 }
 
 QString PixmapLoader::getFilePath()
@@ -20,6 +21,10 @@ QString PixmapLoader::getFilePath()
     return this->filepath;
 }
 
+void PixmapLoader::setThumbnailSize(int length)
+{
+    this->length = length;
+}
 
 void PixmapLoader::loadPixmap()
 {
@@ -35,7 +40,18 @@ void PixmapLoader::loadPixmap()
 
 void PixmapLoader::loadFromFile()
 {
-    emit finished(QPixmap(filepath));
+    if(this->length == 0)
+    {
+        emit finished(QPixmap(filepath));
+    }
+    else
+    {
+        QImageReader image_reader(filepath);
+        image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height() ) );
+        QIcon icon;
+        icon.addPixmap(QPixmap::fromImageReader(&image_reader));
+        emit finished(icon);
+    }
     return;
 }
 
@@ -78,8 +94,41 @@ void PixmapLoader::loadFromZip()
     }
     out.close();
 
-    QPixmap pm;
-    pm.loadFromData(out.buffer());
+    if(this->length == 0)
+    {
+        QPixmap pm;
+        pm.loadFromData(out.buffer());
 
-    emit finished(pm);
+        emit finished(pm);
+    }
+    else
+    {
+        QImageReader image_reader(out.data());
+
+        image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height() ) );
+
+        QIcon icon;
+        icon.addPixmap(QPixmap::fromImageReader(&image_reader));
+        emit finished(icon);
+    }
+}
+
+QSize PixmapLoader::ThumbnailImageSize ( int image_width, int image_height )
+{
+    if (image_width > image_height)
+    {
+        image_height = static_cast<double>(length) / image_width * image_height;
+        image_width = length;
+    }
+    else if (image_width < image_height)
+    {
+        image_width = static_cast<double>(length) / image_height * image_width;
+        image_height = length;
+    }
+    else
+    {
+        image_width = length;
+        image_height = length;
+    }
+    return QSize(image_width, image_height);
 }
