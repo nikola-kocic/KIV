@@ -1,7 +1,6 @@
 
 SOURCES += \
     main.cpp \
-    KomicViewer.cpp \
     quazip/zip.c \
     quazip/unzip.c \
     quazip/quazipnewinfo.cpp \
@@ -20,7 +19,8 @@ SOURCES += \
     thumbnail_viewer.cpp \
     pixmap_loader.cpp \
     pictureitem_shared.cpp \
-    komicviewer_enums.cpp
+    komicviewer_enums.cpp \
+    main_window.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -39,14 +39,14 @@ HEADERS += \
     system_icons.h \
     settings_dialog.h \
     settings.h \
-    KomicViewer.h \
     komicviewer_enums.h \
     pictureitem.h \
     pictureitem_gl.h \
     pictureitem_raster.h \
     thumbnail_viewer.h \
     pixmap_loader.h \
-    pictureitem_shared.h
+    pictureitem_shared.h \
+    main_window.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -68,6 +68,10 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
+
+
 
 
 

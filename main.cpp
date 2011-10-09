@@ -1,4 +1,4 @@
-#include "KomicViewer.h"
+#include "main_window.h"
 
 #include <QtGui/qapplication.h>
 
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("0.8");
 
     QStringList args = QApplication::arguments();
-    KomicViewer komicViewer(args);
+    MainWindow komicViewer(args);
     komicViewer.showMaximized();
     return app.exec();
 }

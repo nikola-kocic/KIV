@@ -1,4 +1,4 @@
-#include "KomicViewer.h"
+#include "main_window.h"
 #include "settings_dialog.h"
 #include "system_icons.h"
 #include "settings.h"
@@ -21,7 +21,7 @@
 #include <QtGui/qdesktopwidget.h>
 #include <QtGui/qcompleter.h>
 
-KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
+MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
     threadImage = new QThread();
 
@@ -204,7 +204,7 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     lp = new PixmapLoader();
     connect(threadImage, SIGNAL(started()), lp, SLOT(loadPixmap()));
-    connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(onPixmalLoaderFinished(QPixmap)));
+    connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmalLoaderFinished(QPixmap)));
     lp->moveToThread(threadImage);
 
     QCompleter *completer = new QCompleter(this);
@@ -225,17 +225,17 @@ KomicViewer::KomicViewer (QStringList args, QWidget * parent, Qt::WindowFlags f)
     }
 }
 
-void KomicViewer::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
     Settings::Instance()->setLastPath(getCurrentPath());
 }
 
-QString KomicViewer::getCurrentPath()
+QString MainWindow::getCurrentPath()
 {
     return fsm->filePath(treeViewFilesystem->currentIndex());
 }
 
-void KomicViewer::keyPressEvent(QKeyEvent *event)
+void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
@@ -261,7 +261,7 @@ void KomicViewer::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void KomicViewer::createActions()
+void MainWindow::createActions()
 {
 //    qDebug() << QIcon::themeSearchPaths();
 //qDebug() << QCoreApplication::applicationDirPath();
@@ -375,7 +375,7 @@ void KomicViewer::createActions()
     dirUpAct->setEnabled(false);
 }
 
-void KomicViewer::createMenus(QMenuBar *parent)
+void MainWindow::createMenus(QMenuBar *parent)
 {
     QMenu *fileMenu = new QMenu(tr("&File"), parent);
     fileMenu->addAction(openAct);
@@ -441,7 +441,7 @@ void KomicViewer::createMenus(QMenuBar *parent)
 }
 
 
-void KomicViewer::connectActions()
+void MainWindow::connectActions()
 {
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(saveAs()));
@@ -474,12 +474,12 @@ void KomicViewer::connectActions()
     connect(lockFitWidthAct, SIGNAL(triggered()), this, SLOT(lockFitWidth()));
 }
 
-void KomicViewer::openFile(const QString &source)
+void MainWindow::openFile(const QString &source)
 {
     treeViewFilesystem->setCurrentIndex(fsm->index(source));
 }
 
-bool KomicViewer::checkFileExtension(const QFileInfo &fi)
+bool MainWindow::checkFileExtension(const QFileInfo &fi)
 {
     if(filters_archive.contains(fi.suffix().toLower()) || fi.isDir() == true)
     {
@@ -491,7 +491,7 @@ bool KomicViewer::checkFileExtension(const QFileInfo &fi)
     }
 }
 
-bool KomicViewer::acceptFileDrop(const QMimeData* mimeData){
+bool MainWindow::acceptFileDrop(const QMimeData* mimeData){
      if (mimeData->hasUrls())
      {
          return checkFileExtension(QFileInfo(mimeData->urls().at(0).toLocalFile()));
@@ -502,7 +502,7 @@ bool KomicViewer::acceptFileDrop(const QMimeData* mimeData){
      }
 }
 
-void KomicViewer::dragEnterEvent(QDragEnterEvent* event)
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
     if(acceptFileDrop(event->mimeData()) == true)
     {
@@ -510,19 +510,19 @@ void KomicViewer::dragEnterEvent(QDragEnterEvent* event)
     }
 }
 
-void KomicViewer::dragMoveEvent(QDragMoveEvent* event)
+void MainWindow::dragMoveEvent(QDragMoveEvent* event)
 {
     // if some actions should not be usable, like move, this code must be adopted
     event->acceptProposedAction();
 }
 
 
-void KomicViewer::dragLeaveEvent(QDragLeaveEvent* event)
+void MainWindow::dragLeaveEvent(QDragLeaveEvent* event)
 {
     event->accept();
 }
 
-void KomicViewer::dropEvent(QDropEvent* event)
+void MainWindow::dropEvent(QDropEvent* event)
 {
     if(event->proposedAction() == Qt::CopyAction)
     {
@@ -531,7 +531,7 @@ void KomicViewer::dropEvent(QDropEvent* event)
     event->acceptProposedAction();
 }
 
-void KomicViewer::OnPathEdited()
+void MainWindow::OnPathEdited()
 {
     QFileInfo fi(lineEditPath->text());
     bool valid = false;
@@ -563,7 +563,7 @@ void KomicViewer::OnPathEdited()
 }
 
 
-void KomicViewer::OnTreeViewItemActivated ( const QModelIndex & index )
+void MainWindow::OnTreeViewItemActivated ( const QModelIndex & index )
 {
     if(lineEditPath->palette() != QApplication::palette())
     {
@@ -573,7 +573,7 @@ void KomicViewer::OnTreeViewItemActivated ( const QModelIndex & index )
     }
 }
 
-void KomicViewer::updatePath(const QString &filePath)
+void MainWindow::updatePath(const QString &filePath)
 {
     QFileInfo fi(filePath);
     if(fi.isDir())
@@ -586,12 +586,12 @@ void KomicViewer::updatePath(const QString &filePath)
     }
 }
 
-void KomicViewer::refreshPath()
+void MainWindow::refreshPath()
 {
     OnTreeViewCurrentChanged(treeViewFilesystem->currentIndex(), treeViewFilesystem->currentIndex());
 }
 
-void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous)
+void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     dirUpAct->setEnabled(current.parent().isValid());
 
@@ -760,14 +760,12 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
 
         if(thumbs == true)
         {
-            //TODO: Show thumbnails for files in archive
-            //thumbnailViewer->startShowingThumbnails(filePath);
             thumbnailViewer->startShowingThumbnails(filePath, true);
         }
     }
 }
 
-QTreeWidgetItem* KomicViewer::AddNode(QTreeWidgetItem* node, QString name, int index)
+QTreeWidgetItem* MainWindow::AddNode(QTreeWidgetItem* node, QString name, int index)
 {
     for(int i = 0; i < node->childCount(); i++)
     {
@@ -784,13 +782,13 @@ QTreeWidgetItem* KomicViewer::AddNode(QTreeWidgetItem* node, QString name, int i
     return ntvi;
 }
 
-void KomicViewer::togglePanel(bool value)
+void MainWindow::togglePanel(bool value)
 {
     splitterPanel->setVisible(value);
     toolbarFiles->setVisible(value);
 }
 
-void KomicViewer::toggleFullscreen(bool value)
+void MainWindow::toggleFullscreen(bool value)
 {
     togglePanelAct->setChecked(!value);
     if(value == true)
@@ -808,7 +806,7 @@ void KomicViewer::toggleFullscreen(bool value)
     }
 }
 
-void KomicViewer::OnTreeFileWidgetItemActivated ( QTreeWidgetItem * item, int column )
+void MainWindow::OnTreeFileWidgetItemActivated ( QTreeWidgetItem * item, int column )
 {
     if(fsm->isDir(treeViewFilesystem->currentIndex()))
     {
@@ -830,7 +828,7 @@ void KomicViewer::OnTreeFileWidgetItemActivated ( QTreeWidgetItem * item, int co
     }
 }
 
-void KomicViewer::dirUp()
+void MainWindow::dirUp()
 {
     if(treeViewFilesystem->currentIndex().parent().isValid())
     {
@@ -838,9 +836,37 @@ void KomicViewer::dirUp()
     }
 }
 
-void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous)
+void MainWindow::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous)
 {
-    if(current == NULL || current->type() == TYPE_DIR || current->type() == TYPE_ARCHIVE)
+    if(thumbs == true) { return; }
+
+    if(current == NULL)
+    {
+        imageDisplay->setPixmap(NULL);
+    }
+    else
+    {
+        loadImageFromWidget(current->type(), current->text(LV_COLNAME));
+    }
+}
+
+void MainWindow::OnThumbnailItemActivated(QListWidgetItem *item)
+{
+    if(item == NULL)
+    {
+        imageDisplay->setPixmap(NULL);
+    }
+    else
+    {
+        showThumbnailsAct->toggle();
+        //TODO Select file in treewidgetfiles
+        loadImageFromWidget(item->type(), item->text());
+    }
+}
+
+void MainWindow::loadImageFromWidget(int type, const QString& filename)
+{
+    if(type == TYPE_DIR || type == TYPE_ARCHIVE)
     {
         imageDisplay->setPixmap(NULL);
     }
@@ -848,14 +874,14 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
     {
         QString filepath = getCurrentPath();
 
-	if(fsm->isDir(treeViewFilesystem->currentIndex()))
+        if(fsm->isDir(treeViewFilesystem->currentIndex()))
         {
-            lp->setFilePath(filepath + "/" + current->text(LV_COLNAME));
+            lp->setFilePath(filepath + "/" + filename);
             threadImage->start();
         }
         else
         {
-            int SelectedZipFileIndex = getArchiveNumberFromTreewidget(treeWidgetFiles->currentItem()->type());
+            int SelectedZipFileIndex = getArchiveNumberFromTreewidget(type);
 
             if(SelectedZipFileIndex < 0)
             {
@@ -870,7 +896,7 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
     }
 }
 
-void KomicViewer::open()
+void MainWindow::open()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Zip files (*.zip *.cbz)"));
     if (!fileName.isEmpty())
@@ -879,7 +905,7 @@ void KomicViewer::open()
     }
 }
 
-bool KomicViewer::saveAs()
+bool MainWindow::saveAs()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "untitled.png", tr("Image (*.png)"));
     if (fileName.isEmpty())
@@ -898,52 +924,52 @@ bool KomicViewer::saveAs()
     return true;
 }
 
-void KomicViewer::zoomReset()
+void MainWindow::zoomReset()
 {
     imageDisplay->setZoom(1);
 }
 
-void KomicViewer::lockZoom()
+void MainWindow::lockZoom()
 {
     imageDisplay->setLockMode(LockMode::Zoom);
 }
 
-void KomicViewer::lockNone()
+void MainWindow::lockNone()
 {
     imageDisplay->setLockMode(LockMode::None);
 }
 
-void KomicViewer::lockAutofit()
+void MainWindow::lockAutofit()
 {
     imageDisplay->setLockMode(LockMode::Autofit);
 }
 
-void KomicViewer::lockFitWidth()
+void MainWindow::lockFitWidth()
 {
     imageDisplay->setLockMode(LockMode::FitWidth);
 }
 
-void KomicViewer::lockFitHeight()
+void MainWindow::lockFitHeight()
 {
     imageDisplay->setLockMode(LockMode::FitHeight);
 }
 
-void KomicViewer::rotateLeft()
+void MainWindow::rotateLeft()
 {
     imageDisplay->setRotation(imageDisplay->getRotation()-10);
 }
 
-void KomicViewer::rotateRight()
+void MainWindow::rotateRight()
 {
     imageDisplay->setRotation(imageDisplay->getRotation()+10);
 }
 
-void KomicViewer::rotateReset()
+void MainWindow::rotateReset()
 {
     imageDisplay->setRotation(0);
 }
 
-void KomicViewer::settingsDialog()
+void MainWindow::settingsDialog()
 {
     Settings_Dialog sd(this);
     if(sd.exec() == QDialog::Accepted)
@@ -957,7 +983,7 @@ void KomicViewer::settingsDialog()
     }
 }
 
-void KomicViewer::toggleLargeIcons(bool value)
+void MainWindow::toggleLargeIcons(bool value)
 {
     int e;
     if(value == true)
@@ -979,7 +1005,7 @@ void KomicViewer::toggleLargeIcons(bool value)
     Settings::Instance()->setLargeIcons(value);
 }
 
-void KomicViewer::pageNext()
+void MainWindow::pageNext()
 {
     if(treeWidgetFiles->currentItem() == NULL) return;
 
@@ -1015,7 +1041,7 @@ void KomicViewer::pageNext()
     }
 }
 
-void KomicViewer::pagePrevious()
+void MainWindow::pagePrevious()
 {
     if(treeWidgetFiles->currentItem() == NULL) return;
     if(treeWidgetFiles->currentItem()->parent() == NULL)
@@ -1044,13 +1070,13 @@ void KomicViewer::pagePrevious()
     }
 }
 
-void KomicViewer::OnZoomChanged()
+void MainWindow::OnZoomChanged()
 {
     QString zoomText = QString::number((int)(imageDisplay->getZoom() * 100)) + "%";
     comboBoxZoom->setEditText(zoomText);
 }
 
-bool KomicViewer::parseZoom(const QString &zoomText)
+bool MainWindow::parseZoom(const QString &zoomText)
 {
     QString zoomvalue = zoomText;
     zoomvalue = zoomvalue.remove('%');
@@ -1067,7 +1093,7 @@ bool KomicViewer::parseZoom(const QString &zoomText)
     return ok;
 }
 
-void KomicViewer::OnComboBoxZoomTextChanged()
+void MainWindow::OnComboBoxZoomTextChanged()
 {
     if(parseZoom(comboBoxZoom->lineEdit()->text()) == false)
     {
@@ -1075,12 +1101,12 @@ void KomicViewer::OnComboBoxZoomTextChanged()
     }
 }
 
-void KomicViewer::OnComboBoxZoomIndexChanged(const int &index)
+void MainWindow::OnComboBoxZoomIndexChanged(const int &index)
 {
     imageDisplay->setZoom(imageDisplay->getDefaultZoomSizes().at(index));
 }
 
-void KomicViewer::toggleShowThumbnails(bool)
+void MainWindow::toggleShowThumbnails(bool)
 {
     if(thumbs == false)
     {
@@ -1089,6 +1115,7 @@ void KomicViewer::toggleShowThumbnails(bool)
         if(thumbnailViewer != NULL)
         {
             thumbnailViewer = new ThumbnailViewer(filters_archive, filters_image);
+            connect(thumbnailViewer, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(OnThumbnailItemActivated(QListWidgetItem*)));
 
             QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
             policy.setHorizontalStretch(1);
@@ -1112,7 +1139,7 @@ void KomicViewer::toggleShowThumbnails(bool)
     }
 }
 
-void KomicViewer::onPixmalLoaderFinished(QPixmap p)
+void MainWindow::OnPixmalLoaderFinished(QPixmap p)
 {
     imageDisplay->setPixmap(p);
     threadImage->exit();

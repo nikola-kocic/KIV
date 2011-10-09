@@ -1,5 +1,5 @@
-#ifndef KOMICVIEWER_H
-#define KOMICVIEWER_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include "thumbnail_viewer.h"
 #include "pixmap_loader.h"
@@ -14,12 +14,12 @@
 #include <QtGui/qcombobox.h>
 #include <QtGui/qlistwidget.h>
 
-class KomicViewer : public QWidget
+class MainWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    KomicViewer(QStringList args, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    MainWindow(QStringList args, QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
 private slots:
     void open();
@@ -55,7 +55,8 @@ private slots:
     void OnTreeViewItemActivated ( const QModelIndex & index );
     void OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
     void OnTreeFileWidgetItemActivated (QTreeWidgetItem * item, int column);
-    void onPixmalLoaderFinished(QPixmap);
+    void OnPixmalLoaderFinished(QPixmap);
+    void OnThumbnailItemActivated(QListWidgetItem*);
 
 private:
     void createActions();
@@ -64,6 +65,7 @@ private:
     bool acceptFileDrop(const QMimeData* mimeData);
     bool checkFileExtension(const QFileInfo &fi);
     void openFile(const QString &source);
+    void loadImageFromWidget(int type, const QString& filename);
     void updatePath(const QString &filePath);
     bool parseZoom(const QString &zoomText);
     QString getCurrentPath();
@@ -134,4 +136,4 @@ protected:
 
 const int LV_COLNAME = 0;
 
-#endif // KOMICVIEWER_H
+#endif // MAINWINDOW_H
