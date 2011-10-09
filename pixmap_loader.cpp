@@ -103,12 +103,11 @@ void PixmapLoader::loadFromZip()
     }
     else
     {
-        QImageReader image_reader(out.data());
-
+        QImageReader image_reader(&out);
         image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height() ) );
-
         QIcon icon;
-        icon.addPixmap(QPixmap::fromImageReader(&image_reader));
+        QPixmap p = QPixmap::fromImageReader(&image_reader);
+        icon.addPixmap(p);
         emit finished(icon);
     }
 }
@@ -117,18 +116,18 @@ QSize PixmapLoader::ThumbnailImageSize ( int image_width, int image_height )
 {
     if (image_width > image_height)
     {
-        image_height = static_cast<double>(length) / image_width * image_height;
-        image_width = length;
+        image_height = static_cast<double>(this->length) / image_width * image_height;
+        image_width = this->length;
     }
     else if (image_width < image_height)
     {
-        image_width = static_cast<double>(length) / image_height * image_width;
-        image_height = length;
+        image_width = static_cast<double>(this->length) / image_height * image_width;
+        image_height = this->length;
     }
     else
     {
-        image_width = length;
-        image_height = length;
+        image_width = this->length;
+        image_height = this->length;
     }
     return QSize(image_width, image_height);
 }

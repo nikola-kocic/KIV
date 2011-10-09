@@ -14,7 +14,7 @@ class ThumbnailViewer : public QListWidget
 
 public:
     ThumbnailViewer( const QStringList &filters_archive, const QStringList &filters_image, QWidget * parent = 0 );
-    void startShowingThumbnails(const QString& path);
+    void startShowingThumbnails(const QString& path, bool isZip);
     bool folderChangedFlag;
 
 private:
@@ -23,11 +23,12 @@ private:
     QThread *threadThumbnails;
     int thumbCount;
     QString path;
+    bool isZip;
+    QString zipFileName;
     PixmapLoader* pl;
     int thumbSize;
     QStringList filters_archive;
     QStringList filters_image;
-    QTime timer;
 
 private slots:
     void onThreadThumbsFinished();

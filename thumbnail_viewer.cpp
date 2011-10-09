@@ -26,8 +26,10 @@ ThumbnailViewer::ThumbnailViewer(const QStringList &filters_archive, const QStri
     connect(pl, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
 }
 
-void ThumbnailViewer::startShowingThumbnails(const QString& path)
+void ThumbnailViewer::startShowingThumbnails(const QString& path, bool isZip)
 {
+    this->isZip = isZip;
+    this->zipFileName = zipFileName;
     if(this->path != path)
     {
         folderChangedFlag = true;
@@ -36,52 +38,9 @@ void ThumbnailViewer::startShowingThumbnails(const QString& path)
 
         if(threadThumbnails->isRunning() == false)
         {
-            populateList();
+            showThumbnails();
         }
     }
-}
-
-void ThumbnailViewer::populateList()
-{
-    this->clear();
-    folderChangedFlag = false;
-
-    QDir dir(this->path);
-
-    QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
-    QFileIconProvider fip;
-    for (int i=0; i < list.count(); i++)
-    {
-        QListWidgetItem* nlvfi = NULL;
-
-        QFileInfo info = list.at(i);
-        if(info.isDir())
-        {
-            nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_DIR);
-        }
-        else if(filters_archive.contains(info.suffix().toLower()))
-        {
-            nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_ARCHIVE);
-        }
-        else if (filters_image.contains(info.suffix().toLower()))
-        {
-            nlvfi = new QListWidgetItem(info.fileName(), 0, TYPE_FILE);
-        }
-
-        if(nlvfi != NULL)
-        {
-            nlvfi->setIcon(fip.icon(info));
-            nlvfi->setSizeHint(QSize(thumbSize + 20, thumbSize + 20));
-
-            nlvfi->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-            nlvfi->setToolTip(info.absoluteFilePath());
-
-            this->addItem(nlvfi);
-        }
-    }
-
-    timer.start();
-    showThumbnails();
 }
 
 void ThumbnailViewer::showThumbnails()
@@ -90,8 +49,13 @@ void ThumbnailViewer::showThumbnails()
     {
         return;
     }
-    while(this->item(thumbCount)->type() != TYPE_FILE)
+    while(true)
     {
+        if(this->item(thumbCount)->type() == TYPE_FILE || this->item(thumbCount)->type() >= makeArchiveNumberForTreewidget(0))
+        {
+            break;
+        }
+
         thumbCount++;
         if(thumbCount >= this->count())
         {
@@ -99,7 +63,14 @@ void ThumbnailViewer::showThumbnails()
         }
     }
 
-    pl->setFilePath(path + "/" + this->item(thumbCount)->text());
+    if(this->isZip == true)
+    {
+        pl->setFilePath(path, true, this->item(thumbCount)->text());
+    }
+    else
+    {
+        pl->setFilePath(path + "/" + this->item(thumbCount)->text());
+    }
     threadThumbnails->start();
 }
 
@@ -112,12 +83,11 @@ void ThumbnailViewer::onThreadThumbsFinished()
     }
     else
     {
-        qDebug("%d", timer.elapsed());
-
         thumbCount = 0;
         if(folderChangedFlag == true)
         {
-            populateList();
+            folderChangedFlag = false;
+            showThumbnails();
         }
     }
 }

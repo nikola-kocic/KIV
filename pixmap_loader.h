@@ -21,8 +21,8 @@ public:
 private:
     QString filepath;
     bool isZip;
-    int length;
     QString zipFileName;
+    int length;
     void loadFromFile();
     void loadFromZip();
     QSize ThumbnailImageSize ( int image_width, int image_height );

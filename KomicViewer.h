@@ -70,7 +70,7 @@ private:
     bool thumbs;
     QTreeWidgetItem* AddNode(QTreeWidgetItem* node, QString name, int index);
 
-    QList<QuaZipFileInfo> archive_files;
+    QStringList archive_files;
     QStringList filters_image;
     QStringList filters_archive;
     QSplitter *splitterMain;
@@ -133,8 +133,5 @@ protected:
 };
 
 const int LV_COLNAME = 0;
-
-int makeArchiveNumberForTreewidget(int number);
-int getArchiveNumberFromTreewidget(int number);
 
 #endif // KOMICVIEWER_H

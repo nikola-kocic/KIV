@@ -603,6 +603,11 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
 
     updatePath(filePath);
 
+    if(thumbs == true)
+    {
+        thumbnailViewer->clear();
+    }
+
     if(fsm->isDir(current))
     {
         fsm->fetchMore(current);
@@ -612,22 +617,36 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
         QList<QTreeWidgetItem*> items;
         QFileIconProvider fip;
+
         for (int i=0; i < list.count(); i++)
         {
             QTreeWidgetItem* ntvfi = NULL;
+            QListWidgetItem* nlvti = NULL;
 
             QFileInfo info = list.at(i);
             if(info.isDir())
             {
                 ntvfi = new QTreeWidgetItem(TYPE_DIR);
+                if(thumbs == true)
+                {
+                    nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_DIR);
+                }
             }
             else if(filters_archive.contains(info.suffix().toLower()))
             {
                 ntvfi = new QTreeWidgetItem(TYPE_ARCHIVE);
+                if(thumbs == true)
+                {
+                  nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_ARCHIVE);
+                }
             }
             else if (filters_image.contains(info.suffix().toLower()))
             {
                 ntvfi = new QTreeWidgetItem(TYPE_FILE);
+                if(thumbs == true)
+                {
+                    nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_FILE);
+                }
             }
 
             if(ntvfi != NULL)
@@ -637,6 +656,16 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
                 items << ntvfi;
             }
 
+            if(nlvti != NULL)
+            {
+                nlvti->setIcon(fip.icon(info));
+                nlvti->setSizeHint(QSize(200 + 20, 200 + 20));
+
+                nlvti->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+                nlvti->setToolTip(info.absoluteFilePath());
+
+                thumbnailViewer->addItem(nlvti);
+            }
         }
 
 
@@ -653,7 +682,7 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
 
         if(thumbs == true)
         {
-            thumbnailViewer->startShowingThumbnails(filePath);
+            thumbnailViewer->startShowingThumbnails(filePath, false);
         }
     }
     else
@@ -669,7 +698,7 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
         }
         zip.setFileNameCodec("UTF-8");
 
-        archive_files = zip.getFileInfoList();
+        archive_files = zip.getFileNameList();
 
         zip.close();
         if(zip.getZipError()!=UNZ_OK) {
@@ -686,10 +715,12 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
         root->setIcon(LV_COLNAME, fip.icon(QFileInfo(zipFile)));
         root->setText(LV_COLNAME, fsm->fileInfo(current).fileName());
 
+        QListWidgetItem* nlvti = NULL;
+
         for(int i=0; i < archive_files.count() ; i++)
         {
             node = root;
-            QStringList file_path_parts = archive_files.at(i).name.split('/');
+            QStringList file_path_parts = archive_files.at(i).split('/');
             for (int j = 0; j < file_path_parts.count(); j++)
             {
                 if (file_path_parts.at(j).count() > 0)
@@ -701,11 +732,22 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
                     else
                         //if (j == file_path_parts.count() - 1)
                     {
-                        QFileInfo fi(archive_files.at(i).name);
+                        QFileInfo fi(archive_files.at(i));
                         if(filters_image.contains(fi.suffix().toLower()))
                         {
 //                            qDebug() << fi.completeBaseName() << fi.suffix();
                             node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForTreewidget(i));
+
+                            if(thumbs == true)
+                            {
+                                nlvti = new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForTreewidget(i));
+                                nlvti->setSizeHint(QSize(200 + 20, 200 + 20));
+
+                                nlvti->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+                                nlvti->setToolTip(archive_files.at(i));
+
+                                thumbnailViewer->addItem(nlvti);
+                            }
                         }
                     }
                 }
@@ -715,6 +757,13 @@ void KomicViewer::OnTreeViewCurrentChanged(const QModelIndex & current, const QM
         treeWidgetFiles->clear();
         treeWidgetFiles->setRootIsDecorated(true);
         treeWidgetFiles->addTopLevelItems(root->takeChildren());
+
+        if(thumbs == true)
+        {
+            //TODO: Show thumbnails for files in archive
+            //thumbnailViewer->startShowingThumbnails(filePath);
+            thumbnailViewer->startShowingThumbnails(filePath, true);
+        }
     }
 }
 
@@ -814,7 +863,7 @@ void KomicViewer::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTre
             }
             else
             {
-                lp->setFilePath(filepath, true, archive_files.at(SelectedZipFileIndex).name);
+                lp->setFilePath(filepath, true, archive_files.at(SelectedZipFileIndex));
                 threadImage->start();
             }
         }
@@ -1052,8 +1101,8 @@ void KomicViewer::toggleShowThumbnails(bool)
         {
             thumbnailViewer->show();
         }
-
-        thumbnailViewer->startShowingThumbnails(getCurrentPath());
+        refreshPath();
+        thumbnailViewer->startShowingThumbnails(getCurrentPath(), !(fsm->isDir(treeViewFilesystem->currentIndex() )));
     }
     else
     {
@@ -1081,14 +1130,4 @@ void KomicViewer::onPixmalLoaderFinished(QPixmap p)
     fitToHeightAct->setEnabled(enableActions);
     rotateResetAct->setEnabled(enableActions);
     comboBoxZoom->setEnabled(enableActions);
-}
-
-int getArchiveNumberFromTreewidget(int number)
-{
-    return number - 2000;
-}
-
-int makeArchiveNumberForTreewidget(int number)
-{
-    return number + 2000;
 }

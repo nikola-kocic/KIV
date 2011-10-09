@@ -19,7 +19,8 @@ SOURCES += \
     pictureitem_raster.cpp \
     thumbnail_viewer.cpp \
     pixmap_loader.cpp \
-    pictureitem_shared.cpp
+    pictureitem_shared.cpp \
+    komicviewer_enums.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -67,6 +68,7 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
 
 
 
