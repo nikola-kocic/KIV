@@ -2,32 +2,82 @@
 
 #include <QtCore/qdir.h>
 #include <QtGui/qfileiconprovider.h>
+#include <QtGui/qapplication.h>
 
-ThumbnailViewer::ThumbnailViewer(const QStringList &filters_archive, const QStringList &filters_image, QWidget * parent)
+#include <QtCore/QDebug>
+
+ThumbnailViewer::ThumbnailViewer(QWidget * parent)
 {
     folderChangedFlag = false;
-    this->filters_archive = filters_archive;
-    this->filters_image = filters_image;
     this->thumbSize = 200;
 
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
-    this->setIconSize(QSize(thumbSize, thumbSize));
     this->setUniformItemSizes(true);
-    this->setGridSize(QSize(thumbSize + 50, thumbSize + 50));
-    this->setViewMode(QListView::IconMode);
+//    this->setViewMode(QListView::IconMode);
+    threadThumbnails = 0;
+}
 
-    threadThumbnails = new QThread();
-    pl = new PixmapLoader();
-    pl->moveToThread(threadThumbnails);
-    pl->setThumbnailSize(this->thumbSize);
-    connect(threadThumbnails, SIGNAL(started()), pl, SLOT(loadPixmap()));
-    connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
-    connect(pl, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
+void ThumbnailViewer::setViewMode(ViewMode mode)
+{
+    int iconSize = -1;
+    int gridSize = -1;
+
+    if(mode == QListView::IconMode)
+    {
+        iconSize = thumbSize;
+        gridSize = thumbSize + 50;
+        for( int i = 0; i < this->count(); i++ )
+        {
+            this->item(i)->setSizeHint(QSize(this->thumbSize + 20, this->thumbSize + 20));
+            this->item(i)->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+        }
+    }
+    else
+    {
+        QModelIndex index = this->indexFromItem(this->item(-1));
+        QAbstractItemDelegate * delegate = this->itemDelegate();
+        QSize size = delegate->sizeHint( QStyleOptionViewItem (), index );
+
+        for( int i = 0; i < this->count(); i++ )
+        {
+            this->item(i)->setSizeHint(size);
+            this->item(i)->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        }
+    }
+
+    QListWidget::setViewMode( mode );
+
+    this->setIconSize( QSize( iconSize, iconSize ) );
+    this->setGridSize( QSize( gridSize, gridSize) );
+}
+
+void ThumbnailViewer::addItem(QListWidgetItem *item)
+{
+    if(this->viewMode() == QListView::IconMode)
+    {
+        item->setSizeHint(QSize(this->thumbSize + 20, this->thumbSize + 20));
+        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    }
+    item->setToolTip(item->text());
+
+    QListWidget::addItem(item);
 }
 
 void ThumbnailViewer::startShowingThumbnails(const QString& path, bool isZip)
 {
+    if(threadThumbnails == 0)
+    {
+        qDebug("creating and connecting threadThumbnails");
+        threadThumbnails = new QThread();
+        pl = new PixmapLoader();
+        pl->moveToThread(threadThumbnails);
+        pl->setThumbnailSize(this->thumbSize);
+        connect(threadThumbnails, SIGNAL(started()), pl, SLOT(loadPixmap()));
+        connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
+        connect(pl, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
+    }
+
     this->isZip = isZip;
     this->zipFileName = zipFileName;
     if(this->path != path)
@@ -38,12 +88,12 @@ void ThumbnailViewer::startShowingThumbnails(const QString& path, bool isZip)
 
         if(threadThumbnails->isRunning() == false)
         {
-            showThumbnails();
+            showThumbnail();
         }
     }
 }
 
-void ThumbnailViewer::showThumbnails()
+void ThumbnailViewer::showThumbnail()
 {
     if(this->count() == 0)
     {
@@ -79,7 +129,7 @@ void ThumbnailViewer::onThreadThumbsFinished()
     if(thumbCount < this->count() - 1 && folderChangedFlag == false)
     {
         thumbCount++;
-        showThumbnails();
+        showThumbnail();
     }
     else
     {
@@ -87,7 +137,7 @@ void ThumbnailViewer::onThreadThumbsFinished()
         if(folderChangedFlag == true)
         {
             folderChangedFlag = false;
-            showThumbnails();
+            showThumbnail();
         }
     }
 }

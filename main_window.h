@@ -53,10 +53,10 @@ private slots:
     void OnComboBoxZoomTextChanged();
     void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
     void OnTreeViewItemActivated ( const QModelIndex & index );
-    void OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
-    void OnTreeFileWidgetItemActivated (QTreeWidgetItem * item, int column);
-    void OnPixmalLoaderFinished(QPixmap);
-    void OnThumbnailItemActivated(QListWidgetItem*);
+    void OnTreeWidgetArchiveDirsCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
+    void OnFileListCurrentItemChanged(QListWidgetItem*,QListWidgetItem*);
+    void OnPixmapLoaderFinished(QPixmap);
+    void OnImageItemActivated(QListWidgetItem*);
 
 private:
     void createActions();
@@ -79,16 +79,15 @@ private:
     PictureItem *imageDisplay;
     QSplitter *splitterPanel;
     QLineEdit* lineEditPath;
+    QFileSystemModel *fsmTree;
     QTreeView *treeViewFilesystem;
-    QTreeWidget *treeWidgetFiles;
-    QFileSystemModel *fsm;
+    QTreeWidget *treeWidgetArchiveDirs;
+    ThumbnailViewer *fileList;
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
     QThread *threadImage;
     PixmapLoader* lp;
-
-    ThumbnailViewer *thumbnailViewer;
 
     QAction *lineEditPathAction;
 

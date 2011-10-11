@@ -6,20 +6,22 @@
 
 #include <QtGui/qlistwidget.h>
 #include <QtCore/qthread.h>
-#include <QtCore/QTime>
+//#include <QtCore/QTime>
 
 class ThumbnailViewer : public QListWidget
 {
     Q_OBJECT
 
 public:
-    ThumbnailViewer( const QStringList &filters_archive, const QStringList &filters_image, QWidget * parent = 0 );
+    ThumbnailViewer( QWidget * parent = 0 );
     void startShowingThumbnails(const QString& path, bool isZip);
+    void setViewMode(ViewMode mode);
     bool folderChangedFlag;
+    void addItem(QListWidgetItem *item);
 
 private:
     void populateList();
-    void showThumbnails();
+    void showThumbnail();
     QThread *threadThumbnails;
     int thumbCount;
     QString path;
@@ -27,8 +29,6 @@ private:
     QString zipFileName;
     PixmapLoader* pl;
     int thumbSize;
-    QStringList filters_archive;
-    QStringList filters_image;
 
 private slots:
     void onThreadThumbsFinished();

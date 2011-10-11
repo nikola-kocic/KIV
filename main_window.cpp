@@ -3,7 +3,7 @@
 #include "system_icons.h"
 #include "settings.h"
 
-//#include <QtCore/qdebug.h>
+#include <QtCore/qdebug.h>
 //#include <QtCore/qdatetime.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
@@ -31,6 +31,9 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     setWindowIcon(QIcon(":/icons/komicviewer.svg"));
 
+    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    policy.setHorizontalStretch(1);
+    policy.setVerticalStretch(0);
 
     thumbs = false;
     createActions();
@@ -102,13 +105,22 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     splitterPanel->addWidget(treeViewFilesystem);
 
-    treeWidgetFiles = new QTreeWidget();
-    treeWidgetFiles->setHeaderHidden(true);
-    treeWidgetFiles->header()->setResizeMode(QHeaderView::Stretch);
-    treeWidgetFiles->setUniformRowHeights(true);
-    treeWidgetFiles->setHeaderLabels(QStringList() << "Name");
+    QSplitter *splitterFiles = new QSplitter(Qt::Vertical, this);
 
-    splitterPanel->addWidget(treeWidgetFiles);
+    treeWidgetArchiveDirs = new QTreeWidget();
+    treeWidgetArchiveDirs->setHeaderHidden(true);
+    treeWidgetArchiveDirs->header()->setResizeMode(QHeaderView::Stretch);
+    treeWidgetArchiveDirs->setUniformRowHeights(true);
+    treeWidgetArchiveDirs->setHeaderLabels(QStringList() << "Name");
+
+    splitterFiles->addWidget(treeWidgetArchiveDirs);
+    splitterFiles->setSizes(QList<int>() << 300);
+
+    fileList = new ThumbnailViewer();
+    fileList->setSizePolicy(policy);
+    splitterFiles->addWidget(fileList);
+
+    splitterPanel->addWidget(splitterFiles);
 
     splitterMain->addWidget(splitterPanel);
 
@@ -120,9 +132,6 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     //Content start
     imageDisplay = new PictureItem(Settings::Instance()->getHardwareAcceleration());
 
-    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    policy.setHorizontalStretch(1);
-    policy.setVerticalStretch(0);
     imageDisplay->setSizePolicy(policy);
 
     splitterMain->addWidget(imageDisplay);
@@ -132,20 +141,26 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     vboxMain->addWidget(splitterMain);
     setLayout(vboxMain);
 
-    fsm = new QFileSystemModel(this);
+    fsmTree = new QFileSystemModel(this);
     filters_archive << "zip" << "cbz";
     QStringList filters;
     for(int i = 0; i < filters_archive.count(); i++)
     {
         filters << "*." + filters_archive.at(i);
     }
-    fsm->setNameFilterDisables(false);
-    fsm->setNameFilters(filters);
-    fsm->setRootPath("");
-    treeViewFilesystem->setModel(fsm);
+    fsmTree->setNameFilterDisables(false);
+    fsmTree->setNameFilters(filters);
+    fsmTree->setRootPath("");
+    treeViewFilesystem->setModel(fsmTree);
     for(int i = 1; i < treeViewFilesystem->header()->count(); i++) treeViewFilesystem->hideColumn(i);
 
-    foreach (const QByteArray &ext, QImageReader::supportedImageFormats()) filters_image << ext;
+    foreach (const QByteArray &ext, QImageReader::supportedImageFormats())
+    {
+        filters_image << ext;
+        filters << ext;
+    }
+
+
 
     foreach(const qreal &i, imageDisplay->getDefaultZoomSizes())
     {
@@ -187,11 +202,14 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     }
 
     connectActions();
+    connect(fileList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(OnImageItemActivated(QListWidgetItem*)));
     connect(lineEditPath, SIGNAL(editingFinished()), this, SLOT(OnPathEdited()));
     connect(treeViewFilesystem->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
     connect(treeViewFilesystem, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
-    connect(treeWidgetFiles, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(OnTreeFileWidgetCurrentChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
-    connect(treeWidgetFiles, SIGNAL(itemActivated(QTreeWidgetItem*,int)), this, SLOT(OnTreeFileWidgetItemActivated(QTreeWidgetItem*,int)));
+    connect(fileList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), this, SLOT(OnFileListCurrentItemChanged(QListWidgetItem*,QListWidgetItem*)));
+
+    connect(treeWidgetArchiveDirs, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(OnTreeWidgetArchiveDirsCurrentChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
+
     connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
     connect(imageDisplay, SIGNAL(pageNext()), this, SLOT(pageNext()));
     connect(imageDisplay, SIGNAL(pagePrevious()), this, SLOT(pagePrevious()));
@@ -204,11 +222,11 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     lp = new PixmapLoader();
     connect(threadImage, SIGNAL(started()), lp, SLOT(loadPixmap()));
-    connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmalLoaderFinished(QPixmap)));
+    connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmapLoaderFinished(QPixmap)));
     lp->moveToThread(threadImage);
 
     QCompleter *completer = new QCompleter(this);
-    completer->setModel(fsm);
+    completer->setModel(fsmTree);
     lineEditPath->setCompleter(completer);
 
     if(args.count() > 1)
@@ -220,7 +238,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
         QString path = Settings::Instance()->getLastPath();
         if(path != "")
         {
-            treeViewFilesystem->setCurrentIndex(fsm->index(path));
+            treeViewFilesystem->setCurrentIndex(fsmTree->index(path));
         }
     }
 }
@@ -232,7 +250,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 QString MainWindow::getCurrentPath()
 {
-    return fsm->filePath(treeViewFilesystem->currentIndex());
+    return fsmTree->filePath(treeViewFilesystem->currentIndex());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -476,7 +494,7 @@ void MainWindow::connectActions()
 
 void MainWindow::openFile(const QString &source)
 {
-    treeViewFilesystem->setCurrentIndex(fsm->index(source));
+    treeViewFilesystem->setCurrentIndex(fsmTree->index(source));
 }
 
 bool MainWindow::checkFileExtension(const QFileInfo &fi)
@@ -569,7 +587,7 @@ void MainWindow::OnTreeViewItemActivated ( const QModelIndex & index )
     {
         lineEditPath->setPalette(QApplication::palette());
 
-	updatePath(fsm->filePath(index));
+        updatePath(fsmTree->filePath(index));
     }
 }
 
@@ -597,92 +615,55 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
 
     treeViewFilesystem->scrollTo(current);
 
-    QString filePath = fsm->filePath(current);
+    QString filePath = fsmTree->filePath(current);
 
-    setWindowTitle(fsm->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
+    setWindowTitle(fsmTree->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
     updatePath(filePath);
 
-    if(thumbs == true)
-    {
-        thumbnailViewer->clear();
-    }
+    fileList->clear();
+    treeWidgetArchiveDirs->clear();
 
-    if(fsm->isDir(current))
+    if(fsmTree->isDir(current))
     {
-        fsm->fetchMore(current);
+        fsmTree->fetchMore(current);
+        treeWidgetArchiveDirs->hide();
 
         QDir dir(filePath);
 
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
-        QList<QTreeWidgetItem*> items;
         QFileIconProvider fip;
 
         for (int i=0; i < list.count(); i++)
         {
-            QTreeWidgetItem* ntvfi = NULL;
             QListWidgetItem* nlvti = NULL;
 
             QFileInfo info = list.at(i);
             if(info.isDir())
             {
-                ntvfi = new QTreeWidgetItem(TYPE_DIR);
-                if(thumbs == true)
-                {
-                    nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_DIR);
-                }
+                nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_DIR);
             }
             else if(filters_archive.contains(info.suffix().toLower()))
             {
-                ntvfi = new QTreeWidgetItem(TYPE_ARCHIVE);
-                if(thumbs == true)
-                {
-                  nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_ARCHIVE);
-                }
+                nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_ARCHIVE);
             }
             else if (filters_image.contains(info.suffix().toLower()))
             {
-                ntvfi = new QTreeWidgetItem(TYPE_FILE);
-                if(thumbs == true)
-                {
-                    nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_FILE);
-                }
-            }
-
-            if(ntvfi != NULL)
-            {
-                ntvfi->setText(LV_COLNAME, info.fileName());
-                ntvfi->setIcon(LV_COLNAME, fip.icon(info));
-                items << ntvfi;
+                nlvti = new QListWidgetItem(info.fileName(), 0, TYPE_FILE);
             }
 
             if(nlvti != NULL)
             {
                 nlvti->setIcon(fip.icon(info));
-                nlvti->setSizeHint(QSize(200 + 20, 200 + 20));
-
-                nlvti->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-                nlvti->setToolTip(info.absoluteFilePath());
-
-                thumbnailViewer->addItem(nlvti);
+                fileList->addItem(nlvti);
             }
-        }
-
-
-        treeWidgetFiles->clear();
-        treeWidgetFiles->setRootIsDecorated(false);
-        treeWidgetFiles->addTopLevelItems(items);
-
-        for(int i = 0; i < treeWidgetFiles->header()->count(); i++)
-        {
-            treeWidgetFiles->resizeColumnToContents(i);
         }
 
         archive_files.clear();
 
         if(thumbs == true)
         {
-            thumbnailViewer->startShowingThumbnails(filePath, false);
+            fileList->startShowingThumbnails(filePath, false);
         }
     }
     else
@@ -713,9 +694,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
         QTreeWidgetItem* node = root;
         QFileIconProvider fip;
         root->setIcon(LV_COLNAME, fip.icon(QFileInfo(zipFile)));
-        root->setText(LV_COLNAME, fsm->fileInfo(current).fileName());
-
-        QListWidgetItem* nlvti = NULL;
+        root->setText(LV_COLNAME, fsmTree->fileInfo(current).fileName());
 
         for(int i=0; i < archive_files.count() ; i++)
         {
@@ -733,34 +712,23 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
                         //if (j == file_path_parts.count() - 1)
                     {
                         QFileInfo fi(archive_files.at(i));
-                        if(filters_image.contains(fi.suffix().toLower()))
+                        if(j == 0 && filters_image.contains(fi.suffix().toLower()))
                         {
-//                            qDebug() << fi.completeBaseName() << fi.suffix();
-                            node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForTreewidget(i));
-
-                            if(thumbs == true)
-                            {
-                                nlvti = new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForTreewidget(i));
-                                nlvti->setSizeHint(QSize(200 + 20, 200 + 20));
-
-                                nlvti->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-                                nlvti->setToolTip(archive_files.at(i));
-
-                                thumbnailViewer->addItem(nlvti);
-                            }
+                            fileList->addItem(new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForTreewidget(i)));
                         }
                     }
                 }
             }
         }
 
-        treeWidgetFiles->clear();
-        treeWidgetFiles->setRootIsDecorated(true);
-        treeWidgetFiles->addTopLevelItems(root->takeChildren());
+        treeWidgetArchiveDirs->clear();
+        treeWidgetArchiveDirs->setRootIsDecorated(true);
+        treeWidgetArchiveDirs->addTopLevelItem(root);
+        treeWidgetArchiveDirs->show();
 
         if(thumbs == true)
         {
-            thumbnailViewer->startShowingThumbnails(filePath, true);
+            fileList->startShowingThumbnails(filePath, true);
         }
     }
 }
@@ -777,7 +745,10 @@ QTreeWidgetItem* MainWindow::AddNode(QTreeWidgetItem* node, QString name, int in
 
     QTreeWidgetItem* ntvi = new QTreeWidgetItem(index);
     ntvi->setText(LV_COLNAME, name);
-    if(index == TYPE_DIR) ntvi->setIcon(LV_COLNAME, SystemIcons::getDirectoryIcon());
+    if(index == TYPE_DIR)
+    {
+        ntvi->setIcon(LV_COLNAME, SystemIcons::getDirectoryIcon());
+    }
     node->addChild(ntvi);
     return ntvi;
 }
@@ -806,28 +777,6 @@ void MainWindow::toggleFullscreen(bool value)
     }
 }
 
-void MainWindow::OnTreeFileWidgetItemActivated ( QTreeWidgetItem * item, int column )
-{
-    if(fsm->isDir(treeViewFilesystem->currentIndex()))
-    {
-        if(item->type() == TYPE_DIR || item->type() == TYPE_ARCHIVE)
-	{
-            treeViewFilesystem->setCurrentIndex(fsm->index(getCurrentPath() + "/" + item->text(LV_COLNAME)));
-
-//	    for(int i = 0; i < fsm->rowCount(treeViewFilesystem->currentIndex()); i++)
-//            {
-//		if(fsm->index(i, 0, treeViewFilesystem->currentIndex()).data().toString() == item->text(LV_COLNAME))
-//                {
-//		    treeViewFilesystem->setCurrentIndex(fsm->index(i,0, treeViewFilesystem->currentIndex()));
-//                    break;
-//                }
-//            }
-
-            treeViewFilesystem->expand(treeViewFilesystem->currentIndex());
-        }
-    }
-}
-
 void MainWindow::dirUp()
 {
     if(treeViewFilesystem->currentIndex().parent().isValid())
@@ -836,7 +785,7 @@ void MainWindow::dirUp()
     }
 }
 
-void MainWindow::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous)
+void MainWindow::OnFileListCurrentItemChanged( QListWidgetItem * current, QListWidgetItem * previous )
 {
     if(thumbs == true) { return; }
 
@@ -846,20 +795,73 @@ void MainWindow::OnTreeFileWidgetCurrentChanged(QTreeWidgetItem * current, QTree
     }
     else
     {
-        loadImageFromWidget(current->type(), current->text(LV_COLNAME));
+        loadImageFromWidget(current->type(), current->text());
     }
 }
 
-void MainWindow::OnThumbnailItemActivated(QListWidgetItem *item)
+void MainWindow::OnTreeWidgetArchiveDirsCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous)
 {
-    if(item == NULL)
+    if(thumbs == true) { return; }
+    qDebug() << current->parent();
+    if(current == NULL)
     {
         imageDisplay->setPixmap(NULL);
     }
     else
     {
+
+        fileList->clear();
+        if(current->type() == TYPE_ARCHIVE)
+        {
+            for(int i=0; i < archive_files.count() ; i++)
+            {
+                if(!(archive_files.at(i).contains('/')))
+                {
+                    fileList->addItem(new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForTreewidget(i)));
+                }
+            }
+        }
+        else
+        {
+            QTreeWidgetItem *ctwi = current;
+            QString path = "";
+
+            while(ctwi->parent() != 0)
+            {
+                path = ctwi->text(LV_COLNAME) + "/" + path;
+                ctwi = ctwi->parent();
+            }
+            qDebug() << path << path.count();
+            for(int i=0; i < archive_files.count() ; i++)
+            {
+                if(archive_files.at(i).startsWith(path))
+                {
+                    qDebug() << archive_files.at(i).indexOf('/', path.count() + 1);
+                    if(archive_files.at(i).indexOf('/', path.count() + 1) == -1)
+                    {
+                        fileList->addItem(new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForTreewidget(i)));
+                    }
+                }
+            }
+        }
+
+
+    }
+}
+
+void MainWindow::OnImageItemActivated(QListWidgetItem *item)
+{
+    if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
+    {
+        if(item->type() == TYPE_DIR || item->type() == TYPE_ARCHIVE)
+        {
+            treeViewFilesystem->setCurrentIndex(fsmTree->index(getCurrentPath() + "/" + item->text()));
+            treeViewFilesystem->expand(treeViewFilesystem->currentIndex());
+        }
+    }
+    else
+    {
         showThumbnailsAct->toggle();
-        //TODO Select file in treewidgetfiles
         loadImageFromWidget(item->type(), item->text());
     }
 }
@@ -874,7 +876,7 @@ void MainWindow::loadImageFromWidget(int type, const QString& filename)
     {
         QString filepath = getCurrentPath();
 
-        if(fsm->isDir(treeViewFilesystem->currentIndex()))
+        if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
         {
             lp->setFilePath(filepath + "/" + filename);
             threadImage->start();
@@ -1007,18 +1009,18 @@ void MainWindow::toggleLargeIcons(bool value)
 
 void MainWindow::pageNext()
 {
-    if(treeWidgetFiles->currentItem() == NULL) return;
+    if(treeWidgetArchiveDirs->currentItem() == NULL) return;
 
-    if(treeWidgetFiles->currentItem()->parent() == NULL)
+    if(treeWidgetArchiveDirs->currentItem()->parent() == NULL)
     {
-        int curr = treeWidgetFiles->indexOfTopLevelItem(treeWidgetFiles->currentItem());
-        int max = treeWidgetFiles->topLevelItemCount();
+        int curr = treeWidgetArchiveDirs->indexOfTopLevelItem(treeWidgetArchiveDirs->currentItem());
+        int max = treeWidgetArchiveDirs->topLevelItemCount();
 
         for(int i = curr + 1; i < max; i++)
         {
-            if(treeWidgetFiles->topLevelItem(i)->type() == TYPE_FILE)
+            if(treeWidgetArchiveDirs->topLevelItem(i)->type() == TYPE_FILE)
             {
-                treeWidgetFiles->setCurrentItem(treeWidgetFiles->topLevelItem(i));
+                treeWidgetArchiveDirs->setCurrentItem(treeWidgetArchiveDirs->topLevelItem(i));
                 break;
             }
         }
@@ -1026,15 +1028,15 @@ void MainWindow::pageNext()
     }
     else
     {
-        QTreeWidgetItem* ctwip = treeWidgetFiles->currentItem()->parent();
-        int curr = ctwip->indexOfChild(treeWidgetFiles->currentItem());
+        QTreeWidgetItem* ctwip = treeWidgetArchiveDirs->currentItem()->parent();
+        int curr = ctwip->indexOfChild(treeWidgetArchiveDirs->currentItem());
         int max = ctwip->childCount();
 
         for(int i = curr + 1; i < max; i++)
         {
             if(ctwip->child(i)->type() != TYPE_DIR)
             {
-                treeWidgetFiles->setCurrentItem(ctwip->child(i));
+                treeWidgetArchiveDirs->setCurrentItem(ctwip->child(i));
                 break;
             }
         }
@@ -1043,14 +1045,14 @@ void MainWindow::pageNext()
 
 void MainWindow::pagePrevious()
 {
-    if(treeWidgetFiles->currentItem() == NULL) return;
-    if(treeWidgetFiles->currentItem()->parent() == NULL)
+    if(treeWidgetArchiveDirs->currentItem() == NULL) return;
+    if(treeWidgetArchiveDirs->currentItem()->parent() == NULL)
     {
-        int curr = treeWidgetFiles->indexOfTopLevelItem(treeWidgetFiles->currentItem());
+        int curr = treeWidgetArchiveDirs->indexOfTopLevelItem(treeWidgetArchiveDirs->currentItem());
 
         for(int i = curr - 1; i >= 0; i--){
-            if(treeWidgetFiles->topLevelItem(i)->type() == TYPE_FILE) {
-                treeWidgetFiles->setCurrentItem(treeWidgetFiles->topLevelItem(i));
+            if(treeWidgetArchiveDirs->topLevelItem(i)->type() == TYPE_FILE) {
+                treeWidgetArchiveDirs->setCurrentItem(treeWidgetArchiveDirs->topLevelItem(i));
                 break;
             }
         }
@@ -1058,12 +1060,12 @@ void MainWindow::pagePrevious()
     }
     else
     {
-        QTreeWidgetItem* ctwip = treeWidgetFiles->currentItem()->parent();
-        int curr = ctwip->indexOfChild(treeWidgetFiles->currentItem());
+        QTreeWidgetItem* ctwip = treeWidgetArchiveDirs->currentItem()->parent();
+        int curr = ctwip->indexOfChild(treeWidgetArchiveDirs->currentItem());
 
         for(int i = curr - 1; i >= 0; i--){
             if(ctwip->child(i)->type() != TYPE_DIR) {
-                treeWidgetFiles->setCurrentItem(ctwip->child(i));
+                treeWidgetArchiveDirs->setCurrentItem(ctwip->child(i));
                 break;
             }
         }
@@ -1111,35 +1113,17 @@ void MainWindow::toggleShowThumbnails(bool)
     if(thumbs == false)
     {
         thumbs = true;
-        imageDisplay->hide();
-        if(thumbnailViewer != NULL)
-        {
-            thumbnailViewer = new ThumbnailViewer(filters_archive, filters_image);
-            connect(thumbnailViewer, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(OnThumbnailItemActivated(QListWidgetItem*)));
-
-            QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-            policy.setHorizontalStretch(1);
-            policy.setVerticalStretch(0);
-            thumbnailViewer->setSizePolicy(policy);
-
-            splitterMain->addWidget(thumbnailViewer);
-        }
-        else
-        {
-            thumbnailViewer->show();
-        }
-        refreshPath();
-        thumbnailViewer->startShowingThumbnails(getCurrentPath(), !(fsm->isDir(treeViewFilesystem->currentIndex() )));
+        fileList->setViewMode(QListView::IconMode);
+        fileList->startShowingThumbnails(getCurrentPath(), !(fsmTree->isDir(treeViewFilesystem->currentIndex() )));
     }
     else
     {
         thumbs = false;
-        imageDisplay->show();
-        thumbnailViewer->hide();
+        fileList->setViewMode(QListView::ListMode);
     }
 }
 
-void MainWindow::OnPixmalLoaderFinished(QPixmap p)
+void MainWindow::OnPixmapLoaderFinished(QPixmap p)
 {
     imageDisplay->setPixmap(p);
     threadImage->exit();
