@@ -3,6 +3,7 @@
 
 #include <QtCore/qsettings.h>
 #include <QtCore/qhash.h>
+#include <QtCore/qstringlist.h>
 
 namespace MiddleClick
 {
@@ -46,6 +47,9 @@ public:
   bool getHardwareAcceleration();
   void setHardwareAcceleration(bool b);
 
+  QStringList getFiltersImage();
+  QStringList getFiltersArchive();
+
 private:
 
 // Make your constructors private
@@ -67,6 +71,8 @@ private:
 
         bool LargeIcons;
         QString LastPath;
+        QStringList filters_image;
+        QStringList filters_archive;
 
         bool ScrollPageByWidth;
         bool RightToLeft;

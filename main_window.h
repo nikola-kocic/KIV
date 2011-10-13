@@ -72,8 +72,6 @@ private:
     QString getCurrentPath();
     bool thumbs;
 
-    QStringList filters_image;
-    QStringList filters_archive;
     QSplitter *splitterMain;
     PictureItem *imageDisplay;
     QSplitter *splitterPanel;

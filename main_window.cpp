@@ -32,17 +32,13 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     setWindowIcon(QIcon(":/icons/komicviewer.svg"));
 
     fsmTree = new QFileSystemModel(this);
-    filters_archive << "zip" << "cbz";
     QStringList filters;
-    for(int i = 0; i < filters_archive.count(); i++)
+
+    foreach (const QString &ext, Settings::Instance()->getFiltersArchive())
     {
-        filters << "*." + filters_archive.at(i);
-    }
-    foreach (const QByteArray &ext, QImageReader::supportedImageFormats())
-    {
-        filters_image << ext;
         filters << "*." + ext;
     }
+
     fsmTree->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
     fsmTree->setNameFilterDisables(false);
     fsmTree->setNameFilters(filters);
@@ -504,7 +500,7 @@ void MainWindow::openFile(const QString &source)
 
 bool MainWindow::checkFileExtension(const QFileInfo &fi)
 {
-    if(filters_archive.contains(fi.suffix().toLower()) || fi.isDir() == true)
+    if(isArchive(fi) || fi.isDir() == true)
     {
        return true;
     }
@@ -631,7 +627,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
         fsmTree->fetchMore(current);
         treeViewArchiveDirs->hide();
 
-        fileList->setRootIndex(current);
+        fileList->setCurrentDirectory(filePath);
 
 
 //        archive_files.clear();

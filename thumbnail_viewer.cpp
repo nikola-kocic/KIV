@@ -8,7 +8,7 @@
 
 ThumbnailViewer::ThumbnailViewer(QWidget * parent)
 {
-    this->fsm = new QFileSystemModel();
+    this->model = new QStandardItemModel();
     folderChangedFlag = false;
     this->thumbSize = 200;
 
@@ -17,14 +17,73 @@ ThumbnailViewer::ThumbnailViewer(QWidget * parent)
     this->setUniformItemSizes(true);
 //    this->setViewMode(QListView::IconMode);
     threadThumbnails = 0;
-    this->setModel(fsm);
+    this->setModel(model);
 }
 
-void ThumbnailViewer::setCurrentDirectory(const QString &path, bool isZip, const QString &zipFileName)
+void ThumbnailViewer::setCurrentDirectory(const QString &filePath, bool isZip, const QString &zipFileName)
 {
     this->isZip = isZip;
     this->zipFileName = zipFileName;
-    this->setRootIndex(fsm->index(path));
+    model->clear();
+
+    if(isZip == false)
+    {
+        QDir dir(filePath);
+
+        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
+        QFileIconProvider fip;
+
+        for (int i=0; i < list.count(); i++)
+        {
+            QStandardItem* item = 0;
+
+            QFileInfo info = list.at(i);
+            if(info.isDir())
+            {
+                item = new QStandardItem();
+                item->setData(TYPE_DIR, ROLE_TYPE);
+            }
+            else if(isArchive(info))
+            {
+                item = new QStandardItem();
+                item->setData(TYPE_ARCHIVE, ROLE_TYPE);
+            }
+            else if (isImage(info))
+            {
+                item = new QStandardItem();
+                item->setData(TYPE_FILE, ROLE_TYPE);
+            }
+
+            if(item != 0)
+            {
+                item->setText(info.fileName());
+                item->setIcon(fip.icon(info));
+                if(this->viewMode() == QListView::IconMode)
+                {
+                    item->setSizeHint(QSize(this->thumbSize + 20, this->thumbSize + 20));
+                    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+                }
+                item->setToolTip(item->text());
+
+                model->invisibleRootItem()->appendRow(item);
+            }
+        }
+    }
+
+    if(this->path != filePath)
+    {
+        this->path = filePath;
+        thumbCount = 0;
+
+        if(this->viewMode() == QListView::IconMode)
+        {
+            folderChangedFlag = true;
+            if(threadThumbnails->isRunning() == false)
+            {
+                showThumbnail();
+            }
+        }
+    }
 }
 
 void ThumbnailViewer::setViewMode(ViewMode mode)
@@ -34,25 +93,27 @@ void ThumbnailViewer::setViewMode(ViewMode mode)
 
     if(mode == QListView::IconMode)
     {
+        folderChangedFlag = true;
         iconSize = thumbSize;
         gridSize = thumbSize + 50;
-//        for( int i = 0; i < this->count(); i++ )
-//        {
-//            this->item(i)->setSizeHint(QSize(this->thumbSize + 20, this->thumbSize + 20));
-//            this->item(i)->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-//        }
+        for( int i = 0; i < model->invisibleRootItem()->rowCount(); i++ )
+        {
+            model->invisibleRootItem()->child(i)->setSizeHint(QSize(this->thumbSize + 20, this->thumbSize + 20));
+            model->invisibleRootItem()->child(i)->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+        }
+
+        startShowingThumbnails();
     }
     else
     {
-//        QModelIndex index = this->indexFromItem(this->item(-1));
-//        QAbstractItemDelegate * delegate = this->itemDelegate();
-//        QSize size = delegate->sizeHint( QStyleOptionViewItem (), index );
+        QAbstractItemDelegate * delegate = this->itemDelegate();
+        QSize size = delegate->sizeHint( QStyleOptionViewItem (), model->invisibleRootItem()->child(0)->index() );
 
-//        for( int i = 0; i < this->count(); i++ )
-//        {
-//            this->item(i)->setSizeHint(size);
-//            this->item(i)->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-//        }
+        for( int i = 0; i < model->invisibleRootItem()->rowCount(); i++ )
+        {
+            model->invisibleRootItem()->child(i)->setSizeHint(size);
+            model->invisibleRootItem()->child(i)->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        }
     }
 
     QListView::setViewMode( mode );
@@ -61,101 +122,78 @@ void ThumbnailViewer::setViewMode(ViewMode mode)
     this->setGridSize( QSize( gridSize, gridSize) );
 }
 
-//void ThumbnailViewer::addItem(QListWidgetItem *item)
-//{
-//    if(this->viewMode() == QListView::IconMode)
-//    {
-//        item->setSizeHint(QSize(this->thumbSize + 20, this->thumbSize + 20));
-//        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-//    }
-//    item->setToolTip(item->text());
 
-//    QListWidget::addItem(item);
-//}
+void ThumbnailViewer::startShowingThumbnails()
+{
+    if(threadThumbnails == 0)
+    {
+        qDebug("creating and connecting threadThumbnails");
+        threadThumbnails = new QThread();
+        pl = new PixmapLoader();
+        pl->moveToThread(threadThumbnails);
+        pl->setThumbnailSize(this->thumbSize);
+        connect(threadThumbnails, SIGNAL(started()), pl, SLOT(loadPixmap()));
+        connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
+        connect(pl, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
+    }
 
-//void ThumbnailViewer::startShowingThumbnails(const QString& path, bool isZip)
-//{
-//    if(threadThumbnails == 0)
-//    {
-//        qDebug("creating and connecting threadThumbnails");
-//        threadThumbnails = new QThread();
-//        pl = new PixmapLoader();
-//        pl->moveToThread(threadThumbnails);
-//        pl->setThumbnailSize(this->thumbSize);
-//        connect(threadThumbnails, SIGNAL(started()), pl, SLOT(loadPixmap()));
-//        connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
-//        connect(pl, SIGNAL(finished(QIcon)), this, SLOT(onThumbnailFinished(QIcon)));
-//    }
-
-//    this->isZip = isZip;
-//    this->zipFileName = zipFileName;
-//    if(this->path != path)
-//    {
-//        folderChangedFlag = true;
-//        thumbCount = 0;
-//        this->path = path;
-
-//        if(threadThumbnails->isRunning() == false)
-//        {
-//            showThumbnail();
-//        }
-//    }
-//}
+}
 
 void ThumbnailViewer::showThumbnail()
 {
-//    if(this->count() == 0)
-//    {
-//        return;
-//    }
-//    while(true)
-//    {
-//        if(this->item(thumbCount)->type() == TYPE_FILE || this->item(thumbCount)->type() >= makeArchiveNumberForItem(0))
-//        {
-//            break;
-//        }
+    if(model->invisibleRootItem()->rowCount() == 0)
+    {
+        return;
+    }
+    while(true)
+    {
+        if(model->invisibleRootItem()->child(thumbCount)->data(ROLE_TYPE).toInt() == TYPE_FILE
+                || (model->invisibleRootItem()->child(thumbCount)->data(ROLE_TYPE).toInt() >= makeArchiveNumberForItem(0)))
+        {
+            break;
+        }
 
-//        thumbCount++;
-//        if(thumbCount >= this->count())
-//        {
-//            return;
-//        }
-//    }
+        thumbCount++;
+        if(thumbCount >= model->invisibleRootItem()->rowCount())
+        {
+            return;
+        }
+    }
 
-//    if(this->isZip == true)
-//    {
-//        pl->setFilePath(path, true, this->item(thumbCount)->text());
-//    }
-//    else
-//    {
-//        pl->setFilePath(path + "/" + this->item(thumbCount)->text());
-//    }
+    if(this->isZip == true)
+    {
+        pl->setFilePath(path, true, (model->invisibleRootItem()->child(thumbCount)->text()));
+    }
+    else
+    {
+        pl->setFilePath(path + "/" + (model->invisibleRootItem()->child(thumbCount)->text()));
+    }
     threadThumbnails->start();
 }
 
 void ThumbnailViewer::onThreadThumbsFinished()
 {
-//    if(thumbCount < this->count() - 1 && folderChangedFlag == false)
-//    {
-//        thumbCount++;
-//        showThumbnail();
-//    }
-//    else
-//    {
-//        thumbCount = 0;
-//        if(folderChangedFlag == true)
-//        {
-//            folderChangedFlag = false;
-//            showThumbnail();
-//        }
-//    }
+    if(thumbCount < model->invisibleRootItem()->rowCount() - 1 && folderChangedFlag == false)
+    {
+        thumbCount++;
+        showThumbnail();
+    }
+    else
+    {
+        thumbCount = 0;
+        if(folderChangedFlag == true)
+        {
+            folderChangedFlag = false;
+            showThumbnail();
+        }
+    }
 }
 
 void ThumbnailViewer::onThumbnailFinished(QIcon icon)
 {
     if(!icon.isNull())
     {
-//        this->item(thumbCount)->setIcon(icon);
+        model->invisibleRootItem()->child(thumbCount)->setIcon(icon);
     }
     threadThumbnails->exit();
 }

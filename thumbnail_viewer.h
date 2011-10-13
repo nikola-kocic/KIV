@@ -7,7 +7,6 @@
 #include <QtGui/qlistview.h>
 #include <QtCore/qthread.h>
 #include <QtGui/qstandarditemmodel.h>
-#include <QtGui/qfilesystemmodel.h>
 //#include <QtCore/QTime>
 
 class ThumbnailViewer : public QListView
@@ -18,7 +17,7 @@ public:
     ThumbnailViewer(QWidget * parent = 0);
     void setViewMode(ViewMode mode);
     bool folderChangedFlag;
-    void setCurrentDirectory(const QString &path, bool isZip = false, const QString &zipFileName = "");
+    void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipFileName = "");
 
 private:
     void populateList();
@@ -30,7 +29,8 @@ private:
     QString zipFileName;
     PixmapLoader* pl;
     int thumbSize;
-    QFileSystemModel *fsm;
+    QStandardItemModel *model;
+    void startShowingThumbnails();
 
 private slots:
     void onThreadThumbsFinished();

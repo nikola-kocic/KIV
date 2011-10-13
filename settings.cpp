@@ -1,10 +1,18 @@
 #include "settings.h"
 
 #include <QtGui/qapplication.h>
+#include <QtGui/qimagereader.h>
 
 Settings::Settings()
 {
     settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
+
+    filters_archive << "zip" << "cbz";
+
+    foreach (const QByteArray &ext, QImageReader::supportedImageFormats())
+    {
+        filters_image << ext;
+    }
 
     middleClickHash["none"]         = MiddleClick::None;
     middleClickHash["fullscreen"]   = MiddleClick::Fullscreen;
@@ -153,4 +161,14 @@ void Settings::setHardwareAcceleration(bool b)
 {
     HardwareAcceleration = b;
     settings->setValue("Interface/HardwareAcceleration", HardwareAcceleration);
+}
+
+
+QStringList Settings::getFiltersImage()
+{
+    return filters_image;
+}
+QStringList Settings::getFiltersArchive()
+{
+    return filters_archive;
 }
