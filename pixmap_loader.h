@@ -1,9 +1,6 @@
 #ifndef PIXMAPLOADER_H
 #define PIXMAPLOADER_H
 
-#include "quazip/quazip.h"
-#include "quazip/quazipfile.h"
-
 #include <QtCore/qobject.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qicon.h>

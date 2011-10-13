@@ -4,15 +4,15 @@
 #include "thumbnail_viewer.h"
 #include "pixmap_loader.h"
 #include "pictureitem.h"
+#include "archive_model.h"
 
-#include <QtGui/qtreewidget.h>
 #include <QtGui/qfilesystemmodel.h>
 #include <QtGui/qlineedit.h>
 #include <QtGui/qsplitter.h>
 #include <QtGui/qmenubar.h>
 #include <QtGui/qtoolbar.h>
 #include <QtGui/qcombobox.h>
-#include <QtGui/qlistwidget.h>
+#include <QtGui/qtreeview.h>
 
 class MainWindow : public QWidget
 {
@@ -53,10 +53,11 @@ private slots:
     void OnComboBoxZoomTextChanged();
     void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
     void OnTreeViewItemActivated ( const QModelIndex & index );
-    void OnTreeWidgetArchiveDirsCurrentChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
-    void OnFileListCurrentItemChanged(QListWidgetItem*,QListWidgetItem*);
+    void OnTreeViewArchiveDirsClicked ( const QModelIndex & index );
+    void OnFileListCurrentItemPressed ( const QModelIndex & index );
     void OnPixmapLoaderFinished(QPixmap);
-    void OnImageItemActivated(QListWidgetItem*);
+//    void OnImageItemActivated(QListWidgetItem*);
+    void OnImageItemActivated ( const QModelIndex & index );
 
 private:
     void createActions();
@@ -70,9 +71,7 @@ private:
     bool parseZoom(const QString &zoomText);
     QString getCurrentPath();
     bool thumbs;
-    QTreeWidgetItem* AddNode(QTreeWidgetItem* node, QString name, int index);
 
-    QStringList archive_files;
     QStringList filters_image;
     QStringList filters_archive;
     QSplitter *splitterMain;
@@ -81,13 +80,14 @@ private:
     QLineEdit* lineEditPath;
     QFileSystemModel *fsmTree;
     QTreeView *treeViewFilesystem;
-    QTreeWidget *treeWidgetArchiveDirs;
+    QTreeView *treeViewArchiveDirs;
     ThumbnailViewer *fileList;
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
     QThread *threadImage;
     PixmapLoader* lp;
+    ArchiveModel *am;
 
     QAction *lineEditPathAction;
 

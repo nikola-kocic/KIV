@@ -1,4 +1,7 @@
 #include "pixmap_loader.h"
+#include "quazip/quazip.h"
+#include "quazip/quazipfile.h"
+
 #include <QtCore/qfile.h>
 #include <QtCore/qbuffer.h>
 #include <QtGui/qimagereader.h>

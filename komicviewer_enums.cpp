@@ -1,11 +1,11 @@
 #include "komicviewer_enums.h"
 
-int getArchiveNumberFromTreewidget(int number)
+int getArchiveNumberFromItem(int number)
 {
     return number - 1100;
 }
 
-int makeArchiveNumberForTreewidget(int number)
+int makeArchiveNumberForItem(int number)
 {
     return number + 1100;
 }

@@ -4,20 +4,21 @@
 #include "komicviewer_enums.h"
 #include "pixmap_loader.h"
 
-#include <QtGui/qlistwidget.h>
+#include <QtGui/qlistview.h>
 #include <QtCore/qthread.h>
+#include <QtGui/qstandarditemmodel.h>
+#include <QtGui/qfilesystemmodel.h>
 //#include <QtCore/QTime>
 
-class ThumbnailViewer : public QListWidget
+class ThumbnailViewer : public QListView
 {
     Q_OBJECT
 
 public:
-    ThumbnailViewer( QWidget * parent = 0 );
-    void startShowingThumbnails(const QString& path, bool isZip);
+    ThumbnailViewer(QWidget * parent = 0);
     void setViewMode(ViewMode mode);
     bool folderChangedFlag;
-    void addItem(QListWidgetItem *item);
+    void setCurrentDirectory(const QString &path, bool isZip = false, const QString &zipFileName = "");
 
 private:
     void populateList();
@@ -29,6 +30,7 @@ private:
     QString zipFileName;
     PixmapLoader* pl;
     int thumbSize;
+    QFileSystemModel *fsm;
 
 private slots:
     void onThreadThumbsFinished();
