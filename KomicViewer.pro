@@ -21,7 +21,8 @@ SOURCES += \
     pictureitem_shared.cpp \
     komicviewer_enums.cpp \
     main_window.cpp \
-    archive_model.cpp
+    archive_model.cpp \
+    view_archive_dirs.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -48,7 +49,8 @@ HEADERS += \
     pixmap_loader.h \
     pictureitem_shared.h \
     main_window.h \
-    archive_model.h
+    archive_model.h \
+    view_archive_dirs.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -70,6 +72,8 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
 
 
 

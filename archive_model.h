@@ -12,11 +12,10 @@ class ArchiveModel : public QStandardItemModel
 
 public:
     ArchiveModel();
-    void setArchiveName(const QString &filePath);
+    void setPath(const QString &filePath, bool isZip = false);
 
 private:
     QStandardItem *root;
-    QStringList archive_files;
     QStandardItem* AddNode(QStandardItem* node, QString name, int index);
 };
 

@@ -7,6 +7,8 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
 #include <QtGui/qimagereader.h>
+#include <QtCore/qdir.h>
+#include "settings.h"
 
 
 
@@ -14,66 +16,111 @@ ArchiveModel::ArchiveModel()
 {
 }
 
-void ArchiveModel::setArchiveName(const QString &filePath)
+void ArchiveModel::setPath(const QString &filePath, bool isZip)
 {
     this->clear();
 
-//    qDebug() << "ArchiveModel::setArchiveName" << filePath;
-    QFile zipFile(filePath);
-    QuaZip zip(&zipFile);
-    if(!zip.open(QuaZip::mdUnzip))
+    if(isZip == false)
     {
-        qWarning("testRead(): zip.open(): %d", zip.getZipError());
-        return;
-    }
-    zip.setFileNameCodec("UTF-8");
+        QDir dir(filePath);
 
-    archive_files = zip.getFileNameList();
+        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
+        QFileIconProvider fip;
 
-    zip.close();
-    if(zip.getZipError()!=UNZ_OK) {
-        qWarning("testRead(): zip.close(): %d", zip.getZipError());
-        return;
-    }
-
-
-    //Populate treeViewFile
-
-    QFileIconProvider fip;
-    QStandardItem* root = new QStandardItem();
-    root->setData(TYPE_ARCHIVE);
-    root->setIcon(fip.icon(QFileInfo(zipFile)));
-    root->setText(zipFile.fileName());
-    QStandardItem* node = root;
-
-    for(int i=0; i < archive_files.count() ; i++)
-    {
-        node = root;
-        QStringList file_path_parts = archive_files.at(i).split('/');
-        for (int j = 0; j < file_path_parts.count(); j++)
+        for (int i=0; i < list.count(); i++)
         {
-            if (file_path_parts.at(j).count() > 0)
+            QStandardItem* item = 0;
+
+            QFileInfo info = list.at(i);
+            if(info.isDir())
             {
-                if (j < file_path_parts.count() - 1)
+                item = new QStandardItem();
+                item->setData(TYPE_DIR, ROLE_TYPE);
+            }
+            else if(isArchive(info))
+            {
+                item = new QStandardItem();
+                item->setData(TYPE_ARCHIVE, ROLE_TYPE);
+            }
+            else if (isImage(info))
+            {
+                item = new QStandardItem();
+                item->setData(TYPE_FILE, ROLE_TYPE);
+            }
+
+            if(item != 0)
+            {
+                item->setText(info.fileName());
+                item->setIcon(fip.icon(info));
+                item->setToolTip(item->text());
+
+                this->invisibleRootItem()->appendRow(item);
+            }
+        }
+    }
+    else
+    {
+        this->clear();
+
+    //    qDebug() << "ArchiveModel::setArchiveName" << filePath;
+        QFile zipFile(filePath);
+        QuaZip zip(&zipFile);
+        if(!zip.open(QuaZip::mdUnzip))
+        {
+            qWarning("testRead(): zip.open(): %d", zip.getZipError());
+            return;
+        }
+        zip.setFileNameCodec("UTF-8");
+
+        QStringList archive_files = zip.getFileNameList();
+
+        zip.close();
+        if(zip.getZipError()!=UNZ_OK) {
+            qWarning("testRead(): zip.close(): %d", zip.getZipError());
+            return;
+        }
+
+
+        //Populate treeViewFile
+
+        QFileIconProvider fip;
+        QStandardItem* root = new QStandardItem();
+        root->setData(TYPE_ARCHIVE);
+        QFileInfo zip_info(zipFile);
+        root->setIcon(fip.icon(zip_info));
+        root->setText(zip_info.fileName());
+
+        QStandardItem* node = root;
+
+        for(int i=0; i < archive_files.count() ; i++)
+        {
+            node = root;
+            QStringList file_path_parts = archive_files.at(i).split('/');
+            for (int j = 0; j < file_path_parts.count(); j++)
+            {
+                if (file_path_parts.at(j).count() > 0)
                 {
-                    node = AddNode(node, file_path_parts.at(j), TYPE_DIR);
-                }
-                else
-                    //if (j == file_path_parts.count() - 1)
-                {
-                    QFileInfo fi(archive_files.at(i));
-                    if(QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
+                    if (j < file_path_parts.count() - 1)
                     {
-//                            qDebug() << fi.completeBaseName() << fi.suffix();
-                        node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForItem(i));
+                        node = AddNode(node, file_path_parts.at(j), TYPE_DIR);
+                    }
+                    else
+                        //if (j == file_path_parts.count() - 1)
+                    {
+                        QFileInfo fi(archive_files.at(i));
+                        if(QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
+                        {
+    //                            qDebug() << fi.completeBaseName() << fi.suffix();
+                            node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForItem(i));
+                        }
                     }
                 }
             }
         }
+
+        this->invisibleRootItem()->appendRow(root);
+
     }
-
-    this->invisibleRootItem()->appendRow(root);
-
 }
 
 QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int index)

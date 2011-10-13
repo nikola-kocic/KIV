@@ -48,7 +48,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
 
-    thumbs = false;
+    am = new ArchiveModel();
     createActions();
 
     splitterMain = new QSplitter(Qt::Horizontal, this);
@@ -120,17 +120,19 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     QSplitter *splitterFiles = new QSplitter(Qt::Vertical, this);
 
-    treeViewArchiveDirs = new QTreeView();
+    treeViewArchiveDirs = new ViewArchiveDirs();
 //    treeViewArchiveDirs->header()->setResizeMode(QHeaderView::Stretch);
     treeViewArchiveDirs->setUniformRowHeights(true);
     treeViewArchiveDirs->setHeaderHidden(true);
+    treeViewArchiveDirs->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
     treeViewArchiveDirs->hide();
 //    treeViewArchiveDirs->setHeaderLabels(QStringList() << "Name");
 
     splitterFiles->addWidget(treeViewArchiveDirs);
     splitterFiles->setSizes(QList<int>() << 300);
 
-    fileList = new ThumbnailViewer();
+    fileList = new ThumbnailViewer(am);
     fileList->setSizePolicy(policy);
     splitterFiles->addWidget(fileList);
 
@@ -158,7 +160,6 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     treeViewFilesystem->setModel(fsmTree);
     for(int i = 1; i < treeViewFilesystem->header()->count(); i++) treeViewFilesystem->hideColumn(i);
 
-    am = new ArchiveModel();
     treeViewArchiveDirs->setModel(am);
 
 
@@ -205,11 +206,12 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     connectActions();
     connect(fileList, SIGNAL(activated(QModelIndex)), this, SLOT(OnImageItemActivated(QModelIndex)));
     connect(lineEditPath, SIGNAL(editingFinished()), this, SLOT(OnPathEdited()));
-    connect(treeViewFilesystem->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
     connect(treeViewFilesystem, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
-    connect(fileList, SIGNAL(pressed(QModelIndex)), this, SLOT(OnFileListCurrentItemPressed(QModelIndex)));
 
-    connect(treeViewArchiveDirs, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewArchiveDirsClicked(QModelIndex)));
+    connect(treeViewFilesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
+    connect(treeViewArchiveDirs->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), fileList, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex,QModelIndex)));
+    connect(fileList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnFileListCurrentRowChanged(QModelIndex,QModelIndex)));
+
 
     connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
     connect(imageDisplay, SIGNAL(pageNext()), this, SLOT(pageNext()));
@@ -221,10 +223,10 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     connect(refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
 
-    lp = new PixmapLoader();
-    connect(threadImage, SIGNAL(started()), lp, SLOT(loadPixmap()));
-    connect(lp, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmapLoaderFinished(QPixmap)));
-    lp->moveToThread(threadImage);
+    pl = new PixmapLoader();
+    connect(threadImage, SIGNAL(started()), pl, SLOT(loadPixmap()));
+    connect(pl, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmapLoaderFinished(QPixmap)));
+    pl->moveToThread(threadImage);
 
     QCompleter *completer = new QCompleter(this);
     completer->setModel(fsmTree);
@@ -613,43 +615,37 @@ void MainWindow::refreshPath()
 void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     dirUpAct->setEnabled(current.parent().isValid());
-
     treeViewFilesystem->scrollTo(current);
-
     QString filePath = fsmTree->filePath(current);
-
     setWindowTitle(fsmTree->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
-
     updatePath(filePath);
 
     if(fsmTree->isDir(current))
     {
         fsmTree->fetchMore(current);
         treeViewArchiveDirs->hide();
-
         fileList->setCurrentDirectory(filePath);
-
-
-//        archive_files.clear();
-
-//        if(thumbs == true)
-//        {
-//            fileList->startShowingThumbnails(filePath, false);
-//        }
     }
     else
     {
-        am->setArchiveName(fsmTree->filePath(current));
-//        treeViewFilesystem->setModel(am);
+        am->setPath(filePath, true);
         treeViewArchiveDirs->show();
-        treeViewArchiveDirs->setModel(am);
-
-//        if(thumbs == true)
-//        {
-//            fileList->startShowingThumbnails(filePath, true);
-//        }
+        fileList->setCurrentDirectory(filePath, true);
     }
 }
+
+void MainWindow::OnFileListCurrentRowChanged ( const QModelIndex & current, const QModelIndex & previous )
+{
+    if(current.isValid() == false)
+    {
+        imageDisplay->setPixmap(NULL);
+    }
+    else
+    {
+        loadImageFromWidget(current.data(ROLE_TYPE).toInt(), current.data(Qt::DisplayRole).toString());
+    }
+}
+
 
 void MainWindow::togglePanel(bool value)
 {
@@ -683,66 +679,6 @@ void MainWindow::dirUp()
     }
 }
 
-void MainWindow::OnFileListCurrentItemPressed ( const QModelIndex & index )
-{
-    if(thumbs == true) { return; }
-
-    if(index.isValid() == false)
-    {
-        imageDisplay->setPixmap(NULL);
-    }
-    else
-    {
-        loadImageFromWidget(TYPE_FILE, fsmTree->fileName(index));
-    }
-}
-
-void MainWindow::OnTreeViewArchiveDirsClicked ( const QModelIndex & index )
-{
-    if(thumbs == true) { return; }
-    if(index.isValid() == false)
-    {
-        imageDisplay->setPixmap(NULL);
-        return;
-    }
-
-
-//    fileList->clear();
-    if(index.data(ROLE_TYPE) == TYPE_ARCHIVE)
-    {
-//        for(int i=0; i < archive_files.count() ; i++)
-//        {
-//            if(!(archive_files.at(i).contains('/')))
-//            {
-//                fileList->addItem(new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForItem(i)));
-//            }
-//        }
-    }
-    else
-    {
-//            QTreeWidgetItem *ctwi = current;
-//            QString path = "";
-
-//            while(ctwi->parent() != 0)
-//            {
-//                path = ctwi->text(LV_COLNAME) + "/" + path;
-//                ctwi = ctwi->parent();
-//            }
-//            qDebug() << path << path.count();
-//            for(int i=0; i < archive_files.count() ; i++)
-//            {
-//                if(archive_files.at(i).startsWith(path))
-//                {
-//                    qDebug() << archive_files.at(i).indexOf('/', path.count() + 1);
-//                    if(archive_files.at(i).indexOf('/', path.count() + 1) == -1)
-//                    {
-//                        fileList->addItem(new QListWidgetItem(archive_files.at(i), 0, makeArchiveNumberForTreewidget(i)));
-//                    }
-//                }
-//            }
-    }
-}
-
 void MainWindow::OnImageItemActivated ( const QModelIndex & index )
 {
     if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
@@ -767,7 +703,7 @@ void MainWindow::loadImageFromWidget(int type, const QString& filename)
 
         if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
         {
-            lp->setFilePath(filepath + "/" + filename);
+            pl->setFilePath(filepath + "/" + filename);
             threadImage->start();
         }
         else  //TODO ###If archive
@@ -999,14 +935,12 @@ void MainWindow::OnComboBoxZoomIndexChanged(const int &index)
 
 void MainWindow::toggleShowThumbnails(bool)
 {
-    if(thumbs == false)
+    if(showThumbnailsAct->isChecked() == true)
     {
-        thumbs = true;
         fileList->setViewMode(QListView::IconMode);
     }
     else
     {
-        thumbs = false;
         fileList->setViewMode(QListView::ListMode);
     }
 }

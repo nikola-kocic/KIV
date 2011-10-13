@@ -36,6 +36,7 @@ Settings::Settings()
     LargeIcons          = settings->value("Interface/LargeIcons", false).toBool();
     LastPath            = settings->value("Interface/LastPath", "").toString();
     HardwareAcceleration= settings->value("Interface/HardwareAcceleration", false).toBool();
+    thumbSize           = settings->value("Interface/ThumbnailSize", "200").toInt();
 }
 
 Settings *Settings::Instance()
@@ -171,4 +172,9 @@ QStringList Settings::getFiltersImage()
 QStringList Settings::getFiltersArchive()
 {
     return filters_archive;
+}
+
+int Settings::getThumbnailSize()
+{
+    return thumbSize;
 }

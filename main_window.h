@@ -5,6 +5,7 @@
 #include "pixmap_loader.h"
 #include "pictureitem.h"
 #include "archive_model.h"
+#include "view_archive_dirs.h"
 
 #include <QtGui/qfilesystemmodel.h>
 #include <QtGui/qlineedit.h>
@@ -51,13 +52,14 @@ private slots:
     void OnZoomChanged();
     void OnComboBoxZoomIndexChanged(const int &index);
     void OnComboBoxZoomTextChanged();
-    void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
     void OnTreeViewItemActivated ( const QModelIndex & index );
-    void OnTreeViewArchiveDirsClicked ( const QModelIndex & index );
-    void OnFileListCurrentItemPressed ( const QModelIndex & index );
+
+    void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
+    void OnFileListCurrentRowChanged ( const QModelIndex & current, const QModelIndex & previous );
+    void OnImageItemActivated ( const QModelIndex & index );
+
     void OnPixmapLoaderFinished(QPixmap);
 //    void OnImageItemActivated(QListWidgetItem*);
-    void OnImageItemActivated ( const QModelIndex & index );
 
 private:
     void createActions();
@@ -78,13 +80,13 @@ private:
     QLineEdit* lineEditPath;
     QFileSystemModel *fsmTree;
     QTreeView *treeViewFilesystem;
-    QTreeView *treeViewArchiveDirs;
+    ViewArchiveDirs *treeViewArchiveDirs;
     ThumbnailViewer *fileList;
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
     QThread *threadImage;
-    PixmapLoader* lp;
+    PixmapLoader* pl;
     ArchiveModel *am;
 
     QAction *lineEditPathAction;

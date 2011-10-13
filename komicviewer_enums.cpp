@@ -20,3 +20,4 @@ bool isImage(const QFileInfo &fi)
 {
     return Settings::Instance()->getFiltersImage().contains(fi.suffix().toLower());
 }
+

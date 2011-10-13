@@ -49,6 +49,7 @@ public:
 
   QStringList getFiltersImage();
   QStringList getFiltersArchive();
+  int getThumbnailSize();
 
 private:
 
@@ -73,6 +74,7 @@ private:
         QString LastPath;
         QStringList filters_image;
         QStringList filters_archive;
+        int thumbSize;
 
         bool ScrollPageByWidth;
         bool RightToLeft;
