@@ -15,7 +15,6 @@ public:
     void setPath(const QString &filePath, bool isZip = false);
 
 private:
-    QStandardItem *root;
     QStandardItem* AddNode(QStandardItem* node, QString name, int index);
 };
 

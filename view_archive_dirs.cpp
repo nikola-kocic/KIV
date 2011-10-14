@@ -23,8 +23,15 @@ void ViewArchiveDirs::currentChanged ( const QModelIndex & current, const QModel
 
 void ViewArchiveDirs::show()
 {
-    this->selectionModel()->setCurrentIndex(proxy->index(0,0,this->rootIndex()), QItemSelectionModel::ClearAndSelect);
+    this->setCurrentIndex(proxy->index(0,0,this->rootIndex()));
+    this->expand(this->currentIndex());
     QTreeView::show();
+}
+
+void ViewArchiveDirs::setCurrentIndexFromSource(const QModelIndex &index)
+{
+    QTreeView::setCurrentIndex(proxy->mapFromSource(index));
+    this->expand(this->currentIndex());
 }
 
 bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const

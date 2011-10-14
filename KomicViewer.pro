@@ -16,13 +16,13 @@ SOURCES += \
     pictureitem.cpp \
     pictureitem_gl.cpp \
     pictureitem_raster.cpp \
-    thumbnail_viewer.cpp \
     pixmap_loader.cpp \
     pictureitem_shared.cpp \
     komicviewer_enums.cpp \
     main_window.cpp \
     archive_model.cpp \
-    view_archive_dirs.cpp
+    view_archive_dirs.cpp \
+    view_files.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -45,12 +45,12 @@ HEADERS += \
     pictureitem.h \
     pictureitem_gl.h \
     pictureitem_raster.h \
-    thumbnail_viewer.h \
     pixmap_loader.h \
     pictureitem_shared.h \
     main_window.h \
     archive_model.h \
-    view_archive_dirs.h
+    view_archive_dirs.h \
+    view_files.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -72,6 +72,10 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
+
+
 
 
 

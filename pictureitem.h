@@ -37,6 +37,7 @@ signals:
     void pagePrevious();
     void toggleFullscreen();
     void zoomChanged();
+    void imageChanged();
 
 public slots:
     void zoomIn();

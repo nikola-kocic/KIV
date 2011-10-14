@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "thumbnail_viewer.h"
+#include "view_files.h"
 #include "pixmap_loader.h"
 #include "pictureitem.h"
 #include "archive_model.h"
@@ -38,8 +38,6 @@ private slots:
     void lockFitHeight();
     void lockNone();
 
-    void pageNext();
-    void pagePrevious();
     void toggleFullscreen(bool);
     void togglePanel(bool);
     void toggleLargeIcons(bool);
@@ -55,9 +53,9 @@ private slots:
     void OnTreeViewItemActivated ( const QModelIndex & index );
 
     void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
-    void OnImageItemActivated ( const QModelIndex & index );
+    void OnFilesViewItemActivated ( const QModelIndex & index );
 
-    void showImage(int num);
+    void updateActions();
 //    void OnPixmapLoaderFinished(QPixmap);
 //    void OnImageItemActivated(QListWidgetItem*);
 
@@ -74,18 +72,18 @@ private:
     QString getCurrentPath();
     bool thumbs;
 
+    QTreeView *filesystemView;
+    ViewArchiveDirs *archiveDirsView;
+    ViewFiles *filesView;
+
     QSplitter *splitterMain;
     PictureItem *imageDisplay;
     QSplitter *splitterPanel;
     QLineEdit* lineEditPath;
     QFileSystemModel *fsmTree;
-    QTreeView *treeViewFilesystem;
-    ViewArchiveDirs *treeViewArchiveDirs;
-    ThumbnailViewer *fileList;
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
-    QFutureWatcher<QPixmap> *imageScaling;
     ArchiveModel *am;
 
     QAction *lineEditPathAction;

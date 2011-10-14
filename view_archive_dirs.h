@@ -13,6 +13,7 @@ public:
 
 public slots:
     void show();
+    void setCurrentIndexFromSource(const QModelIndex &index);
 
 private:
 

@@ -1,5 +1,5 @@
-#ifndef THUMBNAILVIEWER_H
-#define THUMBNAILVIEWER_H
+#ifndef VIEWFILES_H
+#define VIEWFILES_H
 
 #include "komicviewer_enums.h"
 #include "pixmap_loader.h"
@@ -13,15 +13,20 @@
 #include <QtCore/qtconcurrentmap.h>
 #include <QtCore/QTime>
 
-class ThumbnailViewer : public QListView
+class ViewFiles : public QListView
 {
     Q_OBJECT
 
 public:
-    ThumbnailViewer(ArchiveModel *am, QWidget *parent = 0);
+    ViewFiles(ArchiveModel *am, QWidget *parent = 0);
     void setModel ( QAbstractItemModel * model );
     void setViewMode(ViewMode mode);
     void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipPath = "");
+    QModelIndex getIndexFromProxy( const QModelIndex & index );
+
+public slots:
+    void pageNext();
+    void pagePrevious();
 
 private:
     void startShowingThumbnails();
@@ -49,4 +54,4 @@ signals:
 
 };
 
-#endif // THUMBNAILVIEWER_H
+#endif // VIEWFILES_H

@@ -87,6 +87,7 @@ void PictureItem::setPixmap(const QPixmap &p)
 {
     pis->widgetSize = this->size();
     pis->setPixmap(p);
+    emit imageChanged();
 }
 
 void PictureItem::setRotation(qreal r)

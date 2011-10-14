@@ -23,10 +23,6 @@
 
 MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
-    imageScaling = new QFutureWatcher<QPixmap>(this);
-    imageScaling = new QFutureWatcher<QPixmap>(this);
-    connect(imageScaling, SIGNAL(resultReadyAt(int)), SLOT(showImage(int)));
-
     resize(QApplication::desktop()->width() - 100,
 		QApplication::desktop()->height() - 100);
     setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
@@ -114,28 +110,33 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     splitterPanel = new QSplitter(Qt::Vertical, this);
 
-    treeViewFilesystem = new QTreeView();
-    treeViewFilesystem->setUniformRowHeights(true);
-    treeViewFilesystem->setHeaderHidden(true);
+    filesystemView = new QTreeView();
+    filesystemView->setUniformRowHeights(true);
+    filesystemView->setHeaderHidden(true);
 
-    splitterPanel->addWidget(treeViewFilesystem);
+    splitterPanel->addWidget(filesystemView);
 
     QSplitter *splitterFiles = new QSplitter(Qt::Vertical, this);
 
-    treeViewArchiveDirs = new ViewArchiveDirs();
+    archiveDirsView = new ViewArchiveDirs();
 //    treeViewArchiveDirs->header()->setResizeMode(QHeaderView::Stretch);
-    treeViewArchiveDirs->setUniformRowHeights(true);
-    treeViewArchiveDirs->setHeaderHidden(true);
+    archiveDirsView->setUniformRowHeights(true);
+    archiveDirsView->setHeaderHidden(true);
 
-    treeViewArchiveDirs->hide();
+    archiveDirsView->hide();
 //    treeViewArchiveDirs->setHeaderLabels(QStringList() << "Name");
 
-    splitterFiles->addWidget(treeViewArchiveDirs);
-    splitterFiles->setSizes(QList<int>() << 300);
+    splitterFiles->addWidget(archiveDirsView);
+    splitterFiles->setSizes(QList<int>() << 100);
 
-    fileList = new ThumbnailViewer(am);
-    fileList->setSizePolicy(policy);
-    splitterFiles->addWidget(fileList);
+    filesView = new ViewFiles(am);
+
+    QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    policyV.setHorizontalStretch(0);
+    policyV.setVerticalStretch(1);
+
+    filesView->setSizePolicy(policyV);
+    splitterFiles->addWidget(filesView);
 
     splitterPanel->addWidget(splitterFiles);
 
@@ -158,10 +159,10 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     vboxMain->addWidget(splitterMain);
     setLayout(vboxMain);
 
-    treeViewFilesystem->setModel(fsmTree);
-    for(int i = 1; i < treeViewFilesystem->header()->count(); i++) treeViewFilesystem->hideColumn(i);
+    filesystemView->setModel(fsmTree);
+    for(int i = 1; i < filesystemView->header()->count(); i++) filesystemView->hideColumn(i);
 
-    treeViewArchiveDirs->setModel(am);
+    archiveDirsView->setModel(am);
 
 
 
@@ -205,25 +206,6 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     }
 
     connectActions();
-    connect(fileList, SIGNAL(activated(QModelIndex)), this, SLOT(OnImageItemActivated(QModelIndex)));
-    connect(lineEditPath, SIGNAL(editingFinished()), this, SLOT(OnPathEdited()));
-    connect(treeViewFilesystem, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
-
-    connect(treeViewFilesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
-    connect(treeViewArchiveDirs, SIGNAL(currentRowChanged(QModelIndex)), fileList, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
-
-    connect(fileList, SIGNAL(imageLoaded(QPixmap)), imageDisplay, SLOT(setPixmap(QPixmap)));
-
-    connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
-    connect(imageDisplay, SIGNAL(pageNext()), this, SLOT(pageNext()));
-    connect(imageDisplay, SIGNAL(pagePrevious()), this, SLOT(pagePrevious()));
-    connect(imageDisplay, SIGNAL(zoomChanged()), this, SLOT(OnZoomChanged()));
-    connect(comboBoxZoom, SIGNAL(currentIndexChanged(int)), this, SLOT(OnComboBoxZoomIndexChanged(int)));
-    connect(comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(OnComboBoxZoomTextChanged()));
-
-    connect(refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
-    connect(dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
-
 //    pl = new PixmapLoader();
 //    connect(threadImage, SIGNAL(started()), pl, SLOT(loadPixmap()));
 //    connect(pl, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmapLoaderFinished(QPixmap)));
@@ -242,7 +224,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
         QString path = Settings::Instance()->getLastPath();
         if(path != "")
         {
-            treeViewFilesystem->setCurrentIndex(fsmTree->index(path));
+            filesystemView->setCurrentIndex(fsmTree->index(path));
         }
     }
 }
@@ -254,7 +236,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 QString MainWindow::getCurrentPath()
 {
-    return fsmTree->filePath(treeViewFilesystem->currentIndex());
+    return fsmTree->filePath(filesystemView->currentIndex());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -470,8 +452,8 @@ void MainWindow::connectActions()
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
     connect(settingsAct, SIGNAL(triggered()), this, SLOT(settingsDialog()));
-    connect(pagePreviousAct, SIGNAL(triggered()), this, SLOT(pagePrevious()));
-    connect(pageNextAct, SIGNAL(triggered()), this, SLOT(pageNext()));
+    connect(pagePreviousAct, SIGNAL(triggered()), filesView, SLOT(pagePrevious()));
+    connect(pageNextAct, SIGNAL(triggered()), filesView, SLOT(pageNext()));
 
 
     connect(showThumbnailsAct, SIGNAL(toggled(bool)), this, SLOT(toggleShowThumbnails(bool)));
@@ -494,11 +476,33 @@ void MainWindow::connectActions()
     connect(lockAutofitAct, SIGNAL(triggered()), this, SLOT(lockAutofit()));
     connect(lockFitHeightAct, SIGNAL(triggered()), this, SLOT(lockFitHeight()));
     connect(lockFitWidthAct, SIGNAL(triggered()), this, SLOT(lockFitWidth()));
+
+
+    connect(filesView, SIGNAL(activated(QModelIndex)), this, SLOT(OnFilesViewItemActivated(QModelIndex)));
+    connect(lineEditPath, SIGNAL(editingFinished()), this, SLOT(OnPathEdited()));
+    connect(filesystemView, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
+
+    connect(filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
+    connect(archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), filesView, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
+
+    connect(filesView, SIGNAL(imageLoaded(QPixmap)), imageDisplay, SLOT(setPixmap(QPixmap)));
+    connect(imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
+
+    connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
+    connect(imageDisplay, SIGNAL(pageNext()), filesView, SLOT(pageNext()));
+    connect(imageDisplay, SIGNAL(pagePrevious()), filesView, SLOT(pagePrevious()));
+    connect(imageDisplay, SIGNAL(zoomChanged()), this, SLOT(OnZoomChanged()));
+    connect(comboBoxZoom, SIGNAL(currentIndexChanged(int)), this, SLOT(OnComboBoxZoomIndexChanged(int)));
+    connect(comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(OnComboBoxZoomTextChanged()));
+
+    connect(refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
+    connect(dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
+
 }
 
 void MainWindow::openFile(const QString &source)
 {
-    treeViewFilesystem->setCurrentIndex(fsmTree->index(source));
+    filesystemView->setCurrentIndex(fsmTree->index(source));
 }
 
 bool MainWindow::checkFileExtension(const QFileInfo &fi)
@@ -584,17 +588,6 @@ void MainWindow::OnPathEdited()
     }
 }
 
-
-void MainWindow::OnTreeViewItemActivated ( const QModelIndex & index )
-{
-    if(lineEditPath->palette() != QApplication::palette())
-    {
-        lineEditPath->setPalette(QApplication::palette());
-
-        updatePath(fsmTree->filePath(index));
-    }
-}
-
 void MainWindow::updatePath(const QString &filePath)
 {
     QFileInfo fi(filePath);
@@ -610,13 +603,23 @@ void MainWindow::updatePath(const QString &filePath)
 
 void MainWindow::refreshPath()
 {
-    OnTreeViewCurrentChanged(treeViewFilesystem->currentIndex(), treeViewFilesystem->currentIndex());
+    OnTreeViewCurrentChanged(filesystemView->currentIndex(), filesystemView->currentIndex());
+}
+
+void MainWindow::OnTreeViewItemActivated ( const QModelIndex & index )
+{
+    if(lineEditPath->palette() != QApplication::palette())
+    {
+        lineEditPath->setPalette(QApplication::palette());
+
+        updatePath(fsmTree->filePath(index));
+    }
 }
 
 void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     dirUpAct->setEnabled(current.parent().isValid());
-    treeViewFilesystem->scrollTo(current);
+    filesystemView->scrollTo(current);
     QString filePath = fsmTree->filePath(current);
     setWindowTitle(fsmTree->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
     updatePath(filePath);
@@ -624,15 +627,30 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
     if(fsmTree->isDir(current))
     {
         fsmTree->fetchMore(current);
-        treeViewArchiveDirs->hide();
+        archiveDirsView->hide();
         am->setPath(filePath);
-        fileList->setCurrentDirectory(filePath);
+        filesView->setCurrentDirectory(filePath);
     }
     else
     {
         am->setPath(filePath, true);
-        treeViewArchiveDirs->show();
-        fileList->setCurrentDirectory(filePath, true);
+        archiveDirsView->show();
+        filesView->setCurrentDirectory(filePath, true);
+    }
+    imageDisplay->setPixmap(QPixmap(0,0));
+}
+
+void MainWindow::OnFilesViewItemActivated ( const QModelIndex & index )
+{
+    int type = index.data(ROLE_TYPE).toInt();
+    if(type == TYPE_DIR || type == TYPE_ARCHIVE)
+    {
+        filesystemView->setCurrentIndex(fsmTree->index(getCurrentPath() + "/" + index.data(Qt::DisplayRole).toString()));
+        filesystemView->expand(filesystemView->currentIndex());
+    }
+    else if(type == TYPE_ARCHIVE_DIR)
+    {
+        archiveDirsView->setCurrentIndexFromSource(filesView->getIndexFromProxy(index));
     }
 }
 
@@ -662,24 +680,12 @@ void MainWindow::toggleFullscreen(bool value)
 
 void MainWindow::dirUp()
 {
-    if(treeViewFilesystem->currentIndex().parent().isValid())
+    if(filesystemView->currentIndex().parent().isValid())
     {
-	treeViewFilesystem->setCurrentIndex(treeViewFilesystem->currentIndex().parent());
+        filesystemView->setCurrentIndex(filesystemView->currentIndex().parent());
     }
 }
 
-void MainWindow::OnImageItemActivated ( const QModelIndex & index )
-{
-    if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
-    {
-        int type = index.data(ROLE_TYPE).toInt();
-        if(type == TYPE_DIR || type == TYPE_ARCHIVE)
-        {
-            treeViewFilesystem->setCurrentIndex(fsmTree->index(getCurrentPath() + "/" + index.data(Qt::DisplayRole).toString()));
-            treeViewFilesystem->expand(treeViewFilesystem->currentIndex());
-        }
-    }
-}
 
 
 void MainWindow::open()
@@ -791,71 +797,6 @@ void MainWindow::toggleLargeIcons(bool value)
     Settings::Instance()->setLargeIcons(value);
 }
 
-void MainWindow::pageNext()
-{
-//    if(treeViewArchiveDirs->currentItem() == NULL) return;
-
-//    if(treeViewArchiveDirs->currentItem()->parent() == NULL)
-//    {
-//        int curr = treeViewArchiveDirs->indexOfTopLevelItem(treeViewArchiveDirs->currentItem());
-//        int max = treeViewArchiveDirs->topLevelItemCount();
-
-//        for(int i = curr + 1; i < max; i++)
-//        {
-//            if(treeViewArchiveDirs->topLevelItem(i)->type() == TYPE_FILE)
-//            {
-//                treeViewArchiveDirs->setCurrentItem(treeViewArchiveDirs->topLevelItem(i));
-//                break;
-//            }
-//        }
-
-//    }
-//    else
-//    {
-//        QTreeWidgetItem* ctwip = treeViewArchiveDirs->currentItem()->parent();
-//        int curr = ctwip->indexOfChild(treeViewArchiveDirs->currentItem());
-//        int max = ctwip->childCount();
-
-//        for(int i = curr + 1; i < max; i++)
-//        {
-//            if(ctwip->child(i)->type() != TYPE_DIR)
-//            {
-//                treeViewArchiveDirs->setCurrentItem(ctwip->child(i));
-//                break;
-//            }
-//        }
-//    }
-}
-
-void MainWindow::pagePrevious()
-{
-//    if(treeViewArchiveDirs->currentItem() == NULL) return;
-//    if(treeViewArchiveDirs->currentItem()->parent() == NULL)
-//    {
-//        int curr = treeViewArchiveDirs->indexOfTopLevelItem(treeViewArchiveDirs->currentItem());
-
-//        for(int i = curr - 1; i >= 0; i--){
-//            if(treeViewArchiveDirs->topLevelItem(i)->type() == TYPE_FILE) {
-//                treeViewArchiveDirs->setCurrentItem(treeViewArchiveDirs->topLevelItem(i));
-//                break;
-//            }
-//        }
-
-//    }
-//    else
-//    {
-//        QTreeWidgetItem* ctwip = treeViewArchiveDirs->currentItem()->parent();
-//        int curr = ctwip->indexOfChild(treeViewArchiveDirs->currentItem());
-
-//        for(int i = curr - 1; i >= 0; i--){
-//            if(ctwip->child(i)->type() != TYPE_DIR) {
-//                treeViewArchiveDirs->setCurrentItem(ctwip->child(i));
-//                break;
-//            }
-//        }
-//    }
-}
-
 void MainWindow::OnZoomChanged()
 {
     QString zoomText = QString::number((int)(imageDisplay->getZoom() * 100)) + "%";
@@ -896,18 +837,16 @@ void MainWindow::toggleShowThumbnails(bool)
 {
     if(showThumbnailsAct->isChecked() == true)
     {
-        fileList->setViewMode(QListView::IconMode);
+        filesView->setViewMode(QListView::IconMode);
     }
     else
     {
-        fileList->setViewMode(QListView::ListMode);
+        filesView->setViewMode(QListView::ListMode);
     }
 }
 
-void MainWindow::showImage(int num)
+void MainWindow::updateActions()
 {
-    imageDisplay->setPixmap(imageScaling->resultAt(num));
-
     bool enableActions = !imageDisplay->getPixmap().isNull();
 
     saveAct->setEnabled(enableActions);
