@@ -21,31 +21,31 @@ public:
     ThumbnailViewer(ArchiveModel *am, QWidget *parent = 0);
     void setModel ( QAbstractItemModel * model );
     void setViewMode(ViewMode mode);
-    bool folderChangedFlag;
-    void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipFileName = "");
+    void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipPath = "");
 
 private:
-    void populateList();
-    void showThumbnail();
-//    QThread *threadThumbnails;
+    void startShowingThumbnails();
+
     QFutureWatcher<QPixmap> *imageScaling;
+    QFutureWatcher<QPixmap> *imageLoad;
 
     QString path;
-    bool isZip;
-    ArchiveModel *am;
-    QString zipFileName;
+    QString zipPath;
     int thumbSize;
-    void startShowingThumbnails();
+    bool isZip;
+    bool folderChangedFlag;
+
+    ArchiveModel *am;
     QSortFilterProxyModel *proxy;
-    QTime t;
 
 private slots:
-//    void onThreadThumbsFinished();
     void showImage(int num);
-//    void onThumbnailFinished(QPixmap);
-
-    void finished();
+    void imageFinished(int);
+    void currentChanged ( const QModelIndex & current, const QModelIndex & previous );
     void OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index );
+
+signals:
+    void imageLoaded(QPixmap);
 
 };
 

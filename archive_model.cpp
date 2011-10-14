@@ -88,7 +88,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
         root->setData(TYPE_ARCHIVE);
         QFileInfo zip_info(zipFile);
         root->setIcon(fip.icon(zip_info));
-        root->setText(zip_info.filePath());
+        root->setText(zip_info.fileName());
 
         QStandardItem* node = root;
 
@@ -102,7 +102,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
                 {
                     if (j < file_path_parts.count() - 1)
                     {
-                        node = AddNode(node, file_path_parts.at(j), TYPE_DIR);
+                        node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR);
                     }
                     else
                         //if (j == file_path_parts.count() - 1)
@@ -111,7 +111,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
                         if(QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
                         {
     //                            qDebug() << fi.completeBaseName() << fi.suffix();
-                            node = AddNode(node, file_path_parts.at(j), makeArchiveNumberForItem(i));
+                            node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
                         }
                     }
                 }
@@ -137,7 +137,7 @@ QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int inde
     ntvi->setData(index, ROLE_TYPE);
     ntvi->setText(name);
     ntvi->setToolTip(name);
-    if(index == TYPE_DIR)
+    if(index == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(SystemIcons::getDirectoryIcon());
     }

@@ -55,10 +55,10 @@ private slots:
     void OnTreeViewItemActivated ( const QModelIndex & index );
 
     void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
-    void OnFileListCurrentRowChanged ( const QModelIndex & current, const QModelIndex & previous );
     void OnImageItemActivated ( const QModelIndex & index );
 
-    void OnPixmapLoaderFinished(QPixmap);
+    void showImage(int num);
+//    void OnPixmapLoaderFinished(QPixmap);
 //    void OnImageItemActivated(QListWidgetItem*);
 
 private:
@@ -68,7 +68,7 @@ private:
     bool acceptFileDrop(const QMimeData* mimeData);
     bool checkFileExtension(const QFileInfo &fi);
     void openFile(const QString &source);
-    void loadImageFromWidget(int type, const QString& filename);
+    void loadImageFromIndex(const QModelIndex & index);
     void updatePath(const QString &filePath);
     bool parseZoom(const QString &zoomText);
     QString getCurrentPath();
@@ -85,7 +85,7 @@ private:
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
-    QThread *threadImage;
+    QFutureWatcher<QPixmap> *imageScaling;
     ArchiveModel *am;
 
     QAction *lineEditPathAction;

@@ -4,6 +4,7 @@
 
 ViewArchiveDirs::ViewArchiveDirs()
 {
+    this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     proxy = new MySortFilterProxyModel();
 }
 
@@ -20,8 +21,14 @@ void ViewArchiveDirs::currentChanged ( const QModelIndex & current, const QModel
     emit currentRowChanged(proxy->mapToSource(current));
 }
 
+void ViewArchiveDirs::show()
+{
+    this->selectionModel()->setCurrentIndex(proxy->index(0,0,this->rootIndex()), QItemSelectionModel::ClearAndSelect);
+    QTreeView::show();
+}
+
 bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     QModelIndex index0 = sourceModel()->index(sourceRow, 0, sourceParent);
-    return !(index0.data(ROLE_TYPE).toInt() > makeArchiveNumberForItem(0));
+    return !(index0.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE);
 }

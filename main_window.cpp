@@ -23,7 +23,9 @@
 
 MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
-    threadImage = new QThread();
+    imageScaling = new QFutureWatcher<QPixmap>(this);
+    imageScaling = new QFutureWatcher<QPixmap>(this);
+    connect(imageScaling, SIGNAL(resultReadyAt(int)), SLOT(showImage(int)));
 
     resize(QApplication::desktop()->width() - 100,
 		QApplication::desktop()->height() - 100);
@@ -124,7 +126,6 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 //    treeViewArchiveDirs->header()->setResizeMode(QHeaderView::Stretch);
     treeViewArchiveDirs->setUniformRowHeights(true);
     treeViewArchiveDirs->setHeaderHidden(true);
-    treeViewArchiveDirs->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     treeViewArchiveDirs->hide();
 //    treeViewArchiveDirs->setHeaderLabels(QStringList() << "Name");
@@ -210,8 +211,8 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
     connect(treeViewFilesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
     connect(treeViewArchiveDirs, SIGNAL(currentRowChanged(QModelIndex)), fileList, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
-    connect(fileList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnFileListCurrentRowChanged(QModelIndex,QModelIndex)));
 
+    connect(fileList, SIGNAL(imageLoaded(QPixmap)), imageDisplay, SLOT(setPixmap(QPixmap)));
 
     connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
     connect(imageDisplay, SIGNAL(pageNext()), this, SLOT(pageNext()));
@@ -635,19 +636,6 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
     }
 }
 
-void MainWindow::OnFileListCurrentRowChanged ( const QModelIndex & current, const QModelIndex & previous )
-{
-    if(current.isValid() == false)
-    {
-        imageDisplay->setPixmap(NULL);
-    }
-    else
-    {
-        loadImageFromWidget(current.data(ROLE_TYPE).toInt(), current.data(Qt::DisplayRole).toString());
-    }
-}
-
-
 void MainWindow::togglePanel(bool value)
 {
     splitterPanel->setVisible(value);
@@ -684,45 +672,15 @@ void MainWindow::OnImageItemActivated ( const QModelIndex & index )
 {
     if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
     {
-        if(fsmTree->isDir(index)) //TODO ###OR archive
+        int type = index.data(ROLE_TYPE).toInt();
+        if(type == TYPE_DIR || type == TYPE_ARCHIVE)
         {
-            treeViewFilesystem->setCurrentIndex(index);
+            treeViewFilesystem->setCurrentIndex(fsmTree->index(getCurrentPath() + "/" + index.data(Qt::DisplayRole).toString()));
             treeViewFilesystem->expand(treeViewFilesystem->currentIndex());
         }
     }
 }
 
-void MainWindow::loadImageFromWidget(int type, const QString& filename)
-{
-    if(type == TYPE_DIR || type == TYPE_ARCHIVE)
-    {
-        imageDisplay->setPixmap(NULL);
-    }
-    else
-    {
-        QString filepath = getCurrentPath();
-
-        if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
-        {
-//            pl->setFilePath(filepath + "/" + filename);
-            threadImage->start();
-        }
-        else  //TODO ###If archive
-        {
-//            int SelectedZipFileIndex = getArchiveNumberFromItem(type);
-
-//            if(SelectedZipFileIndex < 0)
-//            {
-//                imageDisplay->setPixmap(NULL);
-//            }
-//            else
-//            {
-//                lp->setFilePath(filepath, true, archive_files.at(SelectedZipFileIndex));
-//                threadImage->start();
-//            }
-        }
-    }
-}
 
 void MainWindow::open()
 {
@@ -806,7 +764,7 @@ void MainWindow::settingsDialog()
         if(Settings::Instance()->getHardwareAcceleration() != imageDisplay->getHardwareAcceleration())
         {
             imageDisplay->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
-            threadImage->start();
+//            OnFileListCurrentRowChanged (fileList->currentIndex(), fileList->currentIndex() );
         }
     }
 }
@@ -946,10 +904,9 @@ void MainWindow::toggleShowThumbnails(bool)
     }
 }
 
-void MainWindow::OnPixmapLoaderFinished(QPixmap p)
+void MainWindow::showImage(int num)
 {
-    imageDisplay->setPixmap(p);
-    threadImage->exit();
+    imageDisplay->setPixmap(imageScaling->resultAt(num));
 
     bool enableActions = !imageDisplay->getPixmap().isNull();
 

@@ -10,6 +10,10 @@
 
 QPixmap loadFromFile(const ZipInfo &fileInfo)
 {
+    if(fileInfo.filePath == "")
+    {
+        return QPixmap(0,0);
+    }
     if(fileInfo.thumbSize == 0)
     {
         return QPixmap(fileInfo.filePath);
@@ -35,6 +39,11 @@ QPixmap loadFromFile(const ZipInfo &fileInfo)
 
 QPixmap loadFromZip(const ZipInfo &fileInfo)
 {
+    if(fileInfo.filePath == "")
+    {
+        return QPixmap(0,0);
+    }
+//    qDebug() << fileInfo.filePath << fileInfo.zipFile;
     QFile zipFile(fileInfo.filePath);
     QuaZip zip(&zipFile);
     if(!zip.open(QuaZip::mdUnzip))

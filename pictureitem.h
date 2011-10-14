@@ -16,7 +16,6 @@ public:
     QPixmap getPixmap();
     void setZoom(qreal z);
     qreal getZoom();
-    void setPixmap(const QPixmap &p);
     void setRotation(qreal r);
     qreal getRotation();
     void setLockMode(LockMode::Mode);
@@ -45,6 +44,7 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
+    void setPixmap(const QPixmap &p);
 
 private slots:
     void setMouseCursor(Qt::CursorShape);

@@ -11,6 +11,9 @@ public:
     ViewArchiveDirs();
     void setModel ( QAbstractItemModel * model );
 
+public slots:
+    void show();
+
 private:
 
     class MySortFilterProxyModel : public QSortFilterProxyModel
