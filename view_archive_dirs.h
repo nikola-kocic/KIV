@@ -19,8 +19,14 @@ private:
         bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
     };
 
+
     MySortFilterProxyModel* proxy;
 
+private slots:
+    void currentChanged ( const QModelIndex & current, const QModelIndex & previous );
+
+signals:
+    void currentRowChanged( const QModelIndex &);
 
 };
 

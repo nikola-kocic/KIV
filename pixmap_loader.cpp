@@ -51,29 +51,20 @@ void PixmapLoader::loadFromFile()
     }
     else
     {
-//        QTime t;
-//        t.start();
         QImageReader image_reader(filepath);
-//        qDebug()  << "QImageReader image_reader(filepath)" << filepath ;
         image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height() ) );
-//        qDebug()  << "image_reader.setScaledSize";
 
-        QFile file;
-        file.setFileName(filepath);
-        if (!file.open(QIODevice::ReadOnly))
-        {
-                // some Error handling is done here
-        }
+
+//        QFile file;
+//        file.setFileName(filepath);
+//        if (!file.open(QIODevice::ReadOnly))
+//        {
+//                // some Error handling is done here
+//        }
 
 //        qDebug() << QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md4).toHex();
-//        qDebug()  << t.elapsed();
 
-//        t.restart();
-        QIcon icon;
-        icon.addPixmap(QPixmap::fromImageReader(&image_reader));
-//        qDebug()  << t.elapsed()<< "icon.addPixmap";
-//        t.restart();
-        emit finished(icon);
+        emit finished(QPixmap::fromImageReader(&image_reader));
     }
     return;
 }
@@ -129,10 +120,7 @@ void PixmapLoader::loadFromZip()
     {
         QImageReader image_reader(&out);
         image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height() ) );
-        QIcon icon;
-        QPixmap p = QPixmap::fromImageReader(&image_reader);
-        icon.addPixmap(p);
-        emit finished(icon);
+        emit finished(QPixmap::fromImageReader(&image_reader));
     }
 }
 

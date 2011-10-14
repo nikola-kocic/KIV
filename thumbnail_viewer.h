@@ -7,7 +7,7 @@
 
 #include <QtGui/qlistview.h>
 #include <QtCore/qthread.h>
-#include <QtGui/qstandarditemmodel.h>
+#include <QtGui/qsortfilterproxymodel.h>
 //#include <QtCore/QTime>
 
 class ThumbnailViewer : public QListView
@@ -15,7 +15,8 @@ class ThumbnailViewer : public QListView
     Q_OBJECT
 
 public:
-    ThumbnailViewer(ArchiveModel *am, QWidget * parent = 0);
+    ThumbnailViewer(ArchiveModel *am, QWidget *parent = 0);
+    void setModel ( QAbstractItemModel * model );
     void setViewMode(ViewMode mode);
     bool folderChangedFlag;
     void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipFileName = "");
@@ -30,16 +31,15 @@ private:
     bool isZip;
     ArchiveModel *am;
     QString zipFileName;
-    PixmapLoader* pl;
+    PixmapLoader *pl;
     int thumbSize;
-    QStandardItemModel *model;
     void startShowingThumbnails();
-
+    QSortFilterProxyModel *proxy;
 
 private slots:
     void onThreadThumbsFinished();
-    void onThumbnailFinished(QIcon);
-    void OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & current, const QModelIndex & previous );
+    void onThumbnailFinished(QPixmap);
+    void OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index );
 
 };
 

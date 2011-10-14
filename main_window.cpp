@@ -209,7 +209,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     connect(treeViewFilesystem, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
 
     connect(treeViewFilesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
-    connect(treeViewArchiveDirs->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), fileList, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex,QModelIndex)));
+    connect(treeViewArchiveDirs, SIGNAL(currentRowChanged(QModelIndex)), fileList, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
     connect(fileList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnFileListCurrentRowChanged(QModelIndex,QModelIndex)));
 
 
@@ -624,6 +624,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
     {
         fsmTree->fetchMore(current);
         treeViewArchiveDirs->hide();
+        am->setPath(filePath);
         fileList->setCurrentDirectory(filePath);
     }
     else

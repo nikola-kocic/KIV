@@ -7,11 +7,17 @@ ViewArchiveDirs::ViewArchiveDirs()
     proxy = new MySortFilterProxyModel();
 }
 
-
 void ViewArchiveDirs::setModel ( QAbstractItemModel * model )
 {
     proxy->setSourceModel(model);
     QTreeView::setModel(proxy);
+}
+
+void ViewArchiveDirs::currentChanged ( const QModelIndex & current, const QModelIndex & previous )
+{
+    QTreeView::currentChanged(current, previous);
+
+    emit currentRowChanged(proxy->mapToSource(current));
 }
 
 bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const

@@ -29,7 +29,6 @@ public slots:
 
 signals:
     void finished(QPixmap);
-    void finished(QIcon);
 };
 
 #endif // PIXMAPLOADER_H
