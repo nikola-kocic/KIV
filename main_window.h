@@ -86,7 +86,6 @@ private:
     QToolBar *toolbar;
     QToolBar *toolbarFiles;
     QThread *threadImage;
-    PixmapLoader* pl;
     ArchiveModel *am;
 
     QAction *lineEditPathAction;

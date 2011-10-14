@@ -4,31 +4,10 @@
 #include <QtCore/qobject.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qicon.h>
+#include "komicviewer_enums.h"
 
-class PixmapLoader : public QObject
-{
-    Q_OBJECT
-
-public:
-    PixmapLoader();
-    void setFilePath(const QString &filepath, bool isZip = false, const QString &zipFileName = "");
-    QString getFilePath();
-    void setThumbnailSize(int length);
-
-private:
-    QString filepath;
-    bool isZip;
-    QString zipFileName;
-    int length;
-    void loadFromFile();
-    void loadFromZip();
-    QSize ThumbnailImageSize ( int image_width, int image_height );
-
-public slots:
-    void loadPixmap();
-
-signals:
-    void finished(QPixmap);
-};
+QPixmap loadFromFile(const ZipInfo &fileInfo);
+QPixmap loadFromZip(const ZipInfo &fileInfo);
+QSize ThumbnailImageSize ( int image_width, int image_height, int thumb_size );
 
 #endif // PIXMAPLOADER_H

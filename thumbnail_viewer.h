@@ -8,7 +8,10 @@
 #include <QtGui/qlistview.h>
 #include <QtCore/qthread.h>
 #include <QtGui/qsortfilterproxymodel.h>
-//#include <QtCore/QTime>
+#include <QtCore/qtconcurrentrun.h>
+#include <QtCore/qfuturewatcher.h>
+#include <QtCore/qtconcurrentmap.h>
+#include <QtCore/QTime>
 
 class ThumbnailViewer : public QListView
 {
@@ -24,21 +27,24 @@ public:
 private:
     void populateList();
     void showThumbnail();
-    QThread *threadThumbnails;
+//    QThread *threadThumbnails;
+    QFutureWatcher<QPixmap> *imageScaling;
 
-    int thumbCount;
     QString path;
     bool isZip;
     ArchiveModel *am;
     QString zipFileName;
-    PixmapLoader *pl;
     int thumbSize;
     void startShowingThumbnails();
     QSortFilterProxyModel *proxy;
+    QTime t;
 
 private slots:
-    void onThreadThumbsFinished();
-    void onThumbnailFinished(QPixmap);
+//    void onThreadThumbsFinished();
+    void showImage(int num);
+//    void onThumbnailFinished(QPixmap);
+
+    void finished();
     void OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index );
 
 };

@@ -18,8 +18,11 @@ ThumbnailViewer::ThumbnailViewer(ArchiveModel *am, QWidget * parent)
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
     this->setUniformItemSizes(true);
-//    this->setViewMode(QListView::IconMode);
-    threadThumbnails = 0;
+
+    imageScaling = new QFutureWatcher<QPixmap>(this);
+    connect(imageScaling, SIGNAL(resultReadyAt(int)), SLOT(showImage(int)));
+    connect(imageScaling, SIGNAL(finished()), SLOT(finished()));
+
     this->setModel(am);
 }
 
@@ -34,22 +37,11 @@ void ThumbnailViewer::setCurrentDirectory(const QString &filePath, bool isZip, c
     this->isZip = isZip;
     this->zipFileName = zipFileName;
     this->path = filePath;
-    thumbCount = 0;
 
     if(this->viewMode() == QListView::IconMode)
     {
-        if(threadThumbnails == 0)
-        {
-            threadThumbnails = new QThread();
-            pl = new PixmapLoader();
-            pl->moveToThread(threadThumbnails);
-            pl->setThumbnailSize(this->thumbSize);
-            connect(threadThumbnails, SIGNAL(started()), pl, SLOT(loadPixmap()));
-            connect(threadThumbnails, SIGNAL(finished()), this, SLOT(onThreadThumbsFinished()));
-            connect(pl, SIGNAL(finished(QPixmap)), this, SLOT(onThumbnailFinished(QPixmap)));
-        }
         folderChangedFlag = true;
-        if(threadThumbnails->isRunning() == false)
+        if(imageScaling->isRunning() == false)
         {
             startShowingThumbnails();
         }
@@ -85,10 +77,10 @@ void ThumbnailViewer::setViewMode(ViewMode mode)
         QSize size = delegate->sizeHint( QStyleOptionViewItem (), am->invisibleRootItem()->index());
 
         QFileIconProvider fip;
-        QString text = proxy->data(proxy->index(thumbCount, 0, this->rootIndex()), Qt::DisplayRole).toString();
 
         for( int i = 0; i < proxy->rowCount(this->rootIndex()); i++ )
         {
+            QString text = proxy->data(proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             proxy->setData(proxy->index(i, 0, this->rootIndex()), size, Qt::SizeHintRole);
             proxy->setData(proxy->index(i, 0, this->rootIndex()), fip.icon(path + "/" + text), Qt::DecorationRole);
         }
@@ -103,84 +95,63 @@ void ThumbnailViewer::setViewMode(ViewMode mode)
 
 void ThumbnailViewer::startShowingThumbnails()
 {
-    if(this->viewMode() == QListView::IconMode)
-    {
-        for( int i = 0; i < proxy->rowCount(this->rootIndex()); i++ )
-        {
-            proxy->setData(proxy->index(i, 0, this->rootIndex()), QSize(this->thumbSize + 20, this->thumbSize + 20), Qt::SizeHintRole);
-        }
-    }
-
-    //#TODO find better way to update content (as when resized)
-    this->reset();
-
-    showThumbnail();
-}
-
-void ThumbnailViewer::showThumbnail()
-{
     if(proxy->rowCount(this->rootIndex()) == 0)
     {
         return;
     }
-    while(true)
+
+    t.start();
+    if(this->isZip == false)
     {
-        if(proxy->data(proxy->index(thumbCount, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
-                || (proxy->data(proxy->index(thumbCount, 0, this->rootIndex()), ROLE_TYPE).toInt() >= makeArchiveNumberForItem(0)))
+        QList <ZipInfo> files;
+        if(this->viewMode() == QListView::IconMode)
         {
-            break;
+            for( int i = 0; i < proxy->rowCount(this->rootIndex()); i++ )
+            {
+                proxy->setData(proxy->index(i, 0, this->rootIndex()), QSize(this->thumbSize + 20, this->thumbSize + 20), Qt::SizeHintRole);
+
+                if(proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
+                        || (proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() >= makeArchiveNumberForItem(0)))
+                {
+                    ZipInfo info;
+                    info.filePath = path + "/" + proxy->data(proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+                    info.zipFile = "";
+                    info.thumbSize = this->thumbSize;
+                    files.append(info);
+                }
+            }
         }
 
-        thumbCount++;
-        if(thumbCount >= proxy->rowCount(this->rootIndex()))
-        {
-            return;
-        }
-    }
+    //    if(this->isZip == true)
+    //    {
+    //        pl->setFilePath(path, true, text);
+    //    }
+    //    else
+    //    {
+    //        pl->setFilePath(path + "/" + text);
+    //    }
 
-    QString text = proxy->data(proxy->index(thumbCount, 0, this->rootIndex()), Qt::DisplayRole).toString();
-    if(this->isZip == true)
-    {
-        pl->setFilePath(path, true, text);
-    }
-    else
-    {
-        pl->setFilePath(path + "/" + text);
-    }
+        //#TODO find better way to update content (as when resized)
+        this->reset();
 
-    threadThumbnails->start();
+
+
+        imageScaling->setFuture(QtConcurrent::mapped(files, loadFromFile));
+
+    }
+//    showThumbnail();
 }
 
-void ThumbnailViewer::onThreadThumbsFinished()
+void ThumbnailViewer::finished()
 {
-    if(thumbCount < proxy->rowCount(this->rootIndex()) - 1 && folderChangedFlag == false)
-    {
-        thumbCount++;
-        showThumbnail();
-    }
-    else
-    {
-        thumbCount = 0;
-        if(folderChangedFlag == true)
-        {
-            folderChangedFlag = false;
-            startShowingThumbnails();
-        }
-    }
+    qDebug() << t.elapsed();
 }
 
-void ThumbnailViewer::onThumbnailFinished(QPixmap thumb)
+void ThumbnailViewer::showImage(int num)
 {
-    if(!thumb.isNull())
+    if(!imageScaling->resultAt(num).isNull())
     {
-//        qDebug() << thumbSize;
-
-//        item->setTextAlignment(Qt::AlignHCenter | Qt::AlignTop);
-//        proxy->setData(proxy->index(thumbCount, 0, this->rootIndex()), (Qt::AlignHCenter | Qt::AlignTop), Qt::TextAlignmentRole);
-//        this->update(proxy->index(thumbCount, 0, this->rootIndex()));
-        qDebug() <<  proxy->data(proxy->index(thumbCount, 0, this->rootIndex()), Qt::SizeHintRole).toSize()
-                  << proxy->data(proxy->index(thumbCount, 0, this->rootIndex()), Qt::DisplayRole).toString();
-        proxy->setData(proxy->index(thumbCount, 0, this->rootIndex()), thumb, Qt::DecorationRole);
+        qDebug() << t.elapsed();
+        proxy->setData(proxy->index(num, 0, this->rootIndex()), imageScaling->resultAt(num), Qt::DecorationRole);
     }
-    threadThumbnails->exit();
 }

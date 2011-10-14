@@ -88,7 +88,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
         root->setData(TYPE_ARCHIVE);
         QFileInfo zip_info(zipFile);
         root->setIcon(fip.icon(zip_info));
-        root->setText(zip_info.fileName());
+        root->setText(zip_info.filePath());
 
         QStandardItem* node = root;
 
@@ -136,11 +136,11 @@ QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int inde
     QStandardItem* ntvi = new QStandardItem();
     ntvi->setData(index, ROLE_TYPE);
     ntvi->setText(name);
+    ntvi->setToolTip(name);
     if(index == TYPE_DIR)
     {
         ntvi->setIcon(SystemIcons::getDirectoryIcon());
     }
-    ntvi->setData(name, Qt::ToolTipRole);
     node->appendRow(ntvi);
     return ntvi;
 }

@@ -15,6 +15,12 @@ namespace ViewMode
     enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
 }
 
+typedef struct {
+    QString filePath;
+    QString zipFile;
+    int thumbSize;
+}ZipInfo;
+
 const int TYPE_FILE = 1001;
 const int TYPE_DIR = 1002;
 const int TYPE_ARCHIVE = 1003;

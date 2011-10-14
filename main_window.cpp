@@ -223,10 +223,10 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     connect(refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
 
-    pl = new PixmapLoader();
-    connect(threadImage, SIGNAL(started()), pl, SLOT(loadPixmap()));
-    connect(pl, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmapLoaderFinished(QPixmap)));
-    pl->moveToThread(threadImage);
+//    pl = new PixmapLoader();
+//    connect(threadImage, SIGNAL(started()), pl, SLOT(loadPixmap()));
+//    connect(pl, SIGNAL(finished(QPixmap)), this, SLOT(OnPixmapLoaderFinished(QPixmap)));
+//    pl->moveToThread(threadImage);
 
     QCompleter *completer = new QCompleter(this);
     completer->setModel(fsmTree);
@@ -617,7 +617,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
     dirUpAct->setEnabled(current.parent().isValid());
     treeViewFilesystem->scrollTo(current);
     QString filePath = fsmTree->filePath(current);
-    setWindowTitle(fsmTree->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
+    setWindowTitle(fsmTree->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
     updatePath(filePath);
 
     if(fsmTree->isDir(current))
@@ -704,7 +704,7 @@ void MainWindow::loadImageFromWidget(int type, const QString& filename)
 
         if(fsmTree->isDir(treeViewFilesystem->currentIndex()))
         {
-            pl->setFilePath(filepath + "/" + filename);
+//            pl->setFilePath(filepath + "/" + filename);
             threadImage->start();
         }
         else  //TODO ###If archive
