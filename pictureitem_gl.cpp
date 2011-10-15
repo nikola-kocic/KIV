@@ -19,7 +19,7 @@ void PictureItemGL::setPixmap()
     setRotation(0);
     if(pis->getLockMode() != LockMode::Zoom)
     {
-        setZoom(1, 1);
+        pis->setZoom(1);
     }
     pis->boundingRect = QRect(0, 0, pis->getPixmapSize().width() * pis->getZoom(), pis->getPixmapSize().height() * pis->getZoom());
 

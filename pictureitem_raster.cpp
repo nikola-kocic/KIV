@@ -20,7 +20,6 @@ void PictureItemRaster::setPixmap()
     if(pis->getLockMode() != LockMode::Zoom)
     {
         pis->setZoom(1);
-        emit zoomChanged();
     }
     pis->rotation = 0.0;
 
