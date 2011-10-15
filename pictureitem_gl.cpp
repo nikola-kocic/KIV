@@ -73,7 +73,7 @@ void PictureItemGL::setRotation(qreal r)
 {
     if( pis->isPixmapNull() ) return;
 
-    pis->rotation = r;
+    pis->setRotation(r);
 
     QTransform tRot;
     tRot.translate(pis->boundingRect.x(), pis->boundingRect.y());

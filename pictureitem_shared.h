@@ -36,7 +36,6 @@ public:
     bool isPixmapNull();
     QSize widgetSize;
     QRectF boundingRect;
-    qreal rotation;
     void afterPixmapLoad();
     QSize getPixmapSize();
 
@@ -46,6 +45,7 @@ private:
     void ScrollPageVertical(int value);
     QPixmap bmp;
     qreal zoom;
+    qreal rotation;
     bool rotating;
     bool flagJumpToEnd;
     QPoint dragPoint;

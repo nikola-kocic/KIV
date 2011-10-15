@@ -21,7 +21,7 @@ void PictureItemRaster::setPixmap()
     {
         pis->setZoom(1);
     }
-    pis->rotation = 0.0;
+    pis->setRotation(0);
 
     pis->afterPixmapLoad();
 
@@ -74,16 +74,16 @@ void PictureItemRaster::setRotation( qreal r )
 //    QTime myTimer;
 //    myTimer.start();
 
-    pis->rotation = r;
+    pis->setRotation(r);
 
-    if( (int)pis->rotation % 360 == 0 )
+    if( (int)pis->getRotation() % 360 == 0 )
     {
         this->pixmap_edited = pis->getPixmap();
     }
     else
     {
         QTransform tRot;
-        tRot.rotate( pis->rotation );
+        tRot.rotate( pis->getRotation() );
 
         Qt::TransformationMode rotateMode;
         rotateMode = Qt::SmoothTransformation;
