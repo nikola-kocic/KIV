@@ -4,6 +4,7 @@
 #include "pictureitem_raster.h"
 #include "pictureitem_gl.h"
 #include "pictureitem_shared.h"
+#include "teximg.h"
 
 #include <QtGui/qboxlayout.h>
 
@@ -32,6 +33,8 @@ private:
     QVBoxLayout *vboxMain;
     PictureItemShared* pis;
 
+    TexImg *ti;
+
 signals:
     void pageNext();
     void pagePrevious();
@@ -45,7 +48,7 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
-    void setPixmap(const QPixmap &p);
+    void setPixmap(const ZipInfo &zi);
 
 private slots:
     void setMouseCursor(Qt::CursorShape);

@@ -27,7 +27,7 @@ public:
     int getTexMaxSize();
     void setTexMaxSize(int size);
     void UnloadPow2Bitmap();
-    void CreatePow2Bitmap();
+    void CreatePow2Bitmap(const QString &path);
     static const int MinTileSize = 128;
 
     bool hasPow2Bitmap();
@@ -35,10 +35,12 @@ public:
 
     TileDim *hTile;
     TileDim *vTile;
+
+    //[Vert][Horiz]
     QVector < QVector < GLubyte* > > pow2TileBuffer;
     int channels;
-    TexImg *prevTexImg;
-    TexImg *nextTexImg;
+//    TexImg *prevTexImg;
+//    TexImg *nextTexImg;
 //    RenderImageState renderImageState = new RenderImageState();
 //    long createPow2BitmapTime;
 //    EnumImageLoad imageLoad;

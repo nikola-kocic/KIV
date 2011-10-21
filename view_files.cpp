@@ -106,7 +106,8 @@ void ViewFiles::currentChanged ( const QModelIndex & current, const QModelIndex 
             {
                 imageScaling->pause();
             }
-            imageLoad->setFuture(QtConcurrent::run(loadFromFile, info));
+            emit currentFileChanged(info);
+            //imageLoad->setFuture(QtConcurrent::run(loadFromFile, info));
         }
         else if(type == TYPE_ARCHIVE_FILE)
         {
@@ -119,7 +120,7 @@ void ViewFiles::currentChanged ( const QModelIndex & current, const QModelIndex 
             {
                 imageScaling->pause();
             }
-            imageLoad->setFuture(QtConcurrent::run(loadFromZip, info));
+            //imageLoad->setFuture(QtConcurrent::run(loadFromZip, info));
         }
         else
         {

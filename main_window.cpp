@@ -229,9 +229,6 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
         }
     }
 
-
-    TexImg *ti = new TexImg();
-    ti->CreatePow2Bitmap();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -490,7 +487,7 @@ void MainWindow::connectActions()
     connect(filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
     connect(archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), filesView, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
 
-    connect(filesView, SIGNAL(imageLoaded(QPixmap)), imageDisplay, SLOT(setPixmap(QPixmap)));
+    connect(filesView, SIGNAL(currentFileChanged(ZipInfo)), imageDisplay, SLOT(setPixmap(ZipInfo)));
     connect(imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
     connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
@@ -642,7 +639,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
         archiveDirsView->show();
         filesView->setCurrentDirectory(filePath, true);
     }
-    imageDisplay->setPixmap(QPixmap(0,0));
+//    imageDisplay->setPixmap(QPixmap(0,0));
 }
 
 void MainWindow::OnFilesViewItemActivated ( const QModelIndex & index )

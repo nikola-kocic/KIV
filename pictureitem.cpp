@@ -1,5 +1,6 @@
 #include "pictureitem.h"
 #include <QtGui/qevent.h>
+#include <QtCore>
 
 PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
 {
@@ -16,6 +17,8 @@ PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
     initPictureItem();
 
     this->setLayout(vboxMain);
+
+    ti = new TexImg();
 }
 
 void PictureItem::initPictureItem()
@@ -83,11 +86,35 @@ qreal PictureItem::getZoom()
     return pis->getZoom();
 }
 
-void PictureItem::setPixmap(const QPixmap &p)
+void PictureItem::setPixmap(const ZipInfo &zi)
 {
-    pis->widgetSize = this->size();
-    pis->setPixmap(p);
-    emit imageChanged();
+    qDebug() << zi.zipFile;
+    if(zi.zipFile == "")
+    {
+        ti->UnloadPow2Bitmap();
+        ti->CreatePow2Bitmap(zi.filePath);
+    }
+    if(opengl == true)
+    {
+        imageDisplayGL->setTextures(ti);
+    }
+
+
+    int height = 0;
+    int width = 0;
+    for(int vIndex=0; vIndex<ti->vTile->tileCount; vIndex++)
+    {
+        height += ti->vTile->tileSize.at(vIndex);
+    }
+    for(int hIndex=0; hIndex<ti->hTile->tileCount; hIndex++)
+    {
+       width += ti->hTile->tileSize.at(hIndex);
+    }
+
+    pis->setPixmap(QPixmap(width,height));
+//    pis->widgetSize = this->size();
+//    pis->setPixmap(p);
+//    emit imageChanged();
 }
 
 void PictureItem::setRotation(qreal r)

@@ -3,6 +3,7 @@
 
 #include "komicviewer_enums.h"
 #include "pictureitem_shared.h"
+#include "teximg.h"
 
 #include <QtCore/qtimer.h>
 #include <QtOpenGL/qgl.h>
@@ -15,6 +16,7 @@ public:
     PictureItemGL( PictureItemShared* pis, QWidget * parent = 0, Qt::WindowFlags f = 0 );
     ~PictureItemGL();
     void setRotation( qreal r );
+    void setTextures( TexImg *t );
     void setClearColor( const QColor &color );
 
 private:
@@ -27,7 +29,8 @@ private:
     int offsetY;
     QColor clearColor;
     QPoint lastPos;
-    GLuint texture;
+    QVector< QVector <GLuint> > texObjArrayTile;
+    TexImg *ti;
 
 protected:
     void initializeGL();

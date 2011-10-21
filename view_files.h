@@ -51,6 +51,7 @@ private slots:
 
 signals:
     void imageLoaded(QPixmap);
+    void currentFileChanged(ZipInfo);
 
 };
 

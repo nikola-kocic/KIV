@@ -129,13 +129,14 @@ int TexImg::Pad4(int yBytes)
     int num = yBytes % 4;
     return (num == 0) ? yBytes : (yBytes + (4 - num));
 }
-void TexImg::CreatePow2Bitmap()
+void TexImg::CreatePow2Bitmap(const QString &path)
 {
     if (this->hasPow2Bitmap())
     {
         return;
     }
-    QImage bitmapData = QImage("D:/testimages/small/07.jpg");
+    QImage bitmapData = QImage(path);
+    qDebug() << "CreatePow2Bitmap" << path;
     this->channels = 4;
 
     this->hTile = new TileDim();
@@ -176,11 +177,12 @@ void TexImg::CreatePow2Bitmap()
     for (int vTileIndex = 0; vTileIndex < this->vTile->tileCount; vTileIndex++)
     {
         int CurrentTileHeight = this->vTile->tileSize.at(vTileIndex);
+        int oldTilesWidth = 0;
         for (int hTileIndex = 0; hTileIndex < this->hTile->tileCount; hTileIndex++)
         {
-            int oldTilesWidth = 0;
             GLubyte* texImage = this->pow2TileBuffer[hTileIndex][vTileIndex];
             int CurrentTileWidth = this->hTile->tileSize.at(hTileIndex);
+            qDebug() << "vTileIndex" << vTileIndex << "hTileIndex" << hTileIndex << "oldTilesWidth" << oldTilesWidth << "oldTilesHeight" << oldTilesHeight;
             for (int h = 0; h < CurrentTileHeight; ++h)
             {
                 if (oldTilesHeight + h < bmpSize.height())
@@ -205,23 +207,33 @@ void TexImg::CreatePow2Bitmap()
         oldTilesHeight += CurrentTileHeight;
     }
 
-//    for(int v = 0; v<this->vTile->tileCount; v++)
+//    for(int vIndex = 0; vIndex<this->vTile->tileCount; vIndex++)
 //    {
-//        GLubyte* texImage = this->pow2TileBuffer[0][v];
-//        QImage testimg (this->hTile->tileSize.at(0), this->vTile->tileSize.at(v), QImage::Format_ARGB32);
-//        int m_nWidth = testimg.width();
-//        for(int h=0; h<testimg.height(); h++)
+//        for(int hIndex = 0; hIndex<this->hTile->tileCount; hIndex++)
 //        {
-//            for(int w=0; w<testimg.width(); w++)
-//            {
-//                int pixel = this->channels*(h*m_nWidth + w);
-//                QColor c = QColor(texImage[pixel], texImage[pixel+1], texImage[pixel+2]);
-//                testimg.setPixel(w, h, c.rgb());
-//    //            f.write(QString("reading from " + QString::number(pixel) + "\n" ).toLocal8Bit().constData());
-//            }
-//        }
 
-//        testimg.save(QString("D:/testimg" + QString::number(v) + ".png"));
+//            qDebug() << vIndex << hIndex;
+
+//            GLubyte* texImage = this->pow2TileBuffer[hIndex][vIndex];
+//            QImage testimg (this->hTile->tileSize.at(hIndex), this->vTile->tileSize.at(vIndex), QImage::Format_ARGB32);
+//            int m_nWidth = testimg.width();
+//            for(int h=0; h<testimg.height(); h++)
+//            {
+//                for(int w=0; w<testimg.width(); w++)
+//                {
+//                    int pixel = this->channels*(h*m_nWidth + w);
+//                    QColor c = QColor(texImage[pixel], texImage[pixel+1], texImage[pixel+2]);
+//                    testimg.setPixel(w, h, c.rgb());
+//        //            f.write(QString("reading from " + QString::number(pixel) + "\n" ).toLocal8Bit().constData());
+//                }
+//            }
+
+//            if( testimg.save(QString("D:/testimg" + QString::number(vIndex)  + QString::number(hIndex) + ".png")) == true)
+//            {
+//                qDebug() << "success saving" << vIndex << hIndex;
+//            }
+
+//        }
 //    }
 
     bitmapData = QImage();
