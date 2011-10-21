@@ -22,7 +22,8 @@ SOURCES += \
     main_window.cpp \
     archive_model.cpp \
     view_archive_dirs.cpp \
-    view_files.cpp
+    view_files.cpp \
+    teximg.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -50,7 +51,9 @@ HEADERS += \
     main_window.h \
     archive_model.h \
     view_archive_dirs.h \
-    view_files.h
+    view_files.h \
+    tiledim.h \
+    teximg.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -72,52 +75,3 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

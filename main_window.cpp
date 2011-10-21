@@ -20,6 +20,7 @@
 #include <QtGui/qfileiconprovider.h>
 #include <QtGui/qdesktopwidget.h>
 #include <QtGui/qcompleter.h>
+#include "teximg.h"
 
 MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
@@ -227,6 +228,10 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
             filesystemView->setCurrentIndex(fsmTree->index(path));
         }
     }
+
+
+    TexImg *ti = new TexImg();
+    ti->CreatePow2Bitmap();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
