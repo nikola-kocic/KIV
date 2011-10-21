@@ -23,8 +23,6 @@ ViewFiles::ViewFiles(ArchiveModel *am, QWidget * parent)
     imageScaling = new QFutureWatcher<QPixmap>(this);
     connect(imageScaling, SIGNAL(resultReadyAt(int)), this, SLOT(showImage(int)));
 
-    imageLoad = new QFutureWatcher<QPixmap>(this);
-    connect(imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
     this->setModel(am);
 }
@@ -89,53 +87,22 @@ void ViewFiles::currentChanged ( const QModelIndex & current, const QModelIndex 
     int type = current.data(ROLE_TYPE).toInt();
     QString filename = current.data(Qt::DisplayRole).toString();
 
-    if(type == TYPE_DIR || type == TYPE_ARCHIVE)
-    {
-        emit imageLoaded(QPixmap(0,0));
-    }
-    else
-    {
-        if(type == TYPE_FILE)
-        {
-            ZipInfo info;
-            info.filePath = this->path + "/" + filename;
-            info.zipFile = "";
-            info.thumbSize = 0;
+    ZipInfo info;
+    info.filePath = "";
+    info.zipFile = "";
+    info.thumbSize = 0;
 
-            if(imageScaling->isRunning() == true)
-            {
-                imageScaling->pause();
-            }
-            emit currentFileChanged(info);
-            //imageLoad->setFuture(QtConcurrent::run(loadFromFile, info));
-        }
-        else if(type == TYPE_ARCHIVE_FILE)
-        {
-            ZipInfo info;
-            info.filePath = this->path;
-            info.zipFile = this->zipPath + filename;
-            info.thumbSize = 0;
-
-            if(imageScaling->isRunning() == true)
-            {
-                imageScaling->pause();
-            }
-            //imageLoad->setFuture(QtConcurrent::run(loadFromZip, info));
-        }
-        else
-        {
-            emit imageLoaded(QPixmap(0,0));
-        }
-    }
-}
-
-void ViewFiles::imageFinished(int num)
-{
-    emit imageLoaded(imageLoad->resultAt(num));
-    if(imageScaling->isPaused() == true)
+    if(type == TYPE_FILE)
     {
-        imageScaling->resume();
+        info.filePath = this->path + "/" + filename;
     }
+    else if(type == TYPE_ARCHIVE_FILE)
+    {
+        info.filePath = this->path;
+        info.zipFile = this->zipPath + filename;
+    }
+
+    emit currentFileChanged(info);
 }
 
 void ViewFiles::setViewMode(ViewMode mode)

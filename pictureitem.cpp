@@ -18,7 +18,13 @@ PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
 
     this->setLayout(vboxMain);
 
-    ti = new TexImg();
+    imageLoad = new QFutureWatcher<QPixmap>(this);
+    connect(imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
+}
+
+void PictureItem::imageFinished(int num)
+{
+    pis->setPixmap(imageLoad->resultAt(num));
 }
 
 void PictureItem::initPictureItem()
@@ -86,35 +92,20 @@ qreal PictureItem::getZoom()
     return pis->getZoom();
 }
 
-void PictureItem::setPixmap(const ZipInfo &zi)
+void PictureItem::setPixmap(const ZipInfo &info)
 {
-    qDebug() << zi.zipFile;
-    if(zi.zipFile == "")
-    {
-        ti->UnloadPow2Bitmap();
-        ti->CreatePow2Bitmap(zi.filePath);
-    }
+    pis->widgetSize = this->size();
+
     if(opengl == true)
     {
-        imageDisplayGL->setTextures(ti);
+        imageDisplayGL->setFile(info);
     }
-
-
-    int height = 0;
-    int width = 0;
-    for(int vIndex=0; vIndex<ti->vTile->tileCount; vIndex++)
+    else
     {
-        height += ti->vTile->tileSize.at(vIndex);
-    }
-    for(int hIndex=0; hIndex<ti->hTile->tileCount; hIndex++)
-    {
-       width += ti->hTile->tileSize.at(hIndex);
+        imageLoad->setFuture(QtConcurrent::run(loadImage, info));
     }
 
-    pis->setPixmap(QPixmap(width,height));
-//    pis->widgetSize = this->size();
-//    pis->setPixmap(p);
-//    emit imageChanged();
+    emit imageChanged();
 }
 
 void PictureItem::setRotation(qreal r)

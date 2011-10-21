@@ -13,59 +13,57 @@ PictureItemGL::PictureItemGL( PictureItemShared* pis, QWidget * parent, Qt::Wind
     connect( pis, SIGNAL( zoomChanged(qreal,qreal) ), this, SLOT( setZoom( qreal,qreal ) ) );
     connect( pis, SIGNAL( update() ), this, SLOT( update() ) );
 
-    ti = 0;
+    ti = new TexImg();
+
+    textures = QVector < QVector < GLuint > >(0);
     clearColor = Qt::black;
     offsetX = offsetY = dimY = dimX = 0;
 }
 
-void PictureItemGL::setTextures(TexImg *t)
+void PictureItemGL::setFile(const ZipInfo &info)
 {
-    if(ti == NULL)
+    if(info.zipFile == "")
     {
-        ti = t;
-    }
-    else
-    {
-        for ( int hIndex = 0; hIndex < texObjArrayTile.count(); ++hIndex )
-        {
-            texObjArrayTile[hIndex].resize( ti->vTile->tileCount );
+        ti->UnloadPow2Bitmap();
+        ti->CreatePow2Bitmap(info.filePath);
 
-            for(int vIndex=0; vIndex<texObjArrayTile.at(hIndex).count(); vIndex++)
+
+        for ( int hIndex = 0; hIndex < textures.count(); ++hIndex )
+        {
+            textures[hIndex].resize( ti->vTile->tileCount );
+
+            for(int vIndex=0; vIndex<textures.at(hIndex).count(); vIndex++)
             {
-                glDeleteTextures(1, &texObjArrayTile.at(hIndex).at(vIndex));
+                glDeleteTextures(1, &textures.at(hIndex).at(vIndex));
+            }
+        }
+
+//        qDebug() << "deleted old textures";
+
+        this->textures = QVector < QVector < GLuint > >( ti->hTile->tileCount );
+        for ( int hIndex = 0; hIndex < ti->hTile->tileCount; ++hIndex )
+        {
+            textures[hIndex].resize( ti->vTile->tileCount );
+
+            for(int vIndex=0; vIndex<ti->vTile->tileCount; vIndex++)
+            {
+                glGenTextures(1, &textures[hIndex][vIndex]);
+                glBindTexture(GL_TEXTURE_2D, textures[hIndex][vIndex]);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ti->hTile->tileSize.at(hIndex), ti->vTile->tileSize.at(vIndex), 0, GL_RGBA, GL_UNSIGNED_BYTE, ti->pow2TileBuffer.at(hIndex).at(vIndex));
+//                qDebug() << "texObjArrayTile" << textures.at(hIndex).at(vIndex) << hIndex << vIndex;
             }
         }
     }
-
-
-    qDebug() << "deleted";
-    this->texObjArrayTile = QVector < QVector < GLuint > >( ti->hTile->tileCount );
-    for ( int hIndex = 0; hIndex < ti->hTile->tileCount; ++hIndex )
-    {
-        texObjArrayTile[hIndex].resize( ti->vTile->tileCount );
-
-        for(int vIndex=0; vIndex<ti->vTile->tileCount; vIndex++)
-        {
-            glGenTextures(1, &texObjArrayTile[hIndex][vIndex]);
-            glBindTexture(GL_TEXTURE_2D, texObjArrayTile[hIndex][vIndex]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ti->hTile->tileSize.at(hIndex), ti->vTile->tileSize.at(vIndex), 0, GL_RGBA, GL_UNSIGNED_BYTE, ti->pow2TileBuffer.at(hIndex).at(vIndex));
-        }
-    }
-
-
-    updateGL();
+    pis->setPixmap( QPixmap( ti->hTile->bmpSize,ti->vTile->bmpSize ) );
 }
 
 void PictureItemGL::setPixmap()
 {
-//    deleteTexture( texture );
+//    setUpdatesEnabled(false);
     if( pis->getPixmap().isNull() )
     {
-//        texture = 0;
         return;
     }
-
-//    texture = bindTexture( pis->getPixmap(), GL_TEXTURE_2D, GL_RGBA, QGLContext::LinearFilteringBindOption );
 
     dimX = (double)pis->getPixmapSize().width() / 2;
     dimY = (double)pis->getPixmapSize().height() / 2;
@@ -80,8 +78,10 @@ void PictureItemGL::setPixmap()
 
     pis->afterPixmapLoad();
 
+
     updateSize();
-    initializeGL();
+//    setUpdatesEnabled(true);
+//    initializeGL();
     updateGL();
 }
 
@@ -100,6 +100,11 @@ void PictureItemGL::initializeGL()
     glDisable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
     glEnable( GL_TEXTURE_2D );
+
+    GLint size = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
+//    qDebug() << "GL_MAX_TEXTURE_SIZE" << size;
+    ti->setTexMaxSize(size);
 //    if( texture != 0 )
 //    {
 //        glBindTexture ( GL_TEXTURE_2D, texture );
@@ -115,65 +120,113 @@ void PictureItemGL::updateSize()
     dimY =  pis->getPixmapSize().height() * ( pis->getZoom() / 2 );
 }
 
+bool ClipTextureVertex(double texCrd1, double texCrd2, double vertexCrd1, double vertexCrd2, double texBorder1, double texBorder2, double texOffsetMin, double texScale,
+                       double &texClip1, double &texClip2, double &vertexClip1, double &vertexClip2)
+{
+    bool flag = false;
+    if (texCrd1 > texCrd2)
+    {
+        flag = true;
+        double num = texCrd1;
+        texCrd1 = texCrd2;
+        texCrd2 = num;
+        num = vertexCrd1;
+        vertexCrd1 = vertexCrd2;
+        vertexCrd2 = num;
+    }
+    double num2 = qMax(texCrd1, texBorder1);
+    double num3 = qMin(texCrd2, texBorder2);
+    bool result = num2 < num3;
+    double num4 = 1.0 / (texCrd2 - texCrd1);
+    double num5 = (num2 - texCrd1) * num4;
+    double num6 = (num3 - texCrd1) * num4;
+    double num7 = vertexCrd2 - vertexCrd1;
+    vertexClip1 = vertexCrd1 + num5 * num7;
+    vertexClip2 = vertexCrd2 - (1.0 - num6) * num7;
+    texClip1 = (num2 - texOffsetMin) * texScale;
+    texClip2 = (num3 - texOffsetMin) * texScale;
+    if (flag)
+    {
+        double num = texClip1;
+        texClip1 = texClip2;
+        texClip2 = num;
+        num = vertexClip1;
+        vertexClip1 = vertexClip2;
+        vertexClip2 = num;
+    }
+    return result;
+}
+
 void PictureItemGL::paintGL()
 {
     qglClearColor( clearColor );
     glClear( GL_COLOR_BUFFER_BIT );
 
-//    if( texture == 0 )
-    if(ti == NULL)
-    {
-        return;
-    }
+    if(textures.count() == 0) return;
 
     glMatrixMode( GL_TEXTURE_MATRIX );
     glLoadIdentity();
 
     glTranslated( ( pis->boundingRect.x() + ( offsetX > 0 ? offsetX : 0 ) ), ( pis->boundingRect.y() + ( offsetY > 0 ? offsetY : 0 ) ), 0 );
     glRotated( pis->getRotation(), 0 , 0, 1 );
-
-
-    int oldQuadBottom = 0;
-    for(int vIndex=0; vIndex<ti->vTile->tileCount; vIndex++)
+    for(int hIndex=0; hIndex<ti->hTile->tileCount; hIndex++)
     {
-        int oldQuadRight = 0;
-        int quadHeight = (ti->vTile->tileSize.at(vIndex)) / 2;
+        QRectF tImage = QRectF(QPointF(0.0,0.0),QPointF (1.0,1.0));
+        QRectF vImage = QRectF(QPointF(-pis->boundingRect.width() * 0.5,-pis->boundingRect.height() * 0.5),QPointF (pis->boundingRect.width() * 0.5,pis->boundingRect.height() * 0.5));
 
-
-        for(int hIndex=0; hIndex<ti->hTile->tileCount; hIndex++)
+        double texScale = (double)ti->hTile->bmpSize / (double)ti->hTile->tileSize.at(hIndex);
+        double s;
+        double s2;
+        double x;
+        double x2;
+        bool flag = ClipTextureVertex(tImage.left(), tImage.right(), vImage.left(), vImage.right(),
+                                      ti->hTile->switchBorderNorm.at(hIndex), ti->hTile->switchBorderNorm.at(hIndex + 1),
+                                      ti->hTile->offsetBorderNorm.at(hIndex), texScale, s, s2, x, x2);
+        if (flag)
         {
-            int quadWidth = (ti->hTile->tileSize.at(hIndex)) / 2;
+            for(int vIndex=0; vIndex<ti->vTile->tileCount; vIndex++)
+            {
+                texScale = (double)ti->vTile->bmpSize / (double)ti->vTile->tileSize.at(vIndex);
+                double t;
+                double t2;
+                double y;
+                double y2;
+                flag = ClipTextureVertex(tImage.top(), tImage.bottom(), vImage.top(), vImage.bottom(),
+                                         ti->vTile->switchBorderNorm.at(vIndex), ti->vTile->switchBorderNorm.at(vIndex + 1),
+                                         ti->vTile->offsetBorderNorm.at(vIndex), texScale, t, t2, y, y2);
+                if (flag)
+                {
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// GL_NEAREST is another choice
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// GL_NEAREST is another choice
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glBindTexture(GL_TEXTURE_2D, textures.at(hIndex).at(vIndex));
+                    glBegin(GL_QUADS);
 
-            glBindTexture(GL_TEXTURE_2D, texObjArrayTile.at(hIndex).at(vIndex));
-            glBegin(GL_QUADS);
+//                    qDebug() << "hIndex" << hIndex << "vIndex" << vIndex << "x" << x << "y" << y << "x2" << x2 << "y2" << y2;
+//                    qDebug() << "hIndex" << hIndex << "vIndex" << vIndex << "s" << s << "t" << t << "s2" << s2 << "t2" << t2;
 
-//            qDebug() << quadWidth << quadHeight;
+//                    if(hIndex == 1)
+                    {
+                        //s=t=0;
+                       // s2=t2=1;
+                    }
+                    glTexCoord2f(s, t);
+                    glVertex2f(x, y);
+                    glTexCoord2f(s, t2);
+                    glVertex2f(x, y2);
+                    glTexCoord2f(s2, t2);
+                    glVertex2f(x2, y2);
+                    glTexCoord2f(s2, t);
+                    glVertex2f(x2, y);
+                    glEnd();
 
-            glTexCoord2f( 0.0f, 1.0f ); /* lower left corner of image */
-            glVertex2f( -quadWidth, quadHeight + (oldQuadBottom / 2) );
-
-            glTexCoord2f( 1.0f, 1.0f ); /* lower right corner of image */
-            glVertex2f( quadWidth,  quadHeight + (oldQuadBottom / 2) );
-
-            glTexCoord2f( 1.0f, 0.0f ); /* upper right corner of image */
-            glVertex2f( quadWidth, -quadHeight + (oldQuadBottom / 2) );
-
-            glTexCoord2f( 0.0f, 0.0f ); /* upper left corner of image */
-            glVertex2f( -quadWidth, -quadHeight + (oldQuadBottom / 1.5) );
-            glEnd();
-
-            oldQuadRight += ti->hTile->tileSize.at(hIndex);
+                }
+            }
         }
-        oldQuadBottom += ti->vTile->tileSize.at(vIndex);
     }
-
-//    qDebug() << "***";
-
+//    qDebug("***");
 }
 
 void PictureItemGL::resizeGL( int width, int height )

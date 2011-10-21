@@ -5,6 +5,11 @@
 #include "pictureitem_gl.h"
 #include "pictureitem_shared.h"
 #include "teximg.h"
+#include "pixmap_loader.h"
+
+#include <QtCore/qtconcurrentrun.h>
+#include <QtCore/qfuturewatcher.h>
+#include <QtCore/qtconcurrentmap.h>
 
 #include <QtGui/qboxlayout.h>
 
@@ -32,8 +37,7 @@ private:
     void initPictureItem();
     QVBoxLayout *vboxMain;
     PictureItemShared* pis;
-
-    TexImg *ti;
+    QFutureWatcher<QPixmap> *imageLoad;
 
 signals:
     void pageNext();
@@ -51,6 +55,7 @@ public slots:
     void setPixmap(const ZipInfo &zi);
 
 private slots:
+    void imageFinished(int);
     void setMouseCursor(Qt::CursorShape);
 
 protected:

@@ -16,7 +16,7 @@ public:
     PictureItemGL( PictureItemShared* pis, QWidget * parent = 0, Qt::WindowFlags f = 0 );
     ~PictureItemGL();
     void setRotation( qreal r );
-    void setTextures( TexImg *t );
+    void setFile(const ZipInfo &info);
     void setClearColor( const QColor &color );
 
 private:
@@ -29,7 +29,7 @@ private:
     int offsetY;
     QColor clearColor;
     QPoint lastPos;
-    QVector< QVector <GLuint> > texObjArrayTile;
+    QVector< QVector <GLuint> > textures;
     TexImg *ti;
 
 protected:

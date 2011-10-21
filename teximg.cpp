@@ -136,7 +136,7 @@ void TexImg::CreatePow2Bitmap(const QString &path)
         return;
     }
     QImage bitmapData = QImage(path);
-    qDebug() << "CreatePow2Bitmap" << path;
+//    qDebug() << "CreatePow2Bitmap" << path;
     this->channels = 4;
 
     this->hTile = new TileDim();
@@ -150,15 +150,15 @@ void TexImg::CreatePow2Bitmap(const QString &path)
     this->InitTiles(this->hTile);
     this->InitTiles(this->vTile);
 
-//    qDebug() << "bmpSize" << hTile->bmpSize << "doTiling" << hTile->doTiling << "offsetBorder" << hTile->offsetBorder
-//             << "offsetBorderNorm" << hTile->offsetBorderNorm << "pow2BaseCount" << hTile->pow2BaseCount << "pow2BaseSize" << hTile->pow2BaseSize
-//             << "pow2LastSize" << hTile->pow2LastSize << "pow2Size" << hTile->pow2Size << "switchBorder" << hTile->switchBorder << "switchBorderNorm" << hTile->switchBorderNorm
-//             << "tileCount" << hTile->tileCount << "tileSize" << hTile->tileSize;
+    qDebug() << "hTile" << "bmpSize" << hTile->bmpSize << "doTiling" << hTile->doTiling << "offsetBorder" << hTile->offsetBorder
+             << "offsetBorderNorm" << hTile->offsetBorderNorm << "pow2BaseCount" << hTile->pow2BaseCount << "pow2BaseSize" << hTile->pow2BaseSize
+             << "pow2LastSize" << hTile->pow2LastSize << "pow2Size" << hTile->pow2Size << "switchBorder" << hTile->switchBorder << "switchBorderNorm" << hTile->switchBorderNorm
+             << "tileCount" << hTile->tileCount << "tileSize" << hTile->tileSize;
 
-//    qDebug() << "bmpSize" << vTile->bmpSize << "doTiling" << vTile->doTiling << "offsetBorder" << vTile->offsetBorder
-//             << "offsetBorderNorm" << vTile->offsetBorderNorm << "pow2BaseCount" << vTile->pow2BaseCount << "pow2BaseSize" << vTile->pow2BaseSize
-//             << "pow2LastSize" << vTile->pow2LastSize << "pow2Size" << vTile->pow2Size << "switchBorder" << vTile->switchBorder << "switchBorderNorm" << vTile->switchBorderNorm
-//             << "tileCount" << vTile->tileCount << "tileSize" << vTile->tileSize;
+    qDebug() << "vTile" << "bmpSize" << vTile->bmpSize << "doTiling" << vTile->doTiling << "offsetBorder" << vTile->offsetBorder
+             << "offsetBorderNorm" << vTile->offsetBorderNorm << "pow2BaseCount" << vTile->pow2BaseCount << "pow2BaseSize" << vTile->pow2BaseSize
+             << "pow2LastSize" << vTile->pow2LastSize << "pow2Size" << vTile->pow2Size << "switchBorder" << vTile->switchBorder << "switchBorderNorm" << vTile->switchBorderNorm
+             << "tileCount" << vTile->tileCount << "tileSize" << vTile->tileSize;
 
     this->pow2TileBuffer = QVector < QVector < GLubyte* > >( this->hTile->tileCount );
     for ( int i = 0; i < this->hTile->tileCount; ++i )
@@ -182,7 +182,7 @@ void TexImg::CreatePow2Bitmap(const QString &path)
         {
             GLubyte* texImage = this->pow2TileBuffer[hTileIndex][vTileIndex];
             int CurrentTileWidth = this->hTile->tileSize.at(hTileIndex);
-            qDebug() << "vTileIndex" << vTileIndex << "hTileIndex" << hTileIndex << "oldTilesWidth" << oldTilesWidth << "oldTilesHeight" << oldTilesHeight;
+//            qDebug() << "vTileIndex" << vTileIndex << "hTileIndex" << hTileIndex << "oldTilesWidth" << oldTilesWidth << "oldTilesHeight" << oldTilesHeight;
             for (int h = 0; h < CurrentTileHeight; ++h)
             {
                 if (oldTilesHeight + h < bmpSize.height())

@@ -32,7 +32,6 @@ private:
     void startShowingThumbnails();
 
     QFutureWatcher<QPixmap> *imageScaling;
-    QFutureWatcher<QPixmap> *imageLoad;
 
     QString path;
     QString zipPath;
@@ -45,12 +44,10 @@ private:
 
 private slots:
     void showImage(int num);
-    void imageFinished(int);
     void currentChanged ( const QModelIndex & current, const QModelIndex & previous );
     void OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index );
 
 signals:
-    void imageLoaded(QPixmap);
     void currentFileChanged(ZipInfo);
 
 };

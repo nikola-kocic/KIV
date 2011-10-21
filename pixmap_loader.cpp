@@ -8,6 +8,18 @@
 #include <QtCore/qcryptographichash.h>
 #include <QtDebug>
 
+QPixmap loadImage(const ZipInfo &fileInfo)
+{
+    if(fileInfo.zipFile == "")
+    {
+        return loadFromFile(fileInfo);
+    }
+    else
+    {
+        return loadFromZip(fileInfo);
+    }
+}
+
 QPixmap loadFromFile(const ZipInfo &fileInfo)
 {
     if(fileInfo.filePath == "")
