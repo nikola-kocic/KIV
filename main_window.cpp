@@ -639,7 +639,12 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
         archiveDirsView->show();
         filesView->setCurrentDirectory(filePath, true);
     }
-//    imageDisplay->setPixmap(QPixmap(0,0));
+
+    ZipInfo info;
+    info.filePath = "";
+    info.thumbSize = 0;
+    info.zipFile = "";
+    imageDisplay->setPixmap(info);
 }
 
 void MainWindow::OnFilesViewItemActivated ( const QModelIndex & index )

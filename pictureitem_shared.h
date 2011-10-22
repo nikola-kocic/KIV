@@ -37,7 +37,6 @@ public:
     QSize widgetSize;
     QRectF boundingRect;
     void afterPixmapLoad();
-    QSize getPixmapSize();
 
 private:
     void start_timerScrollPage();
@@ -53,7 +52,6 @@ private:
     QVector<qreal> defaultZoomSizes;
     LockMode::Mode lockMode;
     QTimer *timerScrollPage;
-    QSize pixmapSize;
     //    MiddleClick::Action middleClickAction;
     //    Wheel::Action wheelAction;
 //    bool LockDrag;

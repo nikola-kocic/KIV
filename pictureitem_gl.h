@@ -23,8 +23,8 @@ private:
     void updateSize();
     PictureItemShared* pis;
 
-    int dimX;
-    int dimY;
+    qreal scaleX;
+    qreal scaleY;
     int offsetX;
     int offsetY;
     QColor clearColor;

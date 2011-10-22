@@ -22,8 +22,6 @@ PictureItemShared::PictureItemShared()
 void PictureItemShared::setPixmap(const QPixmap &p)
 {
     this->bmp = p;
-    pixmapSize = this->bmp.size();
-
     emit pixmapChanged();
 }
 
@@ -625,9 +623,4 @@ void PictureItemShared::afterPixmapLoad()
         }
         flagJumpToEnd = false;
     }
-}
-
-QSize PictureItemShared::getPixmapSize()
-{
-    return this->pixmapSize;
 }
