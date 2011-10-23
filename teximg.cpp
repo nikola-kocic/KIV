@@ -1,4 +1,6 @@
 #include "teximg.h"
+
+//#include <QtCore/qdebug.h>
 #include <QtCore/qsize.h>
 #include <QtGui/qpixmap.h>
 
@@ -12,10 +14,12 @@ bool TexImg::hasPow2Bitmap()
 {
     return !(this->pow2TileBuffer.isEmpty());
 }
+
 int TexImg::getTexMaxSize()
 {
     return texMaxSize;
 }
+
 void TexImg::setTexMaxSize(int size)
 {
     texMaxSize = qMin(8192, size);
@@ -53,6 +57,7 @@ void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
         tileDim->pow2BaseSize = getTexMaxSize();
         tileDim->doTiling = true;
     }
+
     if (tileDim->doTiling)
     {
         int minTileSize = TexImg::MinTileSize;
@@ -77,10 +82,8 @@ void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
         }
     }
     tileDim->pow2Size = tileDim->pow2BaseCount * tileDim->pow2BaseSize + tileDim->pow2LastSize;
-
-
-//    qDebug("ComputeBitmapPow2Size %x", tileDim);
 }
+
 void TexImg::InitTiles(TileDim *tileDim)
 {
     int minTileSize = TexImg::MinTileSize;
@@ -129,13 +132,13 @@ int TexImg::Pad4(int yBytes)
     int num = yBytes % 4;
     return (num == 0) ? yBytes : (yBytes + (4 - num));
 }
-void TexImg::CreatePow2Bitmap(const QString &path)
+void TexImg::CreatePow2Bitmap(const FileInfo &info)
 {
     if (this->hasPow2Bitmap())
     {
         return;
     }
-    QImage bitmapData = QImage(path);
+    QImage bitmapData = PixmapLoader::getImage(info);
     this->channels = 4;
     this->hTile = new TileDim();
     this->vTile = new TileDim();
@@ -163,7 +166,7 @@ void TexImg::CreatePow2Bitmap(const QString &path)
     {
         pow2TileBuffer[i].resize(this->vTile->tileCount);
 
-        for (int j=0; j<this->vTile->tileCount; ++j)
+        for (int j=0; j < this->vTile->tileCount; ++j)
         {
             pow2TileBuffer[i][j] = new GLubyte[this->vTile->tileSize.at(j) * this->hTile->tileSize.at(i) * this->channels];
         }
@@ -189,10 +192,10 @@ void TexImg::CreatePow2Bitmap(const QString &path)
                         {
                             color = bitmapData.pixel(hBorderOffset + w, vBorderOffset + h);
                             int pixel = this->channels*(h *CurrentTileWidth + w);
-                            texImage[pixel + 0] = (GLubyte) qRed(color);
-                            texImage[pixel + 1] = (GLubyte) qGreen(color);
-                            texImage[pixel + 2] = (GLubyte) qBlue(color);
-                            texImage[pixel + 3] = (GLubyte) qAlpha(color);
+                            texImage[pixel + 0] = (GLubyte)qRed(color);
+                            texImage[pixel + 1] = (GLubyte)qGreen(color);
+                            texImage[pixel + 2] = (GLubyte)qBlue(color);
+                            texImage[pixel + 3] = (GLubyte)qAlpha(color);
                         }
                     }
                 }

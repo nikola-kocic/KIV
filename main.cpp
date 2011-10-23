@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setApplicationName("KomicViewer");
     app.setOrganizationName("KomicViewer");
-    app.setApplicationVersion("0.8");
+    app.setApplicationVersion("0.9");
 
     QStringList args = QApplication::arguments();
     MainWindow komicViewer(args);

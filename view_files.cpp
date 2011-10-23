@@ -12,7 +12,7 @@ ViewFiles::ViewFiles(ArchiveModel *am, QWidget * parent)
     proxy = new QSortFilterProxyModel();
     this->am = am;
     folderChangedFlag = false;
-    thumbSize = Settings::Instance()->getThumbnailSize();
+    this->currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
 
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
@@ -36,11 +36,9 @@ QModelIndex ViewFiles::getIndexFromProxy(const QModelIndex & index)
     return proxy->mapToSource(index);
 }
 
-void ViewFiles::setCurrentDirectory(const QString &filePath, bool isZip, const QString &zipFileName)
+void ViewFiles::setCurrentDirectory(const FileInfo &info)
 {
-    this->isZip = isZip;
-    this->zipPath = zipFileName;
-    this->path = filePath;
+    this->currentInfo = info;
 
     if (this->viewMode() == QListView::IconMode)
     {
@@ -58,18 +56,16 @@ void ViewFiles::setCurrentDirectory(const QString &filePath, bool isZip, const Q
 //This is index from ArchiveModel
 void ViewFiles::OnTreeViewArchiveDirsCurrentChanged(const QModelIndex & index)
 {
-//    qDebug() << index;
     if (!index.isValid())
     {
         return;
     }
 
-    this->zipPath = "";
+    this->currentInfo.zipPathToImage.clear();
     QModelIndex cindex = index;
     while (cindex.parent().isValid())
     {
-        this->zipPath = cindex.data(Qt::DisplayRole).toString() + "/" + this->zipPath;
-//        qDebug() << this->zipPath;
+        this->currentInfo.zipPathToImage = cindex.data(Qt::DisplayRole).toString() + "/" + this->currentInfo.zipPathToImage;
         cindex = cindex.parent();
     }
 
@@ -85,22 +81,18 @@ void ViewFiles::currentChanged(const QModelIndex & current, const QModelIndex & 
     int type = current.data(ROLE_TYPE).toInt();
     QString filename = current.data(Qt::DisplayRole).toString();
 
-    ZipInfo info;
-    info.filePath = "";
-    info.zipFile = "";
-    info.thumbSize = 0;
-
     if (type == TYPE_FILE)
     {
-        info.filePath = this->path + "/" + filename;
+        currentInfo.imageFileName = filename;
+        currentInfo.zipImageFileName.clear();
+        currentInfo.zipPathToImage.clear();
     }
-    else if (type == TYPE_ARCHIVE_FILE)
+    if (type == TYPE_ARCHIVE_FILE)
     {
-        info.filePath = this->path;
-        info.zipFile = this->zipPath + filename;
+        currentInfo.zipImageFileName = filename;
     }
 
-    emit currentFileChanged(info);
+    emit currentFileChanged(currentInfo);
 }
 
 void ViewFiles::setViewMode(ViewMode mode)
@@ -112,9 +104,9 @@ void ViewFiles::setViewMode(ViewMode mode)
 
     if (mode == QListView::IconMode)
     {
-        thumbSize = Settings::Instance()->getThumbnailSize();
-        iconSize = thumbSize;
-        gridSize = thumbSize + 50;
+        currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+        iconSize = currentInfo.thumbSize;
+        gridSize = iconSize + 50;
     }
     else
     {
@@ -127,7 +119,7 @@ void ViewFiles::setViewMode(ViewMode mode)
         {
             QString text = proxy->data(proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             proxy->setData(proxy->index(i, 0, this->rootIndex()), size, Qt::SizeHintRole);
-            proxy->setData(proxy->index(i, 0, this->rootIndex()), fip.icon(path + "/" + text), Qt::DecorationRole);
+            proxy->setData(proxy->index(i, 0, this->rootIndex()), fip.icon(currentInfo.containerPath + "/" + text), Qt::DecorationRole);
         }
     }
     QListView::setViewMode(mode);
@@ -135,7 +127,7 @@ void ViewFiles::setViewMode(ViewMode mode)
     this->setIconSize(QSize(iconSize, iconSize));
     this->setGridSize(QSize(gridSize, gridSize));
 
-    setCurrentDirectory(this->path, this->isZip, this->zipPath);
+    setCurrentDirectory(currentInfo);
 }
 
 void ViewFiles::startShowingThumbnails()
@@ -145,51 +137,38 @@ void ViewFiles::startShowingThumbnails()
         return;
     }
 
-    QList <ZipInfo> files;
+    QList <FileInfo> files;
     for(int i = 0; i < proxy->rowCount(this->rootIndex()); i++)
     {
-        proxy->setData(proxy->index(i, 0, this->rootIndex()), QSize(this->thumbSize + 20, this->thumbSize + 20), Qt::SizeHintRole);
+        proxy->setData(proxy->index(i, 0, this->rootIndex()), QSize(currentInfo.thumbSize + 20, currentInfo.thumbSize + 20), Qt::SizeHintRole);
 
         if (proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
                 || (proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE))
         {
-            ZipInfo info;
+            FileInfo info = currentInfo;
 
-            if (this->isZip)
+            if (currentInfo.zipPathToImage.isEmpty())
             {
-                info.filePath = this->path;
-                info.zipFile = this->zipPath + this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+                info.imageFileName = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
             else
             {
-                info.filePath = this->path + "/" + this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
-                info.zipFile = "";
+                info.zipImageFileName = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
-            info.thumbSize = this->thumbSize;
 
             files.append(info);
         }
         else
         {
-
-            ZipInfo info;
-            info.filePath = "";
-            info.zipFile ="";
-            info.thumbSize = this->thumbSize;
+            FileInfo info;
+            info.thumbSize = currentInfo.thumbSize;
             files.append(info);
         }
     }
 
 //    this->reset();
 
-    if (this->isZip)
-    {
-        imageScaling->setFuture(QtConcurrent::mapped(files, loadFromZip));
-    }
-    else
-    {
-        imageScaling->setFuture(QtConcurrent::mapped(files, loadFromFile));
-    }
+    imageScaling->setFuture(QtConcurrent::mapped(files, PixmapLoader::getPixmap));
 }
 
 void ViewFiles::showImage(int num)

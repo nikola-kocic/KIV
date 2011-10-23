@@ -2,6 +2,7 @@
 #define TEXIMG_H
 
 #include "tiledim.h"
+#include "pixmap_loader.h"
 
 #include <QtCore/qstring.h>
 #include <QtGui/qimage.h>
@@ -16,7 +17,7 @@ public:
     int getTexMaxSize();
     void setTexMaxSize(int size);
     void UnloadPow2Bitmap();
-    void CreatePow2Bitmap(const QString &path);
+    void CreatePow2Bitmap(const FileInfo &info);
     static const int MinTileSize = 128;
 
     bool hasPow2Bitmap();

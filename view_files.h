@@ -20,7 +20,7 @@ public:
     ViewFiles(ArchiveModel *am, QWidget *parent = 0);
     void setModel(QAbstractItemModel * model);
     void setViewMode(ViewMode mode);
-    void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipPath = "");
+    void setCurrentDirectory(const FileInfo &info);
     QModelIndex getIndexFromProxy(const QModelIndex & index);
 
 public slots:
@@ -32,10 +32,7 @@ private:
 
     QFutureWatcher<QPixmap> *imageScaling;
 
-    QString path;
-    QString zipPath;
-    int thumbSize;
-    bool isZip;
+    FileInfo currentInfo;
     bool folderChangedFlag;
 
     ArchiveModel *am;
@@ -47,7 +44,7 @@ private slots:
     void OnTreeViewArchiveDirsCurrentChanged(const QModelIndex & index);
 
 signals:
-    void currentFileChanged(ZipInfo);
+    void currentFileChanged(FileInfo);
 
 };
 

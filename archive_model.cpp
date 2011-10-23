@@ -5,18 +5,18 @@
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
+//#include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
 #include <QtGui/qimagereader.h>
 #include <QtCore/qdir.h>
 
-void ArchiveModel::setPath(const QString &filePath, bool isZip)
+void ArchiveModel::setPath(const FileInfo &info)
 {
     this->clear();
 
-    if (!isZip)
+    if (info.zipPathToImage.isEmpty())
     {
-        QDir dir(filePath);
+        QDir dir(info.containerPath);
 
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
         QFileIconProvider fip;
@@ -56,8 +56,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
     {
         this->clear();
 
-    //    qDebug() << "ArchiveModel::setArchiveName" << filePath;
-        QFile zipFile(filePath);
+        QFile zipFile(info.containerPath);
         QuaZip zip(&zipFile);
         if (!zip.open(QuaZip::mdUnzip))
         {
@@ -69,7 +68,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
         QStringList archive_files = zip.getFileNameList();
 
         zip.close();
-        if (zip.getZipError()!=UNZ_OK) {
+        if (zip.getZipError() != UNZ_OK) {
             qWarning("testRead(): zip.close(): %d", zip.getZipError());
             return;
         }
@@ -86,7 +85,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
 
         QStandardItem* node = root;
 
-        for(int i=0; i < archive_files.count() ; ++i)
+        for(int i=0; i < archive_files.count(); ++i)
         {
             node = root;
             QStringList file_path_parts = archive_files.at(i).split('/');
@@ -104,7 +103,6 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
                         QFileInfo fi(archive_files.at(i));
                         if (QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
                         {
-    //                            qDebug() << fi.completeBaseName() << fi.suffix();
                             node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
                         }
                     }

@@ -14,11 +14,29 @@ namespace ViewMode
     enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
 }
 
-typedef struct {
-    QString filePath;
-    QString zipFile;
+class FileInfo
+{
+public:
+    //Doesn't end with "/"
+    QString containerPath;
+    QString imageFileName;
+
+    //Ends with "/"
+    QString zipPathToImage;
+    QString zipImageFileName;
     int thumbSize;
-}ZipInfo;
+
+    FileInfo()
+    {
+        containerPath = "";
+        imageFileName = "";
+        zipPathToImage = "";
+        zipImageFileName = "";
+        thumbSize = 0;
+    }
+};
+
+
 
 const int TYPE_FILE = 1001;
 const int TYPE_DIR = 1002;

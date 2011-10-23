@@ -11,7 +11,7 @@ class ArchiveModel : public QStandardItemModel
     Q_OBJECT
 
 public:
-    void setPath(const QString &filePath, bool isZip = false);
+    void setPath(const FileInfo &info);
 
 private:
     QStandardItem* AddNode(QStandardItem* node, QString name, int index);

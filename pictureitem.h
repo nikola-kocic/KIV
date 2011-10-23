@@ -19,7 +19,7 @@ class PictureItem : public QWidget
 public:
     PictureItem(bool opengl, QWidget * parent = 0, Qt::WindowFlags f = 0 );
 
-    QPixmap getPixmap();
+    bool isPixmapNull();
     void setZoom(qreal z);
     qreal getZoom();
     void setRotation(qreal r);
@@ -52,7 +52,7 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
-    void setPixmap(const ZipInfo &zi);
+    void setPixmap(const FileInfo &info);
 
 private slots:
     void imageFinished(int);

@@ -36,9 +36,6 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
         return;
     }
 
-//    QTime myTimer;
-//    myTimer.start();
-
     QPainter p(this);
     p.setClipRect(event->region().boundingRect());
     p.setRenderHint(QPainter::SmoothPixmapTransform);
@@ -62,9 +59,6 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
 
     p.drawPixmap(drawRect, this->pixmap_edited, sourceRect);
     p.end();
-
-
-//    qDebug() << "Paint: " << myTimer.elapsed();
 }
 
 
@@ -76,9 +70,6 @@ void PictureItemRaster::setRotation(qreal r)
     {
         return;
     }
-
-//    QTime myTimer;
-//    myTimer.start();
 
     pis->setRotation(r);
 
@@ -102,9 +93,6 @@ void PictureItemRaster::setRotation(qreal r)
     pis->boundingRect.setHeight(this->pixmap_edited.height() * pis->getZoom());
     pis->avoidOutOfScreen();
     update();
-
-//    qDebug() << "Rotate: " << myTimer.elapsed();
-
 }
 
 

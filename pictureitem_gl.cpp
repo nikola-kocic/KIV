@@ -21,10 +21,9 @@ PictureItemGL::PictureItemGL(PictureItemShared* pis, QWidget * parent, Qt::Windo
     scaleY = scaleX = 0;
 }
 
-void PictureItemGL::setFile(const ZipInfo &info)
+void PictureItemGL::setFile(const FileInfo &info)
 {
     ti->UnloadPow2Bitmap();
-
 
     for (int hIndex = 0; hIndex < textures.count(); ++hIndex)
     {
@@ -34,15 +33,14 @@ void PictureItemGL::setFile(const ZipInfo &info)
         }
     }
 
-    if (info.filePath == "")
+    if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
     {
         this->textures = QVector < QVector < GLuint > >(0);
         pis->setPixmap(QPixmap(0, 0));
     }
-
-    else if (info.zipFile == "")
+    else
     {
-        ti->CreatePow2Bitmap(info.filePath);
+        ti->CreatePow2Bitmap(info);
         this->textures = QVector < QVector < GLuint > >(ti->hTile->tileCount);
         for (int hIndex = 0; hIndex < ti->hTile->tileCount; ++hIndex)
         {
@@ -62,9 +60,9 @@ void PictureItemGL::setFile(const ZipInfo &info)
                              GL_RGBA, GL_UNSIGNED_BYTE, ti->pow2TileBuffer.at(hIndex).at(vIndex));
             }
         }
+
         pis->setPixmap(QPixmap(1, 1));
     }
-
 }
 
 void PictureItemGL::setPixmap()
@@ -291,8 +289,8 @@ void PictureItemGL::setZoom(qreal current, qreal previous)
     pis->boundingRect = QRectF(p.x(), p.y(), scaledW, scaledH);
 
     setUpdatesEnabled(false);
-    setRotation(pis->getRotation());
     pis->avoidOutOfScreen();
+    setRotation(pis->getRotation());
     setUpdatesEnabled(true);
 
     updateGL();

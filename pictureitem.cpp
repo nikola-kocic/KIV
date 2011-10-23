@@ -25,6 +25,7 @@ PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
 void PictureItem::imageFinished(int num)
 {
     pis->setPixmap(imageLoad->resultAt(num));
+    emit imageChanged();
 }
 
 void PictureItem::initPictureItem()
@@ -77,9 +78,9 @@ bool PictureItem::getHardwareAcceleration()
     return opengl;
 }
 
-QPixmap PictureItem::getPixmap()
+bool PictureItem::isPixmapNull()
 {
-    return pis->getPixmap();
+    return pis->isPixmapNull();
 }
 
 void PictureItem::setZoom(qreal z)
@@ -92,20 +93,19 @@ qreal PictureItem::getZoom()
     return pis->getZoom();
 }
 
-void PictureItem::setPixmap(const ZipInfo &info)
+void PictureItem::setPixmap(const FileInfo &info)
 {
     pis->widgetSize = this->size();
 
     if (opengl)
     {
         imageDisplayGL->setFile(info);
+        emit imageChanged();
     }
     else
     {
-        imageLoad->setFuture(QtConcurrent::run(loadImage, info));
+        imageLoad->setFuture(QtConcurrent::run(PixmapLoader::getPixmap, info));
     }
-
-    emit imageChanged();
 }
 
 void PictureItem::setRotation(qreal r)

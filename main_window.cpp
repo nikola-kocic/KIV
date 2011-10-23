@@ -219,7 +219,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     else
     {
         QString path = Settings::Instance()->getLastPath();
-        if (path != "")
+        if (!path.isEmpty())
         {
             filesystemView->setCurrentIndex(fsmTree->index(path));
         }
@@ -241,7 +241,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)
     {
-//	qDebug() << "kv" << event->key();
         if (lineEditPath->hasFocus())
 	{
 //	    if (lineEditPath->palette() != QApplication::palette())
@@ -265,8 +264,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::createActions()
 {
-//    qDebug() << QIcon::themeSearchPaths();
-//qDebug() << QCoreApplication::applicationDirPath();
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "glyphs";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
@@ -276,7 +273,6 @@ void MainWindow::createActions()
         //This does not happen under GNOME or KDE
 //        QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
         QIcon::setThemeName(FALLBACK_ICON_THEME);
-//        qDebug() << "theme fall back";
     }
 
     openAct = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
@@ -483,7 +479,7 @@ void MainWindow::connectActions()
     connect(filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
     connect(archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), filesView, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
 
-    connect(filesView, SIGNAL(currentFileChanged(ZipInfo)), imageDisplay, SLOT(setPixmap(ZipInfo)));
+    connect(filesView, SIGNAL(currentFileChanged(FileInfo)), imageDisplay, SLOT(setPixmap(FileInfo)));
     connect(imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
     connect(imageDisplay, SIGNAL(toggleFullscreen()), toggleFullscreenAct, SLOT(toggle()));
@@ -618,28 +614,35 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
 {
     dirUpAct->setEnabled(current.parent().isValid());
     filesystemView->scrollTo(current);
-    QString filePath = fsmTree->filePath(current);
+    QString currentFolder = fsmTree->filePath(current);
     setWindowTitle(fsmTree->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
-    updatePath(filePath);
+    updatePath(currentFolder);
+
+    FileInfo info;
+    info.containerPath = currentFolder;
 
     if (fsmTree->isDir(current))
     {
         fsmTree->fetchMore(current);
-        archiveDirsView->hide();
-        am->setPath(filePath);
-        filesView->setCurrentDirectory(filePath);
     }
     else
     {
-        am->setPath(filePath, true);
-        archiveDirsView->show();
-        filesView->setCurrentDirectory(filePath, true);
+        info.zipPathToImage = "/";
     }
 
-    ZipInfo info;
-    info.filePath = "";
-    info.thumbSize = 0;
-    info.zipFile = "";
+    am->setPath(info);
+
+    if(info.zipPathToImage.isEmpty())
+    {
+        archiveDirsView->hide();
+    }
+    else
+    {
+        archiveDirsView->show();
+    }
+
+    filesView->setCurrentDirectory(info);
+
     imageDisplay->setPixmap(info);
 }
 
@@ -711,7 +714,7 @@ bool MainWindow::saveAs()
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    imageDisplay->getPixmap().save(fileName);
+//    imageDisplay->getPixmap().save(fileName);
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
@@ -850,7 +853,7 @@ void MainWindow::toggleShowThumbnails(bool)
 
 void MainWindow::updateActions()
 {
-    bool enableActions = !imageDisplay->getPixmap().isNull();
+    bool enableActions = !imageDisplay->isPixmapNull();
 
     saveAct->setEnabled(enableActions);
     zoomInAct->setEnabled(enableActions);
