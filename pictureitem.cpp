@@ -104,7 +104,7 @@ void PictureItem::setPixmap(const FileInfo &info)
     }
     else
     {
-        imageLoad->setFuture(QtConcurrent::run(PixmapLoader::getPixmap, info));
+        imageLoad->setFuture(QtConcurrent::run(PictureLoader::getPixmap, info));
     }
 }
 

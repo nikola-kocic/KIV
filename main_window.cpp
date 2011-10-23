@@ -714,7 +714,7 @@ bool MainWindow::saveAs()
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-//    imageDisplay->getPixmap().save(fileName);
+    PictureLoader::getImage(filesView->getCurrentFileInfo()).save(fileName, "PNG");
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif

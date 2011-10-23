@@ -138,7 +138,7 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
     {
         return;
     }
-    QImage bitmapData = PixmapLoader::getImage(info);
+    QImage bitmapData = PictureLoader::getImage(info);
     this->channels = 4;
     this->hTile = new TileDim();
     this->vTile = new TileDim();

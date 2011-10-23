@@ -1,5 +1,5 @@
-#ifndef PIXMAPLOADER_H
-#define PIXMAPLOADER_H
+#ifndef PICTURELOADER_H
+#define PICTURELOADER_H
 
 #include "komicviewer_enums.h"
 
@@ -7,7 +7,7 @@
 #include <QtGui/qpixmap.h>
 #include <QtGui/qicon.h>
 
-class PixmapLoader
+class PictureLoader
 {
 public:
     static QPixmap getPixmap(const FileInfo &info);
@@ -21,4 +21,4 @@ private:
     static QImage getImageFromFile(const FileInfo &info);
 };
 
-#endif // PIXMAPLOADER_H
+#endif // PICTURELOADER_H

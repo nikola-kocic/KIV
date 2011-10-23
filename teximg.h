@@ -2,7 +2,7 @@
 #define TEXIMG_H
 
 #include "tiledim.h"
-#include "pixmap_loader.h"
+#include "picture_loader.h"
 
 #include <QtCore/qstring.h>
 #include <QtGui/qimage.h>

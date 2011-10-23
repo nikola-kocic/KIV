@@ -2,7 +2,7 @@
 #define VIEWFILES_H
 
 #include "komicviewer_enums.h"
-#include "pixmap_loader.h"
+#include "picture_loader.h"
 #include "archive_model.h"
 
 #include <QtGui/qlistview.h>
@@ -22,6 +22,7 @@ public:
     void setViewMode(ViewMode mode);
     void setCurrentDirectory(const FileInfo &info);
     QModelIndex getIndexFromProxy(const QModelIndex & index);
+    FileInfo getCurrentFileInfo();
 
 public slots:
     void pageNext();

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "view_files.h"
-#include "pixmap_loader.h"
+#include "picture_loader.h"
 #include "pictureitem.h"
 #include "archive_model.h"
 #include "view_archive_dirs.h"

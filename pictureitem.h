@@ -5,7 +5,7 @@
 #include "pictureitem_gl.h"
 #include "pictureitem_shared.h"
 #include "teximg.h"
-#include "pixmap_loader.h"
+#include "picture_loader.h"
 
 #include <QtCore/qtconcurrentrun.h>
 #include <QtCore/qfuturewatcher.h>

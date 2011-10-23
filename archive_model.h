@@ -1,7 +1,7 @@
 #ifndef ARCHIVE_MODEL_H
 #define ARCHIVE_MODEL_H
 
-#include "pixmap_loader.h"
+#include "picture_loader.h"
 
 #include <QtGui/qstandarditemmodel.h>
 #include <QtGui/qfileiconprovider.h>

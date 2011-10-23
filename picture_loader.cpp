@@ -1,4 +1,4 @@
-#include "pixmap_loader.h"
+#include "picture_loader.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
@@ -8,7 +8,7 @@
 #include <QtGui/qimagereader.h>
 #include <QtCore/qcryptographichash.h>
 
-QPixmap PixmapLoader::getPixmap(const FileInfo &info)
+QPixmap PictureLoader::getPixmap(const FileInfo &info)
 {
     if (info.zipImageFileName.isEmpty())
     {
@@ -34,7 +34,7 @@ QPixmap PixmapLoader::getPixmap(const FileInfo &info)
     }
 }
 
-QImage PixmapLoader::getImage(const FileInfo &info)
+QImage PictureLoader::getImage(const FileInfo &info)
 {
     if (info.zipImageFileName.isEmpty())
     {
@@ -60,7 +60,7 @@ QImage PixmapLoader::getImage(const FileInfo &info)
     }
 }
 
-QPixmap PixmapLoader::getPixmapFromFile(const FileInfo &info)
+QPixmap PictureLoader::getPixmapFromFile(const FileInfo &info)
 {
     if (info.thumbSize == 0)
     {
@@ -83,7 +83,7 @@ QPixmap PixmapLoader::getPixmapFromFile(const FileInfo &info)
     }
 }
 
-QImage PixmapLoader::getImageFromFile(const FileInfo &info)
+QImage PictureLoader::getImageFromFile(const FileInfo &info)
 {
     if (info.thumbSize == 0)
     {
@@ -97,7 +97,7 @@ QImage PixmapLoader::getImageFromFile(const FileInfo &info)
     }
 }
 
-QPixmap PixmapLoader::getPixmapFromZip(const FileInfo &info)
+QPixmap PictureLoader::getPixmapFromZip(const FileInfo &info)
 {
     QFile zipFile(info.containerPath);
     QuaZip zip(&zipFile);
@@ -151,7 +151,7 @@ QPixmap PixmapLoader::getPixmapFromZip(const FileInfo &info)
     }
 }
 
-QImage PixmapLoader::getImageFromZip(const FileInfo &info)
+QImage PictureLoader::getImageFromZip(const FileInfo &info)
 {
     QFile zipFile(info.containerPath);
     QuaZip zip(&zipFile);
@@ -205,7 +205,7 @@ QImage PixmapLoader::getImageFromZip(const FileInfo &info)
     }
 }
 
-QSize PixmapLoader::ThumbnailImageSize(int image_width, int image_height, int thumb_size)
+QSize PictureLoader::ThumbnailImageSize(int image_width, int image_height, int thumb_size)
 {
     if (image_width > image_height)
     {

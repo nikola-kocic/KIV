@@ -25,6 +25,11 @@ ViewFiles::ViewFiles(ArchiveModel *am, QWidget * parent)
     this->setModel(am);
 }
 
+FileInfo ViewFiles::getCurrentFileInfo()
+{
+    return currentInfo;
+}
+
 void ViewFiles::setModel(QAbstractItemModel * model)
 {
     proxy->setSourceModel(model);
@@ -168,7 +173,7 @@ void ViewFiles::startShowingThumbnails()
 
 //    this->reset();
 
-    imageScaling->setFuture(QtConcurrent::mapped(files, PixmapLoader::getPixmap));
+    imageScaling->setFuture(QtConcurrent::mapped(files, PictureLoader::getPixmap));
 }
 
 void ViewFiles::showImage(int num)
