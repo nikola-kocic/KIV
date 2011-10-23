@@ -47,6 +47,7 @@ const int TYPE_ARCHIVE_FILE = 1005;
 
 bool isImage(const QFileInfo &fi);
 bool isArchive(const QFileInfo &fi);
+bool checkFileExtension(const QFileInfo &fi);
 
 const int ROLE_TYPE = Qt::UserRole + 1;
 const int ROLE_ARCHIVE_FILE_NAME = Qt::UserRole + 2;

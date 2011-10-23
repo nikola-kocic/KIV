@@ -12,10 +12,8 @@ class PictureItemShared : public QObject
 
 public:
     PictureItemShared();
-    QPixmap getPixmap();
     void setZoom(qreal z);
     qreal getZoom();
-    void setPixmap(const QPixmap &p);
     void setRotation(qreal r);
     qreal getRotation();
     void setLockMode(LockMode::Mode);
@@ -34,6 +32,7 @@ public:
     void updateLockMode();
     bool dragging;
     bool isPixmapNull();
+    void setPixmapNull(bool value);
     QSize widgetSize;
     QRectF boundingRect;
     void afterPixmapLoad();
@@ -42,9 +41,9 @@ private:
     void start_timerScrollPage();
     void ScrollPageHorizontal(int value);
     void ScrollPageVertical(int value);
-    QPixmap bmp;
     qreal zoom;
     qreal rotation;
+    bool pixmapNull;
     bool rotating;
     bool flagJumpToEnd;
     QPoint dragPoint;
@@ -62,7 +61,6 @@ signals:
     void toggleFullscreen();
     void zoomChanged(qreal current, qreal previous);
     void updateCursor(Qt::CursorShape);
-    void pixmapChanged();
     void update();
 
 public slots:
@@ -71,6 +69,7 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
+
 private slots:
     void on_timerScrollPage_timeout();
 

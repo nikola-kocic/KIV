@@ -10,6 +10,7 @@
 
 QPixmap PictureLoader::getPixmap(const FileInfo &info)
 {
+//    qDebug() << info.containerPath << info.imageFileName << info.thumbSize << info.zipImageFileName << info.zipPathToImage;
     if (info.zipImageFileName.isEmpty())
     {
         if (info.imageFileName.isEmpty())
@@ -18,7 +19,7 @@ QPixmap PictureLoader::getPixmap(const FileInfo &info)
         }
         else
         {
-            return getPixmapFromFile(info);
+            return PictureLoader::getPixmapFromFile(info);
         }
     }
     else
@@ -29,13 +30,14 @@ QPixmap PictureLoader::getPixmap(const FileInfo &info)
         }
         else
         {
-            return getPixmapFromZip(info);
+            return PictureLoader::getPixmapFromZip(info);
         }
     }
 }
 
 QImage PictureLoader::getImage(const FileInfo &info)
 {
+//    qDebug() << info.containerPath << info.imageFileName << info.thumbSize << info.zipImageFileName << info.zipPathToImage;
     if (info.zipImageFileName.isEmpty())
     {
         if (info.imageFileName.isEmpty())
@@ -44,7 +46,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
         }
         else
         {
-            return getImageFromFile(info);
+            return PictureLoader::getImageFromFile(info);
         }
     }
     else
@@ -55,7 +57,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
         }
         else
         {
-            return getImageFromZip(info);
+            return PictureLoader::getImageFromZip(info);
         }
     }
 }
@@ -69,7 +71,7 @@ QPixmap PictureLoader::getPixmapFromFile(const FileInfo &info)
     else
     {
         QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
-        image_reader.setScaledSize(ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
+        image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
 
 //        QFile file;
 //        file.setFileName(filepath);
@@ -92,7 +94,7 @@ QImage PictureLoader::getImageFromFile(const FileInfo &info)
     else
     {
         QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
-        image_reader.setScaledSize(ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
+        image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
         return image_reader.read();
     }
 }
@@ -108,7 +110,7 @@ QPixmap PictureLoader::getPixmapFromZip(const FileInfo &info)
     }
     zip.setFileNameCodec("UTF-8");
 
-    zip.setCurrentFile(info.zipPathToImage + info.zipImageFileName);
+    zip.setCurrentFile((info.zipPathToImage.compare("/") == 0 ? "" : info.zipPathToImage) + info.zipImageFileName);
 
     QuaZipFile file(&zip);
     char c;
@@ -146,7 +148,7 @@ QPixmap PictureLoader::getPixmapFromZip(const FileInfo &info)
     else
     {
         QImageReader image_reader(&out);
-        image_reader.setScaledSize(ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
+        image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
         return QPixmap::fromImageReader(&image_reader);
     }
 }
@@ -162,7 +164,7 @@ QImage PictureLoader::getImageFromZip(const FileInfo &info)
     }
     zip.setFileNameCodec("UTF-8");
 
-    zip.setCurrentFile(info.zipPathToImage + info.zipImageFileName);
+    zip.setCurrentFile((info.zipPathToImage.compare("/") == 0 ? "" : info.zipPathToImage) + info.zipImageFileName);
 
     QuaZipFile file(&zip);
     char c;
@@ -200,7 +202,7 @@ QImage PictureLoader::getImageFromZip(const FileInfo &info)
     else
     {
         QImageReader image_reader(&out);
-        image_reader.setScaledSize(ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
+        image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
         return image_reader.read();
     }
 }

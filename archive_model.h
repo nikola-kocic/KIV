@@ -14,7 +14,7 @@ public:
     void setPath(const FileInfo &info);
 
 private:
-    QStandardItem* AddNode(QStandardItem* node, QString name, int index);
+    QStandardItem* AddNode(QStandardItem *node, const QString &name, int type);
 };
 
 #endif // ARCHIVE_MODEL_H

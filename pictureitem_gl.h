@@ -7,13 +7,16 @@
 
 #include <QtCore/qtimer.h>
 #include <QtOpenGL/qgl.h>
+#include <QtCore/qtconcurrentrun.h>
+#include <QtCore/qfuturewatcher.h>
+#include <QtCore/qtconcurrentmap.h>
 
 class PictureItemGL : public QGLWidget
 {
     Q_OBJECT
 
 public:
-    PictureItemGL(PictureItemShared* pis, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    PictureItemGL(PictureItemShared *picItemShared, QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~PictureItemGL();
     void setRotation(qreal r);
     void setFile(const FileInfo &info);
@@ -21,7 +24,7 @@ public:
 
 private:
     void updateSize();
-    PictureItemShared* pis;
+    PictureItemShared *picItemShared;
 
     qreal scaleX;
     qreal scaleY;
@@ -36,19 +39,15 @@ protected:
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
-//    void paintEvent(QPaintEvent *pe){
-//        QPainter p = new QPainter(pe);
-//        p.drawPixmap(
-//    }
 
 signals:
     void zoomChanged();
+    void imageChanged();
 
 public slots:
     void setZoom(qreal current, qreal previous);
 
 private slots:
-    void setPixmap();
 
 };
 

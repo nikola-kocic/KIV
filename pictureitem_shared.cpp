@@ -7,27 +7,15 @@
 
 PictureItemShared::PictureItemShared()
 {
-    zoom = 1;
-    dragging = false;
-    rotation = 0;
-    bmp = 0;
-    lockMode = LockMode::None;
-    timerScrollPage = new QTimer();
+    this->zoom = 1;
+    this->dragging = false;
+    this->rotation = 0;
+    this->lockMode = LockMode::None;
+    this->timerScrollPage = new QTimer();
     connect(timerScrollPage, SIGNAL(timeout()), this, SLOT(on_timerScrollPage_timeout()));
 //    LockDrag = false;
-    flagJumpToEnd = false;
-    defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1 << 1.25 << 1.5 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
-}
-
-void PictureItemShared::setPixmap(const QPixmap &p)
-{
-    this->bmp = p;
-    emit pixmapChanged();
-}
-
-QPixmap PictureItemShared::getPixmap()
-{
-    return bmp;
+    this->flagJumpToEnd = false;
+    this->defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1 << 1.25 << 1.5 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
 }
 
 //Region Rotation
@@ -39,13 +27,13 @@ void PictureItemShared::setRotation(qreal r)
         return;
     }
 
-    rotation = r;
+    this->rotation = r;
 }
 
 
 qreal PictureItemShared::getRotation()
 {
-    return rotation;
+    return this->rotation;
 }
 
 //End Region Rotation
@@ -70,40 +58,40 @@ void PictureItemShared::setZoom(qreal z)
         z = 1000;
     }
 
-    qreal previous = zoom;
-    zoom = z;
+    qreal previous = this->zoom;
+    this->zoom = z;
 
-    emit zoomChanged(zoom, previous);
+    emit zoomChanged(this->zoom, previous);
 }
 
 
 QPoint PictureItemShared::pointToOrigin(int width, int height)
 {
-    qreal zoomX = (qreal)width / (qreal)boundingRect.width();
-    qreal zoomY = (qreal)height / (qreal)boundingRect.height();
+    qreal zoomX = (qreal)width / (qreal)this->boundingRect.width();
+    qreal zoomY = (qreal)height / (qreal)this->boundingRect.height();
 
-    if (width > widgetSize.width())
+    if (width > this->widgetSize.width())
     {
-        qreal oldX = (boundingRect.x() - (boundingRect.x() * 2)) + (widgetSize.width() / 2);
-        qreal oldY = (boundingRect.y() - (boundingRect.y() * 2)) + (widgetSize.height() / 2);
+        qreal oldX = (this->boundingRect.x() - (this->boundingRect.x() * 2)) + (this->widgetSize.width() / 2);
+        qreal oldY = (this->boundingRect.y() - (this->boundingRect.y() * 2)) + (this->widgetSize.height() / 2);
 
         qreal newX = oldX * zoomX;
         qreal newY = oldY * zoomY;
 
-        qreal originX = newX - (widgetSize.width() / 2) - ((newX - (widgetSize.width() / 2)) * 2);
-        qreal originY = newY - (widgetSize.height() / 2) - ((newY - (widgetSize.height() / 2)) * 2);
+        qreal originX = newX - (this->widgetSize.width() / 2) - ((newX - (this->widgetSize.width() / 2)) * 2);
+        qreal originY = newY - (this->widgetSize.height() / 2) - ((newY - (this->widgetSize.height() / 2)) * 2);
 
         return QPoint(originX, originY);
     }
     else
     {
-        if (height > widgetSize.height())
+        if (height > this->widgetSize.height())
         {
-            qreal oldY = (boundingRect.y() - (boundingRect.y() * 2)) + (widgetSize.height() / 2);
+            qreal oldY = (this->boundingRect.y() - (this->boundingRect.y() * 2)) + (this->widgetSize.height() / 2);
 
             qreal newY = oldY * zoomY;
 
-            qreal originY = newY - (widgetSize.height() / 2) - ((newY - (widgetSize.height() / 2)) * 2);
+            qreal originY = newY - (this->widgetSize.height() / 2) - ((newY - (this->widgetSize.height() / 2)) * 2);
 
             return QPoint(0, originY);
         }
@@ -116,136 +104,136 @@ QPoint PictureItemShared::pointToOrigin(int width, int height)
 
 qreal PictureItemShared::getZoom()
 {
-    return zoom;
+    return this->zoom;
 }
 
 QVector<qreal> PictureItemShared::getDefaultZoomSizes()
 {
-    return defaultZoomSizes;
+    return this->defaultZoomSizes;
 }
 
 void PictureItemShared::zoomIn()
 {
-    for (int i=0; i < defaultZoomSizes.count(); ++i)
+    for (int i=0; i < this->defaultZoomSizes.count(); ++i)
     {
-        if (defaultZoomSizes.at(i) > zoom)
+        if (this->defaultZoomSizes.at(i) > this->zoom)
         {
-            setZoom(defaultZoomSizes.at(i));
+            this->setZoom(this->defaultZoomSizes.at(i));
             return;
         }
     }
 
-    setZoom(zoom * 1.25);
+    this->setZoom(this->zoom * 1.25);
 }
 
 void PictureItemShared::zoomOut()
 {
-    for (int i=0; i < defaultZoomSizes.count(); ++i)
+    for (int i=0; i < this->defaultZoomSizes.count(); ++i)
     {
-        if (defaultZoomSizes.at(i) >= zoom)
+        if (this->defaultZoomSizes.at(i) >= this->zoom)
         {
             if (i != 0)
             {
-                setZoom(defaultZoomSizes.at(i - 1));
+                this->setZoom(this->defaultZoomSizes.at(i - 1));
             }
             else
             {
-                setZoom(zoom / 1.25);
+                this->setZoom(this->zoom / 1.25);
             }
             return;
         }
     }
 
-    setZoom(zoom / 1.25);
+    setZoom(this->zoom / 1.25);
 }
 
 void PictureItemShared::fitToScreen()
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
-    QRect temp = QRect(boundingRect.x(), boundingRect.y(), boundingRect.width() / zoom, boundingRect.height() / zoom);
+    QRect temp = QRect(this->boundingRect.x(), this->boundingRect.y(), this->boundingRect.width() / this->zoom, this->boundingRect.height() / this->zoom);
 
-    qreal x_ratio = (qreal)widgetSize.width() / temp.width();
-    qreal y_ratio = (qreal)widgetSize.height() / temp.height();
+    qreal x_ratio = (qreal)this->widgetSize.width() / temp.width();
+    qreal y_ratio = (qreal)this->widgetSize.height() / temp.height();
 
-    if ((temp.width() <= widgetSize.width()) && (temp.height() <= widgetSize.height()))
+    if ((temp.width() <= this->widgetSize.width()) && (temp.height() <= this->widgetSize.height()))
     {
-        setZoom(1);
+        this->setZoom(1);
     }
-    else if ((x_ratio * temp.height()) < widgetSize.height())
+    else if ((x_ratio * temp.height()) < this->widgetSize.height())
     {
-        setZoom(x_ratio);
+        this->setZoom(x_ratio);
     }
     else
     {
-        setZoom(y_ratio);
+        this->setZoom(y_ratio);
     }
 }
 
 void PictureItemShared::fitWidth()
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
-    qreal tw = boundingRect.width() / zoom;
+    qreal tw = this->boundingRect.width() / this->zoom;
 
-    qreal x_ratio = (qreal)widgetSize.width() / tw;
+    qreal x_ratio = (qreal)this->widgetSize.width() / tw;
 
-    if (tw <= widgetSize.width())
+    if (tw <= this->widgetSize.width())
     {
-        setZoom(1);
+        this->setZoom(1);
     }
     else
     {
-        setZoom(x_ratio);
+        this->setZoom(x_ratio);
     }
 }
 
 void PictureItemShared::fitHeight()
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
-    qreal th = boundingRect.height() / zoom;
+    qreal th = this->boundingRect.height() / this->zoom;
 
-    qreal y_ratio = (qreal)widgetSize.height() / th;
+    qreal y_ratio = (qreal)this->widgetSize.height() / th;
 
-    if (th <= widgetSize.height())
+    if (th <= this->widgetSize.height())
     {
-        setZoom(1);
+        this->setZoom(1);
     }
     else
     {
-        setZoom(y_ratio);
+        this->setZoom(y_ratio);
     }
 
 }
 
 void PictureItemShared::updateLockMode()
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
     //use in setpixmap and resize events
-    switch (lockMode)
+    switch (this->lockMode)
     {
     case LockMode::Autofit:
-        fitToScreen();
+        this->fitToScreen();
         break;
     case LockMode::FitWidth:
-        fitWidth();
+        this->fitWidth();
         break;
     case LockMode::FitHeight:
-        fitHeight();
+        this->fitHeight();
         break;
     default:
         break;
@@ -254,58 +242,57 @@ void PictureItemShared::updateLockMode()
 
 void PictureItemShared::setLockMode(LockMode::Mode mode)
 {
-    lockMode = mode;
-
-    updateLockMode();
+    this->lockMode = mode;
+    this->updateLockMode();
 }
 
 LockMode::Mode PictureItemShared::getLockMode()
 {
-    return lockMode;
+    return this->lockMode;
 }
 
 void PictureItemShared::avoidOutOfScreen()
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
     // Am I lined out to the left?
-    if (boundingRect.x() >= 0)
+    if (this->boundingRect.x() >= 0)
     {
-        boundingRect.moveLeft(0);
+        this->boundingRect.moveLeft(0);
     }
-    else if ((boundingRect.x() <= (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)))
+    else if ((this->boundingRect.x() <= (this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2)))
     {
-        if ((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2) <= 0)
+        if ((this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2) <= 0)
         {
             // I am too far to the left!
-            boundingRect.moveLeft((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2));
+            this->boundingRect.moveLeft((this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2));
         }
         else
         {
             // I am too far to the right!
-            boundingRect.moveLeft(0);
+            this->boundingRect.moveLeft(0);
         }
     }
 
     // Am I lined out to the top?
-    if (boundingRect.y() >= 0)
+    if (this->boundingRect.y() >= 0)
     {
-        boundingRect.moveTop(0);
+        this->boundingRect.moveTop(0);
     }
-    else if ((boundingRect.y() <= (boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2)))
+    else if ((this->boundingRect.y() <= (this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height() - this->widgetSize.height()) * 2)))
     {
-        if ((boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2) <= 0)
+        if ((this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height() - this->widgetSize.height()) * 2) <= 0)
         {
             // I am too far to the top!
-            boundingRect.moveTop((boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2));
+            this->boundingRect.moveTop((this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height() - this->widgetSize.height()) * 2));
         }
         else
         {
             // I am too far to the bottom!
-            boundingRect.moveTop(0);
+            this->boundingRect.moveTop(0);
         }
     }
 }
@@ -318,58 +305,57 @@ void PictureItemShared::avoidOutOfScreen()
 
 void PictureItemShared::drag(const QPoint &pt)
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
-    if (dragging)
+    if (this->dragging)
     {
         // Am I dragging it outside of the panel?
-        if ((pt.x() - dragPoint.x() >= (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)) && (pt.x() - dragPoint.x() <= 0))
+        if ((pt.x() - this->dragPoint.x() >= (this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2)) && (pt.x() - this->dragPoint.x() <= 0))
         {
             // No, everything is just fine
-            boundingRect.moveLeft(pt.x() - dragPoint.x());
+            this->boundingRect.moveLeft(pt.x() - this->dragPoint.x());
         }
-        else if ((pt.x() - dragPoint.x() > 0))
+        else if ((pt.x() - this->dragPoint.x() > 0))
         {
             // Now don't drag it out of the panel please
-            boundingRect.moveLeft(0);
+            this->boundingRect.moveLeft(0);
         }
-        else if ((pt.x() - dragPoint.x() < (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)))
+        else if ((pt.x() - this->dragPoint.x() < (this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2)))
         {
             // I am dragging it out of my panel. How many pixels do I have left?
-            if ((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2) <= 0)
+            if ((this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2) <= 0)
             {
                 // Make it fit perfectly
-                boundingRect.moveLeft((boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2));
+                this->boundingRect.moveLeft((this->boundingRect.width() - this->widgetSize.width()) - ((this->boundingRect.width() - this->widgetSize.width()) * 2));
             }
         }
 
         // Am I dragging it outside of the panel?
-        if (pt.y() - dragPoint.y() >= (boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2) && (pt.y() - dragPoint.y() <= 0))
+        if (pt.y() - this->dragPoint.y() >= (this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height() - this->widgetSize.height()) * 2) && (pt.y() - this->dragPoint.y() <= 0))
         {
             // No, everything is just fine
-            boundingRect.moveTop(pt.y() - dragPoint.y());
+            this->boundingRect.moveTop(pt.y() - this->dragPoint.y());
         }
-        else if ((pt.y() - dragPoint.y() > 0))
+        else if ((pt.y() - this->dragPoint.y() > 0))
         {
             // Now don't drag it out of the panel please
-            boundingRect.moveTop(0);
+            this->boundingRect.moveTop(0);
         }
-        else if (pt.y() - dragPoint.y() < (boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2))
+        else if (pt.y() - this->dragPoint.y() < (this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height() - this->widgetSize.height()) * 2))
         {
             // I am dragging it out of my panel. How many pixels do I have left?
-            if ((boundingRect.height() - widgetSize.height()) - ((boundingRect.height() - widgetSize.height()) * 2) <= 0)
+            if ((this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height() - this->widgetSize.height()) * 2) <= 0)
             {
                 // Make it fit perfectly
-                boundingRect.moveTop((boundingRect.height() - widgetSize.height()) - ((boundingRect.height()- widgetSize.height()) * 2));
+                this->boundingRect.moveTop((this->boundingRect.height() - this->widgetSize.height()) - ((this->boundingRect.height()- this->widgetSize.height()) * 2));
             }
         }
         emit update();
     }
 }
-
 
 void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
 {
@@ -394,7 +380,7 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
         {
 
             // Start dragging
-            beginDrag(ev->pos());
+            this->beginDrag(ev->pos());
         }
     }
     else if (ev->button() == Qt::MiddleButton)
@@ -406,11 +392,11 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
             break;
 
         case MiddleClick::AutoFit:
-            fitToScreen();
+            this->fitToScreen();
             break;
 
         case MiddleClick::ZoomReset:
-            setZoom(1);
+            this->setZoom(1);
             break;
 
         case MiddleClick::NextPage:
@@ -430,26 +416,26 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
 
 void PictureItemShared::beginDrag(const QPoint &pt)
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
     // Initial drag position
-    dragPoint.setX(pt.x() - boundingRect.x());
-    dragPoint.setY(pt.y() - boundingRect.y());
-    dragging = true;
+    this->dragPoint.setX(pt.x() - this->boundingRect.x());
+    this->dragPoint.setY(pt.y() - this->boundingRect.y());
+    this->dragging = true;
     emit updateCursor(Qt::ClosedHandCursor);
 }
 
 void PictureItemShared::endDrag()
 {
-    if (isPixmapNull())
+    if (this->isPixmapNull())
     {
         return;
     }
 
-    dragging = false;
+    this->dragging = false;
     emit updateCursor(Qt::OpenHandCursor);
 }
 
@@ -457,38 +443,38 @@ void PictureItemShared::endDrag()
 
 void PictureItemShared::ScrollPageVertical(int value)
 {
-    beginDrag(QPoint(0,0));
-    drag(QPoint(0,value));
-    endDrag();
+    this->beginDrag(QPoint(0,0));
+    this->drag(QPoint(0,value));
+    this->endDrag();
 }
 
 void PictureItemShared::ScrollPageHorizontal(int value)
 {
-    beginDrag(QPoint(0,0));
-    drag(QPoint(value,0));
-    endDrag();
+    this->beginDrag(QPoint(0,0));
+    this->drag(QPoint(value,0));
+    this->endDrag();
 }
 
 bool PictureItemShared::processKeyPressEvent(int key)
 {
     if (key == Qt::Key_Up)
     {
-        ScrollPageVertical(120);
+        this->ScrollPageVertical(120);
         return true;
     }
     else if (key == Qt::Key_Down)
     {
-        ScrollPageVertical(-120);
+        this->ScrollPageVertical(-120);
         return true;
     }
     else if (key == Qt::Key_Left)
     {
-        ScrollPageHorizontal(120);
+        this->ScrollPageHorizontal(120);
         return true;
     }
     else if (key == Qt::Key_Right)
     {
-        ScrollPageHorizontal(-120);
+        this->ScrollPageHorizontal(-120);
         return true;
     }
 
@@ -503,24 +489,24 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
     {
         if (event->delta() < 0)
         {
-            zoomOut();
+            this->zoomOut();
         }
         else
         {
-            zoomIn();
+            this->zoomIn();
         }
     }
     else if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
     {
-        setZoom(zoom * (1 + ((event->delta() / 4.8) / 100)));
+        this->setZoom(this->zoom * (1 + ((event->delta() / 4.8) / 100)));
     }
     else if (event->modifiers() == Qt::ShiftModifier)
     {
-        ScrollPageVertical(event->delta());
+        this->ScrollPageVertical(event->delta());
     }
     else if (event->modifiers() == Qt::AltModifier)
     {
-        ScrollPageHorizontal(event->delta());
+        this->ScrollPageHorizontal(event->delta());
     }
     else if (event->modifiers() == Qt::NoModifier)
     {
@@ -537,51 +523,51 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
         }
         else if (Settings::Instance()->getWheel() == Wheel::Scroll)
         {
-            if ((Settings::Instance()->getPageChangeTimeout() > 0) && (boundingRect.height() > widgetSize.height() || boundingRect.width() > widgetSize.width()))
+            if ((Settings::Instance()->getPageChangeTimeout() > 0) && (this->boundingRect.height() > this->widgetSize.height() || this->boundingRect.width() > this->widgetSize.width()))
             {
                 //If we scroll to bottom of page, start timer
-                if (event->delta() < 0 && -boundingRect.y() + widgetSize.height() >= boundingRect.height() && !timerScrollPage->isActive())
+                if (event->delta() < 0 && -this->boundingRect.y() + this->widgetSize.height() >= this->boundingRect.height() && !this->timerScrollPage->isActive())
                 {
                     if (Settings::Instance()->getScrollPageByWidth())
                     {
                         if (Settings::Instance()->getRightToLeft())
                         {
-                            if (boundingRect.x() < 0)
+                            if (this->boundingRect.x() < 0)
                             {
-                                ScrollPageHorizontal(-event->delta());
+                                this->ScrollPageHorizontal(-event->delta());
 
-                                if (boundingRect.x() == 0)
+                                if (this->boundingRect.x() == 0)
                                 {
-                                    start_timerScrollPage();
+                                    this->start_timerScrollPage();
                                 }
                                 return;
                             }
                         }
                         else
                         {
-                            if ((boundingRect.width() + boundingRect.x()) > widgetSize.width() )
+                            if ((this->boundingRect.width() + this->boundingRect.x()) > this->widgetSize.width() )
                             {
-                                ScrollPageHorizontal(event->delta());
+                                this->ScrollPageHorizontal(event->delta());
 
 
-                                if (boundingRect.width() + boundingRect.x() == widgetSize.width())
+                                if (this->boundingRect.width() + this->boundingRect.x() == this->widgetSize.width())
                                 {
-                                    start_timerScrollPage();
+                                    this->start_timerScrollPage();
                                 }
                                 return;
                             }
                         }
                     }
-                    if (!timerScrollPage->isActive())
+                    if (!this->timerScrollPage->isActive())
                     {
-                        start_timerScrollPage();
+                        this->start_timerScrollPage();
                         emit pageNext();
                     }
                 }
-                else if (event->delta() > 0 && boundingRect.y() == 0 && !timerScrollPage->isActive())
+                else if (event->delta() > 0 && this->boundingRect.y() == 0 && !this->timerScrollPage->isActive())
                 {
-                    start_timerScrollPage();
-                    flagJumpToEnd = Settings::Instance()->getJumpToEnd();
+                    this->start_timerScrollPage();
+                    this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
                     emit pagePrevious();
                 }
                 else
@@ -590,16 +576,14 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
                     // Keep dragging
                     ScrollPageVertical(event->delta());
 
-                    if ((boundingRect.height() + boundingRect.y() == widgetSize.height()
-                        || boundingRect.y() == 0)
-                            && !timerScrollPage->isActive()
+                    if ((this->boundingRect.height() + this->boundingRect.y() == this->widgetSize.height()
+                        || this->boundingRect.y() == 0)
+                            && !this->timerScrollPage->isActive()
                             )
                     {
-                        start_timerScrollPage();
+                        this->start_timerScrollPage();
                     }
                 }
-
-
             }
             else
             {
@@ -612,7 +596,6 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
                     emit  pageNext();
                 }
             }
-
         }
     }
 }
@@ -621,42 +604,47 @@ void PictureItemShared::start_timerScrollPage()
 {
     if (Settings::Instance()->getPageChangeTimeout() > 0)
     {
-        timerScrollPage->start(Settings::Instance()->getPageChangeTimeout());
+        this->timerScrollPage->start(Settings::Instance()->getPageChangeTimeout());
     }
 }
 
 void PictureItemShared::on_timerScrollPage_timeout()
 {
-    timerScrollPage->stop();
+    this->timerScrollPage->stop();
+}
+
+void PictureItemShared::setPixmapNull(bool value)
+{
+    this->pixmapNull = value;
 }
 
 bool PictureItemShared::isPixmapNull()
 {
-    return this->bmp.isNull();
+    return this->pixmapNull;
 }
 
 void PictureItemShared::afterPixmapLoad()
 {
 
-    updateLockMode();
+    this->updateLockMode();
 
-    if (boundingRect.width() > widgetSize.width())
+    if (this->boundingRect.width() > this->widgetSize.width())
     {
-        if ((Settings::Instance()->getRightToLeft() && !flagJumpToEnd)
-                || (!Settings::Instance()->getRightToLeft() && flagJumpToEnd)
+        if ((Settings::Instance()->getRightToLeft() && !this->flagJumpToEnd)
+                || (!Settings::Instance()->getRightToLeft() && this->flagJumpToEnd)
 
                 )
         {
-            boundingRect.moveLeft(-(boundingRect.width() - widgetSize.width()));
+            this->boundingRect.moveLeft(-(this->boundingRect.width() - this->widgetSize.width()));
         }
     }
 
-    if (flagJumpToEnd)
+    if (this->flagJumpToEnd)
     {
-        if (boundingRect.height() > widgetSize.height())
+        if (this->boundingRect.height() > this->widgetSize.height())
         {
-            boundingRect.moveTop(-(boundingRect.height() - widgetSize.height()));
+            this->boundingRect.moveTop(-(this->boundingRect.height() - this->widgetSize.height()));
         }
-        flagJumpToEnd = false;
+        this->flagJumpToEnd = false;
     }
 }

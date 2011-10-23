@@ -7,9 +7,6 @@
 #include "teximg.h"
 #include "picture_loader.h"
 
-#include <QtCore/qtconcurrentrun.h>
-#include <QtCore/qfuturewatcher.h>
-#include <QtCore/qtconcurrentmap.h>
 
 #include <QtGui/qboxlayout.h>
 
@@ -17,7 +14,7 @@ class PictureItem : public QWidget
 {
     Q_OBJECT
 public:
-    PictureItem(bool opengl, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    PictureItem(bool opengl, QWidget *parent = 0, Qt::WindowFlags f = 0 );
 
     bool isPixmapNull();
     void setZoom(qreal z);
@@ -35,9 +32,7 @@ private:
     PictureItemRaster *imageDisplayRaster;
     bool opengl;
     void initPictureItem();
-    QVBoxLayout *vboxMain;
-    PictureItemShared* pis;
-    QFutureWatcher<QPixmap> *imageLoad;
+    PictureItemShared *picItemShared;
 
 signals:
     void pageNext();
@@ -55,7 +50,6 @@ public slots:
     void setPixmap(const FileInfo &info);
 
 private slots:
-    void imageFinished(int);
     void setMouseCursor(Qt::CursorShape);
 
 protected:

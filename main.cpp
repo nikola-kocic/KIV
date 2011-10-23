@@ -9,8 +9,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("KomicViewer");
     app.setApplicationVersion("0.9");
 
-    QStringList args = QApplication::arguments();
-    MainWindow komicViewer(args);
+    MainWindow komicViewer;
     komicViewer.showMaximized();
     return app.exec();
 }

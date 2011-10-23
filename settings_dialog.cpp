@@ -8,74 +8,78 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Settings_Dialog)
 {
-    ui->setupUi(this);
+    this->ui->setupUi(this);
 
     QIntValidator *iv = new QIntValidator();
     iv->setRange(0, 10000);
-    ui->tbWaitTime->setValidator(iv);
+    this->ui->tbWaitTime->setValidator(iv);
 
     QHash<QString, MiddleClick::Action> ddMiddleClickHash;
-    ddMiddleClickHash["<None>"] = MiddleClick::None;
-    ddMiddleClickHash["Full Screen"] = MiddleClick::Fullscreen;
-    ddMiddleClickHash["Autofit"] = MiddleClick::AutoFit;
-    ddMiddleClickHash["Actual Size"] = MiddleClick::ZoomReset;
+    ddMiddleClickHash["<None>"]       = MiddleClick::None;
+    ddMiddleClickHash["Full Screen"]  = MiddleClick::Fullscreen;
+    ddMiddleClickHash["Autofit"]      = MiddleClick::AutoFit;
+    ddMiddleClickHash["Actual Size"]  = MiddleClick::ZoomReset;
     ddMiddleClickHash["Follow Mouse"] = MiddleClick::FollowMouse;
-    ddMiddleClickHash["Next Page"] = MiddleClick::NextPage;
+    ddMiddleClickHash["Next Page"]    = MiddleClick::NextPage;
 
-    ddMidleClickOrder << MiddleClick::None
-                      << MiddleClick::Fullscreen
-                      << MiddleClick::AutoFit
-                      << MiddleClick::ZoomReset
-                      << MiddleClick::NextPage
-//                      << MiddleClick::FollowMouse
-                         ;
+    this->ddMidleClickOrder << MiddleClick::None
+                            << MiddleClick::Fullscreen
+                            << MiddleClick::AutoFit
+                            << MiddleClick::ZoomReset
+                            << MiddleClick::NextPage
+//                          << MiddleClick::FollowMouse
+                               ;
 
-    for(int i=0; i < ddMidleClickOrder.count(); ++i)
+    for (int i=0; i < this->ddMidleClickOrder.count(); ++i)
     {
-        ui->ddMiddleClick->addItem(ddMiddleClickHash.key(ddMidleClickOrder.at(i)));
-        if (ddMidleClickOrder.at(i) == Settings::Instance()->getMiddleClick())
+        this->ui->ddMiddleClick->addItem(ddMiddleClickHash.key(this->ddMidleClickOrder.at(i)));
+        if (this->ddMidleClickOrder.at(i) == Settings::Instance()->getMiddleClick())
         {
-            ui->ddMiddleClick->setCurrentIndex(i);
+            this->ui->ddMiddleClick->setCurrentIndex(i);
         }
     }
 
 
     QHash<QString, Wheel::Action> ddWheelHash;
-    ddWheelHash["<None>"] = Wheel::None;
-    ddWheelHash["Scroll Page"] = Wheel::Scroll;
+    ddWheelHash["<None>"]               = Wheel::None;
+    ddWheelHash["Scroll Page"]          = Wheel::Scroll;
     ddWheelHash["Next / Previous Page"] = Wheel::ChangePage;
-    ddWheelHash["Zoom In / Out"] = Wheel::Zoom;
+    ddWheelHash["Zoom In / Out"]        = Wheel::Zoom;
 
-    ddWheelOrder << Wheel::None <<Wheel::Scroll << Wheel::ChangePage << Wheel::Zoom;
+    this->ddWheelOrder << Wheel::None
+                       << Wheel::Scroll
+                       << Wheel::ChangePage
+                       << Wheel::Zoom
+                          ;
 
-    for(int i=0; i < ddWheelOrder.count(); ++i)
+    for (int i=0; i < this->ddWheelOrder.count(); ++i)
     {
-        ui->ddWheel->addItem(ddWheelHash.key(ddWheelOrder.at(i)));
-        if (ddWheelOrder.at(i) == Settings::Instance()->getWheel())
+        this->ui->ddWheel->addItem(ddWheelHash.key(this->ddWheelOrder.at(i)));
+        if (this->ddWheelOrder.at(i) == Settings::Instance()->getWheel())
         {
-            ui->ddWheel->setCurrentIndex(i);
+            this->ui->ddWheel->setCurrentIndex(i);
         }
     }
 
-    ui->cbScrollByWidth->setChecked(Settings::Instance()->getScrollPageByWidth());
-    ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
-    ui->tbWaitTime->setText(QString::number(Settings::Instance()->getPageChangeTimeout()));
-    ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
-    ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
+    this->ui->cbScrollByWidth->setChecked(Settings::Instance()->getScrollPageByWidth());
+    this->ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
+    this->ui->tbWaitTime->setText(QString::number(Settings::Instance()->getPageChangeTimeout()));
+    this->ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
+    this->ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
 }
 
 void Settings_Dialog::on_buttonBox_accepted()
 {
-    Settings::Instance()->setMiddleClick(ddMidleClickOrder.at(ui->ddMiddleClick->currentIndex()));
-    Settings::Instance()->setWheel(ddWheelOrder.at(ui->ddWheel->currentIndex()));
+    Settings::Instance()->setMiddleClick(this->ddMidleClickOrder.at(this->ui->ddMiddleClick->currentIndex()));
+    Settings::Instance()->setWheel(this->ddWheelOrder.at(this->ui->ddWheel->currentIndex()));
 
-    Settings::Instance()->setScrollPageByWidth(ui->cbScrollByWidth->isChecked());
-    Settings::Instance()->setRightToLeft(ui->cbRTL->isChecked());
-    Settings::Instance()->setJumpToEnd(ui->cbJumpToEnd->isChecked());
-    Settings::Instance()->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
+    Settings::Instance()->setScrollPageByWidth(this->ui->cbScrollByWidth->isChecked());
+    Settings::Instance()->setRightToLeft(this->ui->cbRTL->isChecked());
+    Settings::Instance()->setJumpToEnd(this->ui->cbJumpToEnd->isChecked());
+    Settings::Instance()->setHardwareAcceleration(this->ui->cbHardwareAcceleration->isChecked());
 
     bool ok;
-    int dec = ui->tbWaitTime->text().toInt(&ok, 10);
+    int dec = this->ui->tbWaitTime->text().toInt(&ok, 10);
     if (ok)
     {
         Settings::Instance()->setPageChangeTimeout(dec);
@@ -84,5 +88,5 @@ void Settings_Dialog::on_buttonBox_accepted()
 
 Settings_Dialog::~Settings_Dialog()
 {
-    delete ui;
+    delete this->ui;
 }

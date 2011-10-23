@@ -2,55 +2,49 @@
 
 #include <QtGui/qevent.h>
 
-PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
+PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
 {
     this->opengl = opengl;
     setCursor(Qt::OpenHandCursor);
-    pis = new PictureItemShared();
-    connect(pis, SIGNAL(updateCursor(Qt::CursorShape)), this, SLOT(setMouseCursor(Qt::CursorShape)));
-    connect(pis, SIGNAL(update()), this, SLOT(update()));
+    picItemShared = new PictureItemShared();
+    connect(picItemShared, SIGNAL(updateCursor(Qt::CursorShape)), this, SLOT(setMouseCursor(Qt::CursorShape)));
+    connect(picItemShared, SIGNAL(update()), this, SLOT(update()));
 
-    vboxMain = new QVBoxLayout(this);
+    QVBoxLayout *vboxMain = new QVBoxLayout(this);
     vboxMain->setSpacing(0);
     vboxMain->setMargin(0);
 
     initPictureItem();
 
     this->setLayout(vboxMain);
-
-    imageLoad = new QFutureWatcher<QPixmap>(this);
-    connect(imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 }
 
-void PictureItem::imageFinished(int num)
-{
-    pis->setPixmap(imageLoad->resultAt(num));
-    emit imageChanged();
-}
 
 void PictureItem::initPictureItem()
 {
     if (this->opengl)
     {
-        imageDisplayGL = new PictureItemGL(pis);
-        connect(pis, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
+        imageDisplayGL = new PictureItemGL(picItemShared);
+        connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayGL, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
-        connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
-        connect(pis, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
+        connect(imageDisplayGL, SIGNAL(imageChanged()), this, SIGNAL(imageChanged()));
+        connect(picItemShared, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
+        connect(picItemShared, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
         imageDisplayRaster = 0;
-        vboxMain->addWidget(imageDisplayGL);
+        this->layout()->addWidget(imageDisplayGL);
     }
     else
     {
-        imageDisplayRaster = new PictureItemRaster(pis);
-        connect(pis, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
+        imageDisplayRaster = new PictureItemRaster(picItemShared);
+        connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayRaster, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
-        connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
-        connect(pis, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
+        connect(imageDisplayRaster, SIGNAL(imageChanged()), this, SIGNAL(imageChanged()));
+        connect(picItemShared, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
+        connect(picItemShared, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
         imageDisplayGL = 0;
-        vboxMain->addWidget(imageDisplayRaster);
+        this->layout()->addWidget(imageDisplayRaster);
     }
 }
 
@@ -80,111 +74,108 @@ bool PictureItem::getHardwareAcceleration()
 
 bool PictureItem::isPixmapNull()
 {
-    return pis->isPixmapNull();
+    return picItemShared->isPixmapNull();
 }
 
 void PictureItem::setZoom(qreal z)
 {
-    pis->setZoom(z);
+    picItemShared->setZoom(z);
 }
 
 qreal PictureItem::getZoom()
 {
-    return pis->getZoom();
+    return picItemShared->getZoom();
 }
 
 void PictureItem::setPixmap(const FileInfo &info)
 {
-    pis->widgetSize = this->size();
+    picItemShared->widgetSize = this->size();
 
     if (opengl)
     {
         imageDisplayGL->setFile(info);
-        emit imageChanged();
     }
     else
     {
-        imageLoad->setFuture(QtConcurrent::run(PictureLoader::getPixmap, info));
+        imageDisplayRaster->setFile(info);
     }
 }
 
 void PictureItem::setRotation(qreal r)
 {
-    if (opengl)
+    if (this->opengl)
     {
-        imageDisplayGL->setRotation(r);
+        this->imageDisplayGL->setRotation(r);
     }
     else
     {
-        imageDisplayRaster->setRotation(r);
+        this->imageDisplayRaster->setRotation(r);
     }
 }
 
 qreal PictureItem::getRotation()
 {
-    return pis->getRotation();
+    return this->picItemShared->getRotation();
 }
 
 void PictureItem::setLockMode(LockMode::Mode mode)
 {
-    pis->setLockMode(mode);
+    this->picItemShared->setLockMode(mode);
 }
 
 QVector<qreal> PictureItem::getDefaultZoomSizes()
 {
-    return pis->getDefaultZoomSizes();
+    return this->picItemShared->getDefaultZoomSizes();
 }
 
 LockMode::Mode PictureItem::getLockMode()
 {
-    return pis->getLockMode();
+    return this->picItemShared->getLockMode();
 }
 
 void PictureItem::zoomIn()
 {
-    pis->zoomIn();
+    this->picItemShared->zoomIn();
 }
 
 void PictureItem::zoomOut()
 {
-    pis->zoomOut();
+    this->picItemShared->zoomOut();
 }
 
 void PictureItem::fitToScreen()
 {
-    pis->fitToScreen();
+    this->picItemShared->fitToScreen();
 }
 
 void PictureItem::fitWidth()
 {
-    pis->fitWidth();
+    this->picItemShared->fitWidth();
 }
 
 void PictureItem::fitHeight()
 {
-    pis->fitHeight();
+    this->picItemShared->fitHeight();
 }
-
-
 
 void PictureItem::mousePressEvent(QMouseEvent *ev)
 {
-    setFocus();
+    this->setFocus();
 
-    pis->processMousePressEvent(ev);
+    this->picItemShared->processMousePressEvent(ev);
 }
 
 void PictureItem::mouseMoveEvent(QMouseEvent *ev)
 {
-    pis->drag(ev->pos());
+    this->picItemShared->drag(ev->pos());
 }
 
 void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 {
-    if (pis->dragging && ev->button() == Qt::LeftButton)
+    if (this->picItemShared->dragging && ev->button() == Qt::LeftButton)
     {
-        pis->endDrag();
-        setCursor(Qt::OpenHandCursor);
+        this->picItemShared->endDrag();
+        this->setCursor(Qt::OpenHandCursor);
     }
 }
 
@@ -194,20 +185,20 @@ void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 
 void PictureItem::resizeEvent(QResizeEvent *)
 {
-    if (pis->isPixmapNull())
+    if (this->picItemShared->isPixmapNull())
     {
         return;
     }
 
-    pis->widgetSize = this->size();
-    pis->avoidOutOfScreen();
-    pis->updateLockMode();
+    this->picItemShared->widgetSize = this->size();
+    this->picItemShared->avoidOutOfScreen();
+    this->picItemShared->updateLockMode();
 }
 
 
 void PictureItem::keyPressEvent(QKeyEvent *ev)
 {
-    if (pis->processKeyPressEvent(ev->key()))
+    if (this->picItemShared->processKeyPressEvent(ev->key()))
     {
         ev->accept();
     }
@@ -215,11 +206,11 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
 
 void PictureItem::wheelEvent(QWheelEvent *event)
 {
-    pis->processWheelEvent(event);
-    update();
+    this->picItemShared->processWheelEvent(event);
+    this->update();
 }
 
 void PictureItem::setMouseCursor(Qt::CursorShape cursor)
 {
-    setCursor(cursor);
+    this->setCursor(cursor);
 }

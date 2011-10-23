@@ -6,8 +6,8 @@
 
 TexImg::TexImg()
 {
-    channels = 4;
-    texMaxSize = 2048;
+    this->channels = 4;
+    this->texMaxSize = 2048;
 }
 
 bool TexImg::hasPow2Bitmap()
@@ -17,21 +17,21 @@ bool TexImg::hasPow2Bitmap()
 
 int TexImg::getTexMaxSize()
 {
-    return texMaxSize;
+    return this->texMaxSize;
 }
 
 void TexImg::setTexMaxSize(int size)
 {
-    texMaxSize = qMin(8192, size);
+    this->texMaxSize = qMin(8192, size);
 }
 
 void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
 {
     tileDim->pow2Size = 0;
-    if (tileDim->bmpSize <= getTexMaxSize())
+    if (tileDim->bmpSize <= this->getTexMaxSize())
     {
         int i = TexImg::TexMinSize;
-        while (i <= getTexMaxSize())
+        while (i <= this->getTexMaxSize())
         {
             if (tileDim->bmpSize <= i)
             {
@@ -105,13 +105,13 @@ void TexImg::InitTiles(TileDim *tileDim)
     }
     int pow2BaseCount = tileDim->pow2BaseCount;
     tileDim->tileSize[pow2BaseCount] = tileDim->pow2LastSize;
-    tileDim->switchBorder[pow2BaseCount] = qMin(tileDim->bmpSize, tileDim->switchBorder[pow2BaseCount]);
+    tileDim->switchBorder[pow2BaseCount] = qMin(tileDim->bmpSize, tileDim->switchBorder.at(pow2BaseCount));
     tileDim->offsetBorder[tileDim->tileCount] = tileDim->bmpSize;
     tileDim->switchBorder[tileDim->tileCount] = tileDim->bmpSize;
     for (int j = 0; j <= tileDim->tileCount; ++j)
     {
-        tileDim->offsetBorderNorm[j] = (double)tileDim->offsetBorder[j] / (double)tileDim->bmpSize;
-        tileDim->switchBorderNorm[j] = (double)tileDim->switchBorder[j] / (double)tileDim->bmpSize;
+        tileDim->offsetBorderNorm[j] = (double)tileDim->offsetBorder.at(j) / (double)tileDim->bmpSize;
+        tileDim->switchBorderNorm[j] = (double)tileDim->switchBorder.at(j) / (double)tileDim->bmpSize;
     }
 //    qDebug("InitTiles %x", tileDim);
 }
@@ -132,6 +132,7 @@ int TexImg::Pad4(int yBytes)
     int num = yBytes % 4;
     return (num == 0) ? yBytes : (yBytes + (4 - num));
 }
+
 void TexImg::CreatePow2Bitmap(const FileInfo &info)
 {
     if (this->hasPow2Bitmap())
@@ -164,11 +165,11 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
     this->pow2TileBuffer = QVector < QVector < GLubyte* > >(this->hTile->tileCount);
     for (int i = 0; i < this->hTile->tileCount; ++i)
     {
-        pow2TileBuffer[i].resize(this->vTile->tileCount);
+        this->pow2TileBuffer[i].resize(this->vTile->tileCount);
 
         for (int j=0; j < this->vTile->tileCount; ++j)
         {
-            pow2TileBuffer[i][j] = new GLubyte[this->vTile->tileSize.at(j) * this->hTile->tileSize.at(i) * this->channels];
+            this->pow2TileBuffer[i][j] = new GLubyte[this->vTile->tileSize.at(j) * this->hTile->tileSize.at(i) * this->channels];
         }
     }
 
@@ -179,7 +180,7 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
         int vBorderOffset = this->vTile->offsetBorder.at(vTileIndex);
         for (int hTileIndex = 0; hTileIndex < this->hTile->tileCount; ++hTileIndex)
         {
-            GLubyte* texImage = this->pow2TileBuffer[hTileIndex][vTileIndex];
+            GLubyte *texImage = this->pow2TileBuffer[hTileIndex][vTileIndex];
             int CurrentTileWidth = this->hTile->tileSize.at(hTileIndex);
             int hBorderOffset = this->hTile->offsetBorder.at(hTileIndex);
             for (int h = 0; h < CurrentTileHeight; ++h)
@@ -191,7 +192,7 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
                         if (hBorderOffset + w < bmpSize.width())
                         {
                             color = bitmapData.pixel(hBorderOffset + w, vBorderOffset + h);
-                            int pixel = this->channels*(h *CurrentTileWidth + w);
+                            int pixel = this->channels * (h * CurrentTileWidth + w);
                             texImage[pixel + 0] = (GLubyte)qRed(color);
                             texImage[pixel + 1] = (GLubyte)qGreen(color);
                             texImage[pixel + 2] = (GLubyte)qBlue(color);
@@ -204,4 +205,5 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
     }
 
     bitmapData = QImage();
+    return;
 }

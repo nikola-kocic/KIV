@@ -6,6 +6,7 @@
 class SystemIcons
 {
 public:
+    static QIcon getFileIcon();
     static QIcon getDirectoryIcon();
 };
 

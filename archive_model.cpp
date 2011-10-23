@@ -23,7 +23,7 @@ void ArchiveModel::setPath(const FileInfo &info)
 
         for (int i=0; i < list.count(); ++i)
         {
-            QStandardItem* item = 0;
+            QStandardItem *item = 0;
 
             QFileInfo info = list.at(i);
             if (info.isDir())
@@ -77,15 +77,15 @@ void ArchiveModel::setPath(const FileInfo &info)
         //Populate treeViewFile
 
         QFileIconProvider fip;
-        QStandardItem* root = new QStandardItem();
+        QStandardItem *root = new QStandardItem();
         root->setData(TYPE_ARCHIVE);
         QFileInfo zip_info(zipFile);
         root->setIcon(fip.icon(zip_info));
         root->setText(zip_info.fileName());
 
-        QStandardItem* node = root;
+        QStandardItem *node = root;
 
-        for(int i=0; i < archive_files.count(); ++i)
+        for (int i=0; i < archive_files.count(); ++i)
         {
             node = root;
             QStringList file_path_parts = archive_files.at(i).split('/');
@@ -115,7 +115,7 @@ void ArchiveModel::setPath(const FileInfo &info)
     }
 }
 
-QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int index)
+QStandardItem* ArchiveModel::AddNode(QStandardItem *node, const QString &name, int type)
 {
     for (int i = 0; i < node->rowCount(); ++i)
     {
@@ -125,14 +125,33 @@ QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int inde
         }
     }
 
-    QStandardItem* ntvi = new QStandardItem();
-    ntvi->setData(index, ROLE_TYPE);
+    QStandardItem *ntvi = new QStandardItem();
+    ntvi->setData(type, ROLE_TYPE);
     ntvi->setText(name);
     ntvi->setToolTip(name);
-    if (index == TYPE_ARCHIVE_DIR)
+    if (type == TYPE_DIR || type == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(SystemIcons::getDirectoryIcon());
+        int lastFolderIndex = 0;
+        for (int i = 0; i < node->rowCount(); ++i)
+        {
+            int currentItemType = node->child(lastFolderIndex)->data(ROLE_TYPE).toInt();
+            if (currentItemType == TYPE_DIR || currentItemType == TYPE_ARCHIVE_DIR)
+            {
+                if (node->child(lastFolderIndex)->data(Qt::DisplayRole).toString().compare(name) > 0)
+                {
+                    break;
+                }
+
+                ++lastFolderIndex;
+            }
+        }
+        node->insertRow(lastFolderIndex, ntvi);
     }
-    node->appendRow(ntvi);
+    else
+    {
+        ntvi->setIcon(SystemIcons::getFileIcon());
+        node->appendRow(ntvi);
+    }
     return ntvi;
 }
