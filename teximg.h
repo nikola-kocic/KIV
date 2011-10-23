@@ -1,22 +1,11 @@
 #ifndef TEXIMG_H
 #define TEXIMG_H
 
-#include <QtCore/qstring.h>
 #include "tiledim.h"
-#include <QGLWidget>
-#include <QtGui/qimage.h>
 
-//enum EnumImageLoad
-//{
-//        Undefined,
-//        ReloadImage,
-//        PlayNextImage,
-//        NextImage,
-//        PreviousImage,
-//        LoadFile,
-//        NextFile,
-//        PreviousFile
-//};
+#include <QtCore/qstring.h>
+#include <QtGui/qimage.h>
+#include <QtOpenGL/qgl.h>
 
 class TexImg
 {

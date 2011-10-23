@@ -50,10 +50,10 @@ private slots:
     void OnZoomChanged();
     void OnComboBoxZoomIndexChanged(const int &index);
     void OnComboBoxZoomTextChanged();
-    void OnTreeViewItemActivated ( const QModelIndex & index );
+    void OnTreeViewItemActivated(const QModelIndex & index);
 
     void OnTreeViewCurrentChanged(const QModelIndex & current, const QModelIndex & previous);
-    void OnFilesViewItemActivated ( const QModelIndex & index );
+    void OnFilesViewItemActivated(const QModelIndex & index);
 
     void updateActions();
 //    void OnPixmapLoaderFinished(QPixmap);

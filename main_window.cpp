@@ -2,14 +2,11 @@
 #include "settings_dialog.h"
 #include "system_icons.h"
 #include "settings.h"
+#include "teximg.h"
 
-#include <QtCore/qdebug.h>
-//#include <QtCore/qdatetime.h>
+//#include <QtCore/qdebug.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
-
-//#include <QtGui/QSpacerItem>
-//#include <QtGui/qmessagebox.h>
 #include <QtGui/qapplication.h>
 #include <QtGui/qaction.h>
 #include <QtGui/qevent.h>
@@ -20,7 +17,6 @@
 #include <QtGui/qfileiconprovider.h>
 #include <QtGui/qdesktopwidget.h>
 #include <QtGui/qcompleter.h>
-#include "teximg.h"
 
 MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 {
@@ -161,7 +157,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     setLayout(vboxMain);
 
     filesystemView->setModel(fsmTree);
-    for(int i = 1; i < filesystemView->header()->count(); i++) filesystemView->hideColumn(i);
+    for(int i = 1; i < filesystemView->header()->count(); ++i) filesystemView->hideColumn(i);
 
     archiveDirsView->setModel(am);
 
@@ -170,7 +166,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     foreach(const qreal &i, imageDisplay->getDefaultZoomSizes())
     {
 	comboBoxZoom->addItem(QString::number((int)(i * 100)) + "%");
-	if(i == 1) comboBoxZoom->setCurrentIndex(comboBoxZoom->count() - 1);
+        if (i == 1) comboBoxZoom->setCurrentIndex(comboBoxZoom->count() - 1);
     }
 
     // Now add the line to the splitter handle
@@ -197,7 +193,7 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
 
 
     //Large icons are On by default but I want small icons by default
-    if(Settings::Instance()->getLargeIcons() == true)
+    if (Settings::Instance()->getLargeIcons())
     {
         largeIconsAct->setChecked(true);
     }
@@ -216,14 +212,14 @@ MainWindow::MainWindow (QStringList args, QWidget * parent, Qt::WindowFlags f)
     completer->setModel(fsmTree);
     lineEditPath->setCompleter(completer);
 
-    if(args.count() > 1)
+    if (args.count() > 1)
     {
 	openFile(args[1]);
     }
     else
     {
         QString path = Settings::Instance()->getLastPath();
-        if(path != "")
+        if (path != "")
         {
             filesystemView->setCurrentIndex(fsmTree->index(path));
         }
@@ -243,12 +239,12 @@ QString MainWindow::getCurrentPath()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Escape)
+    if (event->key() == Qt::Key_Escape)
     {
 //	qDebug() << "kv" << event->key();
-	if(lineEditPath->hasFocus())
+        if (lineEditPath->hasFocus())
 	{
-//	    if(lineEditPath->palette() != QApplication::palette())
+//	    if (lineEditPath->palette() != QApplication::palette())
 //	    {
 //		lineEditPath->setPalette(QApplication::palette());
 //	    }
@@ -259,7 +255,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 	    event->accept();
 	}
-	else if(comboBoxZoom->lineEdit()->hasFocus())
+        else if (comboBoxZoom->lineEdit()->hasFocus())
 	{
 	    OnZoomChanged();
 	    event->accept();
@@ -509,7 +505,7 @@ void MainWindow::openFile(const QString &source)
 
 bool MainWindow::checkFileExtension(const QFileInfo &fi)
 {
-    if(isArchive(fi) || fi.isDir() == true)
+    if (isArchive(fi) || fi.isDir())
     {
        return true;
     }
@@ -532,7 +528,7 @@ bool MainWindow::acceptFileDrop(const QMimeData* mimeData){
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
-    if(acceptFileDrop(event->mimeData()) == true)
+    if (acceptFileDrop(event->mimeData()))
     {
         event->acceptProposedAction();
     }
@@ -552,7 +548,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent* event)
 
 void MainWindow::dropEvent(QDropEvent* event)
 {
-    if(event->proposedAction() == Qt::CopyAction)
+    if (event->proposedAction() == Qt::CopyAction)
     {
         openFile(event->mimeData()->urls().at(0).toLocalFile());
     }
@@ -563,27 +559,27 @@ void MainWindow::OnPathEdited()
 {
     QFileInfo fi(lineEditPath->text());
     bool valid = false;
-    if(fi.exists())
+    if (fi.exists())
     {
-        if(checkFileExtension(fi) == true)
+        if (checkFileExtension(fi))
         {
             openFile(lineEditPath->text());
             valid = true;
         }
     }
 
-    if(lineEditPath->text().length() == 0) valid = true;
+    if (lineEditPath->text().length() == 0) valid = true;
 
-    if(valid == false)
+    if (!valid)
     {
         QApplication::beep();
-        QPalette palette( lineEditPath->palette() );
-        palette.setColor( QPalette::Base, QColor::fromRgb(255,150,150) );
+        QPalette palette(lineEditPath->palette());
+        palette.setColor(QPalette::Base, QColor::fromRgb(255,150,150));
         lineEditPath->setPalette(palette);
     }
     else
     {
-        if(lineEditPath->palette() != QApplication::palette())
+        if (lineEditPath->palette() != QApplication::palette())
         {
             lineEditPath->setPalette(QApplication::palette());
         }
@@ -593,7 +589,7 @@ void MainWindow::OnPathEdited()
 void MainWindow::updatePath(const QString &filePath)
 {
     QFileInfo fi(filePath);
-    if(fi.isDir())
+    if (fi.isDir())
     {
         lineEditPath->setText(fi.absoluteFilePath() + "/");
     }
@@ -608,9 +604,9 @@ void MainWindow::refreshPath()
     OnTreeViewCurrentChanged(filesystemView->currentIndex(), filesystemView->currentIndex());
 }
 
-void MainWindow::OnTreeViewItemActivated ( const QModelIndex & index )
+void MainWindow::OnTreeViewItemActivated(const QModelIndex & index)
 {
-    if(lineEditPath->palette() != QApplication::palette())
+    if (lineEditPath->palette() != QApplication::palette())
     {
         lineEditPath->setPalette(QApplication::palette());
 
@@ -626,7 +622,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
     setWindowTitle(fsmTree->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
     updatePath(filePath);
 
-    if(fsmTree->isDir(current))
+    if (fsmTree->isDir(current))
     {
         fsmTree->fetchMore(current);
         archiveDirsView->hide();
@@ -647,15 +643,15 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex & current, const QMo
     imageDisplay->setPixmap(info);
 }
 
-void MainWindow::OnFilesViewItemActivated ( const QModelIndex & index )
+void MainWindow::OnFilesViewItemActivated(const QModelIndex & index)
 {
     int type = index.data(ROLE_TYPE).toInt();
-    if(type == TYPE_DIR || type == TYPE_ARCHIVE)
+    if (type == TYPE_DIR || type == TYPE_ARCHIVE)
     {
         filesystemView->setCurrentIndex(fsmTree->index(getCurrentPath() + "/" + index.data(Qt::DisplayRole).toString()));
         filesystemView->expand(filesystemView->currentIndex());
     }
-    else if(type == TYPE_ARCHIVE_DIR)
+    else if (type == TYPE_ARCHIVE_DIR)
     {
         archiveDirsView->setCurrentIndexFromSource(filesView->getIndexFromProxy(index));
     }
@@ -670,7 +666,7 @@ void MainWindow::togglePanel(bool value)
 void MainWindow::toggleFullscreen(bool value)
 {
     togglePanelAct->setChecked(!value);
-    if(value == true)
+    if (value)
     {
 
 	showFullScreen();
@@ -687,7 +683,7 @@ void MainWindow::toggleFullscreen(bool value)
 
 void MainWindow::dirUp()
 {
-    if(filesystemView->currentIndex().parent().isValid())
+    if (filesystemView->currentIndex().parent().isValid())
     {
         filesystemView->setCurrentIndex(filesystemView->currentIndex().parent());
     }
@@ -771,10 +767,10 @@ void MainWindow::rotateReset()
 void MainWindow::settingsDialog()
 {
     Settings_Dialog sd(this);
-    if(sd.exec() == QDialog::Accepted)
+    if (sd.exec() == QDialog::Accepted)
     {
         //update settings
-        if(Settings::Instance()->getHardwareAcceleration() != imageDisplay->getHardwareAcceleration())
+        if (Settings::Instance()->getHardwareAcceleration() != imageDisplay->getHardwareAcceleration())
         {
             imageDisplay->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
 //            OnFileListCurrentRowChanged (fileList->currentIndex(), fileList->currentIndex() );
@@ -785,7 +781,7 @@ void MainWindow::settingsDialog()
 void MainWindow::toggleLargeIcons(bool value)
 {
     int e;
-    if(value == true)
+    if (value)
     {
 
 //	e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
@@ -818,7 +814,7 @@ bool MainWindow::parseZoom(const QString &zoomText)
     bool ok;
     int dec = zoomvalue.toInt(&ok, 10);
 
-    if(ok)
+    if (ok)
     {
         qreal z = (qreal)dec / 100;
         imageDisplay->setZoom(z);
@@ -829,7 +825,7 @@ bool MainWindow::parseZoom(const QString &zoomText)
 
 void MainWindow::OnComboBoxZoomTextChanged()
 {
-    if(parseZoom(comboBoxZoom->lineEdit()->text()) == false)
+    if (!parseZoom(comboBoxZoom->lineEdit()->text()))
     {
         OnZoomChanged();
     }
@@ -842,7 +838,7 @@ void MainWindow::OnComboBoxZoomIndexChanged(const int &index)
 
 void MainWindow::toggleShowThumbnails(bool)
 {
-    if(showThumbnailsAct->isChecked() == true)
+    if (showThumbnailsAct->isChecked())
     {
         filesView->setViewMode(QListView::IconMode);
     }

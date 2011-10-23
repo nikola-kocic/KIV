@@ -59,12 +59,12 @@ private slots:
     void setMouseCursor(Qt::CursorShape);
 
 protected:
-    void wheelEvent( QWheelEvent* );
-    void mousePressEvent( QMouseEvent *ev );
-    void mouseMoveEvent( QMouseEvent *ev );
-    void mouseReleaseEvent( QMouseEvent *ev );
-    void resizeEvent( QResizeEvent * );
-    void keyPressEvent( QKeyEvent *ev );
+    void wheelEvent(QWheelEvent *);
+    void mousePressEvent(QMouseEvent *);
+    void mouseMoveEvent(QMouseEvent *ev);
+    void mouseReleaseEvent(QMouseEvent *);
+    void resizeEvent(QResizeEvent *);
+    void keyPressEvent(QKeyEvent *);
 
 };
 

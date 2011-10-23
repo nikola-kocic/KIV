@@ -6,11 +6,10 @@
 #include <QtCore/qbuffer.h>
 #include <QtGui/qimagereader.h>
 #include <QtCore/qcryptographichash.h>
-#include <QtDebug>
 
 QPixmap loadImage(const ZipInfo &fileInfo)
 {
-    if(fileInfo.zipFile == "")
+    if (fileInfo.zipFile == "")
     {
         return loadFromFile(fileInfo);
     }
@@ -22,18 +21,18 @@ QPixmap loadImage(const ZipInfo &fileInfo)
 
 QPixmap loadFromFile(const ZipInfo &fileInfo)
 {
-    if(fileInfo.filePath == "")
+    if (fileInfo.filePath == "")
     {
         return QPixmap(0,0);
     }
-    if(fileInfo.thumbSize == 0)
+    if (fileInfo.thumbSize == 0)
     {
         return QPixmap(fileInfo.filePath);
     }
     else
     {
         QImageReader image_reader(fileInfo.filePath);
-        image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height(), fileInfo.thumbSize ) );
+        image_reader.setScaledSize(ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), fileInfo.thumbSize));
 
 
 //        QFile file;
@@ -51,14 +50,14 @@ QPixmap loadFromFile(const ZipInfo &fileInfo)
 
 QPixmap loadFromZip(const ZipInfo &fileInfo)
 {
-    if(fileInfo.filePath == "")
+    if (fileInfo.filePath == "")
     {
         return QPixmap(0,0);
     }
 //    qDebug() << fileInfo.filePath << fileInfo.zipFile;
     QFile zipFile(fileInfo.filePath);
     QuaZip zip(&zipFile);
-    if(!zip.open(QuaZip::mdUnzip))
+    if (!zip.open(QuaZip::mdUnzip))
     {
         qWarning("testRead(): zip.open(): %d", zip.getZipError());
         return QPixmap(0,0);
@@ -69,7 +68,7 @@ QPixmap loadFromZip(const ZipInfo &fileInfo)
 
     QuaZipFile file(&zip);
     char c;
-    if(!file.open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly))
     {
         qWarning("testRead(): file.open(): %d", file.getZipError());
         return QPixmap(0,0);
@@ -94,7 +93,7 @@ QPixmap loadFromZip(const ZipInfo &fileInfo)
     }
     out.close();
 
-    if(fileInfo.thumbSize == 0)
+    if (fileInfo.thumbSize == 0)
     {
         QPixmap pm;
         pm.loadFromData(out.buffer());
@@ -104,12 +103,12 @@ QPixmap loadFromZip(const ZipInfo &fileInfo)
     else
     {
         QImageReader image_reader(&out);
-        image_reader.setScaledSize( ThumbnailImageSize( image_reader.size().width(), image_reader.size().height(), fileInfo.thumbSize ) );
+        image_reader.setScaledSize(ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), fileInfo.thumbSize));
         return QPixmap::fromImageReader(&image_reader);
     }
 }
 
-QSize ThumbnailImageSize ( int image_width, int image_height, int thumb_size )
+QSize ThumbnailImageSize(int image_width, int image_height, int thumb_size)
 {
     if (image_width > image_height)
     {

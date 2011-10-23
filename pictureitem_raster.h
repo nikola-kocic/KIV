@@ -13,7 +13,7 @@ class PictureItemRaster : public QWidget
 
 public:
     PictureItemRaster(PictureItemShared* pis, QWidget * parent = 0, Qt::WindowFlags f = 0 );
-    void setRotation( qreal r );
+    void setRotation(qreal r);
 
 private:
     QPixmap pixmap_edited;
@@ -26,7 +26,7 @@ private slots:
     void setPixmap();
 
 protected:
-    void paintEvent( QPaintEvent *event );
+    void paintEvent(QPaintEvent *event);
 
 signals:
     void zoomChanged();

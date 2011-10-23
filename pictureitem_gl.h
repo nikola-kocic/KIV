@@ -13,11 +13,11 @@ class PictureItemGL : public QGLWidget
     Q_OBJECT
 
 public:
-    PictureItemGL( PictureItemShared* pis, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    PictureItemGL(PictureItemShared* pis, QWidget * parent = 0, Qt::WindowFlags f = 0);
     ~PictureItemGL();
-    void setRotation( qreal r );
+    void setRotation(qreal r);
     void setFile(const ZipInfo &info);
-    void setClearColor( const QColor &color );
+    void setClearColor(const QColor &color);
 
 private:
     void updateSize();
@@ -29,19 +29,23 @@ private:
     int offsetY;
     QColor clearColor;
     QPoint lastPos;
-    QVector< QVector <GLuint> > textures;
+    QVector < QVector <GLuint> > textures;
     TexImg *ti;
 
 protected:
     void initializeGL();
     void paintGL();
-    void resizeGL( int width, int height );
+    void resizeGL(int width, int height);
+//    void paintEvent(QPaintEvent *pe){
+//        QPainter p = new QPainter(pe);
+//        p.drawPixmap(
+//    }
 
 signals:
     void zoomChanged();
 
 public slots:
-    void setZoom( qreal current, qreal previous );
+    void setZoom(qreal current, qreal previous);
 
 private slots:
     void setPixmap();

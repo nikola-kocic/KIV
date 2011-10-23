@@ -22,7 +22,7 @@ public:
     QVector<qreal> getDefaultZoomSizes();
     LockMode::Mode getLockMode();
 
-    void processWheelEvent( QWheelEvent* );
+    void processWheelEvent(QWheelEvent*);
     bool processKeyPressEvent(int key);
     void processMousePressEvent(QMouseEvent *ev);
 

@@ -6,8 +6,6 @@
 class TileDim
 {
 public:
-    TileDim() {};
-
     int bmpSize;
     int pow2Size;
     int pow2BaseSize;

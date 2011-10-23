@@ -1,6 +1,6 @@
 #include "pictureitem.h"
+
 #include <QtGui/qevent.h>
-#include <QtCore>
 
 PictureItem::PictureItem(bool opengl, QWidget * parent, Qt::WindowFlags f)
 {
@@ -29,7 +29,7 @@ void PictureItem::imageFinished(int num)
 
 void PictureItem::initPictureItem()
 {
-    if(this->opengl == true)
+    if (this->opengl)
     {
         imageDisplayGL = new PictureItemGL(pis);
         connect(pis, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
@@ -37,7 +37,7 @@ void PictureItem::initPictureItem()
         connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
         connect(pis, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
-        imageDisplayRaster = NULL;
+        imageDisplayRaster = 0;
         vboxMain->addWidget(imageDisplayGL);
     }
     else
@@ -48,16 +48,16 @@ void PictureItem::initPictureItem()
         connect(pis, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
         connect(pis, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
-        imageDisplayGL = NULL;
+        imageDisplayGL = 0;
         vboxMain->addWidget(imageDisplayRaster);
     }
 }
 
 void PictureItem::setHardwareAcceleration(bool b)
 {
-    if(this->opengl != b)
+    if (this->opengl != b)
     {
-        if(this->opengl == true)
+        if (this->opengl)
         {
 
             imageDisplayGL->deleteLater();
@@ -96,7 +96,7 @@ void PictureItem::setPixmap(const ZipInfo &info)
 {
     pis->widgetSize = this->size();
 
-    if(opengl == true)
+    if (opengl)
     {
         imageDisplayGL->setFile(info);
     }
@@ -110,7 +110,7 @@ void PictureItem::setPixmap(const ZipInfo &info)
 
 void PictureItem::setRotation(qreal r)
 {
-    if(opengl == true)
+    if (opengl)
     {
         imageDisplayGL->setRotation(r);
     }
@@ -176,12 +176,12 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
 
 void PictureItem::mouseMoveEvent(QMouseEvent *ev)
 {
-    pis->drag( ev->pos() );
+    pis->drag(ev->pos());
 }
 
 void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 {
-    if(pis->dragging == true && ev->button() == Qt::LeftButton)
+    if (pis->dragging && ev->button() == Qt::LeftButton)
     {
         pis->endDrag();
         setCursor(Qt::OpenHandCursor);
@@ -194,7 +194,10 @@ void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 
 void PictureItem::resizeEvent(QResizeEvent *)
 {
-    if( pis->isPixmapNull() ) return;
+    if (pis->isPixmapNull())
+    {
+        return;
+    }
 
     pis->widgetSize = this->size();
     pis->avoidOutOfScreen();
@@ -204,13 +207,13 @@ void PictureItem::resizeEvent(QResizeEvent *)
 
 void PictureItem::keyPressEvent(QKeyEvent *ev)
 {
-    if(pis->processKeyPressEvent(ev->key()) == true)
+    if (pis->processKeyPressEvent(ev->key()))
     {
         ev->accept();
     }
 }
 
-void PictureItem::wheelEvent( QWheelEvent *event )
+void PictureItem::wheelEvent(QWheelEvent *event)
 {
     pis->processWheelEvent(event);
     update();

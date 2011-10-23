@@ -6,8 +6,6 @@
 #include <QtGui/qapplication.h>
 #include <QtGui/qstyleditemdelegate.h>
 
-#include <QtCore/QDebug>
-
 ViewFiles::ViewFiles(ArchiveModel *am, QWidget * parent)
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -27,13 +25,13 @@ ViewFiles::ViewFiles(ArchiveModel *am, QWidget * parent)
     this->setModel(am);
 }
 
-void ViewFiles::setModel ( QAbstractItemModel * model )
+void ViewFiles::setModel(QAbstractItemModel * model)
 {
     proxy->setSourceModel(model);
     QListView::setModel(proxy);
 }
 
-QModelIndex ViewFiles::getIndexFromProxy( const QModelIndex & index )
+QModelIndex ViewFiles::getIndexFromProxy(const QModelIndex & index)
 {
     return proxy->mapToSource(index);
 }
@@ -44,10 +42,10 @@ void ViewFiles::setCurrentDirectory(const QString &filePath, bool isZip, const Q
     this->zipPath = zipFileName;
     this->path = filePath;
 
-    if(this->viewMode() == QListView::IconMode)
+    if (this->viewMode() == QListView::IconMode)
     {
         folderChangedFlag = true;
-        if(imageScaling->isRunning() == false)
+        if (imageScaling->isRunning())
         {
             imageScaling->cancel();
             imageScaling->waitForFinished();
@@ -58,17 +56,17 @@ void ViewFiles::setCurrentDirectory(const QString &filePath, bool isZip, const Q
 
 
 //This is index from ArchiveModel
-void ViewFiles::OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index )
+void ViewFiles::OnTreeViewArchiveDirsCurrentChanged(const QModelIndex & index)
 {
 //    qDebug() << index;
-    if(index.isValid() == false)
+    if (!index.isValid())
     {
         return;
     }
 
     this->zipPath = "";
     QModelIndex cindex = index;
-    while(cindex.parent().isValid() == true)
+    while (cindex.parent().isValid())
     {
         this->zipPath = cindex.data(Qt::DisplayRole).toString() + "/" + this->zipPath;
 //        qDebug() << this->zipPath;
@@ -80,7 +78,7 @@ void ViewFiles::OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index 
     startShowingThumbnails();
 }
 
-void ViewFiles::currentChanged ( const QModelIndex & current, const QModelIndex & previous )
+void ViewFiles::currentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     QListView::currentChanged(current, previous);
 
@@ -92,11 +90,11 @@ void ViewFiles::currentChanged ( const QModelIndex & current, const QModelIndex 
     info.zipFile = "";
     info.thumbSize = 0;
 
-    if(type == TYPE_FILE)
+    if (type == TYPE_FILE)
     {
         info.filePath = this->path + "/" + filename;
     }
-    else if(type == TYPE_ARCHIVE_FILE)
+    else if (type == TYPE_ARCHIVE_FILE)
     {
         info.filePath = this->path;
         info.zipFile = this->zipPath + filename;
@@ -107,12 +105,12 @@ void ViewFiles::currentChanged ( const QModelIndex & current, const QModelIndex 
 
 void ViewFiles::setViewMode(ViewMode mode)
 {
-    if(mode == this->viewMode()) return;
+    if (mode == this->viewMode()) return;
 
     int iconSize = -1;
     int gridSize = -1;
 
-    if(mode == QListView::IconMode)
+    if (mode == QListView::IconMode)
     {
         thumbSize = Settings::Instance()->getThumbnailSize();
         iconSize = thumbSize;
@@ -121,43 +119,43 @@ void ViewFiles::setViewMode(ViewMode mode)
     else
     {
         QAbstractItemDelegate * delegate = this->itemDelegate();
-        QSize size = delegate->sizeHint( QStyleOptionViewItem (), am->invisibleRootItem()->index());
+        QSize size = delegate->sizeHint(QStyleOptionViewItem (), am->invisibleRootItem()->index());
 
         QFileIconProvider fip;
 
-        for( int i = 0; i < proxy->rowCount(this->rootIndex()); i++ )
+        for(int i = 0; i < proxy->rowCount(this->rootIndex()); i++)
         {
             QString text = proxy->data(proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             proxy->setData(proxy->index(i, 0, this->rootIndex()), size, Qt::SizeHintRole);
             proxy->setData(proxy->index(i, 0, this->rootIndex()), fip.icon(path + "/" + text), Qt::DecorationRole);
         }
     }
-    QListView::setViewMode( mode );
+    QListView::setViewMode(mode);
 
-    this->setIconSize( QSize( iconSize, iconSize ) );
-    this->setGridSize( QSize( gridSize, gridSize) );
+    this->setIconSize(QSize(iconSize, iconSize));
+    this->setGridSize(QSize(gridSize, gridSize));
 
     setCurrentDirectory(this->path, this->isZip, this->zipPath);
 }
 
 void ViewFiles::startShowingThumbnails()
 {
-    if(proxy->rowCount(this->rootIndex()) == 0 || this->viewMode() != QListView::IconMode)
+    if (proxy->rowCount(this->rootIndex()) == 0 || this->viewMode() != QListView::IconMode)
     {
         return;
     }
 
     QList <ZipInfo> files;
-    for( int i = 0; i < proxy->rowCount(this->rootIndex()); i++ )
+    for(int i = 0; i < proxy->rowCount(this->rootIndex()); i++)
     {
         proxy->setData(proxy->index(i, 0, this->rootIndex()), QSize(this->thumbSize + 20, this->thumbSize + 20), Qt::SizeHintRole);
 
-        if(proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
+        if (proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
                 || (proxy->data(proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE))
         {
             ZipInfo info;
 
-            if(this->isZip == true)
+            if (this->isZip)
             {
                 info.filePath = this->path;
                 info.zipFile = this->zipPath + this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
@@ -184,7 +182,7 @@ void ViewFiles::startShowingThumbnails()
 
 //    this->reset();
 
-    if(this->isZip == true)
+    if (this->isZip)
     {
         imageScaling->setFuture(QtConcurrent::mapped(files, loadFromZip));
     }
@@ -196,7 +194,7 @@ void ViewFiles::startShowingThumbnails()
 
 void ViewFiles::showImage(int num)
 {
-    if(!imageScaling->resultAt(num).isNull())
+    if (!imageScaling->resultAt(num).isNull())
     {
         proxy->setData(proxy->index(num, 0, this->rootIndex()), imageScaling->resultAt(num), Qt::DecorationRole);
     }
@@ -204,12 +202,12 @@ void ViewFiles::showImage(int num)
 
 void ViewFiles::pageNext()
 {
-    if(this->currentIndex().isValid() == false) return;
+    if (!this->currentIndex().isValid()) return;
 
-    for(int i = this->currentIndex().row() + 1; i < proxy->rowCount(this->rootIndex()); i++)
+    for (int i = this->currentIndex().row() + 1; i < proxy->rowCount(this->rootIndex()); ++i)
     {
         int type = proxy->index(i, 0, this->rootIndex()).data(ROLE_TYPE).toInt();
-        if(type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
+        if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
             this->setCurrentIndex(proxy->index(i, 0, this->rootIndex()));
             break;
@@ -219,12 +217,12 @@ void ViewFiles::pageNext()
 
 void ViewFiles::pagePrevious()
 {
-    if(this->currentIndex().isValid() == false) return;
+    if (!this->currentIndex().isValid()) return;
 
-    for(int i = this->currentIndex().row() - 1; i >= 0; i--)
+    for (int i = this->currentIndex().row() - 1; i >= 0; --i)
     {
         int type = proxy->index(i, 0, this->rootIndex()).data(ROLE_TYPE).toInt();
-        if(type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
+        if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
             this->setCurrentIndex(proxy->index(i, 0, this->rootIndex()));
             break;

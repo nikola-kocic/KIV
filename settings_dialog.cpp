@@ -30,10 +30,10 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 //                      << MiddleClick::FollowMouse
                          ;
 
-    for(int i=0; i < ddMidleClickOrder.count(); i++)
+    for(int i=0; i < ddMidleClickOrder.count(); ++i)
     {
         ui->ddMiddleClick->addItem(ddMiddleClickHash.key(ddMidleClickOrder.at(i)));
-        if(ddMidleClickOrder.at(i) == Settings::Instance()->getMiddleClick())
+        if (ddMidleClickOrder.at(i) == Settings::Instance()->getMiddleClick())
         {
             ui->ddMiddleClick->setCurrentIndex(i);
         }
@@ -48,10 +48,10 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 
     ddWheelOrder << Wheel::None <<Wheel::Scroll << Wheel::ChangePage << Wheel::Zoom;
 
-    for(int i=0; i < ddWheelOrder.count(); i++)
+    for(int i=0; i < ddWheelOrder.count(); ++i)
     {
         ui->ddWheel->addItem(ddWheelHash.key(ddWheelOrder.at(i)));
-        if(ddWheelOrder.at(i) == Settings::Instance()->getWheel())
+        if (ddWheelOrder.at(i) == Settings::Instance()->getWheel())
         {
             ui->ddWheel->setCurrentIndex(i);
         }
@@ -76,7 +76,7 @@ void Settings_Dialog::on_buttonBox_accepted()
 
     bool ok;
     int dec = ui->tbWaitTime->text().toInt(&ok, 10);
-    if(ok)
+    if (ok)
     {
         Settings::Instance()->setPageChangeTimeout(dec);
     }

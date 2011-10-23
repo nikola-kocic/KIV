@@ -1,7 +1,6 @@
 #ifndef KOMICVIEWERENUMS_H
 #define KOMICVIEWERENUMS_H
 
-#include <Qt>
 #include <QtCore/qstringlist.h>
 #include <QtCore/qfileinfo.h>
 

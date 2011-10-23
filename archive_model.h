@@ -11,7 +11,6 @@ class ArchiveModel : public QStandardItemModel
     Q_OBJECT
 
 public:
-    ArchiveModel();
     void setPath(const QString &filePath, bool isZip = false);
 
 private:

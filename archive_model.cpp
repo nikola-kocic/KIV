@@ -1,5 +1,6 @@
 #include "archive_model.h"
 #include "komicviewer_enums.h"
+#include "settings.h"
 #include "system_icons.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
@@ -8,36 +9,29 @@
 #include <QtCore/qdebug.h>
 #include <QtGui/qimagereader.h>
 #include <QtCore/qdir.h>
-#include "settings.h"
-
-
-
-ArchiveModel::ArchiveModel()
-{
-}
 
 void ArchiveModel::setPath(const QString &filePath, bool isZip)
 {
     this->clear();
 
-    if(isZip == false)
+    if (!isZip)
     {
         QDir dir(filePath);
 
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
         QFileIconProvider fip;
 
-        for (int i=0; i < list.count(); i++)
+        for (int i=0; i < list.count(); ++i)
         {
             QStandardItem* item = 0;
 
             QFileInfo info = list.at(i);
-            if(info.isDir())
+            if (info.isDir())
             {
                 item = new QStandardItem();
                 item->setData(TYPE_DIR, ROLE_TYPE);
             }
-            else if(isArchive(info))
+            else if (isArchive(info))
             {
                 item = new QStandardItem();
                 item->setData(TYPE_ARCHIVE, ROLE_TYPE);
@@ -48,7 +42,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
                 item->setData(TYPE_FILE, ROLE_TYPE);
             }
 
-            if(item != 0)
+            if (item != 0)
             {
                 item->setText(info.fileName());
                 item->setIcon(fip.icon(info));
@@ -65,7 +59,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
     //    qDebug() << "ArchiveModel::setArchiveName" << filePath;
         QFile zipFile(filePath);
         QuaZip zip(&zipFile);
-        if(!zip.open(QuaZip::mdUnzip))
+        if (!zip.open(QuaZip::mdUnzip))
         {
             qWarning("testRead(): zip.open(): %d", zip.getZipError());
             return;
@@ -75,7 +69,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
         QStringList archive_files = zip.getFileNameList();
 
         zip.close();
-        if(zip.getZipError()!=UNZ_OK) {
+        if (zip.getZipError()!=UNZ_OK) {
             qWarning("testRead(): zip.close(): %d", zip.getZipError());
             return;
         }
@@ -92,11 +86,11 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
 
         QStandardItem* node = root;
 
-        for(int i=0; i < archive_files.count() ; i++)
+        for(int i=0; i < archive_files.count() ; ++i)
         {
             node = root;
             QStringList file_path_parts = archive_files.at(i).split('/');
-            for (int j = 0; j < file_path_parts.count(); j++)
+            for (int j = 0; j < file_path_parts.count(); ++j)
             {
                 if (file_path_parts.at(j).count() > 0)
                 {
@@ -108,7 +102,7 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
                         //if (j == file_path_parts.count() - 1)
                     {
                         QFileInfo fi(archive_files.at(i));
-                        if(QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
+                        if (QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
                         {
     //                            qDebug() << fi.completeBaseName() << fi.suffix();
                             node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
@@ -125,9 +119,9 @@ void ArchiveModel::setPath(const QString &filePath, bool isZip)
 
 QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int index)
 {
-    for(int i = 0; i < node->rowCount(); i++)
+    for (int i = 0; i < node->rowCount(); ++i)
     {
-        if(node->child(i)->text() == name)
+        if (node->child(i)->text() == name)
         {
             return node->child(i);
         }
@@ -137,7 +131,7 @@ QStandardItem* ArchiveModel::AddNode(QStandardItem* node, QString name, int inde
     ntvi->setData(index, ROLE_TYPE);
     ntvi->setText(name);
     ntvi->setToolTip(name);
-    if(index == TYPE_ARCHIVE_DIR)
+    if (index == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(SystemIcons::getDirectoryIcon());
     }

@@ -1,6 +1,5 @@
 #include "view_archive_dirs.h"
 #include "komicviewer_enums.h"
-#include <QDebug>
 
 ViewArchiveDirs::ViewArchiveDirs()
 {
@@ -8,13 +7,13 @@ ViewArchiveDirs::ViewArchiveDirs()
     proxy = new MySortFilterProxyModel();
 }
 
-void ViewArchiveDirs::setModel ( QAbstractItemModel * model )
+void ViewArchiveDirs::setModel(QAbstractItemModel * model)
 {
     proxy->setSourceModel(model);
     QTreeView::setModel(proxy);
 }
 
-void ViewArchiveDirs::currentChanged ( const QModelIndex & current, const QModelIndex & previous )
+void ViewArchiveDirs::currentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     QTreeView::currentChanged(current, previous);
 

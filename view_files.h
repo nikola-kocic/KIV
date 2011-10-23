@@ -11,7 +11,6 @@
 #include <QtCore/qtconcurrentrun.h>
 #include <QtCore/qfuturewatcher.h>
 #include <QtCore/qtconcurrentmap.h>
-#include <QtCore/QTime>
 
 class ViewFiles : public QListView
 {
@@ -19,10 +18,10 @@ class ViewFiles : public QListView
 
 public:
     ViewFiles(ArchiveModel *am, QWidget *parent = 0);
-    void setModel ( QAbstractItemModel * model );
+    void setModel(QAbstractItemModel * model);
     void setViewMode(ViewMode mode);
     void setCurrentDirectory(const QString &filePath, bool isZip = false, const QString &zipPath = "");
-    QModelIndex getIndexFromProxy( const QModelIndex & index );
+    QModelIndex getIndexFromProxy(const QModelIndex & index);
 
 public slots:
     void pageNext();
@@ -44,8 +43,8 @@ private:
 
 private slots:
     void showImage(int num);
-    void currentChanged ( const QModelIndex & current, const QModelIndex & previous );
-    void OnTreeViewArchiveDirsCurrentChanged ( const QModelIndex & index );
+    void currentChanged(const QModelIndex & current, const QModelIndex & previous);
+    void OnTreeViewArchiveDirsCurrentChanged(const QModelIndex & index);
 
 signals:
     void currentFileChanged(ZipInfo);

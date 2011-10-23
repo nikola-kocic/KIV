@@ -10,7 +10,7 @@ PictureItemShared::PictureItemShared()
     zoom = 1;
     dragging = false;
     rotation = 0;
-    bmp = NULL;
+    bmp = 0;
     lockMode = LockMode::None;
     timerScrollPage = new QTimer();
     connect(timerScrollPage, SIGNAL(timeout()), this, SLOT(on_timerScrollPage_timeout()));
@@ -34,7 +34,10 @@ QPixmap PictureItemShared::getPixmap()
 
 void PictureItemShared::setRotation(qreal r)
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     rotation = r;
 }
@@ -53,10 +56,19 @@ qreal PictureItemShared::getRotation()
 
 void PictureItemShared::setZoom(qreal z)
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
-    if(z < 0.001) z = 0.001;
-    else if(z > 1000) z = 1000;
+    if (z < 0.001)
+    {
+        z = 0.001;
+    }
+    else if (z > 1000)
+    {
+        z = 1000;
+    }
 
     qreal previous = zoom;
     zoom = z;
@@ -114,9 +126,9 @@ QVector<qreal> PictureItemShared::getDefaultZoomSizes()
 
 void PictureItemShared::zoomIn()
 {
-    for(int i=0; i<defaultZoomSizes.count(); i++)
+    for (int i=0; i < defaultZoomSizes.count(); ++i)
     {
-        if(defaultZoomSizes.at(i) > zoom)
+        if (defaultZoomSizes.at(i) > zoom)
         {
             setZoom(defaultZoomSizes.at(i));
             return;
@@ -128,13 +140,13 @@ void PictureItemShared::zoomIn()
 
 void PictureItemShared::zoomOut()
 {
-    for(int i=0; i<defaultZoomSizes.count(); i++)
+    for (int i=0; i < defaultZoomSizes.count(); ++i)
     {
-        if(defaultZoomSizes.at(i) >= zoom)
+        if (defaultZoomSizes.at(i) >= zoom)
         {
-            if(i != 0)
+            if (i != 0)
             {
-                setZoom(defaultZoomSizes.at(i-1));
+                setZoom(defaultZoomSizes.at(i - 1));
             }
             else
             {
@@ -149,7 +161,10 @@ void PictureItemShared::zoomOut()
 
 void PictureItemShared::fitToScreen()
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     QRect temp = QRect(boundingRect.x(), boundingRect.y(), boundingRect.width() / zoom, boundingRect.height() / zoom);
 
@@ -172,7 +187,10 @@ void PictureItemShared::fitToScreen()
 
 void PictureItemShared::fitWidth()
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     qreal tw = boundingRect.width() / zoom;
 
@@ -190,7 +208,10 @@ void PictureItemShared::fitWidth()
 
 void PictureItemShared::fitHeight()
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     qreal th = boundingRect.height() / zoom;
 
@@ -209,7 +230,10 @@ void PictureItemShared::fitHeight()
 
 void PictureItemShared::updateLockMode()
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     //use in setpixmap and resize events
     switch (lockMode)
@@ -242,7 +266,10 @@ LockMode::Mode PictureItemShared::getLockMode()
 
 void PictureItemShared::avoidOutOfScreen()
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     // Am I lined out to the left?
     if (boundingRect.x() >= 0)
@@ -291,9 +318,12 @@ void PictureItemShared::avoidOutOfScreen()
 
 void PictureItemShared::drag(const QPoint &pt)
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
-    if (dragging == true)
+    if (dragging)
     {
         // Am I dragging it outside of the panel?
         if ((pt.x() - dragPoint.x() >= (boundingRect.width() - widgetSize.width()) - ((boundingRect.width() - widgetSize.width()) * 2)) && (pt.x() - dragPoint.x() <= 0))
@@ -345,17 +375,17 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
 {
     if (ev->button() ==  Qt::RightButton)
     {
-        if(ev->buttons() == (Qt::LeftButton | Qt::RightButton))
+        if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
         {
             emit pageNext();
-//            _HandledPageChange = true;
+//            _HandledPageChange
         }
     }
     else if (ev->button() == Qt::LeftButton
-//             || LockDrag == true
+//             || LockDrag
              )
     {
-        if(ev->buttons() == (Qt::LeftButton | Qt::RightButton))
+        if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
         {
             emit pagePrevious();
 //            _HandledPageChange = true;
@@ -367,7 +397,7 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
             beginDrag(ev->pos());
         }
     }
-    else if(ev->button() == Qt::MiddleButton)
+    else if (ev->button() == Qt::MiddleButton)
     {
         switch(Settings::Instance()->getMiddleClick())
         {
@@ -400,7 +430,10 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
 
 void PictureItemShared::beginDrag(const QPoint &pt)
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     // Initial drag position
     dragPoint.setX(pt.x() - boundingRect.x());
@@ -411,7 +444,10 @@ void PictureItemShared::beginDrag(const QPoint &pt)
 
 void PictureItemShared::endDrag()
 {
-    if(bmp.isNull()) return;
+    if (isPixmapNull())
+    {
+        return;
+    }
 
     dragging = false;
     emit updateCursor(Qt::OpenHandCursor);
@@ -435,22 +471,22 @@ void PictureItemShared::ScrollPageHorizontal(int value)
 
 bool PictureItemShared::processKeyPressEvent(int key)
 {
-    if(key == Qt::Key_Up)
+    if (key == Qt::Key_Up)
     {
         ScrollPageVertical(120);
         return true;
     }
-    else if(key == Qt::Key_Down)
+    else if (key == Qt::Key_Down)
     {
         ScrollPageVertical(-120);
         return true;
     }
-    else if(key == Qt::Key_Left)
+    else if (key == Qt::Key_Left)
     {
         ScrollPageHorizontal(120);
         return true;
     }
-    else if(key == Qt::Key_Right)
+    else if (key == Qt::Key_Right)
     {
         ScrollPageHorizontal(-120);
         return true;
@@ -459,13 +495,13 @@ bool PictureItemShared::processKeyPressEvent(int key)
     return false;
 }
 
-void PictureItemShared::processWheelEvent( QWheelEvent *event )
+void PictureItemShared::processWheelEvent(QWheelEvent *event)
 {
-    if(event->modifiers() == Qt::ControlModifier
+    if (event->modifiers() == Qt::ControlModifier
             || (event->modifiers() == Qt::NoModifier && Settings::Instance()->getWheel() == Wheel::Zoom)
             )
     {
-        if(event->delta() < 0)
+        if (event->delta() < 0)
         {
             zoomOut();
         }
@@ -474,23 +510,23 @@ void PictureItemShared::processWheelEvent( QWheelEvent *event )
             zoomIn();
         }
     }
-    else if(event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
+    else if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
     {
         setZoom(zoom * (1 + ((event->delta() / 4.8) / 100)));
     }
-    else if(event->modifiers() == Qt::ShiftModifier)
+    else if (event->modifiers() == Qt::ShiftModifier)
     {
         ScrollPageVertical(event->delta());
     }
-    else if(event->modifiers() == Qt::AltModifier)
+    else if (event->modifiers() == Qt::AltModifier)
     {
         ScrollPageHorizontal(event->delta());
     }
-    else if(event->modifiers() == Qt::NoModifier)
+    else if (event->modifiers() == Qt::NoModifier)
     {
-        if(Settings::Instance()->getWheel() == Wheel::ChangePage)
+        if (Settings::Instance()->getWheel() == Wheel::ChangePage)
         {
-            if(event->delta() < 0)
+            if (event->delta() < 0)
             {
                 emit pageNext();
             }
@@ -499,22 +535,22 @@ void PictureItemShared::processWheelEvent( QWheelEvent *event )
                 emit pagePrevious();
             }
         }
-        else if(Settings::Instance()->getWheel() == Wheel::Scroll)
+        else if (Settings::Instance()->getWheel() == Wheel::Scroll)
         {
-            if((Settings::Instance()->getPageChangeTimeout() > 0) && (boundingRect.height() > widgetSize.height() || boundingRect.width() > widgetSize.width()))
+            if ((Settings::Instance()->getPageChangeTimeout() > 0) && (boundingRect.height() > widgetSize.height() || boundingRect.width() > widgetSize.width()))
             {
                 //If we scroll to bottom of page, start timer
-                if (event->delta() < 0 && -boundingRect.y() + widgetSize.height() >= boundingRect.height() && timerScrollPage->isActive() == false)
+                if (event->delta() < 0 && -boundingRect.y() + widgetSize.height() >= boundingRect.height() && !timerScrollPage->isActive())
                 {
-                    if (Settings::Instance()->getScrollPageByWidth() == true)
+                    if (Settings::Instance()->getScrollPageByWidth())
                     {
-                        if(Settings::Instance()->getRightToLeft() == true)
+                        if (Settings::Instance()->getRightToLeft())
                         {
-                            if(boundingRect.x() < 0)
+                            if (boundingRect.x() < 0)
                             {
                                 ScrollPageHorizontal(-event->delta());
 
-                                if(boundingRect.x() == 0)
+                                if (boundingRect.x() == 0)
                                 {
                                     start_timerScrollPage();
                                 }
@@ -523,12 +559,12 @@ void PictureItemShared::processWheelEvent( QWheelEvent *event )
                         }
                         else
                         {
-                            if((boundingRect.width() + boundingRect.x()) > widgetSize.width() )
+                            if ((boundingRect.width() + boundingRect.x()) > widgetSize.width() )
                             {
                                 ScrollPageHorizontal(event->delta());
 
 
-                                if(boundingRect.width() + boundingRect.x() == widgetSize.width())
+                                if (boundingRect.width() + boundingRect.x() == widgetSize.width())
                                 {
                                     start_timerScrollPage();
                                 }
@@ -536,13 +572,13 @@ void PictureItemShared::processWheelEvent( QWheelEvent *event )
                             }
                         }
                     }
-                    if(timerScrollPage->isActive() == false)
+                    if (!timerScrollPage->isActive())
                     {
                         start_timerScrollPage();
                         emit pageNext();
                     }
                 }
-                else if (event->delta() > 0 && boundingRect.y() == 0 && timerScrollPage->isActive() == false)
+                else if (event->delta() > 0 && boundingRect.y() == 0 && !timerScrollPage->isActive())
                 {
                     start_timerScrollPage();
                     flagJumpToEnd = Settings::Instance()->getJumpToEnd();
@@ -554,9 +590,9 @@ void PictureItemShared::processWheelEvent( QWheelEvent *event )
                     // Keep dragging
                     ScrollPageVertical(event->delta());
 
-                    if((boundingRect.height() + boundingRect.y() == widgetSize.height()
+                    if ((boundingRect.height() + boundingRect.y() == widgetSize.height()
                         || boundingRect.y() == 0)
-                            && timerScrollPage->isActive() == false
+                            && !timerScrollPage->isActive()
                             )
                     {
                         start_timerScrollPage();
@@ -583,7 +619,7 @@ void PictureItemShared::processWheelEvent( QWheelEvent *event )
 
 void PictureItemShared::start_timerScrollPage()
 {
-    if(Settings::Instance()->getPageChangeTimeout() > 0)
+    if (Settings::Instance()->getPageChangeTimeout() > 0)
     {
         timerScrollPage->start(Settings::Instance()->getPageChangeTimeout());
     }
@@ -604,10 +640,10 @@ void PictureItemShared::afterPixmapLoad()
 
     updateLockMode();
 
-    if(boundingRect.width() > widgetSize.width())
+    if (boundingRect.width() > widgetSize.width())
     {
-        if((Settings::Instance()->getRightToLeft() == true && flagJumpToEnd == false)
-                || (Settings::Instance()->getRightToLeft() == false && flagJumpToEnd == true)
+        if ((Settings::Instance()->getRightToLeft() && !flagJumpToEnd)
+                || (!Settings::Instance()->getRightToLeft() && flagJumpToEnd)
 
                 )
         {
@@ -615,9 +651,9 @@ void PictureItemShared::afterPixmapLoad()
         }
     }
 
-    if(flagJumpToEnd == true)
+    if (flagJumpToEnd)
     {
-        if(boundingRect.height() > widgetSize.height())
+        if (boundingRect.height() > widgetSize.height())
         {
             boundingRect.moveTop(-(boundingRect.height() - widgetSize.height()));
         }
