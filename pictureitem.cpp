@@ -55,11 +55,11 @@ void PictureItem::setHardwareAcceleration(bool b)
         if (this->opengl)
         {
 
-            imageDisplayGL->deleteLater();
+            delete imageDisplayGL;
         }
         else
         {
-            imageDisplayRaster->deleteLater();
+            delete imageDisplayRaster;
         }
 
         this->opengl = b;

@@ -119,11 +119,8 @@ void TexImg::UnloadPow2Bitmap()
 {
     if (this->hasPow2Bitmap())
     {
-        this->pow2TileBuffer.clear();
-        this->hTile = 0;
-        this->vTile = 0;
-        //        GC.Collect();
-        //        GC.Collect();
+        delete this->hTile;
+        delete this->vTile;
     }
 }
 
@@ -204,6 +201,5 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
         }
     }
 
-    bitmapData = QImage();
     return;
 }

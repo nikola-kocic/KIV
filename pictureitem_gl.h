@@ -17,7 +17,6 @@ class PictureItemGL : public QGLWidget
 
 public:
     PictureItemGL(PictureItemShared *picItemShared, QWidget *parent = 0, Qt::WindowFlags f = 0);
-    ~PictureItemGL();
     void setRotation(qreal r);
     void setFile(const FileInfo &info);
     void setClearColor(const QColor &color);

@@ -29,11 +29,6 @@ public:
     //[Vert][Horiz]
     QVector < QVector < GLubyte* > > pow2TileBuffer;
     int channels;
-//    TexImg *prevTexImg;
-//    TexImg *nextTexImg;
-//    RenderImageState renderImageState = new RenderImageState();
-//    long createPow2BitmapTime;
-//    EnumImageLoad imageLoad;
 
 private:
     static const int TexMinSize = 16;

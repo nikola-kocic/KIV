@@ -781,7 +781,7 @@ void MainWindow::settingsDialog()
         if (Settings::Instance()->getHardwareAcceleration() != this->imageDisplay->getHardwareAcceleration())
         {
             this->imageDisplay->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
-//            OnFileListCurrentRowChanged (fileList->currentIndex(), fileList->currentIndex() );
+            this->imageDisplay->setPixmap(filesView->getCurrentFileInfo());
         }
     }
 }

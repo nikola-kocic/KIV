@@ -14,7 +14,6 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     connect(this->picItemShared, SIGNAL(update()), this, SLOT(update()));
 
     this->ti = new TexImg();
-
     this->textures = QVector < QVector < GLuint > >(0);
     this->clearColor = Qt::lightGray;
     this->offsetX = offsetY = 0;
@@ -23,6 +22,10 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
 
 void PictureItemGL::setFile(const FileInfo &info)
 {
+    this->setUpdatesEnabled(false);
+
+    //Delete old textures
+
     this->ti->UnloadPow2Bitmap();
 
     for (int hIndex = 0; hIndex < textures.count(); ++hIndex)
@@ -33,6 +36,7 @@ void PictureItemGL::setFile(const FileInfo &info)
         }
     }
 
+    //If file is null, display nothing
     if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
     {
         this->textures = QVector < QVector < GLuint > >(0);
@@ -43,7 +47,10 @@ void PictureItemGL::setFile(const FileInfo &info)
     }
 
 
+    //Create textures in memory
     this->ti->CreatePow2Bitmap(info);
+
+    //Upload textures from memory
     this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
     for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
     {
@@ -64,9 +71,19 @@ void PictureItemGL::setFile(const FileInfo &info)
         }
     }
 
-    picItemShared->setPixmapNull(false);
+    //Clear textures from memory
+    for (int hIndex = 0; hIndex < this->ti->pow2TileBuffer.count(); ++hIndex)
+    {
+        for (int vIndex=0; vIndex < this->ti->pow2TileBuffer.at(hIndex).count(); ++vIndex)
+        {
+            delete this->ti->pow2TileBuffer.at(hIndex).at(vIndex);
+        }
+    }
+    this->ti->pow2TileBuffer.clear();
 
-    this->setUpdatesEnabled(false);
+
+    //Update view
+    picItemShared->setPixmapNull(false);
 
     this->setRotation(0);
     if (this->picItemShared->getLockMode() != LockMode::Zoom)
@@ -75,18 +92,13 @@ void PictureItemGL::setFile(const FileInfo &info)
     }
 
     this->picItemShared->boundingRect = QRect(0, 0, (this->ti->hTile->bmpSize * this->picItemShared->getZoom()), (this->ti->vTile->bmpSize * this->picItemShared->getZoom()));
-
     this->picItemShared->afterPixmapLoad();
 
     this->updateSize();
+
     this->setUpdatesEnabled(true);
     this->updateGL();
-
     emit imageChanged();
-}
-
-PictureItemGL::~PictureItemGL()
-{
 }
 
 void PictureItemGL::setClearColor(const QColor &color)
@@ -234,8 +246,6 @@ void PictureItemGL::resizeGL(int width, int height)
 }
 
 
-//Region Rotation
-
 void PictureItemGL::setRotation(qreal r)
 {
     if (this->textures.count() == 0)
@@ -269,11 +279,6 @@ void PictureItemGL::setRotation(qreal r)
     this->updateSize();
     this->updateGL();
 }
-
-
-//End Region Rotation
-
-//Region Zoom
 
 void PictureItemGL::setZoom(qreal current, qreal previous)
 {

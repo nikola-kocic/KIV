@@ -11,13 +11,13 @@ PictureItemRaster::PictureItemRaster(PictureItemShared *picItemShared, QWidget *
     this->picItemShared = picItemShared;
     connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(setZoom(qreal,qreal)));
 
-    imageLoad = new QFutureWatcher<QPixmap>(this);
-    connect(imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
+    this->imageLoad = new QFutureWatcher<QPixmap>(this);
+    connect(this->imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 }
 
 void PictureItemRaster::imageFinished(int num)
 {
-    this->pixmap = imageLoad->resultAt(num);
+    this->pixmap = this->imageLoad->resultAt(num);
     picItemShared->setPixmapNull(this->pixmap.isNull());
 
     this->pixmap_edited = this->pixmap;
@@ -38,7 +38,7 @@ void PictureItemRaster::imageFinished(int num)
 
 void PictureItemRaster::setFile(const FileInfo &info)
 {
-    imageLoad->setFuture(QtConcurrent::run(PictureLoader::getPixmap, info));
+    this->imageLoad->setFuture(QtConcurrent::run(PictureLoader::getPixmap, info));
 }
 
 void PictureItemRaster::paintEvent(QPaintEvent *event)
@@ -73,9 +73,6 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
     p.end();
 }
 
-
-//Region Rotation
-
 void PictureItemRaster::setRotation(qreal r)
 {
     if (this->picItemShared->isPixmapNull())
@@ -107,13 +104,6 @@ void PictureItemRaster::setRotation(qreal r)
     this->update();
 }
 
-
-//End Region Rotation
-
-
-
-//Region Zoom
-
 void PictureItemRaster::setZoom(qreal current, qreal previous)
 {
     if (this->picItemShared->isPixmapNull())
@@ -130,11 +120,3 @@ void PictureItemRaster::setZoom(qreal current, qreal previous)
 
     emit this->zoomChanged();
 }
-
-//End Region Zoom
-
-
-
-//Region Drag
-
-
