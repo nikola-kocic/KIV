@@ -7,6 +7,7 @@
 #include <QtCore/qstring.h>
 #include <QtGui/qimage.h>
 #include <QtOpenGL/qgl.h>
+#include <QtCore/QTime>
 
 class TexImg
 {
@@ -17,8 +18,9 @@ public:
     int getTexMaxSize();
     void setTexMaxSize(int size);
     void UnloadPow2Bitmap();
-    void CreatePow2Bitmap(const FileInfo &info);
+    static TexImg* CreatePow2Bitmap(const FileInfo &info);
     static const int MinTileSize = 128;
+    void clearTextureCache();
 
     bool hasPow2Bitmap();
     uint getKbSizeTileBuffer();

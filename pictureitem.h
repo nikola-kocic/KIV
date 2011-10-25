@@ -26,6 +26,7 @@ public:
     LockMode::Mode getLockMode();
     void setHardwareAcceleration(bool b);
     bool getHardwareAcceleration();
+    void setPixmap(const FileInfo &info);
 
 private:
     PictureItemGL *imageDisplayGL;
@@ -47,7 +48,6 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
-    void setPixmap(const FileInfo &info);
 
 private slots:
     void setMouseCursor(Qt::CursorShape);

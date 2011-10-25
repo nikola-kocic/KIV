@@ -2,7 +2,7 @@
 #include "settings.h"
 #include "picture_loader.h"
 
-//#include <QtCore/qdebug.h>
+#include <QtCore/qdebug.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qpalette.h>
 #include <QtGui/qevent.h>
@@ -13,6 +13,9 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal) ), this, SLOT(setZoom(qreal,qreal)));
     connect(this->picItemShared, SIGNAL(update()), this, SLOT(update()));
 
+    this->imageLoad = new QFutureWatcher<TexImg*>(this);
+    connect(this->imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
+
     this->ti = new TexImg();
     this->textures = QVector < QVector < GLuint > >(0);
     this->clearColor = Qt::lightGray;
@@ -20,8 +23,9 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     this->scaleY = scaleX = 0;
 }
 
-void PictureItemGL::setFile(const FileInfo &info)
+void PictureItemGL::textureFinished(int num)
 {
+    qDebug() << "textureFinished" << num;
     this->setUpdatesEnabled(false);
 
     //Delete old textures
@@ -35,22 +39,12 @@ void PictureItemGL::setFile(const FileInfo &info)
             glDeleteTextures(1, &textures.at(hIndex).at(vIndex));
         }
     }
+    delete this->ti;
 
-    //If file is null, display nothing
-    if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
-    {
-        this->textures = QVector < QVector < GLuint > >(0);
-        picItemShared->setPixmapNull(true);
-        this->updateGL();
-        emit imageChanged();
-        return;
-    }
-
-
-    //Create textures in memory
-    this->ti->CreatePow2Bitmap(info);
+    qDebug() << "OpenGL, set image time" << t.elapsed();
 
     //Upload textures from memory
+    this->ti = this->imageLoad->resultAt(num);
     this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
     for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
     {
@@ -71,16 +65,7 @@ void PictureItemGL::setFile(const FileInfo &info)
         }
     }
 
-    //Clear textures from memory
-    for (int hIndex = 0; hIndex < this->ti->pow2TileBuffer.count(); ++hIndex)
-    {
-        for (int vIndex=0; vIndex < this->ti->pow2TileBuffer.at(hIndex).count(); ++vIndex)
-        {
-            delete this->ti->pow2TileBuffer.at(hIndex).at(vIndex);
-        }
-    }
-    this->ti->pow2TileBuffer.clear();
-
+    this->ti->clearTextureCache();
 
     //Update view
     picItemShared->setPixmapNull(false);
@@ -98,7 +83,30 @@ void PictureItemGL::setFile(const FileInfo &info)
 
     this->setUpdatesEnabled(true);
     this->updateGL();
+    qDebug() << "OpenGL, set textures time" << t.elapsed();
     emit imageChanged();
+}
+
+void PictureItemGL::setFile(const FileInfo &info)
+{
+    this->currentFileInfo = info;
+    //If file is null, display nothing
+    if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
+    {
+        this->textures = QVector < QVector < GLuint > >(0);
+        picItemShared->setPixmapNull(true);
+        this->updateGL();
+        emit imageChanged();
+    }
+    else
+    {
+        if (this->imageLoad->isRunning())
+        {
+            this->imageLoad->waitForFinished();
+        }
+        t.start();
+        this->imageLoad->setFuture(QtConcurrent::run(TexImg::CreatePow2Bitmap, this->currentFileInfo));
+    }
 }
 
 void PictureItemGL::setClearColor(const QColor &color)

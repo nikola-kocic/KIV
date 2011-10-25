@@ -21,7 +21,7 @@ void ArchiveModel::setPath(const FileInfo &info)
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
         QFileIconProvider fip;
 
-        for (int i=0; i < list.count(); ++i)
+        for (int i = 0; i < list.count(); ++i)
         {
             QStandardItem *item = 0;
 
@@ -85,7 +85,7 @@ void ArchiveModel::setPath(const FileInfo &info)
 
         QStandardItem *node = root;
 
-        for (int i=0; i < archive_files.count(); ++i)
+        for (int i = 0; i < archive_files.count(); ++i)
         {
             node = root;
             QStringList file_path_parts = archive_files.at(i).split('/');

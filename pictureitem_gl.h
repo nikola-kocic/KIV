@@ -11,6 +11,8 @@
 #include <QtCore/qfuturewatcher.h>
 #include <QtCore/qtconcurrentmap.h>
 
+#include <QtCore/QTime>
+
 class PictureItemGL : public QGLWidget
 {
     Q_OBJECT
@@ -33,6 +35,9 @@ private:
     QPoint lastPos;
     QVector < QVector <GLuint> > textures;
     TexImg *ti;
+    QFutureWatcher<TexImg*> *imageLoad;
+    FileInfo currentFileInfo;
+    QTime t;
 
 protected:
     void initializeGL();
@@ -47,6 +52,7 @@ public slots:
     void setZoom(qreal current, qreal previous);
 
 private slots:
+    void textureFinished(int);
 
 };
 

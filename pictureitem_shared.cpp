@@ -114,7 +114,7 @@ QVector<qreal> PictureItemShared::getDefaultZoomSizes()
 
 void PictureItemShared::zoomIn()
 {
-    for (int i=0; i < this->defaultZoomSizes.count(); ++i)
+    for (int i = 0; i < this->defaultZoomSizes.count(); ++i)
     {
         if (this->defaultZoomSizes.at(i) > this->zoom)
         {
@@ -128,7 +128,7 @@ void PictureItemShared::zoomIn()
 
 void PictureItemShared::zoomOut()
 {
-    for (int i=0; i < this->defaultZoomSizes.count(); ++i)
+    for (int i = 0; i < this->defaultZoomSizes.count(); ++i)
     {
         if (this->defaultZoomSizes.at(i) >= this->zoom)
         {

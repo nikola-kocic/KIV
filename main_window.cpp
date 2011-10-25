@@ -475,7 +475,7 @@ void MainWindow::connectActions()
     connect(this->filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
     connect(this->archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), this->filesView, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
 
-    connect(this->filesView, SIGNAL(currentFileChanged(FileInfo)), this->imageDisplay, SLOT(setPixmap(FileInfo)));
+    connect(this->filesView, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(OnFilesViewCurrentChanged(FileInfo)));
     connect(this->imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
     connect(this->imageDisplay, SIGNAL(toggleFullscreen()), this->toggleFullscreenAct, SLOT(toggle()));
@@ -488,6 +488,12 @@ void MainWindow::connectActions()
     connect(this->refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(this->dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
 
+}
+
+void MainWindow::OnFilesViewCurrentChanged(const FileInfo &info)
+{
+    this->setCursor(Qt::BusyCursor);
+    this->imageDisplay->setPixmap(info);
 }
 
 void MainWindow::openFile(const QString &source)
@@ -876,6 +882,8 @@ void MainWindow::toggleShowThumbnails(bool)
 
 void MainWindow::updateActions()
 {
+    this->unsetCursor();
+
     bool enableActions = !this->imageDisplay->isPixmapNull();
 
     this->saveAct->setEnabled(enableActions);

@@ -123,6 +123,7 @@ private slots:
     void OnTreeViewItemActivated(const QModelIndex &index);
     void OnTreeViewCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
     void OnFilesViewItemActivated(const QModelIndex &index);
+    void OnFilesViewCurrentChanged(const FileInfo &info);
 
 protected:
     void closeEvent(QCloseEvent *event);

@@ -11,6 +11,8 @@
 #include <QtCore/qfuturewatcher.h>
 #include <QtCore/qtconcurrentmap.h>
 
+#include <QtCore/QTime>
+
 class PictureItemRaster : public QWidget
 {
     Q_OBJECT
@@ -25,6 +27,7 @@ private:
     PictureItemShared *picItemShared;
     QFutureWatcher<QPixmap> *imageLoad;
     QPixmap pixmap;
+    QTime t;
 
 public slots:
     void setZoom(qreal current, qreal previous);

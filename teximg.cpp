@@ -1,8 +1,9 @@
 #include "teximg.h"
 
-//#include <QtCore/qdebug.h>
+#include <QtCore/qdebug.h>
 #include <QtCore/qsize.h>
 #include <QtGui/qpixmap.h>
+#include <QtGui/qimagereader.h>
 
 TexImg::TexImg()
 {
@@ -124,30 +125,58 @@ void TexImg::UnloadPow2Bitmap()
     }
 }
 
+void TexImg::clearTextureCache()
+{
+    //Clear textures from memory
+    for (int hIndex = 0; hIndex < this->pow2TileBuffer.count(); ++hIndex)
+    {
+        for (int vIndex=0; vIndex < this->pow2TileBuffer.at(hIndex).count(); ++vIndex)
+        {
+            delete this->pow2TileBuffer.at(hIndex).at(vIndex);
+        }
+    }
+    this->pow2TileBuffer.clear();
+}
+
 int TexImg::Pad4(int yBytes)
 {
     int num = yBytes % 4;
     return (num == 0) ? yBytes : (yBytes + (4 - num));
 }
 
-void TexImg::CreatePow2Bitmap(const FileInfo &info)
+TexImg* TexImg::CreatePow2Bitmap(const FileInfo &info)
 {
-    if (this->hasPow2Bitmap())
-    {
-        return;
-    }
-    QImage bitmapData = PictureLoader::getImage(info);
-    this->channels = 4;
-    this->hTile = new TileDim();
-    this->vTile = new TileDim();
-    QSize bmpSize = bitmapData.size();
-    this->hTile->bmpSize = bmpSize.width();
-    this->vTile->bmpSize = bmpSize.height();
 
-    this->ComputeBitmapPow2Size(this->hTile);
-    this->ComputeBitmapPow2Size(this->vTile);
-    this->InitTiles(this->hTile);
-    this->InitTiles(this->vTile);
+    QTime t;
+    t.start();
+
+    TexImg *ti = new TexImg();
+
+//    QImageReader ir(info.containerPath + "/" + info.imageFileName);
+
+//    QSize si = ir.size();
+
+
+    QImage image = QImageReader(info.containerPath + "/" + info.imageFileName).read();
+    qDebug() << "CreatePow2Bitmap - QImageReader" << image.size() << t.elapsed();
+    QPixmap p = QPixmap::fromImage(image);
+
+    qDebug() << "CreatePow2Bitmap - QPixmap" << p.size() << t.elapsed();
+
+    QImage bitmapData = PictureLoader::getImage(info);
+    ti->channels = 4;
+    ti->hTile = new TileDim();
+    ti->vTile = new TileDim();
+    QSize bmpSize = bitmapData.size();
+    ti->hTile->bmpSize = bmpSize.width();
+    ti->vTile->bmpSize = bmpSize.height();
+
+    ti->ComputeBitmapPow2Size(ti->hTile);
+    ti->ComputeBitmapPow2Size(ti->vTile);
+    ti->InitTiles(ti->hTile);
+    ti->InitTiles(ti->vTile);
+
+    qDebug() << "CreatePow2Bitmap - inittiles" << t.elapsed();
 
 //    qDebug() << "hTile" << "\nbmpSize" << hTile->bmpSize << "\ndoTiling" << hTile->doTiling << "\noffsetBorder" << hTile->offsetBorder
 //             << "\noffsetBorderNorm" << hTile->offsetBorderNorm << "\npow2BaseCount" << hTile->pow2BaseCount << "\npow2BaseSize" << hTile->pow2BaseSize
@@ -159,27 +188,29 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
 //             << "\npow2LastSize" << vTile->pow2LastSize << "\npow2Size" << vTile->pow2Size << "\nswitchBorder" << vTile->switchBorder << "\nswitchBorderNorm" << vTile->switchBorderNorm
 //             << "\ntileCount" << vTile->tileCount << "\ntileSize" << vTile->tileSize;
 
-    this->pow2TileBuffer = QVector < QVector < GLubyte* > >(this->hTile->tileCount);
-    for (int i = 0; i < this->hTile->tileCount; ++i)
+    ti->pow2TileBuffer = QVector < QVector < GLubyte* > >(ti->hTile->tileCount);
+    for (int i = 0; i < ti->hTile->tileCount; ++i)
     {
-        this->pow2TileBuffer[i].resize(this->vTile->tileCount);
+        ti->pow2TileBuffer[i].resize(ti->vTile->tileCount);
 
-        for (int j=0; j < this->vTile->tileCount; ++j)
+        for (int j=0; j < ti->vTile->tileCount; ++j)
         {
-            this->pow2TileBuffer[i][j] = new GLubyte[this->vTile->tileSize.at(j) * this->hTile->tileSize.at(i) * this->channels];
+            ti->pow2TileBuffer[i][j] = new GLubyte[ti->vTile->tileSize.at(j) * ti->hTile->tileSize.at(i) * ti->channels];
         }
     }
 
+    qDebug() << "CreatePow2Bitmap - pow2TileBuffer" << t.elapsed();
+
     QRgb color;
-    for (int vTileIndex = 0; vTileIndex < this->vTile->tileCount; ++vTileIndex)
+    for (int vTileIndex = 0; vTileIndex < ti->vTile->tileCount; ++vTileIndex)
     {
-        int CurrentTileHeight = this->vTile->tileSize.at(vTileIndex);
-        int vBorderOffset = this->vTile->offsetBorder.at(vTileIndex);
-        for (int hTileIndex = 0; hTileIndex < this->hTile->tileCount; ++hTileIndex)
+        int CurrentTileHeight = ti->vTile->tileSize.at(vTileIndex);
+        int vBorderOffset = ti->vTile->offsetBorder.at(vTileIndex);
+        for (int hTileIndex = 0; hTileIndex < ti->hTile->tileCount; ++hTileIndex)
         {
-            GLubyte *texImage = this->pow2TileBuffer[hTileIndex][vTileIndex];
-            int CurrentTileWidth = this->hTile->tileSize.at(hTileIndex);
-            int hBorderOffset = this->hTile->offsetBorder.at(hTileIndex);
+            GLubyte *texImage = ti->pow2TileBuffer[hTileIndex][vTileIndex];
+            int CurrentTileWidth = ti->hTile->tileSize.at(hTileIndex);
+            int hBorderOffset = ti->hTile->offsetBorder.at(hTileIndex);
             for (int h = 0; h < CurrentTileHeight; ++h)
             {
                 if (vBorderOffset + h < bmpSize.height())
@@ -189,7 +220,7 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
                         if (hBorderOffset + w < bmpSize.width())
                         {
                             color = bitmapData.pixel(hBorderOffset + w, vBorderOffset + h);
-                            int pixel = this->channels * (h * CurrentTileWidth + w);
+                            int pixel = ti->channels * (h * CurrentTileWidth + w);
                             texImage[pixel + 0] = (GLubyte)qRed(color);
                             texImage[pixel + 1] = (GLubyte)qGreen(color);
                             texImage[pixel + 2] = (GLubyte)qBlue(color);
@@ -201,5 +232,6 @@ void TexImg::CreatePow2Bitmap(const FileInfo &info)
         }
     }
 
-    return;
+    qDebug() << "CreatePow2Bitmap - end" << t.elapsed();
+    return ti;
 }

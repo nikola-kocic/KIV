@@ -2,7 +2,7 @@
 #include "settings.h"
 #include "picture_loader.h"
 
-//#include <QtCore/qdebug.h>
+#include <QtCore/qdebug.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qevent.h>
 
@@ -33,11 +33,13 @@ void PictureItemRaster::imageFinished(int num)
 
     this->update();
 
+    qDebug() << "Raster, set image time" << t.elapsed();
     emit imageChanged();
 }
 
 void PictureItemRaster::setFile(const FileInfo &info)
 {
+    t.start();
     this->imageLoad->setFuture(QtConcurrent::run(PictureLoader::getPixmap, info));
 }
 
