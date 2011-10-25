@@ -373,8 +373,6 @@ void MainWindow::createMenus(QMenuBar *parent)
     QMenu *fileMenu = new QMenu(tr("&File"), parent);
     fileMenu->addAction(this->openAct);
     fileMenu->addAction(this->saveAct);
-//    fileMenu->addAction(printAct);
-//    fileMenu->addSeparator();
     fileMenu->addAction(this->exitAct);
 
     QMenu *editMenu = new QMenu(tr("&Edit"), parent);
@@ -501,8 +499,8 @@ void MainWindow::openFile(const QString &source)
     this->filesystemView->setCurrentIndex(this->modelFilesystem->index(source));
 }
 
-
-bool MainWindow::acceptFileDrop(const QMimeData *mimeData){
+bool MainWindow::acceptFileDrop(const QMimeData *mimeData)
+{
      if (mimeData->hasUrls())
      {
          return checkFileExtension(QFileInfo(mimeData->urls().at(0).toLocalFile()));

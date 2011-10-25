@@ -35,7 +35,7 @@ private:
     QPoint lastPos;
     QVector < QVector <GLuint> > textures;
     TexImg *ti;
-    QFutureWatcher<TexImg*> *imageLoad;
+    QThread *imageLoad;
     FileInfo currentFileInfo;
     QTime t;
 
@@ -52,7 +52,7 @@ public slots:
     void setZoom(qreal current, qreal previous);
 
 private slots:
-    void textureFinished(int);
+    void textureFinished();
 
 };
 

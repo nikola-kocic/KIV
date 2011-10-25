@@ -9,8 +9,9 @@
 #include <QtOpenGL/qgl.h>
 #include <QtCore/QTime>
 
-class TexImg
+class TexImg : public QObject
 {
+    Q_OBJECT
 
 public:
     TexImg();
@@ -18,7 +19,7 @@ public:
     int getTexMaxSize();
     void setTexMaxSize(int size);
     void UnloadPow2Bitmap();
-    static TexImg* CreatePow2Bitmap(const FileInfo &info);
+    void setCurrentFileInfo(const FileInfo &info);
     static const int MinTileSize = 128;
     void clearTextureCache();
 
@@ -32,14 +33,21 @@ public:
     QVector < QVector < GLubyte* > > pow2TileBuffer;
     int channels;
 
+public slots:
+    void CreatePow2Bitmap();
+
 private:
     static const int TexMinSize = 16;
     static const int ThresholdTileSize = 1024;
     int texMaxSize;
+    FileInfo currentFileInfo;
 
     void ComputeBitmapPow2Size(TileDim *tileDim);
     void InitTiles(TileDim *tileDim);
     int Pad4(int yBytes);
+
+signals:
+    void finished();
 
 };
 

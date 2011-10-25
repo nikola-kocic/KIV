@@ -13,47 +13,46 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal) ), this, SLOT(setZoom(qreal,qreal)));
     connect(this->picItemShared, SIGNAL(update()), this, SLOT(update()));
 
-    this->imageLoad = new QFutureWatcher<TexImg*>(this);
-    connect(this->imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
-
+    this->imageLoad = new QThread();
     this->ti = new TexImg();
-    this->textures = QVector < QVector < GLuint > >(0);
+
+    this->ti->moveToThread(this->imageLoad);
+    connect(this->ti, SIGNAL(finished()), this, SLOT(textureFinished()));
+    connect(this->imageLoad, SIGNAL(started()), this->ti, SLOT(CreatePow2Bitmap()));
+
+
     this->clearColor = Qt::lightGray;
     this->offsetX = offsetY = 0;
     this->scaleY = scaleX = 0;
+    this->textures = QVector < QVector < GLuint > >(0);
 }
 
-void PictureItemGL::textureFinished(int num)
+void PictureItemGL::textureFinished()
 {
-    qDebug() << "textureFinished" << num;
+    this->imageLoad->quit();
+    qDebug() << "textureFinished";
     this->setUpdatesEnabled(false);
 
     //Delete old textures
 
-    this->ti->UnloadPow2Bitmap();
-
-    for (int hIndex = 0; hIndex < textures.count(); ++hIndex)
+    for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
     {
-        for (int vIndex=0; vIndex < textures.at(hIndex).count(); ++vIndex)
+        for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
         {
-            glDeleteTextures(1, &textures.at(hIndex).at(vIndex));
+            qDebug() << "deleted texture @ " << hIndex << vIndex;
+            glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
         }
     }
-    delete this->ti;
 
-    qDebug() << "OpenGL, set image time" << t.elapsed();
-
-    //Upload textures from memory
-    this->ti = this->imageLoad->resultAt(num);
     this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
     for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
     {
         this->textures[hIndex].resize(this->ti->vTile->tileCount);
 
-        for (int vIndex=0; vIndex < this->ti->vTile->tileCount; ++vIndex)
+        for (int vIndex = 0; vIndex < this->ti->vTile->tileCount; ++vIndex)
         {
-            glGenTextures(1, &textures[hIndex][vIndex]);
-            glBindTexture(GL_TEXTURE_2D, textures[hIndex][vIndex]);
+            glGenTextures(1, &this->textures[hIndex][vIndex]);
+            glBindTexture(GL_TEXTURE_2D, this->textures.at(hIndex).at(vIndex));
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -62,10 +61,14 @@ void PictureItemGL::textureFinished(int num)
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->ti->hTile->tileSize.at(hIndex), this->ti->vTile->tileSize.at(vIndex), 0,
                          GL_RGBA, GL_UNSIGNED_BYTE, this->ti->pow2TileBuffer.at(hIndex).at(vIndex));
+
+            qDebug() << "bound texture @ " << hIndex << vIndex;
         }
     }
 
     this->ti->clearTextureCache();
+
+    qDebug() << "OpenGL, set image time" << t.elapsed();
 
     //Update view
     picItemShared->setPixmapNull(false);
@@ -100,12 +103,9 @@ void PictureItemGL::setFile(const FileInfo &info)
     }
     else
     {
-        if (this->imageLoad->isRunning())
-        {
-            this->imageLoad->waitForFinished();
-        }
         t.start();
-        this->imageLoad->setFuture(QtConcurrent::run(TexImg::CreatePow2Bitmap, this->currentFileInfo));
+        this->ti->setCurrentFileInfo(info);
+        this->imageLoad->start();
     }
 }
 
@@ -196,7 +196,7 @@ void PictureItemGL::paintGL()
     QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
     QRectF vertImage = QRectF(QPointF(-this->width() * 0.5, -this->height() * 0.5), QPointF (this->width() * 0.5, this->height() * 0.5));
 
-    for (int hIndex=0; hIndex<this->ti->hTile->tileCount; ++hIndex)
+    for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
     {
         double texScale = (double)this->ti->hTile->bmpSize / (double)this->ti->hTile->tileSize.at(hIndex);
         double tx;
@@ -211,7 +211,7 @@ void PictureItemGL::paintGL()
             continue;
         }
 
-        for (int vIndex=0; vIndex<this->ti->vTile->tileCount; ++vIndex)
+        for (int vIndex = 0; vIndex < this->ti->vTile->tileCount; ++vIndex)
         {
             texScale = (double)this->ti->vTile->bmpSize / (double)this->ti->vTile->tileSize.at(vIndex);
             double ty;
