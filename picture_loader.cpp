@@ -64,39 +64,22 @@ QImage PictureLoader::getImage(const FileInfo &info)
 
 QPixmap PictureLoader::getPixmapFromFile(const FileInfo &info)
 {
-    if (info.thumbSize == 0)
+    QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
+    if (info.thumbSize != 0)
     {
-        return QPixmap(info.containerPath + "/" + info.imageFileName);
-    }
-    else
-    {
-        QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
         image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
-
-//        QFile file;
-//        file.setFileName(filepath);
-//        if (!file.open(QIODevice::ReadOnly))
-//        {
-//                // some Error handling is done here
-//        }
-//        qDebug() << QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md4).toHex();
-
-        return QPixmap::fromImageReader(&image_reader);
     }
+    return QPixmap::fromImageReader(&image_reader);
 }
 
 QImage PictureLoader::getImageFromFile(const FileInfo &info)
 {
-    if (info.thumbSize == 0)
+    QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
+    if (info.thumbSize != 0)
     {
-        return QImage(info.containerPath + "/" + info.imageFileName);
-    }
-    else
-    {
-        QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
         image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
-        return image_reader.read();
     }
+    return image_reader.read();
 }
 
 QPixmap PictureLoader::getPixmapFromZip(const FileInfo &info)
@@ -139,18 +122,12 @@ QPixmap PictureLoader::getPixmapFromZip(const FileInfo &info)
     }
     out.close();
 
-    if (info.thumbSize == 0)
+    QImageReader image_reader(&out);
+    if (info.thumbSize != 0)
     {
-        QPixmap pm;
-        pm.loadFromData(out.buffer());
-        return pm;
-    }
-    else
-    {
-        QImageReader image_reader(&out);
         image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
-        return QPixmap::fromImageReader(&image_reader);
     }
+    return QPixmap::fromImageReader(&image_reader);
 }
 
 QImage PictureLoader::getImageFromZip(const FileInfo &info)
@@ -193,18 +170,12 @@ QImage PictureLoader::getImageFromZip(const FileInfo &info)
     }
     out.close();
 
-    if (info.thumbSize == 0)
+    QImageReader image_reader(&out);
+    if (info.thumbSize != 0)
     {
-        QImage img;
-        img.loadFromData(out.buffer());
-        return img;
-    }
-    else
-    {
-        QImageReader image_reader(&out);
         image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size().width(), image_reader.size().height(), info.thumbSize));
-        return image_reader.read();
     }
+    return image_reader.read();
 }
 
 QSize PictureLoader::ThumbnailImageSize(int image_width, int image_height, int thumb_size)
@@ -226,3 +197,11 @@ QSize PictureLoader::ThumbnailImageSize(int image_width, int image_height, int t
     }
     return QSize(image_width, image_height);
 }
+
+//        QFile file;
+//        file.setFileName(filepath);
+//        if (!file.open(QIODevice::ReadOnly))
+//        {
+//                // some Error handling is done here
+//        }
+//        qDebug() << QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md4).toHex();

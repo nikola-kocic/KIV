@@ -39,8 +39,8 @@ void PictureItemGL::textureFinished()
     {
         for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
         {
-            qDebug() << "deleted texture @ " << hIndex << vIndex;
             glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
+            qDebug() << "deleted texture @ " << hIndex << vIndex;
         }
     }
 
@@ -62,13 +62,13 @@ void PictureItemGL::textureFinished()
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->ti->hTile->tileSize.at(hIndex), this->ti->vTile->tileSize.at(vIndex), 0,
                          GL_RGBA, GL_UNSIGNED_BYTE, this->ti->pow2TileBuffer.at(hIndex).at(vIndex));
 
-            qDebug() << "bound texture @ " << hIndex << vIndex;
+//            qDebug() << "bound texture @ " << "hIndex" << hIndex << "vIndex" << vIndex << t.elapsed();
         }
     }
 
     this->ti->clearTextureCache();
 
-    qDebug() << "OpenGL, set image time" << t.elapsed();
+    qDebug() << "OpenGL, set textures time" << t.elapsed();
 
     //Update view
     picItemShared->setPixmapNull(false);
@@ -86,7 +86,6 @@ void PictureItemGL::textureFinished()
 
     this->setUpdatesEnabled(true);
     this->updateGL();
-    qDebug() << "OpenGL, set textures time" << t.elapsed();
     emit imageChanged();
 }
 
@@ -120,9 +119,9 @@ void PictureItemGL::initializeGL()
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
 
-    GLint size = 0;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
-    this->ti->setTexMaxSize(size);
+//    GLint size = 0;
+//    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
+//    this->ti->setTexMaxSize(size);
 }
 
 void PictureItemGL::updateSize()

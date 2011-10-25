@@ -23,7 +23,8 @@ int TexImg::getTexMaxSize()
 
 void TexImg::setTexMaxSize(int size)
 {
-    this->texMaxSize = qMin(8192, size);
+    //was 8192
+    this->texMaxSize = qMin(2048, size);
 }
 
 void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
@@ -151,20 +152,18 @@ void TexImg::setCurrentFileInfo(const FileInfo &info)
 
 void TexImg::CreatePow2Bitmap()
 {
-    QTime t;
-    t.start();
-
-    qDebug() << "CreatePow2Bitmap - start";
     this->clearTextureCache();
     this->UnloadPow2Bitmap();
-    qDebug() << "CreatePow2Bitmap - UnloadPow2Bitmap" << t.elapsed();
 
     if (this->hasPow2Bitmap())
     {
-        qDebug() << "CreatePow2Bitmap - hasPow2Bitmap";
         return;
     }
 
+    QTime t;
+    t.start();
+
+    qDebug() << "CreatePow2Bitmap - start" << t.elapsed();
     QImage bitmapData = PictureLoader::getImage(this->currentFileInfo);
     qDebug() << "CreatePow2Bitmap - bitmapData" << bitmapData.size() << t.elapsed();
     this->channels = 4;
@@ -202,34 +201,57 @@ void TexImg::CreatePow2Bitmap()
         }
     }
 
+    t.restart();
     qDebug() << "CreatePow2Bitmap - pow2TileBuffer" << t.elapsed();
 
-    QRgb color;
+    qDebug() << bitmapData.format();
+    bitmapData = bitmapData.convertToFormat(QImage::Format_RGB32);
     for (int vTileIndex = 0; vTileIndex < this->vTile->tileCount; ++vTileIndex)
     {
         int CurrentTileHeight = this->vTile->tileSize.at(vTileIndex);
         int vBorderOffset = this->vTile->offsetBorder.at(vTileIndex);
         for (int hTileIndex = 0; hTileIndex < this->hTile->tileCount; ++hTileIndex)
         {
-            GLubyte *texImage = this->pow2TileBuffer[hTileIndex][vTileIndex];
+            GLubyte *texImage = this->pow2TileBuffer.at(hTileIndex).at(vTileIndex);
             int CurrentTileWidth = this->hTile->tileSize.at(hTileIndex);
             int hBorderOffset = this->hTile->offsetBorder.at(hTileIndex);
-            for (int h = 0; h < CurrentTileHeight; ++h)
+
+            int vLimit;
+            if (vBorderOffset + CurrentTileHeight >= bmpSize.height())
             {
-                if (vBorderOffset + h < bmpSize.height())
+                vLimit = bmpSize.height() - vBorderOffset;
+            }
+            else
+            {
+                vLimit = CurrentTileHeight;
+            }
+
+            for (int h = 0; h < vLimit; ++h)
+            {
+                GLubyte *texPointer = &(texImage[this->channels * (h * CurrentTileWidth)]);
+                const QRgb* rgb = (const QRgb*)bitmapData.constScanLine(vBorderOffset + h);
+                for (int i = 0; i < hBorderOffset; i++)
                 {
-                    for (int w = 0; w < CurrentTileWidth; ++w)
-                    {
-                        if (hBorderOffset + w < bmpSize.width())
-                        {
-                            color = bitmapData.pixel(hBorderOffset + w, vBorderOffset + h);
-                            int pixel = this->channels * (h * CurrentTileWidth + w);
-                            texImage[pixel + 0] = (GLubyte)qRed(color);
-                            texImage[pixel + 1] = (GLubyte)qGreen(color);
-                            texImage[pixel + 2] = (GLubyte)qBlue(color);
-                            texImage[pixel + 3] = (GLubyte)qAlpha(color);
-                        }
-                    }
+                    ++rgb;
+                }
+
+                int hLimit;
+                if (hBorderOffset + CurrentTileWidth >= bmpSize.width())
+                {
+                    hLimit = bmpSize.width() - hBorderOffset;
+                }
+                else
+                {
+                    hLimit = CurrentTileWidth;
+                }
+
+                for (int w = 0; w < hLimit; ++w)
+                {
+                    *texPointer++ = qRed(*rgb);
+                    *texPointer++ = qGreen(*rgb);
+                    *texPointer++ = qBlue(*rgb);
+                    *texPointer++ = qAlpha(*rgb);
+                    ++rgb;
                 }
             }
         }
