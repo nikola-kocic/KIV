@@ -37,7 +37,7 @@ private:
     TexImg *ti;
     FileInfo currentFileInfo;
     QTime t;
-    QFutureWatcher< GLubyte* > *textureLoader;
+    QFutureWatcher< QImage > *textureLoader;
     int returnTexCount;
 
 protected:

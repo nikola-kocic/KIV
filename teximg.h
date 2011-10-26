@@ -11,9 +11,9 @@
 
 struct TexIndex{
     QImage bitmapData;
-    int CurrentTileHeight;
+    int currentTileHeight;
     int vBorderOffset;
-    int CurrentTileWidth;
+    int currentTileWidth;
     int hBorderOffset;
 };
 
@@ -37,7 +37,7 @@ public:
     int channels;
 
 public slots:
-    static GLubyte* CreatePow2Bitmap(TexIndex index);
+    static QImage CreatePow2Bitmap(TexIndex index);
 
 private:
     static const int TexMinSize = 16;

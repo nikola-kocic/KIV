@@ -15,7 +15,7 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
 
     this->ti = new TexImg();
 
-    this->textureLoader = new QFutureWatcher<GLubyte*>(this);
+    this->textureLoader = new QFutureWatcher<QImage>(this);
     connect(this->textureLoader, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
 
     this->clearColor = Qt::lightGray;
@@ -28,28 +28,17 @@ void PictureItemGL::textureFinished(int num)
 {
     this->setUpdatesEnabled(false);
 
-    //Delete old textures
-
     int hIndex = num / this->ti->vTile->tileCount;
     int vIndex = num % this->ti->vTile->tileCount;
 
-    glGenTextures(1, &this->textures[hIndex][vIndex]);
-    glBindTexture(GL_TEXTURE_2D, this->textures.at(hIndex).at(vIndex));
+    this->textures[hIndex][vIndex] = bindTexture(this->textureLoader->resultAt(num), GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// GL_NEAREST is another choice
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->ti->hTile->tileSize.at(hIndex), this->ti->vTile->tileSize.at(vIndex), 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, this->textureLoader->resultAt(num));
-
-    delete this->textureLoader->resultAt(num);
     if(++this->returnTexCount == (this->ti->hTile->tileCount * this->ti->vTile->tileCount))
     {
-        qDebug() << "finished" << this->currentFileInfo.imageFileName << t.restart();
+        qDebug() << "finished" << this->currentFileInfo.imageFileName << t.restart() << "ms";
         this->returnTexCount = 0;
         this->ti->bitmapData = QImage();
+
         //Update view
         this->picItemShared->setPixmapNull(false);
 
@@ -91,12 +80,12 @@ void PictureItemGL::setFile(const FileInfo &info)
         this->ti->setImage(PictureLoader::getImage(info));
 
 
+        //Delete old textures
         for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
         {
             for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
             {
                 glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
-//                qDebug() << "deleted texture @ " << hIndex << vIndex;
             }
         }
 
@@ -111,8 +100,8 @@ void PictureItemGL::setFile(const FileInfo &info)
             {
                 TexIndex tex;
                 tex.bitmapData = this->ti->bitmapData;
-                tex.CurrentTileHeight = this->ti->vTile->tileSize.at(vIndex);
-                tex.CurrentTileWidth = this->ti->hTile->tileSize.at(hIndex);
+                tex.currentTileWidth = this->ti->hTile->tileSize.at(hIndex);
+                tex.currentTileHeight = this->ti->vTile->tileSize.at(vIndex);
                 tex.hBorderOffset = this->ti->hTile->offsetBorder.at(hIndex);
                 tex.vBorderOffset = this->ti->vTile->offsetBorder.at(vIndex);
                 indexes.append(tex);
@@ -134,9 +123,9 @@ void PictureItemGL::initializeGL()
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
 
-//    GLint size = 0;
-//    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
-//    this->ti->setTexMaxSize(size);
+    GLint size = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
+    this->ti->setTexMaxSize(size);
 }
 
 void PictureItemGL::updateSize()
