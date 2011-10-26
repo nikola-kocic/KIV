@@ -38,6 +38,7 @@ private:
     FileInfo currentFileInfo;
     QTime t;
     QFutureWatcher< QImage > *textureLoader;
+    QFutureWatcher< QImage > *imageLoader;
     int returnTexCount;
 
 protected:
@@ -54,6 +55,7 @@ public slots:
 
 private slots:
     void textureFinished(int num);
+    void imageFinished(int num);
 
 };
 

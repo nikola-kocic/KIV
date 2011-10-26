@@ -18,10 +18,48 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     this->textureLoader = new QFutureWatcher<QImage>(this);
     connect(this->textureLoader, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
 
+    this->imageLoader = new QFutureWatcher<QImage>(this);
+    connect(this->imageLoader, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
+
     this->clearColor = Qt::lightGray;
     this->offsetX = offsetY = 0;
     this->scaleY = scaleX = 0;
     this->textures = QVector < QVector < GLuint > >(0);
+}
+
+void PictureItemGL::imageFinished(int num)
+{
+    this->ti->setImage(this->imageLoader->resultAt(num));
+
+    //Delete old textures
+    for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
+    {
+        for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
+        {
+            glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
+        }
+    }
+
+    this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
+    QList<TexIndex> indexes;
+    this->returnTexCount = 0;
+    for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
+    {
+        this->textures[hIndex].resize(this->ti->vTile->tileCount);
+
+        for (int vIndex = 0; vIndex < this->ti->vTile->tileCount; ++vIndex)
+        {
+            TexIndex tex;
+            tex.bitmapData = this->ti->bitmapData;
+            tex.currentTileWidth = this->ti->hTile->tileSize.at(hIndex);
+            tex.currentTileHeight = this->ti->vTile->tileSize.at(vIndex);
+            tex.hBorderOffset = this->ti->hTile->offsetBorder.at(hIndex);
+            tex.vBorderOffset = this->ti->vTile->offsetBorder.at(vIndex);
+            indexes.append(tex);
+        }
+    }
+
+    this->textureLoader->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
 }
 
 void PictureItemGL::textureFinished(int num)
@@ -73,42 +111,9 @@ void PictureItemGL::setFile(const FileInfo &info)
     else
     {
         t.start();
-        if(textureLoader->isRunning())
-        {
-            textureLoader->waitForFinished();
-        }
-        this->ti->setImage(PictureLoader::getImage(info));
-
-
-        //Delete old textures
-        for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
-        {
-            for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
-            {
-                glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
-            }
-        }
-
-        this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
-        QList<TexIndex> indexes;
-        this->returnTexCount = 0;
-        for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
-        {
-            this->textures[hIndex].resize(this->ti->vTile->tileCount);
-
-            for (int vIndex = 0; vIndex < this->ti->vTile->tileCount; ++vIndex)
-            {
-                TexIndex tex;
-                tex.bitmapData = this->ti->bitmapData;
-                tex.currentTileWidth = this->ti->hTile->tileSize.at(hIndex);
-                tex.currentTileHeight = this->ti->vTile->tileSize.at(vIndex);
-                tex.hBorderOffset = this->ti->hTile->offsetBorder.at(hIndex);
-                tex.vBorderOffset = this->ti->vTile->offsetBorder.at(vIndex);
-                indexes.append(tex);
-            }
-        }
-
-        this->textureLoader->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
+        QList<FileInfo> infos;
+        infos.append(info);
+        this->imageLoader->setFuture(QtConcurrent::mapped(infos, PictureLoader::getImage));
     }
 }
 
