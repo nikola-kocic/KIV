@@ -24,7 +24,6 @@ public:
 
     int getTexMaxSize();
     void setTexMaxSize(int size);
-    void UnloadPow2Bitmap();
     void setImage(QImage img);
     static const int MinTileSize = 128;
     uint getKbSizeTileBuffer();
@@ -49,5 +48,8 @@ private:
     int Pad4(int yBytes);
 
 };
+
+bool ClipTextureVertex(double texCrd1, double texCrd2, double vertexCrd1, double vertexCrd2, double texBorder1, double texBorder2, double texOffsetMin, double texScale,
+                       double &texClip1, double &texClip2, double &vertexClip1, double &vertexClip2);
 
 #endif // TEXIMG_H

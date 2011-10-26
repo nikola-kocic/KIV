@@ -27,19 +27,29 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     this->textures = QVector < QVector < GLuint > >(0);
 }
 
+void PictureItemGL::clearTextures()
+{
+    //Delete old textures
+    qDebug() << "textures.count()" << textures.count();
+    for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
+    {
+        qDebug() << "this->textures.at(hIndex).count()" << this->textures.at(hIndex).count();
+        for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
+        {
+            glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
+            qDebug() << "deleted texture @" << hIndex << vIndex;
+        }
+    }
+}
+
 void PictureItemGL::imageFinished(int num)
 {
     this->ti->setImage(this->imageLoader->resultAt(num));
 
-    //Delete old textures
-    for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
-    {
-        for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
-        {
-            glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
-        }
-    }
+    //Free result memory
+    this->imageLoader->setFuture(QFuture<QImage>());
 
+    clearTextures();
     this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
     QList<TexIndex> indexes;
     this->returnTexCount = 0;
@@ -73,9 +83,12 @@ void PictureItemGL::textureFinished(int num)
 
     if(++this->returnTexCount == (this->ti->hTile->tileCount * this->ti->vTile->tileCount))
     {
-        qDebug() << "finished" << this->currentFileInfo.imageFileName << t.restart() << "ms";
+        qDebug() << "finished" << t.restart() << "ms";
         this->returnTexCount = 0;
+
+        //Free memory
         this->ti->bitmapData = QImage();
+        this->textureLoader->setFuture(QFuture<QImage>());
 
         //Update view
         this->picItemShared->setPixmapNull(false);
@@ -99,21 +112,26 @@ void PictureItemGL::textureFinished(int num)
 
 void PictureItemGL::setFile(const FileInfo &info)
 {
-    this->currentFileInfo = info;
     //If file is null, display nothing
     if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
     {
+        qDebug() << "textures = 0";
+        clearTextures();
+
+//        this->imageLoader->setFuture(QFuture<QImage>());
+//        this->textureLoader->setFuture(QFuture<QImage>());
+//        this->ti->setImage(QImage());
+//        this->textures.clear();
+
         this->textures = QVector < QVector < GLuint > >(0);
-        picItemShared->setPixmapNull(true);
+        this->picItemShared->setPixmapNull(true);
         this->updateGL();
         emit imageChanged();
     }
     else
     {
         t.start();
-        QList<FileInfo> infos;
-        infos.append(info);
-        this->imageLoader->setFuture(QtConcurrent::mapped(infos, PictureLoader::getImage));
+        this->imageLoader->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
     }
 }
 
@@ -145,43 +163,6 @@ void PictureItemGL::updateSize()
 
     this->scaleX = (this->ti->hTile->bmpSize * this->picItemShared->getZoom()) / this->width();
     this->scaleY = (this->ti->vTile->bmpSize * this->picItemShared->getZoom()) / this->height();
-}
-
-bool ClipTextureVertex(double texCrd1, double texCrd2, double vertexCrd1, double vertexCrd2, double texBorder1, double texBorder2, double texOffsetMin, double texScale,
-                       double &texClip1, double &texClip2, double &vertexClip1, double &vertexClip2)
-{
-    bool flag = false;
-    if (texCrd1 > texCrd2)
-    {
-        flag = true;
-        double num = texCrd1;
-        texCrd1 = texCrd2;
-        texCrd2 = num;
-        num = vertexCrd1;
-        vertexCrd1 = vertexCrd2;
-        vertexCrd2 = num;
-    }
-    double coord1 = qMax(texCrd1, texBorder1);
-    double coord2 = qMin(texCrd2, texBorder2);
-    bool result = coord1 < coord2;
-    double num4 = 1.0 / (texCrd2 - texCrd1);
-    double num5 = (coord1 - texCrd1) * num4;
-    double num6 = (coord2 - texCrd1) * num4;
-    double num7 = vertexCrd2 - vertexCrd1;
-    vertexClip1 = vertexCrd1 + num5 * num7;
-    vertexClip2 = vertexCrd2 - (1.0 - num6) * num7;
-    texClip1 = (coord1 - texOffsetMin) * texScale;
-    texClip2 = (coord2 - texOffsetMin) * texScale;
-    if (flag)
-    {
-        double num = texClip1;
-        texClip1 = texClip2;
-        texClip2 = num;
-        num = vertexClip1;
-        vertexClip1 = vertexClip2;
-        vertexClip2 = num;
-    }
-    return result;
 }
 
 void PictureItemGL::paintGL()

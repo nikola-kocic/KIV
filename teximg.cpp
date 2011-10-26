@@ -112,14 +112,6 @@ void TexImg::InitTiles(TileDim *tileDim)
         tileDim->switchBorderNorm[j] = (double)tileDim->switchBorder.at(j) / (double)tileDim->bmpSize;
     }
 }
-void TexImg::UnloadPow2Bitmap()
-{
-    if (this->hTile != 0)
-    {
-        delete this->hTile;
-        delete this->vTile;
-    }
-}
 
 int TexImg::Pad4(int yBytes)
 {
@@ -129,10 +121,13 @@ int TexImg::Pad4(int yBytes)
 
 void TexImg::setImage(QImage img)
 {
-    this->UnloadPow2Bitmap();
-
     bitmapData = img.convertToFormat(QImage::Format_RGB32);
     this->channels = 4;
+    if (this->hTile != 0)
+    {
+        delete this->hTile;
+        delete this->vTile;
+    }
     this->hTile = new TileDim();
     this->vTile = new TileDim();
     QSize bmpSize = bitmapData.size();
@@ -149,7 +144,7 @@ QImage TexImg::CreatePow2Bitmap(TexIndex index)
 {
     int channels = 4;
     QSize bmpSize = index.bitmapData.size();
-    QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, QImage::Format_RGB32);
+    QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, index.bitmapData.format());
 
     int vLimit;
     if (index.vBorderOffset + index.currentTileHeight >= bmpSize.height())
@@ -188,4 +183,41 @@ QImage TexImg::CreatePow2Bitmap(TexIndex index)
     }
 
     return texImage;
+}
+
+bool ClipTextureVertex(double texCrd1, double texCrd2, double vertexCrd1, double vertexCrd2, double texBorder1, double texBorder2, double texOffsetMin, double texScale,
+                       double &texClip1, double &texClip2, double &vertexClip1, double &vertexClip2)
+{
+    bool flag = false;
+    if (texCrd1 > texCrd2)
+    {
+        flag = true;
+        double num = texCrd1;
+        texCrd1 = texCrd2;
+        texCrd2 = num;
+        num = vertexCrd1;
+        vertexCrd1 = vertexCrd2;
+        vertexCrd2 = num;
+    }
+    double coord1 = qMax(texCrd1, texBorder1);
+    double coord2 = qMin(texCrd2, texBorder2);
+    bool result = coord1 < coord2;
+    double num4 = 1.0 / (texCrd2 - texCrd1);
+    double num5 = (coord1 - texCrd1) * num4;
+    double num6 = (coord2 - texCrd1) * num4;
+    double num7 = vertexCrd2 - vertexCrd1;
+    vertexClip1 = vertexCrd1 + num5 * num7;
+    vertexClip2 = vertexCrd2 - (1.0 - num6) * num7;
+    texClip1 = (coord1 - texOffsetMin) * texScale;
+    texClip2 = (coord2 - texOffsetMin) * texScale;
+    if (flag)
+    {
+        double num = texClip1;
+        texClip1 = texClip2;
+        texClip2 = num;
+        num = vertexClip1;
+        vertexClip1 = vertexClip2;
+        vertexClip2 = num;
+    }
+    return result;
 }

@@ -25,6 +25,7 @@ public:
 
 private:
     void updateSize();
+    void clearTextures();
     PictureItemShared *picItemShared;
 
     qreal scaleX;
@@ -35,7 +36,6 @@ private:
     QPoint lastPos;
     QVector < QVector <GLuint> > textures;
     TexImg *ti;
-    FileInfo currentFileInfo;
     QTime t;
     QFutureWatcher< QImage > *textureLoader;
     QFutureWatcher< QImage > *imageLoader;
