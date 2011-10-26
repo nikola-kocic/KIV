@@ -14,7 +14,7 @@ class PictureItem : public QWidget
 {
     Q_OBJECT
 public:
-    PictureItem(bool opengl, QWidget *parent = 0, Qt::WindowFlags f = 0 );
+    PictureItem(bool opengl, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     bool isPixmapNull();
     void setZoom(qreal z);

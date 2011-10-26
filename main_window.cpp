@@ -696,7 +696,7 @@ bool MainWindow::saveAs()
     QString tempFileName;
 
 
-    if(info.zipImageFileName.isEmpty())
+    if (info.zipImageFileName.isEmpty())
     {
         tempFileName = info.imageFileName;
     }
@@ -715,7 +715,7 @@ bool MainWindow::saveAs()
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if(info.zipImageFileName.isEmpty())
+    if (info.zipImageFileName.isEmpty())
     {
         QFile::copy(info.containerPath + "/" + info.imageFileName, fileName);
     }

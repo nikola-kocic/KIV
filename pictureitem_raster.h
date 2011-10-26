@@ -18,7 +18,7 @@ class PictureItemRaster : public QWidget
     Q_OBJECT
 
 public:
-    PictureItemRaster(PictureItemShared *picItemShared, QWidget *parent = 0, Qt::WindowFlags f = 0 );
+    PictureItemRaster(PictureItemShared *picItemShared, QWidget *parent = 0, Qt::WindowFlags f = 0);
     void setRotation(qreal r);
     void setFile(const FileInfo &info);
 

@@ -545,7 +545,7 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
                         }
                         else
                         {
-                            if ((this->boundingRect.width() + this->boundingRect.x()) > this->widgetSize.width() )
+                            if ((this->boundingRect.width() + this->boundingRect.x()) > this->widgetSize.width())
                             {
                                 this->ScrollPageHorizontal(event->delta());
 

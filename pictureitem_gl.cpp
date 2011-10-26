@@ -10,7 +10,7 @@
 PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, Qt::WindowFlags f)
 {
     this->picItemShared = picItemShared;
-    connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal) ), this, SLOT(setZoom(qreal,qreal)));
+    connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(setZoom(qreal,qreal)));
     connect(this->picItemShared, SIGNAL(update()), this, SLOT(update()));
 
     this->imageLoad = new QThread();
@@ -273,7 +273,7 @@ void PictureItemGL::setRotation(qreal r)
     this->picItemShared->boundingRect.setWidth(transformedRot.width());
     this->picItemShared->boundingRect.setHeight(transformedRot.height());
 
-    if ((this->picItemShared->boundingRect.height() + this->picItemShared->boundingRect.y() ) < this->height() )
+    if ((this->picItemShared->boundingRect.height() + this->picItemShared->boundingRect.y()) < this->height())
     {
         this->picItemShared->boundingRect.translate(0, (this->height() - (this->picItemShared->boundingRect.height() + this->picItemShared->boundingRect.y())));
     }
