@@ -59,11 +59,14 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 
     this->ui->cbScrollByWidth->setChecked(Settings::Instance()->getScrollPageByWidth());
     this->ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
+    this->ui->cbScrollChangesPage->setChecked(Settings::Instance()->getScrollChangesPage());
     this->ui->sbWaitTime->setValue(Settings::Instance()->getPageChangeTimeout());
     this->ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
 
     this->ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
     this->ui->sbThumbSize->setValue(Settings::Instance()->getThumbnailSize());
+
+    on_cbScrollChangesPage_clicked(this->ui->cbScrollChangesPage->isChecked());
 }
 
 void Settings_Dialog::on_buttonBox_accepted()
@@ -73,6 +76,7 @@ void Settings_Dialog::on_buttonBox_accepted()
 
     Settings::Instance()->setScrollPageByWidth(this->ui->cbScrollByWidth->isChecked());
     Settings::Instance()->setRightToLeft(this->ui->cbRTL->isChecked());
+    Settings::Instance()->setScrollChangesPage(this->ui->cbScrollChangesPage->isChecked());
     Settings::Instance()->setJumpToEnd(this->ui->cbJumpToEnd->isChecked());
     Settings::Instance()->setPageChangeTimeout(this->ui->sbWaitTime->value());
 
@@ -83,4 +87,11 @@ void Settings_Dialog::on_buttonBox_accepted()
 Settings_Dialog::~Settings_Dialog()
 {
     delete this->ui;
+}
+
+void Settings_Dialog::on_cbScrollChangesPage_clicked(bool checked)
+{
+    this->ui->sbWaitTime->setEnabled(checked);
+    this->ui->labelWaitTime->setEnabled(checked);
+    this->ui->cbJumpToEnd->setEnabled(checked);
 }

@@ -53,6 +53,10 @@ public:
   int getThumbnailSize();
   void setThumbnailSize(int v);
 
+  bool getScrollChangesPage();
+  void setScrollChangesPage(bool b);
+
+
 private:
 
 // Make your constructors private
@@ -72,17 +76,19 @@ private:
         MiddleClick::Action middleClick;
         Wheel::Action wheel;
 
-        bool LargeIcons;
+        bool largeIcons;
         QString LastPath;
         QStringList filters_image;
         QStringList filters_archive;
-        int thumbSize;
 
-        bool ScrollPageByWidth;
-        bool RightToLeft;
-        int PageChangeTimeout;
-        bool JumpToEnd;
+        bool scrollPageByWidth;
+        bool rightToLeft;
+        int pageChangeTimeout;
+        bool jumpToEnd;
+        bool scrollChangesPage;
+
         bool HardwareAcceleration;
+        int thumbSize;
 };
 
 

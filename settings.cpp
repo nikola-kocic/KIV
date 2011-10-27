@@ -28,12 +28,13 @@ Settings::Settings()
     this->wheelHash["zoom"]       = Wheel::Zoom;
     this->wheel = getWheelFromString(settings->value("Mouse/Wheel", "scroll").toString());
 
-    this->JumpToEnd           = this->settings->value("Behavior/JumpToBottom",         false).toBool();
-    this->ScrollPageByWidth   = this->settings->value("Behavior/ScrollPageByWidth",    false).toBool();
-    this->RightToLeft         = this->settings->value("Behavior/RightToLeft",          false).toBool();
-    this->PageChangeTimeout   = this->settings->value("Behavior/PageChangeTimeout",    "300").toInt();
+    this->jumpToEnd           = this->settings->value("Behavior/JumpToBottom",         false).toBool();
+    this->scrollPageByWidth   = this->settings->value("Behavior/ScrollPageByWidth",    false).toBool();
+    this->rightToLeft         = this->settings->value("Behavior/RightToLeft",          false).toBool();
+    this->pageChangeTimeout   = this->settings->value("Behavior/PageChangeTimeout",    "300").toInt();
+    this->scrollChangesPage   = this->settings->value("Behavior/ScrollChangesPage",    true).toBool();
 
-    this->LargeIcons          = this->settings->value("Interface/LargeIcons", false).toBool();
+    this->largeIcons          = this->settings->value("Interface/LargeIcons", false).toBool();
     this->LastPath            = this->settings->value("Interface/LastPath", "").toString();
     this->HardwareAcceleration= this->settings->value("Interface/HardwareAcceleration", false).toBool();
     this->thumbSize           = this->settings->value("Interface/ThumbnailSize", "200").toInt();
@@ -90,46 +91,46 @@ QString Settings::getStringFromWheel(Wheel::Action w)
 
 bool Settings::getScrollPageByWidth()
 {
-    return this->ScrollPageByWidth;
+    return this->scrollPageByWidth;
 }
 
 void Settings::setScrollPageByWidth(bool b)
 {
-    this->ScrollPageByWidth = b;
-    this->settings->setValue("Behavior/ScrollPageByWidth", this->ScrollPageByWidth);
+    this->scrollPageByWidth = b;
+    this->settings->setValue("Behavior/ScrollPageByWidth", this->scrollPageByWidth);
 }
 
 bool Settings::getRightToLeft()
 {
-    return this->RightToLeft;
+    return this->rightToLeft;
 }
 
 void Settings::setRightToLeft(bool b)
 {
-    this->RightToLeft = b;
-    this->settings->setValue("Behavior/RightToLeft", this->RightToLeft);
+    this->rightToLeft = b;
+    this->settings->setValue("Behavior/RightToLeft", this->rightToLeft);
 }
 
 int Settings::getPageChangeTimeout()
 {
-    return PageChangeTimeout;
+    return pageChangeTimeout;
 }
 
 void Settings::setPageChangeTimeout(int v)
 {
-    this->PageChangeTimeout = v;
-    this->settings->setValue("Behavior/PageChangeTimeout", this->PageChangeTimeout);
+    this->pageChangeTimeout = v;
+    this->settings->setValue("Behavior/PageChangeTimeout", this->pageChangeTimeout);
 }
 
 bool Settings::getLargeIcons()
 {
-    return this->LargeIcons;
+    return this->largeIcons;
 }
 
 void Settings::setLargeIcons(bool b)
 {
-    this->LargeIcons = b;
-    this->settings->setValue("Interface/LargeIcons", this->LargeIcons);
+    this->largeIcons = b;
+    this->settings->setValue("Interface/LargeIcons", this->largeIcons);
 }
 
 QString Settings::getLastPath()
@@ -145,13 +146,13 @@ void Settings::setLastPath(QString s)
 
 bool Settings::getJumpToEnd()
 {
-    return this->JumpToEnd;
+    return this->jumpToEnd;
 }
 
 void Settings::setJumpToEnd(bool b)
 {
-    this->JumpToEnd = b;
-    this->settings->setValue("Behavior/JumpToBottom", this->JumpToEnd);
+    this->jumpToEnd = b;
+    this->settings->setValue("Behavior/JumpToBottom", this->jumpToEnd);
 }
 
 bool Settings::getHardwareAcceleration()
@@ -184,4 +185,17 @@ int Settings::getThumbnailSize()
 void Settings::setThumbnailSize(int v)
 {
     this->thumbSize = v;
+    this->settings->setValue("Interface/ThumbnailSize", this->thumbSize);
+}
+
+bool Settings::getScrollChangesPage()
+{
+    return this->scrollChangesPage;
+}
+
+void Settings::setScrollChangesPage(bool b)
+{
+    this->scrollChangesPage = b;
+    this->settings->setValue("Behavior/ScrollChangesPage", this->scrollChangesPage);
+
 }

@@ -4,10 +4,8 @@
 #include "tiledim.h"
 #include "picture_loader.h"
 
-#include <QtCore/qstring.h>
 #include <QtGui/qimage.h>
 #include <QtOpenGL/qgl.h>
-#include <QtCore/QTime>
 
 struct TexIndex{
     QImage bitmapData;

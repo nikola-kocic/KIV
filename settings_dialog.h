@@ -20,6 +20,8 @@ public:
 private slots:
     void on_buttonBox_accepted();
 
+    void on_cbScrollChangesPage_clicked(bool checked);
+
 private:
     Ui::Settings_Dialog *ui;
 

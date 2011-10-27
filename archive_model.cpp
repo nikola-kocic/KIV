@@ -7,7 +7,6 @@
 
 //#include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
-#include <QtGui/qimagereader.h>
 #include <QtCore/qdir.h>
 
 void ArchiveModel::setPath(const FileInfo &info)
@@ -101,7 +100,7 @@ void ArchiveModel::setPath(const FileInfo &info)
                         //if (j == file_path_parts.count() - 1)
                     {
                         QFileInfo fi(archive_files.at(i));
-                        if (QImageReader::supportedImageFormats().contains(fi.suffix().toLower().toLocal8Bit()))
+                        if (isImage(fi))
                         {
                             node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
                         }

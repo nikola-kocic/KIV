@@ -6,9 +6,7 @@
 #include "archive_model.h"
 
 #include <QtGui/qlistview.h>
-#include <QtCore/qthread.h>
 #include <QtGui/qsortfilterproxymodel.h>
-#include <QtCore/qtconcurrentrun.h>
 #include <QtCore/qfuturewatcher.h>
 #include <QtCore/qtconcurrentmap.h>
 

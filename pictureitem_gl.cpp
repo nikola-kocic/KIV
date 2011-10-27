@@ -2,7 +2,7 @@
 #include "settings.h"
 #include "picture_loader.h"
 
-#include <QtCore/qdebug.h>
+//#include <QtCore/qdebug.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qpalette.h>
 #include <QtGui/qevent.h>
@@ -36,14 +36,14 @@ PictureItemGL::~PictureItemGL()
 void PictureItemGL::clearTextures()
 {
     //Delete old textures
-    qDebug() << "textures.count()" << textures.count();
+//    qDebug() << "textures.count()" << textures.count();
     for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
     {
-        qDebug() << "this->textures.at(hIndex).count()" << this->textures.at(hIndex).count();
+//        qDebug() << "this->textures.at(hIndex).count()" << this->textures.at(hIndex).count();
         for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
         {
             glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
-            qDebug() << "deleted texture @" << hIndex << vIndex;
+//            qDebug() << "deleted texture @" << hIndex << vIndex;
         }
     }
 }
@@ -89,7 +89,6 @@ void PictureItemGL::textureFinished(int num)
 
     if(++this->returnTexCount == (this->ti->hTile->tileCount * this->ti->vTile->tileCount))
     {
-        qDebug() << "finished" << t.restart() << "ms";
         this->returnTexCount = 0;
 
         //Free memory
@@ -121,7 +120,7 @@ void PictureItemGL::setFile(const FileInfo &info)
     //If file is null, display nothing
     if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
     {
-        qDebug() << "textures = 0";
+//        qDebug() << "textures = 0";
         clearTextures();
         this->ti->setImage(QImage());
 
@@ -136,7 +135,6 @@ void PictureItemGL::setFile(const FileInfo &info)
     }
     else
     {
-        t.start();
         this->imageLoader->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
     }
 }

@@ -4,14 +4,9 @@
 #include "komicviewer_enums.h"
 #include "pictureitem_shared.h"
 
-#include <QtCore/qtimer.h>
 #include <QtGui/qwidget.h>
-
 #include <QtCore/qtconcurrentrun.h>
 #include <QtCore/qfuturewatcher.h>
-#include <QtCore/qtconcurrentmap.h>
-
-#include <QtCore/QTime>
 
 class PictureItemRaster : public QWidget
 {
@@ -27,7 +22,6 @@ private:
     PictureItemShared *picItemShared;
     QFutureWatcher<QPixmap> *imageLoad;
     QPixmap pixmap;
-    QTime t;
 
 public slots:
     void setZoom(qreal current, qreal previous);

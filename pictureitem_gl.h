@@ -5,13 +5,10 @@
 #include "pictureitem_shared.h"
 #include "teximg.h"
 
-#include <QtCore/qtimer.h>
 #include <QtOpenGL/qgl.h>
 #include <QtCore/qtconcurrentrun.h>
 #include <QtCore/qfuturewatcher.h>
 #include <QtCore/qtconcurrentmap.h>
-
-#include <QtCore/QTime>
 
 class PictureItemGL : public QGLWidget
 {
@@ -37,7 +34,6 @@ private:
     QPoint lastPos;
     QVector < QVector <GLuint> > textures;
     TexImg *ti;
-    QTime t;
     QFutureWatcher< QImage > *textureLoader;
     QFutureWatcher< QImage > *imageLoader;
     int returnTexCount;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>268</width>
-    <height>245</height>
+    <width>309</width>
+    <height>280</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,62 +79,84 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="cbScrollByWidth">
-         <property name="text">
-          <string>After Scrolling to Bottom, Scroll by Width</string>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Scrolling</string>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="cbScrollByWidth">
+            <property name="text">
+             <string>After Scrolling to Bottom, Scroll by Width</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbScrollChangesPage">
+            <property name="text">
+             <string>Change page after scrolling to end</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <property name="leftMargin">
+             <number>20</number>
+            </property>
+            <item>
+             <widget class="QCheckBox" name="cbJumpToEnd">
+              <property name="text">
+               <string>Jump to end of page after scrolling up</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="layoutWaitTime">
+              <item>
+               <widget class="QLabel" name="labelWaitTime">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="text">
+                 <string>Prevent changing pages for (ms):</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="sbWaitTime">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="minimum">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="singleStep">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="cbRTL">
-         <property name="text">
-          <string>Right to Left Mode</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="cbJumpToEnd">
-         <property name="text">
-          <string>Jump to end of page after scrolling up</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Prevent changing pages for (ms):</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="sbWaitTime">
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>10000</number>
-           </property>
-           <property name="singleStep">
-            <number>100</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer">
@@ -160,6 +182,13 @@
         <widget class="QCheckBox" name="cbHardwareAcceleration">
          <property name="text">
           <string>Enable Hardware Acceleration</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbRTL">
+         <property name="text">
+          <string>Right to Left Mode</string>
          </property>
         </widget>
        </item>
@@ -241,8 +270,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>167</y>
+     <x>236</x>
+     <y>235</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -257,8 +286,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>167</y>
+     <x>236</x>
+     <y>235</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

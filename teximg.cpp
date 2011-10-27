@@ -1,9 +1,7 @@
 #include "teximg.h"
 
-#include <QtCore/qdebug.h>
+//#include <QtCore/qdebug.h>
 #include <QtCore/qsize.h>
-#include <QtGui/qpixmap.h>
-#include <QtGui/qimagereader.h>
 
 TexImg::TexImg()
 {

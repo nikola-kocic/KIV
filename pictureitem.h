@@ -4,9 +4,7 @@
 #include "pictureitem_raster.h"
 #include "pictureitem_gl.h"
 #include "pictureitem_shared.h"
-#include "teximg.h"
 #include "picture_loader.h"
-
 
 #include <QtGui/qboxlayout.h>
 

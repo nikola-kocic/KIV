@@ -13,6 +13,8 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
     QVBoxLayout *vboxMain = new QVBoxLayout(this);
     vboxMain->setSpacing(0);
     vboxMain->setMargin(0);
+    imageDisplayRaster = 0;
+    imageDisplayGL = 0;
 
     initPictureItem();
 
@@ -53,7 +55,6 @@ void PictureItem::setHardwareAcceleration(bool b)
     {
         if (this->opengl)
         {
-
             delete imageDisplayGL;
         }
         else

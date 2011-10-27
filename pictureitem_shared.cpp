@@ -523,7 +523,7 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
         }
         else if (Settings::Instance()->getWheel() == Wheel::Scroll)
         {
-            if ((Settings::Instance()->getPageChangeTimeout() > 0) && (this->boundingRect.height() > this->widgetSize.height() || this->boundingRect.width() > this->widgetSize.width()))
+            if (this->boundingRect.height() > this->widgetSize.height() || this->boundingRect.width() > this->widgetSize.width())
             {
                 //If we scroll to bottom of page, start timer
                 if (event->delta() < 0 && -this->boundingRect.y() + this->widgetSize.height() >= this->boundingRect.height() && !this->timerScrollPage->isActive())
@@ -558,13 +558,13 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
                             }
                         }
                     }
-                    if (!this->timerScrollPage->isActive())
+                    if ((Settings::Instance()->getScrollChangesPage()) && !this->timerScrollPage->isActive())
                     {
                         this->start_timerScrollPage();
                         emit pageNext();
                     }
                 }
-                else if (event->delta() > 0 && this->boundingRect.y() == 0 && !this->timerScrollPage->isActive())
+                else if ((Settings::Instance()->getScrollChangesPage()) && (event->delta() > 0 && this->boundingRect.y() == 0 && !this->timerScrollPage->isActive()))
                 {
                     this->start_timerScrollPage();
                     this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
@@ -587,13 +587,16 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
             }
             else
             {
-                if (event->delta() > 0)
+                if(Settings::Instance()->getScrollChangesPage())
                 {
-                    emit pagePrevious();
-                }
-                else if (event->delta() < 0)
-                {
-                    emit pageNext();
+                    if (event->delta() > 0)
+                    {
+                        emit pagePrevious();
+                    }
+                    else if (event->delta() < 0)
+                    {
+                        emit pageNext();
+                    }
                 }
             }
         }

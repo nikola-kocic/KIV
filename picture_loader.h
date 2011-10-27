@@ -3,9 +3,7 @@
 
 #include "komicviewer_enums.h"
 
-#include <QtCore/qobject.h>
 #include <QtGui/qpixmap.h>
-#include <QtGui/qicon.h>
 
 class PictureLoader
 {
