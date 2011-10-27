@@ -15,6 +15,9 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
     vboxMain->setMargin(0);
     imageDisplayRaster = 0;
     imageDisplayGL = 0;
+    connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
+    connect(picItemShared, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
+    connect(picItemShared, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
     initPictureItem();
 
@@ -26,11 +29,8 @@ void PictureItem::initPictureItem()
     if (this->opengl)
     {
         imageDisplayGL = new PictureItemGL(picItemShared, this);
-        connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayGL, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
         connect(imageDisplayGL, SIGNAL(imageChanged()), this, SIGNAL(imageChanged()));
-        connect(picItemShared, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
-        connect(picItemShared, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
         imageDisplayRaster = 0;
         this->layout()->addWidget(imageDisplayGL);
@@ -38,11 +38,8 @@ void PictureItem::initPictureItem()
     else
     {
         imageDisplayRaster = new PictureItemRaster(picItemShared, this);
-        connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayRaster, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
         connect(imageDisplayRaster, SIGNAL(imageChanged()), this, SIGNAL(imageChanged()));
-        connect(picItemShared, SIGNAL(pageNext()), this, SIGNAL(pageNext()));
-        connect(picItemShared, SIGNAL(pagePrevious()), this, SIGNAL(pagePrevious()));
 
         imageDisplayGL = 0;
         this->layout()->addWidget(imageDisplayRaster);
@@ -55,11 +52,13 @@ void PictureItem::setHardwareAcceleration(bool b)
     {
         if (this->opengl)
         {
-            delete imageDisplayGL;
+            imageDisplayGL->disconnect();
+            imageDisplayGL->deleteLater();
         }
         else
         {
-            delete imageDisplayRaster;
+            imageDisplayRaster->disconnect();
+            imageDisplayRaster->deleteLater();
         }
 
         this->opengl = b;
