@@ -9,15 +9,16 @@
 ViewFiles::ViewFiles(QWidget *parent)
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    this->proxy = new QSortFilterProxyModel();
+    this->proxy = new QSortFilterProxyModel(this);
     this->currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
 
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
     this->setUniformItemSizes(true);
 
-    this->imageScaling = new QFutureWatcher<QPixmap>(this);
-    connect(this->imageScaling, SIGNAL(resultReadyAt(int)), this, SLOT(showImage(int)));
+    this->returnThumbCount = 0;
+    this->watcherThumbnail = new QFutureWatcher<QPixmap>(this);
+    connect(this->watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
 }
 
 FileInfo ViewFiles::getCurrentFileInfo()
@@ -42,10 +43,10 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 
     if (this->viewMode() == QListView::IconMode)
     {
-        if (this->imageScaling->isRunning())
+        if (this->watcherThumbnail->isRunning())
         {
-            this->imageScaling->cancel();
-            this->imageScaling->waitForFinished();
+            this->watcherThumbnail->cancel();
+            this->watcherThumbnail->waitForFinished();
         }
         this->startShowingThumbnails();
     }
@@ -169,14 +170,19 @@ void ViewFiles::startShowingThumbnails()
 
 //    this->reset();
 
-    this->imageScaling->setFuture(QtConcurrent::mapped(files, PictureLoader::getPixmap));
+    this->watcherThumbnail->setFuture(QtConcurrent::mapped(files, PictureLoader::getPixmap));
 }
 
-void ViewFiles::showImage(int num)
+void ViewFiles::showThumbnail(int num)
 {
-    if (!this->imageScaling->resultAt(num).isNull())
+    if (!this->watcherThumbnail->resultAt(num).isNull())
     {
-        this->proxy->setData(this->proxy->index(num, 0, this->rootIndex()), this->imageScaling->resultAt(num), Qt::DecorationRole);
+        this->proxy->setData(this->proxy->index(num, 0, this->rootIndex()), this->watcherThumbnail->resultAt(num), Qt::DecorationRole);
+    }
+    if(++this->returnThumbCount == this->proxy->rowCount(this->rootIndex()))
+    {
+        this->returnThumbCount = 0;
+        this->watcherThumbnail->setFuture(QFuture<QPixmap>());
     }
 }
 

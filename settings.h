@@ -49,7 +49,9 @@ public:
 
   QStringList getFiltersImage();
   QStringList getFiltersArchive();
+
   int getThumbnailSize();
+  void setThumbnailSize(int v);
 
 private:
 

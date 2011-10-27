@@ -11,7 +11,7 @@ PictureItemShared::PictureItemShared()
     this->dragging = false;
     this->rotation = 0;
     this->lockMode = LockMode::None;
-    this->timerScrollPage = new QTimer();
+    this->timerScrollPage = new QTimer(this);
     connect(timerScrollPage, SIGNAL(timeout()), this, SLOT(on_timerScrollPage_timeout()));
 //    LockDrag = false;
     this->flagJumpToEnd = false;
@@ -593,7 +593,7 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
                 }
                 else if (event->delta() < 0)
                 {
-                    emit  pageNext();
+                    emit pageNext();
                 }
             }
         }

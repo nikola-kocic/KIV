@@ -19,12 +19,11 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
     this->setLayout(vboxMain);
 }
 
-
 void PictureItem::initPictureItem()
 {
     if (this->opengl)
     {
-        imageDisplayGL = new PictureItemGL(picItemShared);
+        imageDisplayGL = new PictureItemGL(picItemShared, this);
         connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayGL, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
         connect(imageDisplayGL, SIGNAL(imageChanged()), this, SIGNAL(imageChanged()));
@@ -36,7 +35,7 @@ void PictureItem::initPictureItem()
     }
     else
     {
-        imageDisplayRaster = new PictureItemRaster(picItemShared);
+        imageDisplayRaster = new PictureItemRaster(picItemShared, this);
         connect(picItemShared, SIGNAL(toggleFullscreen()), this, SIGNAL(toggleFullscreen()));
         connect(imageDisplayRaster, SIGNAL(zoomChanged()), this, SIGNAL(zoomChanged()));
         connect(imageDisplayRaster, SIGNAL(imageChanged()), this, SIGNAL(imageChanged()));

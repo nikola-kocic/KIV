@@ -10,10 +10,6 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 {
     this->ui->setupUi(this);
 
-    QIntValidator *iv = new QIntValidator();
-    iv->setRange(0, 10000);
-    this->ui->tbWaitTime->setValidator(iv);
-
     QHash<QString, MiddleClick::Action> ddMiddleClickHash;
     ddMiddleClickHash["<None>"]       = MiddleClick::None;
     ddMiddleClickHash["Full Screen"]  = MiddleClick::Fullscreen;
@@ -63,9 +59,11 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 
     this->ui->cbScrollByWidth->setChecked(Settings::Instance()->getScrollPageByWidth());
     this->ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
-    this->ui->tbWaitTime->setText(QString::number(Settings::Instance()->getPageChangeTimeout()));
+    this->ui->sbWaitTime->setValue(Settings::Instance()->getPageChangeTimeout());
     this->ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
+
     this->ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
+    this->ui->sbThumbSize->setValue(Settings::Instance()->getThumbnailSize());
 }
 
 void Settings_Dialog::on_buttonBox_accepted()
@@ -76,14 +74,10 @@ void Settings_Dialog::on_buttonBox_accepted()
     Settings::Instance()->setScrollPageByWidth(this->ui->cbScrollByWidth->isChecked());
     Settings::Instance()->setRightToLeft(this->ui->cbRTL->isChecked());
     Settings::Instance()->setJumpToEnd(this->ui->cbJumpToEnd->isChecked());
-    Settings::Instance()->setHardwareAcceleration(this->ui->cbHardwareAcceleration->isChecked());
+    Settings::Instance()->setPageChangeTimeout(this->ui->sbWaitTime->value());
 
-    bool ok;
-    int dec = this->ui->tbWaitTime->text().toInt(&ok, 10);
-    if (ok)
-    {
-        Settings::Instance()->setPageChangeTimeout(dec);
-    }
+    Settings::Instance()->setHardwareAcceleration(this->ui->cbHardwareAcceleration->isChecked());
+    Settings::Instance()->setThumbnailSize(this->ui->sbThumbSize->value());
 }
 
 Settings_Dialog::~Settings_Dialog()

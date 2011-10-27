@@ -27,6 +27,12 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     this->textures = QVector < QVector < GLuint > >(0);
 }
 
+PictureItemGL::~PictureItemGL()
+{
+    clearTextures();
+    delete this->ti;
+}
+
 void PictureItemGL::clearTextures()
 {
     //Delete old textures
@@ -117,10 +123,10 @@ void PictureItemGL::setFile(const FileInfo &info)
     {
         qDebug() << "textures = 0";
         clearTextures();
+        this->ti->setImage(QImage());
 
 //        this->imageLoader->setFuture(QFuture<QImage>());
 //        this->textureLoader->setFuture(QFuture<QImage>());
-//        this->ti->setImage(QImage());
 //        this->textures.clear();
 
         this->textures = QVector < QVector < GLuint > >(0);

@@ -56,13 +56,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     vboxMain->setMargin(0);
 
 
-    QMenuBar *mainMenu = new QMenuBar();
+    QMenuBar *mainMenu = new QMenuBar(this);
     mainMenu->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     this->createMenus(mainMenu);
 
-    this->lineEditPath = new QLineEdit();
+    this->lineEditPath = new QLineEdit(this);
 
-    this->comboBoxZoom = new QComboBox();
+    this->comboBoxZoom = new QComboBox(this);
     this->comboBoxZoom->setEnabled(false);
     this->comboBoxZoom->setInsertPolicy(QComboBox::NoInsert);
     this->comboBoxZoom->setMaxVisibleItems(12);
@@ -70,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->comboBoxZoom->setEditable(true);
     this->comboBoxZoom->setFocusPolicy(Qt::ClickFocus);
 
-    this->toolbar = new QToolBar();
+    this->toolbar = new QToolBar(this);
     this->toolbar->setMovable(false);
     this->toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
 //    toolbar->setIconSize(QSize(16,16));
@@ -92,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addAction(this->rotateLeftAct);
     this->toolbar->addAction(this->rotateRightAct);
 
-    this->toolbarDirectory = new QToolBar();
+    this->toolbarDirectory = new QToolBar(this);
     this->toolbarDirectory->setMovable(false);
     this->toolbarDirectory->setContextMenuPolicy(Qt::PreventContextMenu);
     this->toolbarDirectory->addAction(this->dirUpAct);
@@ -106,7 +106,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->splitterPanel = new QSplitter(Qt::Vertical, this);
 
-    this->filesystemView = new QTreeView();
+    this->filesystemView = new QTreeView(this);
     this->filesystemView->setUniformRowHeights(true);
     this->filesystemView->setHeaderHidden(true);
 
@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     splitterFiles->addWidget(this->archiveDirsView);
     splitterFiles->setSizes(QList<int>() << 100);
 
-    this->filesView = new ViewFiles();
+    this->filesView = new ViewFiles(this);
     this->filesView->setModel(modelArchive);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -140,7 +140,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 
     //Content start
-    this->imageDisplay = new PictureItem(Settings::Instance()->getHardwareAcceleration());
+    this->imageDisplay = new PictureItem(Settings::Instance()->getHardwareAcceleration(), this);
     this->imageDisplay->setSizePolicy(policy);
 
     this->splitterMain->addWidget(this->imageDisplay);
@@ -792,7 +792,7 @@ void MainWindow::settingsDialog()
 
 void MainWindow::about()
 {
-    QMessageBox *aboutBox = new QMessageBox();
+    QMessageBox *aboutBox = new QMessageBox(this);
     aboutBox->setWindowTitle("About KomicViewer");
     aboutBox->setText(
                 QApplication::applicationName() +

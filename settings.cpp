@@ -180,3 +180,8 @@ int Settings::getThumbnailSize()
 {
     return this->thumbSize;
 }
+
+void Settings::setThumbnailSize(int v)
+{
+    this->thumbSize = v;
+}

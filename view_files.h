@@ -31,12 +31,13 @@ public slots:
 private:
     void startShowingThumbnails();
 
-    QFutureWatcher<QPixmap> *imageScaling;
+    int returnThumbCount;
+    QFutureWatcher<QPixmap> *watcherThumbnail;
     FileInfo currentInfo;
     QSortFilterProxyModel *proxy;
 
 private slots:
-    void showImage(int num);
+    void showThumbnail(int num);
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
     void OnTreeViewArchiveDirsCurrentChanged(const QModelIndex &index);
 
