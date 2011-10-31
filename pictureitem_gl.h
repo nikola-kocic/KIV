@@ -1,7 +1,7 @@
 #ifndef PICTUREITEMGL_H
 #define PICTUREITEMGL_H
 
-#include "komicviewer_enums.h"
+#include "helper.h"
 #include "pictureitem_shared.h"
 #include "teximg.h"
 

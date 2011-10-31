@@ -1,4 +1,4 @@
-#include "komicviewer_enums.h"
+#include "helper.h"
 #include "settings.h"
 
 bool checkFileExtension(const QFileInfo &fi)

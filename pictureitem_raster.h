@@ -1,7 +1,7 @@
 #ifndef PICTUREITEMRASTER_H
 #define PICTUREITEMRASTER_H
 
-#include "komicviewer_enums.h"
+#include "helper.h"
 #include "pictureitem_shared.h"
 
 #include <QtGui/qwidget.h>

@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
 
-    this->modelArchive = new ArchiveModel();
+    this->modelArchive = new FilesModel();
     this->createActions();
 
     this->splitterMain = new QSplitter(Qt::Horizontal, this);

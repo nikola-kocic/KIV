@@ -6,7 +6,7 @@
 #include <QtGui/qstandarditemmodel.h>
 #include <QtGui/qfileiconprovider.h>
 
-class ArchiveModel : public QStandardItemModel
+class FilesModel : public QStandardItemModel
 {
     Q_OBJECT
 

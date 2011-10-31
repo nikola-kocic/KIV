@@ -1,5 +1,5 @@
 #include "view_archive_dirs.h"
-#include "komicviewer_enums.h"
+#include "helper.h"
 
 ViewArchiveDirs::ViewArchiveDirs()
 {

@@ -1,7 +1,7 @@
 #ifndef PICTUREITEMSHARED_H
 #define PICTUREITEMSHARED_H
 
-#include "komicviewer_enums.h"
+#include "helper.h"
 
 #include <QtCore/qtimer.h>
 #include <QtGui/qwidget.h>

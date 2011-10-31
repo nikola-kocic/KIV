@@ -1,6 +1,7 @@
 #include "view_files.h"
 #include "settings.h"
 
+//#include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtGui/qfileiconprovider.h>
 #include <QtGui/qapplication.h>

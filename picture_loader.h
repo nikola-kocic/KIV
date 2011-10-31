@@ -1,7 +1,7 @@
 #ifndef PICTURELOADER_H
 #define PICTURELOADER_H
 
-#include "komicviewer_enums.h"
+#include "helper.h"
 
 #include <QtGui/qpixmap.h>
 

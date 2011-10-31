@@ -1,9 +1,9 @@
 #ifndef VIEWFILES_H
 #define VIEWFILES_H
 
-#include "komicviewer_enums.h"
+#include "helper.h"
 #include "picture_loader.h"
-#include "archive_model.h"
+#include "model_files.h"
 
 #include <QtGui/qlistview.h>
 #include <QtGui/qsortfilterproxymodel.h>

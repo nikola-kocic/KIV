@@ -17,13 +17,13 @@ SOURCES += \
     pictureitem_gl.cpp \
     pictureitem_raster.cpp \
     pictureitem_shared.cpp \
-    komicviewer_enums.cpp \
     main_window.cpp \
-    archive_model.cpp \
     view_archive_dirs.cpp \
     view_files.cpp \
     teximg.cpp \
-    picture_loader.cpp
+    picture_loader.cpp \
+    model_files.cpp \
+    helper.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -42,18 +42,18 @@ HEADERS += \
     system_icons.h \
     settings_dialog.h \
     settings.h \
-    komicviewer_enums.h \
     pictureitem.h \
     pictureitem_gl.h \
     pictureitem_raster.h \
     pictureitem_shared.h \
     main_window.h \
-    archive_model.h \
     view_archive_dirs.h \
     view_files.h \
     tiledim.h \
     teximg.h \
-    picture_loader.h
+    picture_loader.h \
+    model_files.h \
+    helper.h
 
 RESOURCES += \
     komicviewer.qrc
@@ -75,7 +75,3 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
-
-
-
-

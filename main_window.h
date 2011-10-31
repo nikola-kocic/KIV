@@ -4,7 +4,7 @@
 #include "view_files.h"
 #include "picture_loader.h"
 #include "pictureitem.h"
-#include "archive_model.h"
+#include "model_files.h"
 #include "view_archive_dirs.h"
 
 #include <QtGui/qfilesystemmodel.h>
@@ -44,7 +44,7 @@ private:
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
 //    QToolBar *toolbarDirectory;
-    ArchiveModel *modelArchive;
+    FilesModel *modelArchive;
 
     //File Menu Actions
     QAction *openAct;

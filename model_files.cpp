@@ -1,5 +1,5 @@
-#include "archive_model.h"
-#include "komicviewer_enums.h"
+#include "model_files.h"
+#include "helper.h"
 #include "settings.h"
 #include "system_icons.h"
 #include "quazip/quazip.h"
@@ -9,7 +9,7 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qdir.h>
 
-void ArchiveModel::setPath(const FileInfo &info)
+void FilesModel::setPath(const FileInfo &info)
 {
     this->clear();
 
@@ -114,7 +114,7 @@ void ArchiveModel::setPath(const FileInfo &info)
     }
 }
 
-QStandardItem* ArchiveModel::AddNode(QStandardItem *node, const QString &name, int type)
+QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int type)
 {
     for (int i = 0; i < node->rowCount(); ++i)
     {
