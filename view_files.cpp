@@ -171,7 +171,7 @@ void ViewFiles::showThumbnail(int num)
     {
         this->proxy->setData(this->proxy->index(num, 0, this->rootIndex()), QPixmap::fromImage(this->watcherThumbnail->resultAt(num)), Qt::DecorationRole);
     }
-    if(++this->returnThumbCount == this->proxy->rowCount(this->rootIndex()))
+    if (++this->returnThumbCount == this->proxy->rowCount(this->rootIndex()))
     {
         this->returnThumbCount = 0;
         this->watcherThumbnail->setFuture(QFuture<QImage>());

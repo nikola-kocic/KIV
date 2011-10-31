@@ -403,10 +403,10 @@ void PictureItemShared::processMousePressEvent(QMouseEvent *ev)
             emit pageNext();
             break;
 
-        case MiddleClick::FollowMouse:
+//        case MiddleClick::FollowMouse:
 
-            //            LockDrag = !LockDrag;
-            break;
+//            LockDrag = !LockDrag;
+//            break;
 
         default: break;
 
@@ -587,7 +587,7 @@ void PictureItemShared::processWheelEvent(QWheelEvent *event)
             }
             else
             {
-                if(Settings::Instance()->getScrollChangesPage())
+                if (Settings::Instance()->getScrollChangesPage())
                 {
                     if (event->delta() > 0)
                     {

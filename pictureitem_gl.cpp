@@ -87,7 +87,7 @@ void PictureItemGL::textureFinished(int num)
 
     this->textures[hIndex][vIndex] = bindTexture(this->textureLoader->resultAt(num), GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
-    if(++this->returnTexCount == (this->ti->hTile->tileCount * this->ti->vTile->tileCount))
+    if (++this->returnTexCount == (this->ti->hTile->tileCount * this->ti->vTile->tileCount))
     {
         this->returnTexCount = 0;
 

@@ -15,7 +15,7 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     ddMiddleClickHash["Full Screen"]  = MiddleClick::Fullscreen;
     ddMiddleClickHash["Autofit"]      = MiddleClick::AutoFit;
     ddMiddleClickHash["Actual Size"]  = MiddleClick::ZoomReset;
-    ddMiddleClickHash["Follow Mouse"] = MiddleClick::FollowMouse;
+//    ddMiddleClickHash["Follow Mouse"] = MiddleClick::FollowMouse;
     ddMiddleClickHash["Next Page"]    = MiddleClick::NextPage;
 
     this->ddMidleClickOrder << MiddleClick::None

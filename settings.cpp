@@ -18,7 +18,7 @@ Settings::Settings()
     this->middleClickHash["fullscreen"]   = MiddleClick::Fullscreen;
     this->middleClickHash["autofit"]      = MiddleClick::AutoFit;
     this->middleClickHash["zoomreset"]    = MiddleClick::ZoomReset;
-    this->middleClickHash["followmouse"]  = MiddleClick::FollowMouse;
+//    this->middleClickHash["followmouse"]  = MiddleClick::FollowMouse;
     this->middleClickHash["nextpage"]     = MiddleClick::NextPage;
     this->middleClick = getMiddleClickFromString(settings->value("Mouse/MiddleClick", "fullscreen").toString());
 

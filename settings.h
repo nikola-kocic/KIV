@@ -7,12 +7,24 @@
 
 namespace MiddleClick
 {
-    enum Action { None, Fullscreen, AutoFit, ZoomReset, FollowMouse, NextPage };
+    enum Action {
+        None,
+        Fullscreen,
+        AutoFit,
+        ZoomReset,
+        NextPage
+//        ,FollowMouse
+    };
 }
 
 namespace Wheel
 {
-    enum Action { None, Scroll, ChangePage, Zoom };
+    enum Action {
+        None,
+        Scroll,
+        ChangePage,
+        Zoom
+    };
 }
 
 class Settings{
