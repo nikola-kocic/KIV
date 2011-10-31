@@ -44,11 +44,7 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 
     if (this->viewMode() == QListView::IconMode)
     {
-        if (this->watcherThumbnail->isRunning())
-        {
-            this->watcherThumbnail->cancel();
-            this->watcherThumbnail->waitForFinished();
-        }
+        this->currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
         this->startShowingThumbnails();
     }
 }
@@ -77,8 +73,6 @@ void ViewFiles::OnTreeViewArchiveDirsCurrentChanged(const QModelIndex &index)
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    QListView::currentChanged(current, previous);
-
     int type = current.data(ROLE_TYPE).toInt();
     QString filename = current.data(Qt::DisplayRole).toString();
 
@@ -140,15 +134,16 @@ void ViewFiles::startShowingThumbnails()
         return;
     }
 
+
     QList <FileInfo> files;
     for (int i = 0; i < this->proxy->rowCount(this->rootIndex()); ++i)
     {
         this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), QSize(this->currentInfo.thumbSize + 20, this->currentInfo.thumbSize + 20), Qt::SizeHintRole);
-
+        FileInfo info;
         if (this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
                 || (this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE))
         {
-            FileInfo info = this->currentInfo;
+            info = this->currentInfo;
 
             if (this->currentInfo.zipPathToImage.isEmpty())
             {
@@ -158,19 +153,19 @@ void ViewFiles::startShowingThumbnails()
             {
                 info.zipImageFileName = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
-
-            files.append(info);
         }
         else
         {
-            FileInfo info;
             info.thumbSize = this->currentInfo.thumbSize;
-            files.append(info);
         }
+        files.append(info);
     }
 
-//    this->reset();
-
+    if (this->watcherThumbnail->isRunning())
+    {
+        this->watcherThumbnail->cancel();
+        this->watcherThumbnail->waitForFinished();
+    }
     this->watcherThumbnail->setFuture(QtConcurrent::mapped(files, PictureLoader::getImage));
 }
 

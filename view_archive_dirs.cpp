@@ -17,8 +17,6 @@ void ViewArchiveDirs::setModel(QAbstractItemModel *model)
 
 void ViewArchiveDirs::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    QTreeView::currentChanged(current, previous);
-
     emit currentRowChanged(this->proxy->mapToSource(current));
 }
 
