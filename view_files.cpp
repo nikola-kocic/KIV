@@ -107,15 +107,11 @@ void ViewFiles::setViewMode(ViewMode mode)
     }
     else
     {
-        QAbstractItemDelegate *delegate = this->itemDelegate();
-        QSize size = delegate->sizeHint(QStyleOptionViewItem (), this->model()->parent(this->rootIndex()));
-
         QFileIconProvider fip;
-
         for (int i = 0; i < this->proxy->rowCount(this->rootIndex()); ++i)
         {
             QString text = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
-            this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), size, Qt::SizeHintRole);
+            this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), QVariant(), Qt::SizeHintRole);
             this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), fip.icon(this->currentInfo.containerPath + "/" + text), Qt::DecorationRole);
         }
     }
