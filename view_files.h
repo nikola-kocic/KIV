@@ -30,7 +30,7 @@ private:
     void startShowingThumbnails();
 
     int returnThumbCount;
-    QFutureWatcher<QPixmap> *watcherThumbnail;
+    QFutureWatcher<QImage> *watcherThumbnail;
     FileInfo currentInfo;
     QSortFilterProxyModel *proxy;
 

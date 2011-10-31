@@ -20,7 +20,7 @@ public:
 private:
     QPixmap pixmap_edited;
     PictureItemShared *picItemShared;
-    QFutureWatcher<QPixmap> *imageLoad;
+    QFutureWatcher<QImage> *imageLoad;
     QPixmap pixmap;
 
 public slots:

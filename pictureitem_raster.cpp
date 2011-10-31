@@ -11,13 +11,13 @@ PictureItemRaster::PictureItemRaster(PictureItemShared *picItemShared, QWidget *
     this->picItemShared = picItemShared;
     connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(setZoom(qreal,qreal)));
 
-    this->imageLoad = new QFutureWatcher<QPixmap>(this);
+    this->imageLoad = new QFutureWatcher<QImage>(this);
     connect(this->imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 }
 
 void PictureItemRaster::imageFinished(int num)
 {
-    this->pixmap = this->imageLoad->resultAt(num);
+    this->pixmap = QPixmap::fromImage(this->imageLoad->resultAt(num));
     picItemShared->setPixmapNull(this->pixmap.isNull());
 
     this->pixmap_edited = this->pixmap;
@@ -38,7 +38,7 @@ void PictureItemRaster::imageFinished(int num)
 
 void PictureItemRaster::setFile(const FileInfo &info)
 {
-    this->imageLoad->setFuture(QtConcurrent::run(PictureLoader::getPixmap, info));
+    this->imageLoad->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
 }
 
 void PictureItemRaster::paintEvent(QPaintEvent *event)

@@ -5,7 +5,7 @@
 #include "teximg.h"
 #include "quazip/JlCompress.h"
 
-//#include <QtCore/qdebug.h>
+#include <QtCore/qdebug.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
 #include <QtGui/qapplication.h>
@@ -51,14 +51,14 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->splitterMain = new QSplitter(Qt::Horizontal, this);
 
-    QVBoxLayout *vboxMain = new QVBoxLayout(this);
+    QWidget *content = new QWidget(this);
+    QVBoxLayout *vboxMain = new QVBoxLayout(content);
     vboxMain->setSpacing(0);
     vboxMain->setMargin(0);
 
-
     QMenuBar *mainMenu = new QMenuBar(this);
-    mainMenu->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     this->createMenus(mainMenu);
+    this->setMenuBar(mainMenu);
 
     this->lineEditPath = new QLineEdit(this);
 
@@ -79,10 +79,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addAction(this->togglePanelAct);
     this->toolbar->addAction(this->toggleFullscreenAct);
     this->toolbar->addSeparator();
-    this->toolbar->addWidget(mainMenu);
+    this->toolbar->addWidget(this->lineEditPath);
+//    this->toolbar->addWidget(mainMenu);
     this->toolbar->addSeparator();
     this->toolbar->addAction(this->pagePreviousAct);
     this->toolbar->addAction(this->pageNextAct);
+    this->toolbar->addAction(this->dirUpAct);
+    this->toolbar->addAction(this->refreshPathAct);
     this->toolbar->addSeparator();
     this->toolbar->addAction(this->zoomInAct);
     this->toolbar->addAction(this->zoomOutAct);
@@ -92,15 +95,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addAction(this->rotateLeftAct);
     this->toolbar->addAction(this->rotateRightAct);
 
-    this->toolbarDirectory = new QToolBar(this);
-    this->toolbarDirectory->setMovable(false);
-    this->toolbarDirectory->setContextMenuPolicy(Qt::PreventContextMenu);
-    this->toolbarDirectory->addAction(this->dirUpAct);
-    this->toolbarDirectory->addAction(this->refreshPathAct);
-    this->toolbarDirectory->addWidget(this->lineEditPath);
-
     vboxMain->addWidget(this->toolbar);
-    vboxMain->addWidget(this->toolbarDirectory);
 
     //Panel start
 
@@ -148,7 +143,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 
     vboxMain->addWidget(this->splitterMain);
-    setLayout(vboxMain);
+    this->setCentralWidget(content);
+
+
 
     this->filesystemView->setModel(this->modelFilesystem);
     for (int i = 1; i < this->filesystemView->header()->count(); ++i)
@@ -652,12 +649,13 @@ void MainWindow::OnFilesViewItemActivated(const QModelIndex &index)
 void MainWindow::togglePanel(bool value)
 {
     this->splitterPanel->setVisible(value);
-    this->toolbarDirectory->setVisible(value);
+//    this->toolbarDirectory->setVisible(value);
 }
 
 void MainWindow::toggleFullscreen(bool value)
 {
     this->togglePanelAct->setChecked(!value);
+    this->menuBar()->setVisible(!value);
     if (value)
     {
 
@@ -824,7 +822,7 @@ void MainWindow::toggleLargeIcons(bool value)
 
     QSize iconSize = QSize(e, e);
     this->toolbar->setIconSize(iconSize);
-    this->toolbarDirectory->setIconSize(iconSize);
+//    this->toolbarDirectory->setIconSize(iconSize);
 
 
     Settings::Instance()->setLargeIcons(value);

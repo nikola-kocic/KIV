@@ -14,8 +14,9 @@
 #include <QtGui/qtoolbar.h>
 #include <QtGui/qcombobox.h>
 #include <QtGui/qtreeview.h>
+#include <QtGui/qmainwindow.h>
 
-class MainWindow : public QWidget
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -42,7 +43,7 @@ private:
     QFileSystemModel *modelFilesystem;
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
-    QToolBar *toolbarDirectory;
+//    QToolBar *toolbarDirectory;
     ArchiveModel *modelArchive;
 
     //File Menu Actions
