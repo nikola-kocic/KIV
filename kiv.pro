@@ -56,11 +56,11 @@ HEADERS += \
     helper.h
 
 RESOURCES += \
-    komicviewer.qrc
+    kiv.qrc
 
 win32{
     INCLUDEPATH   += zlib
-    RC_FILE = komicviewer.rc
+    RC_FILE = kiv.rc
 }
 
 unix {

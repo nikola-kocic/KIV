@@ -5,24 +5,24 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationName("KomicViewer");
-    app.setOrganizationName("KomicViewer");
-    app.setApplicationVersion("0.9");
+    app.setApplicationName("KIV");
+    app.setOrganizationName("KIV");
+    app.setApplicationVersion("0.1");
 
-    MainWindow komicViewer;
+    MainWindow w;
 
 #ifdef WIN32
     QStringList l_libPaths;
     // Build plugins path
-    QDir l_pluginsPath(qApp->applicationDirPath());
+    QDir l_pluginsPath(QApplication::applicationDirPath());
     l_pluginsPath.mkdir("plugins");
     l_pluginsPath.cd("plugins");
 
     // Set library paths
-    l_libPaths << l_pluginsPath.path() << qApp->applicationDirPath();
-    qApp->setLibraryPaths(l_libPaths);
+    l_libPaths << l_pluginsPath.path() << QApplication::applicationDirPath();
+    QApplication::setLibraryPaths(l_libPaths);
 #endif
 
-    komicViewer.showMaximized();
+    w.showMaximized();
     return app.exec();
 }

@@ -8,7 +8,6 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
-#include <QtGui/qapplication.h>
 #include <QtGui/qaction.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qboxlayout.h>
@@ -27,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    this->setWindowIcon(QIcon(":/icons/komicviewer.svg"));
+    this->setWindowIcon(QIcon(":/icons/kiv.svg"));
 
     this->modelFilesystem = new QFileSystemModel(this);
     QStringList filters;
@@ -791,19 +790,19 @@ void MainWindow::settingsDialog()
 void MainWindow::about()
 {
     QMessageBox *aboutBox = new QMessageBox(this);
-    aboutBox->setWindowTitle("About KomicViewer");
+    aboutBox->setWindowTitle("About " + QApplication::applicationName());
     aboutBox->setText(
                 QApplication::applicationName() +
                 tr(" version ") + QApplication::applicationVersion() +
                 trUtf8("\n\nAuthor: Nikola Kocić (nikolakocic@gmail.com)") +
-                "\n\nWebsite: http://nikola-kocic.github.com/KomicViewer/"
+                "\n\nWebsite: http://nikola-kocic.github.com/KIV/"
                 );
     aboutBox->exec();
 }
 
 void MainWindow::website()
 {
-    QDesktopServices::openUrl(QUrl("http://nikola-kocic.github.com/KomicViewer/"));
+    QDesktopServices::openUrl(QUrl("http://nikola-kocic.github.com/KIV/"));
 }
 
 void MainWindow::toggleLargeIcons(bool value)

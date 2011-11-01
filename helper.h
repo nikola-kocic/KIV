@@ -1,5 +1,5 @@
-#ifndef KOMICVIEWERENUMS_H
-#define KOMICVIEWERENUMS_H
+#ifndef HELPER_H
+#define HELPER_H
 
 #include <QtCore/qstringlist.h>
 #include <QtCore/qfileinfo.h>
@@ -54,5 +54,5 @@ const int ROLE_ARCHIVE_FILE_NAME = Qt::UserRole + 2;
 const int ROLE_THUMBNAIL = Qt::UserRole + 3;
 
 
-#endif // KOMICVIEWERENUMS_H
+#endif // HELPER_H
 
