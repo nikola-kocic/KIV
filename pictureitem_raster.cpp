@@ -1,4 +1,4 @@
-#include "pictureitem_raster.h"
+#include "pictureitem.h"
 #include "settings.h"
 #include "picture_loader.h"
 
@@ -6,19 +6,14 @@
 #include <QtGui/qpainter.h>
 #include <QtGui/qevent.h>
 
-PictureItemRaster::PictureItemRaster(PictureItemShared *picItemShared, QWidget *parent, Qt::WindowFlags f)
+PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f)
 {
-    this->picItemShared = picItemShared;
-    connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(setZoom(qreal,qreal)));
-
-    this->imageLoad = new QFutureWatcher<QImage>(this);
-    connect(this->imageLoad, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
+    this->picItemShared = parent;
 }
 
-void PictureItemRaster::imageFinished(int num)
+void PictureItem::PictureItemRaster::setImage(QImage img)
 {
-    this->pixmap = QPixmap::fromImage(this->imageLoad->resultAt(num));
-    picItemShared->setPixmapNull(this->pixmap.isNull());
+    this->pixmap = QPixmap::fromImage(img);
 
     this->pixmap_edited = this->pixmap;
 
@@ -32,16 +27,9 @@ void PictureItemRaster::imageFinished(int num)
     this->picItemShared->afterPixmapLoad();
 
     this->update();
-
-    emit imageChanged();
 }
 
-void PictureItemRaster::setFile(const FileInfo &info)
-{
-    this->imageLoad->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
-}
-
-void PictureItemRaster::paintEvent(QPaintEvent *event)
+void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
 {
     if (this->picItemShared->isPixmapNull())
     {
@@ -73,15 +61,8 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
     p.end();
 }
 
-void PictureItemRaster::setRotation(qreal r)
+void PictureItem::PictureItemRaster::setRotation(qreal r)
 {
-    if (this->picItemShared->isPixmapNull())
-    {
-        return;
-    }
-
-    this->picItemShared->setRotation(r);
-
     if ((int)this->picItemShared->getRotation() % 360 == 0)
     {
         this->pixmap_edited = this->pixmap;
@@ -104,19 +85,12 @@ void PictureItemRaster::setRotation(qreal r)
     this->update();
 }
 
-void PictureItemRaster::setZoom(qreal current, qreal previous)
+void PictureItem::PictureItemRaster::setZoom(qreal current, qreal previous)
 {
-    if (this->picItemShared->isPixmapNull())
-    {
-        return;
-    }
-
     QPointF p = this->picItemShared->pointToOrigin((this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current));
 
     this->picItemShared->boundingRect = QRectF(p.x(), p.y(), (this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current));
 
     this->picItemShared->avoidOutOfScreen();
     this->update();
-
-    emit this->zoomChanged();
 }

@@ -16,7 +16,6 @@ SOURCES += \
     pictureitem.cpp \
     pictureitem_gl.cpp \
     pictureitem_raster.cpp \
-    pictureitem_shared.cpp \
     main_window.cpp \
     view_archive_dirs.cpp \
     view_files.cpp \
@@ -43,9 +42,6 @@ HEADERS += \
     settings_dialog.h \
     settings.h \
     pictureitem.h \
-    pictureitem_gl.h \
-    pictureitem_raster.h \
-    pictureitem_shared.h \
     main_window.h \
     view_archive_dirs.h \
     view_files.h \

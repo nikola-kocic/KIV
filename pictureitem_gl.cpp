@@ -1,4 +1,4 @@
-#include "pictureitem_gl.h"
+#include "pictureitem.h"
 #include "settings.h"
 #include "picture_loader.h"
 
@@ -7,19 +7,11 @@
 #include <QtGui/qpalette.h>
 #include <QtGui/qevent.h>
 
-PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, Qt::WindowFlags f)
+PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f)
 {
-    this->picItemShared = picItemShared;
-    connect(this->picItemShared, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(setZoom(qreal,qreal)));
-    connect(this->picItemShared, SIGNAL(update()), this, SLOT(update()));
+    this->picItemShared = parent;
 
     this->ti = new TexImg();
-
-    this->textureLoader = new QFutureWatcher<QImage>(this);
-    connect(this->textureLoader, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
-
-    this->imageLoader = new QFutureWatcher<QImage>(this);
-    connect(this->imageLoader, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
     this->clearColor = Qt::lightGray;
     this->offsetX = offsetY = 0;
@@ -27,38 +19,41 @@ PictureItemGL::PictureItemGL(PictureItemShared *picItemShared, QWidget *parent, 
     this->textures = QVector < QVector < GLuint > >(0);
 }
 
-PictureItemGL::~PictureItemGL()
+PictureItem::PictureItemGL::~PictureItemGL()
 {
     clearTextures();
     delete this->ti;
 }
 
-void PictureItemGL::clearTextures()
+void PictureItem::PictureItemGL::clearTextures()
 {
     //Delete old textures
-//    qDebug() << "textures.count()" << textures.count();
     for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
     {
-//        qDebug() << "this->textures.at(hIndex).count()" << this->textures.at(hIndex).count();
         for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
         {
-            glDeleteTextures(1, &this->textures.at(hIndex).at(vIndex));
-//            qDebug() << "deleted texture @" << hIndex << vIndex;
+            deleteTexture(this->textures.at(hIndex).at(vIndex));
         }
     }
 }
 
-void PictureItemGL::imageFinished(int num)
+void PictureItem::PictureItemGL::setImage(QImage img)
 {
-    this->ti->setImage(this->imageLoader->resultAt(num));
+    if(img.isNull())
+    {
+        clearTextures();
+        this->ti->setImage(QImage());
 
-    //Free result memory
-    this->imageLoader->setFuture(QFuture<QImage>());
+        this->textures = QVector < QVector < GLuint > >(0);
+        this->updateGL();
+        return;
+    }
+
+    this->ti->setImage(img);
 
     clearTextures();
     this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
     QList<TexIndex> indexes;
-    this->returnTexCount = 0;
     for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
     {
         this->textures[hIndex].resize(this->ti->vTile->tileCount);
@@ -75,77 +70,50 @@ void PictureItemGL::imageFinished(int num)
         }
     }
 
-    this->textureLoader->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
+    this->picItemShared->loadTextures(indexes);
 }
 
-void PictureItemGL::textureFinished(int num)
+void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
 {
     this->setUpdatesEnabled(false);
 
     int hIndex = num / this->ti->vTile->tileCount;
     int vIndex = num % this->ti->vTile->tileCount;
 
-    this->textures[hIndex][vIndex] = bindTexture(this->textureLoader->resultAt(num), GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
+    this->textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
-    if (++this->returnTexCount == (this->ti->hTile->tileCount * this->ti->vTile->tileCount))
-    {
-        this->returnTexCount = 0;
-
-        //Free memory
-        this->ti->bitmapData = QImage();
-        this->textureLoader->setFuture(QFuture<QImage>());
-
-        //Update view
-        this->picItemShared->setPixmapNull(false);
-
-        this->setRotation(0);
-        if (this->picItemShared->getLockMode() != LockMode::Zoom)
-        {
-            this->picItemShared->setZoom(1);
-        }
-
-        this->picItemShared->boundingRect = QRect(0, 0, (this->ti->hTile->bmpSize * this->picItemShared->getZoom()), (this->ti->vTile->bmpSize * this->picItemShared->getZoom()));
-        this->picItemShared->afterPixmapLoad();
-
-        this->updateSize();
-
-        this->setUpdatesEnabled(true);
-        this->updateGL();
-        emit imageChanged();
-    }
 }
 
-void PictureItemGL::setFile(const FileInfo &info)
+void PictureItem::PictureItemGL::textureLoadFinished()
 {
-    //If file is null, display nothing
-    if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
-    {
-//        qDebug() << "textures = 0";
-        clearTextures();
-        this->ti->setImage(QImage());
+    //Free memory
+    this->ti->bitmapData = QImage();
 
-//        this->imageLoader->setFuture(QFuture<QImage>());
-//        this->textureLoader->setFuture(QFuture<QImage>());
-//        this->textures.clear();
+    //Update view
 
-        this->textures = QVector < QVector < GLuint > >(0);
-        this->picItemShared->setPixmapNull(true);
-        this->updateGL();
-        emit imageChanged();
-    }
-    else
+    this->picItemShared->setRotation(0);
+    if (this->picItemShared->getLockMode() != LockMode::Zoom)
     {
-        this->imageLoader->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
+        this->picItemShared->setZoom(1);
     }
+
+    this->picItemShared->boundingRect = QRect(0, 0, (this->ti->hTile->bmpSize * this->picItemShared->getZoom()), (this->ti->vTile->bmpSize * this->picItemShared->getZoom()));
+    this->picItemShared->afterPixmapLoad();
+
+    this->updateSize();
+
+    this->setUpdatesEnabled(true);
+    this->updateGL();
 }
 
-void PictureItemGL::setClearColor(const QColor &color)
+
+void PictureItem::PictureItemGL::setClearColor(const QColor &color)
 {
     this->clearColor = color;
     this->updateGL();
 }
 
-void PictureItemGL::initializeGL()
+void PictureItem::PictureItemGL::initializeGL()
 {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -155,7 +123,7 @@ void PictureItemGL::initializeGL()
     this->ti->setTexMaxSize(size);
 }
 
-void PictureItemGL::updateSize()
+void PictureItem::PictureItemGL::updateSize()
 {
     if (this->textures.count() == 0)
     {
@@ -169,7 +137,7 @@ void PictureItemGL::updateSize()
     this->scaleY = (this->ti->vTile->bmpSize * this->picItemShared->getZoom()) / this->height();
 }
 
-void PictureItemGL::paintGL()
+void PictureItem::PictureItemGL::paintGL()
 {
     qglClearColor(clearColor);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -235,7 +203,7 @@ void PictureItemGL::paintGL()
     }
 }
 
-void PictureItemGL::resizeGL(int width, int height)
+void PictureItem::PictureItemGL::resizeGL(int width, int height)
 {
     updateSize();
     glViewport(0, 0, width, height);
@@ -247,15 +215,8 @@ void PictureItemGL::resizeGL(int width, int height)
 }
 
 
-void PictureItemGL::setRotation(qreal r)
+void PictureItem::PictureItemGL::setRotation(qreal r)
 {
-    if (this->textures.count() == 0)
-    {
-        return;
-    }
-
-    this->picItemShared->setRotation(r);
-
     QTransform tRot;
     tRot.translate(this->picItemShared->boundingRect.x(), this->picItemShared->boundingRect.y());
     tRot.scale(this->picItemShared->getZoom(), this->picItemShared->getZoom());
@@ -281,13 +242,8 @@ void PictureItemGL::setRotation(qreal r)
     this->updateGL();
 }
 
-void PictureItemGL::setZoom(qreal current, qreal previous)
+void PictureItem::PictureItemGL::setZoom(qreal current, qreal previous)
 {
-    if (this->textures.count() == 0)
-    {
-        return;
-    }
-
     qreal scaledW = (this->picItemShared->boundingRect.width() / previous) * current;
     qreal scaledH = (this->picItemShared->boundingRect.height() / previous) * current;
     QPointF p = this->picItemShared->pointToOrigin(scaledW, scaledH);
@@ -299,6 +255,4 @@ void PictureItemGL::setZoom(qreal current, qreal previous)
     this->setUpdatesEnabled(true);
 
     this->updateGL();
-
-    emit zoomChanged();
 }
