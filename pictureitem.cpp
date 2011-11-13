@@ -37,16 +37,22 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
     this->setLayout(vboxMain);
 }
 
-bool PictureItem::isPixmapNull()
-{
-    return this->pixmapNull;
-}
 
-void PictureItem::setPixmapNull(bool value)
+void PictureItem::initPictureItem()
 {
-    this->pixmapNull = value;
+    if (this->opengl)
+    {
+        this->imageDisplayGL = new PictureItemGL(this);
+        this->imageDisplayRaster = 0;
+        this->layout()->addWidget(this->imageDisplayGL);
+    }
+    else
+    {
+        this->imageDisplayRaster = new PictureItemRaster(this);
+        this->imageDisplayGL = 0;
+        this->layout()->addWidget(this->imageDisplayRaster);
+    }
 }
-
 
 bool PictureItem::getHardwareAcceleration()
 {
@@ -71,6 +77,17 @@ void PictureItem::setHardwareAcceleration(bool b)
         this->opengl = b;
         initPictureItem();
     }
+}
+
+
+bool PictureItem::isPixmapNull()
+{
+    return this->pixmapNull;
+}
+
+void PictureItem::setPixmapNull(bool value)
+{
+    this->pixmapNull = value;
 }
 
 
@@ -146,18 +163,10 @@ void PictureItem::setLockMode(LockMode::Mode mode)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+QVector<qreal> PictureItem::getDefaultZoomSizes()
+{
+    return this->defaultZoomSizes;
+}
 
 
 
@@ -188,22 +197,6 @@ void PictureItem::setPixmap(const FileInfo &info)
     }
 }
 
-
-void PictureItem::textureFinished(int num)
-{
-    if (this->opengl)
-    {
-        this->imageDisplayGL->setTexture(this->textureLoader->resultAt(num), num);
-        if (--this->returnTexCount == 0)
-        {
-            this->setPixmapNull(false);
-            this->textureLoader->setFuture(QFuture<QImage>());
-            this->imageDisplayGL->textureLoadFinished();
-            emit imageChanged();
-        }
-    }
-}
-
 void PictureItem::imageFinished(int num)
 {
     this->setPixmapNull(this->imageLoader->resultAt(num).isNull());
@@ -227,23 +220,20 @@ void PictureItem::loadTextures(QList<TexIndex> indexes)
     this->textureLoader->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
 }
 
-void PictureItem::initPictureItem()
+void PictureItem::textureFinished(int num)
 {
     if (this->opengl)
     {
-        this->imageDisplayGL = new PictureItemGL(this);
-        this->imageDisplayRaster = 0;
-        this->layout()->addWidget(this->imageDisplayGL);
-    }
-    else
-    {
-        this->imageDisplayRaster = new PictureItemRaster(this);
-        this->imageDisplayGL = 0;
-        this->layout()->addWidget(this->imageDisplayRaster);
+        this->imageDisplayGL->setTexture(this->textureLoader->resultAt(num), num);
+        if (--this->returnTexCount == 0)
+        {
+            this->setPixmapNull(false);
+            this->textureLoader->setFuture(QFuture<QImage>());
+            this->imageDisplayGL->textureLoadFinished();
+            emit imageChanged();
+        }
     }
 }
-
-
 
 void PictureItem::afterPixmapLoad()
 {
@@ -269,6 +259,9 @@ void PictureItem::afterPixmapLoad()
         this->flagJumpToEnd = false;
     }
 }
+
+
+
 
 
 void PictureItem::mousePressEvent(QMouseEvent *ev)
@@ -506,10 +499,6 @@ void PictureItem::wheelEvent(QWheelEvent *event)
     this->update();
 }
 
-QVector<qreal> PictureItem::getDefaultZoomSizes()
-{
-    return this->defaultZoomSizes;
-}
 
 void PictureItem::start_timerScrollPage()
 {

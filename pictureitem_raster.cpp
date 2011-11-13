@@ -8,30 +8,32 @@
 
 PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f)
 {
-    this->picItemShared = parent;
+    this->picItem = parent;
 }
 
 void PictureItem::PictureItemRaster::setImage(QImage img)
 {
+    this->setUpdatesEnabled(false);
     this->pixmap = QPixmap::fromImage(img);
 
     this->pixmap_edited = this->pixmap;
 
-    this->picItemShared->boundingRect = QRect(0, 0, this->pixmap.width(), this->pixmap.height());
-    if (this->picItemShared->getLockMode() != LockMode::Zoom)
+    this->picItem->boundingRect = QRect(0, 0, this->pixmap.width(), this->pixmap.height());
+    if (this->picItem->getLockMode() != LockMode::Zoom)
     {
-        this->picItemShared->setZoom(1);
+        this->picItem->setZoom(1);
     }
-    this->picItemShared->setRotation(0);
+    this->picItem->setRotation(0);
 
-    this->picItemShared->afterPixmapLoad();
+    this->picItem->afterPixmapLoad();
 
+    this->setUpdatesEnabled(true);
     this->update();
 }
 
 void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
 {
-    if (this->picItemShared->isPixmapNull())
+    if (this->picItem->isPixmapNull())
     {
         return;
     }
@@ -40,19 +42,19 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
     p.setClipRect(event->region().boundingRect());
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    qreal zoom = this->picItemShared->getZoom();
-    QRectF sourceRect = QRectF(-this->picItemShared->boundingRect.x() / zoom,
-                               -this->picItemShared->boundingRect.y() / zoom,
+    qreal zoom = this->picItem->getZoom();
+    QRectF sourceRect = QRectF(-this->picItem->boundingRect.x() / zoom,
+                               -this->picItem->boundingRect.y() / zoom,
                                event->region().boundingRect().width() / zoom,
                                event->region().boundingRect().height() / zoom);
 
     QRectF drawRect = (QRectF)event->region().boundingRect();
 
-    if (drawRect.width() > (this->pixmap_edited.width() * this->picItemShared->getZoom()))
+    if (drawRect.width() > (this->pixmap_edited.width() * this->picItem->getZoom()))
     {
         drawRect.moveLeft((drawRect.width() - (this->pixmap_edited.width() * zoom)) / 2);
     }
-    if (drawRect.height() > (this->pixmap_edited.height() * this->picItemShared->getZoom()))
+    if (drawRect.height() > (this->pixmap_edited.height() * this->picItem->getZoom()))
     {
         drawRect.moveTop((drawRect.height() - (this->pixmap_edited.height() * zoom)) / 2);
     }
@@ -63,14 +65,14 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
 
 void PictureItem::PictureItemRaster::setRotation(qreal r)
 {
-    if ((int)this->picItemShared->getRotation() % 360 == 0)
+    if ((int)this->picItem->getRotation() % 360 == 0)
     {
         this->pixmap_edited = this->pixmap;
     }
     else
     {
         QTransform tRot;
-        tRot.rotate(this->picItemShared->getRotation());
+        tRot.rotate(this->picItem->getRotation());
 
         Qt::TransformationMode rotateMode;
         rotateMode = Qt::SmoothTransformation;
@@ -79,18 +81,18 @@ void PictureItem::PictureItemRaster::setRotation(qreal r)
         this->pixmap_edited = this->pixmap.transformed(tRot, rotateMode);
     }
 
-    this->picItemShared->boundingRect.setWidth(this->pixmap_edited.width() * this->picItemShared->getZoom());
-    this->picItemShared->boundingRect.setHeight(this->pixmap_edited.height() * this->picItemShared->getZoom());
-    this->picItemShared->avoidOutOfScreen();
+    this->picItem->boundingRect.setWidth(this->pixmap_edited.width() * this->picItem->getZoom());
+    this->picItem->boundingRect.setHeight(this->pixmap_edited.height() * this->picItem->getZoom());
+    this->picItem->avoidOutOfScreen();
     this->update();
 }
 
 void PictureItem::PictureItemRaster::setZoom(qreal current, qreal previous)
 {
-    QPointF p = this->picItemShared->pointToOrigin((this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current));
+    QPointF p = this->picItem->pointToOrigin((this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current));
 
-    this->picItemShared->boundingRect = QRectF(p.x(), p.y(), (this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current));
+    this->picItem->boundingRect = QRectF(p.x(), p.y(), (this->pixmap_edited.width() * current), (this->pixmap_edited.height() * current));
 
-    this->picItemShared->avoidOutOfScreen();
+    this->picItem->avoidOutOfScreen();
     this->update();
 }

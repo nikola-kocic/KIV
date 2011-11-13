@@ -9,9 +9,9 @@
 
 PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f)
 {
-    this->picItemShared = parent;
+    this->picItem = parent;
 
-    this->ti = new TexImg();
+    this->texImg = new TexImg();
 
     this->clearColor = Qt::lightGray;
     this->offsetX = offsetY = 0;
@@ -22,7 +22,7 @@ PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f
 PictureItem::PictureItemGL::~PictureItemGL()
 {
     clearTextures();
-    delete this->ti;
+    delete this->texImg;
 }
 
 void PictureItem::PictureItemGL::clearTextures()
@@ -42,43 +42,43 @@ void PictureItem::PictureItemGL::setImage(QImage img)
     if(img.isNull())
     {
         clearTextures();
-        this->ti->setImage(QImage());
+        this->texImg->setImage(QImage());
 
         this->textures = QVector < QVector < GLuint > >(0);
         this->updateGL();
         return;
     }
 
-    this->ti->setImage(img);
+    this->setUpdatesEnabled(false);
+
+    this->texImg->setImage(img);
 
     clearTextures();
-    this->textures = QVector < QVector < GLuint > >(this->ti->hTile->tileCount);
+    this->textures = QVector < QVector < GLuint > >(this->texImg->hTile->tileCount);
     QList<TexIndex> indexes;
-    for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
+    for (int hIndex = 0; hIndex < this->texImg->hTile->tileCount; ++hIndex)
     {
-        this->textures[hIndex].resize(this->ti->vTile->tileCount);
+        this->textures[hIndex].resize(this->texImg->vTile->tileCount);
 
-        for (int vIndex = 0; vIndex < this->ti->vTile->tileCount; ++vIndex)
+        for (int vIndex = 0; vIndex < this->texImg->vTile->tileCount; ++vIndex)
         {
             TexIndex tex;
-            tex.bitmapData = this->ti->bitmapData;
-            tex.currentTileWidth = this->ti->hTile->tileSize.at(hIndex);
-            tex.currentTileHeight = this->ti->vTile->tileSize.at(vIndex);
-            tex.hBorderOffset = this->ti->hTile->offsetBorder.at(hIndex);
-            tex.vBorderOffset = this->ti->vTile->offsetBorder.at(vIndex);
+            tex.bitmapData = this->texImg->bitmapData;
+            tex.currentTileWidth = this->texImg->hTile->tileSize.at(hIndex);
+            tex.currentTileHeight = this->texImg->vTile->tileSize.at(vIndex);
+            tex.hBorderOffset = this->texImg->hTile->offsetBorder.at(hIndex);
+            tex.vBorderOffset = this->texImg->vTile->offsetBorder.at(vIndex);
             indexes.append(tex);
         }
     }
 
-    this->picItemShared->loadTextures(indexes);
+    this->picItem->loadTextures(indexes);
 }
 
 void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
 {
-    this->setUpdatesEnabled(false);
-
-    int hIndex = num / this->ti->vTile->tileCount;
-    int vIndex = num % this->ti->vTile->tileCount;
+    int hIndex = num / this->texImg->vTile->tileCount;
+    int vIndex = num % this->texImg->vTile->tileCount;
 
     this->textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
@@ -87,18 +87,18 @@ void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
 void PictureItem::PictureItemGL::textureLoadFinished()
 {
     //Free memory
-    this->ti->bitmapData = QImage();
+    this->texImg->bitmapData = QImage();
 
     //Update view
 
-    this->picItemShared->setRotation(0);
-    if (this->picItemShared->getLockMode() != LockMode::Zoom)
+    this->picItem->setRotation(0);
+    if (this->picItem->getLockMode() != LockMode::Zoom)
     {
-        this->picItemShared->setZoom(1);
+        this->picItem->setZoom(1);
     }
 
-    this->picItemShared->boundingRect = QRect(0, 0, (this->ti->hTile->bmpSize * this->picItemShared->getZoom()), (this->ti->vTile->bmpSize * this->picItemShared->getZoom()));
-    this->picItemShared->afterPixmapLoad();
+    this->picItem->boundingRect = QRect(0, 0, (this->texImg->hTile->bmpSize * this->picItem->getZoom()), (this->texImg->vTile->bmpSize * this->picItem->getZoom()));
+    this->picItem->afterPixmapLoad();
 
     this->updateSize();
 
@@ -120,7 +120,7 @@ void PictureItem::PictureItemGL::initializeGL()
 
     GLint size = 0;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
-    this->ti->setTexMaxSize(size);
+    this->texImg->setTexMaxSize(size);
 }
 
 void PictureItem::PictureItemGL::updateSize()
@@ -130,11 +130,11 @@ void PictureItem::PictureItemGL::updateSize()
         return;
     }
 
-    this->offsetX = (this->picItemShared->boundingRect.width() - this->width()) / 2;
-    this->offsetY = (this->picItemShared->boundingRect.height() - this->height()) / 2;
+    this->offsetX = (this->picItem->boundingRect.width() - this->width()) / 2;
+    this->offsetY = (this->picItem->boundingRect.height() - this->height()) / 2;
 
-    this->scaleX = (this->ti->hTile->bmpSize * this->picItemShared->getZoom()) / this->width();
-    this->scaleY = (this->ti->vTile->bmpSize * this->picItemShared->getZoom()) / this->height();
+    this->scaleX = (this->texImg->hTile->bmpSize * this->picItem->getZoom()) / this->width();
+    this->scaleY = (this->texImg->vTile->bmpSize * this->picItem->getZoom()) / this->height();
 }
 
 void PictureItem::PictureItemGL::paintGL()
@@ -150,39 +150,39 @@ void PictureItem::PictureItemGL::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslated((this->picItemShared->boundingRect.x() + (this->offsetX > 0 ? this->offsetX : 0)), (this->picItemShared->boundingRect.y() + (this->offsetY > 0 ? this->offsetY : 0)), 0);
-    glRotated(this->picItemShared->getRotation(), 0 , 0, 1);
+    glTranslated((this->picItem->boundingRect.x() + (this->offsetX > 0 ? this->offsetX : 0)), (this->picItem->boundingRect.y() + (this->offsetY > 0 ? this->offsetY : 0)), 0);
+    glRotated(this->picItem->getRotation(), 0 , 0, 1);
     glScaled(this->scaleX, this->scaleY, 1);
 
     QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
     QRectF vertImage = QRectF(QPointF(-this->width() * 0.5, -this->height() * 0.5), QPointF (this->width() * 0.5, this->height() * 0.5));
 
-    for (int hIndex = 0; hIndex < this->ti->hTile->tileCount; ++hIndex)
+    for (int hIndex = 0; hIndex < this->texImg->hTile->tileCount; ++hIndex)
     {
-        double texScale = (double)this->ti->hTile->bmpSize / (double)this->ti->hTile->tileSize.at(hIndex);
+        double texScale = (double)this->texImg->hTile->bmpSize / (double)this->texImg->hTile->tileSize.at(hIndex);
         double tx;
         double tx2;
         double qx;
         double qx2;
 
         if (!ClipTextureVertex(texImage.left(), texImage.right(), vertImage.left(), vertImage.right(),
-                               this->ti->hTile->switchBorderNorm.at(hIndex), this->ti->hTile->switchBorderNorm.at(hIndex + 1),
-                               this->ti->hTile->offsetBorderNorm.at(hIndex), texScale, tx, tx2, qx, qx2))
+                               this->texImg->hTile->switchBorderNorm.at(hIndex), this->texImg->hTile->switchBorderNorm.at(hIndex + 1),
+                               this->texImg->hTile->offsetBorderNorm.at(hIndex), texScale, tx, tx2, qx, qx2))
         {
             continue;
         }
 
-        for (int vIndex = 0; vIndex < this->ti->vTile->tileCount; ++vIndex)
+        for (int vIndex = 0; vIndex < this->texImg->vTile->tileCount; ++vIndex)
         {
-            texScale = (double)this->ti->vTile->bmpSize / (double)this->ti->vTile->tileSize.at(vIndex);
+            texScale = (double)this->texImg->vTile->bmpSize / (double)this->texImg->vTile->tileSize.at(vIndex);
             double ty;
             double ty2;
             double qy;
             double qy2;
 
             if (!ClipTextureVertex(texImage.top(), texImage.bottom(), vertImage.top(), vertImage.bottom(),
-                                   this->ti->vTile->switchBorderNorm.at(vIndex), this->ti->vTile->switchBorderNorm.at(vIndex + 1),
-                                   this->ti->vTile->offsetBorderNorm.at(vIndex), texScale, ty, ty2, qy, qy2))
+                                   this->texImg->vTile->switchBorderNorm.at(vIndex), this->texImg->vTile->switchBorderNorm.at(vIndex + 1),
+                                   this->texImg->vTile->offsetBorderNorm.at(vIndex), texScale, ty, ty2, qy, qy2))
             {
                 continue;
             }
@@ -218,24 +218,24 @@ void PictureItem::PictureItemGL::resizeGL(int width, int height)
 void PictureItem::PictureItemGL::setRotation(qreal r)
 {
     QTransform tRot;
-    tRot.translate(this->picItemShared->boundingRect.x(), this->picItemShared->boundingRect.y());
-    tRot.scale(this->picItemShared->getZoom(), this->picItemShared->getZoom());
-    tRot.translate((this->ti->vTile->bmpSize / 2), (this->ti->hTile->bmpSize / 2));
-    tRot.rotate(this->picItemShared->getRotation());
-    tRot.translate((-this->ti->vTile->bmpSize / 2), (-this->ti->hTile->bmpSize / 2));
-    QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(this->ti->hTile->bmpSize, this->ti->vTile->bmpSize)));
+    tRot.translate(this->picItem->boundingRect.x(), this->picItem->boundingRect.y());
+    tRot.scale(this->picItem->getZoom(), this->picItem->getZoom());
+    tRot.translate((this->texImg->vTile->bmpSize / 2), (this->texImg->hTile->bmpSize / 2));
+    tRot.rotate(this->picItem->getRotation());
+    tRot.translate((-this->texImg->vTile->bmpSize / 2), (-this->texImg->hTile->bmpSize / 2));
+    QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(this->texImg->hTile->bmpSize, this->texImg->vTile->bmpSize)));
 
-    this->picItemShared->boundingRect.setWidth(transformedRot.width());
-    this->picItemShared->boundingRect.setHeight(transformedRot.height());
+    this->picItem->boundingRect.setWidth(transformedRot.width());
+    this->picItem->boundingRect.setHeight(transformedRot.height());
 
-    if ((this->picItemShared->boundingRect.height() + this->picItemShared->boundingRect.y()) < this->height())
+    if ((this->picItem->boundingRect.height() + this->picItem->boundingRect.y()) < this->height())
     {
-        this->picItemShared->boundingRect.translate(0, (this->height() - (this->picItemShared->boundingRect.height() + this->picItemShared->boundingRect.y())));
+        this->picItem->boundingRect.translate(0, (this->height() - (this->picItem->boundingRect.height() + this->picItem->boundingRect.y())));
     }
 
-    if (this->picItemShared->boundingRect.height() < this->height())
+    if (this->picItem->boundingRect.height() < this->height())
     {
-        this->picItemShared->boundingRect.moveTop(0);
+        this->picItem->boundingRect.moveTop(0);
     }
 
     this->updateSize();
@@ -244,14 +244,14 @@ void PictureItem::PictureItemGL::setRotation(qreal r)
 
 void PictureItem::PictureItemGL::setZoom(qreal current, qreal previous)
 {
-    qreal scaledW = (this->picItemShared->boundingRect.width() / previous) * current;
-    qreal scaledH = (this->picItemShared->boundingRect.height() / previous) * current;
-    QPointF p = this->picItemShared->pointToOrigin(scaledW, scaledH);
-    this->picItemShared->boundingRect = QRectF(p.x(), p.y(), scaledW, scaledH);
+    qreal scaledW = (this->picItem->boundingRect.width() / previous) * current;
+    qreal scaledH = (this->picItem->boundingRect.height() / previous) * current;
+    QPointF p = this->picItem->pointToOrigin(scaledW, scaledH);
+    this->picItem->boundingRect = QRectF(p.x(), p.y(), scaledW, scaledH);
 
     this->setUpdatesEnabled(false);
-    this->picItemShared->avoidOutOfScreen();
-    this->setRotation(this->picItemShared->getRotation());
+    this->picItem->avoidOutOfScreen();
+    this->setRotation(this->picItem->getRotation());
     this->setUpdatesEnabled(true);
 
     this->updateGL();

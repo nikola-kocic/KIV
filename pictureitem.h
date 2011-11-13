@@ -42,7 +42,7 @@ private:
 
     private:
         QPixmap pixmap_edited;
-        PictureItem *picItemShared;
+        PictureItem *picItem;
         QPixmap pixmap;
 
     protected:
@@ -65,7 +65,7 @@ private:
     private:
         void updateSize();
         void clearTextures();
-        PictureItem *picItemShared;
+        PictureItem *picItem;
 
         qreal scaleX;
         qreal scaleY;
@@ -74,7 +74,7 @@ private:
         QColor clearColor;
         QPoint lastPos;
         QVector < QVector <GLuint> > textures;
-        TexImg *ti;
+        TexImg *texImg;
 
     protected:
         void initializeGL();
