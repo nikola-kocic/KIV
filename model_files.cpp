@@ -1,7 +1,6 @@
 #include "model_files.h"
 #include "helper.h"
 #include "settings.h"
-#include "system_icons.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
@@ -130,7 +129,7 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
     ntvi->setToolTip(name);
     if (type == TYPE_DIR || type == TYPE_ARCHIVE_DIR)
     {
-        ntvi->setIcon(SystemIcons::getDirectoryIcon());
+        ntvi->setIcon(getDirectoryIcon());
         int lastFolderIndex = 0;
         for (int i = 0; i < node->rowCount(); ++i)
         {
@@ -149,7 +148,7 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
     }
     else
     {
-        ntvi->setIcon(SystemIcons::getFileIcon());
+        ntvi->setIcon(getFileIcon());
         node->appendRow(ntvi);
     }
     return ntvi;

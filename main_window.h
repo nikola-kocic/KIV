@@ -44,7 +44,7 @@ private:
     QComboBox *comboBoxZoom;
     QToolBar *toolbar;
 //    QToolBar *toolbarDirectory;
-    FilesModel *modelArchive;
+    FilesModel *modelFiles;
 
     //File Menu Actions
     QAction *openAct;

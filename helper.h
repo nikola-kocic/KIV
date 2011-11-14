@@ -3,6 +3,7 @@
 
 #include <QtCore/qstringlist.h>
 #include <QtCore/qfileinfo.h>
+#include <QtGui/QApplication>
 
 namespace LockMode
 {
@@ -48,6 +49,9 @@ const int TYPE_ARCHIVE_FILE = 1005;
 bool isImage(const QFileInfo &fi);
 bool isArchive(const QFileInfo &fi);
 bool checkFileExtension(const QFileInfo &fi);
+
+QIcon getFileIcon();
+QIcon getDirectoryIcon();
 
 const int ROLE_TYPE = Qt::UserRole + 1;
 const int ROLE_ARCHIVE_FILE_NAME = Qt::UserRole + 2;

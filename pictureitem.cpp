@@ -203,7 +203,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 void PictureItem::imageFinished(int num)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << "loaded image" << t.restart();
+    qDebug() << "\nloaded image" << t.restart();
 #endif
     this->setPixmapNull(this->imageLoader->resultAt(num).isNull());
     if (this->opengl)

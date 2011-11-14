@@ -1,9 +1,12 @@
 #include "helper.h"
 #include "settings.h"
 
-bool checkFileExtension(const QFileInfo &fi)
+#include <QDebug>
+#include <QtGui/QStyle>
+
+bool checkFileExtension(const QFileInfo &info)
 {
-    if (isArchive(fi) || fi.isDir())
+    if (isArchive(info) || info.isDir() || isImage(info))
     {
        return true;
     }
@@ -23,3 +26,13 @@ bool isImage(const QFileInfo &fi)
     return Settings::Instance()->getFiltersImage().contains(fi.suffix().toLower());
 }
 
+
+QIcon getDirectoryIcon()
+{
+    return QApplication::style()->standardIcon(QStyle::SP_DirIcon);
+}
+
+QIcon getFileIcon()
+{
+    return QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+}

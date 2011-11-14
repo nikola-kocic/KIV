@@ -1,6 +1,5 @@
 #include "main_window.h"
 #include "settings_dialog.h"
-#include "system_icons.h"
 #include "settings.h"
 #include "teximg.h"
 #include "quazip/JlCompress.h"
@@ -22,6 +21,7 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 {
+    this->setAcceptDrops(true);
     this->resize(QApplication::desktop()->width() - 100,
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
 
-    this->modelArchive = new FilesModel();
+    this->modelFiles = new FilesModel();
     this->createActions();
 
     this->splitterMain = new QSplitter(Qt::Horizontal, this);
@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     splitterFiles->setSizes(QList<int>() << 100);
 
     this->filesView = new ViewFiles(this);
-    this->filesView->setModel(modelArchive);
+    this->filesView->setModel(modelFiles);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
     policyV.setHorizontalStretch(0);
@@ -152,7 +152,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
         this->filesystemView->hideColumn(i);
     }
 
-    this->archiveDirsView->setModel(this->modelArchive);
+    this->archiveDirsView->setModel(this->modelFiles);
 
 
 
@@ -492,7 +492,29 @@ void MainWindow::OnFilesViewCurrentChanged(const FileInfo &info)
 
 void MainWindow::openFile(const QString &source)
 {
-    this->filesystemView->setCurrentIndex(this->modelFilesystem->index(source));
+    QFileInfo info(source);
+    if(info.isDir())
+    {
+        this->filesystemView->setCurrentIndex(this->modelFilesystem->index(source));
+    }
+    else
+    {
+        // Select directory
+        this->filesystemView->setCurrentIndex(this->modelFilesystem->index(info.absolutePath()));
+
+        // Select file
+        for (int i = 0; i < this->modelFiles->invisibleRootItem()->rowCount(); ++i)
+        {
+            if (this->modelFiles->invisibleRootItem()->child(i)->data(Qt::DisplayRole) == info.fileName())
+            {
+                this->filesView->setCurrentIndex(this->modelFiles->invisibleRootItem()->child(i)->index());
+                break;
+            }
+        }
+
+        this->filesView->scrollTo(this->filesView->currentIndex(), QAbstractItemView::PositionAtTop);
+
+    }
 }
 
 bool MainWindow::acceptFileDrop(const QMimeData *mimeData)
@@ -615,7 +637,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex &current, const QMod
         info.zipPathToImage = "/";
     }
 
-    this->modelArchive->setPath(info);
+    this->modelFiles->setPath(info);
 
     if (info.zipPathToImage.isEmpty())
     {
@@ -648,7 +670,6 @@ void MainWindow::OnFilesViewItemActivated(const QModelIndex &index)
 void MainWindow::togglePanel(bool value)
 {
     this->splitterPanel->setVisible(value);
-//    this->toolbarDirectory->setVisible(value);
 }
 
 void MainWindow::toggleFullscreen(bool value)

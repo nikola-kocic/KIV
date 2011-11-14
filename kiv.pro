@@ -10,7 +10,6 @@ SOURCES += \
     quazip/quaadler32.cpp \
     quazip/qioapi.cpp \
     quazip/JlCompress.cpp \
-    system_icons.cpp \
     settings_dialog.cpp \
     settings.cpp \
     pictureitem.cpp \
@@ -38,7 +37,6 @@ HEADERS += \
     quazip/JlCompress.h \
     quazip/ioapi.h \
     quazip/crypt.h \
-    system_icons.h \
     settings_dialog.h \
     settings.h \
     pictureitem.h \
@@ -71,3 +69,5 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
