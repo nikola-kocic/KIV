@@ -26,7 +26,10 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    this->setWindowIcon(QIcon(":/icons/kiv.svg"));
+    if(Settings::Instance()->getFiltersImage().contains("svg"))
+    {
+        this->setWindowIcon(QIcon(":/icons/kiv.svg"));
+    }
 
     this->modelFilesystem = new QFileSystemModel(this);
     QStringList filters;
@@ -701,7 +704,9 @@ void MainWindow::dirUp()
 
 void MainWindow::open()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Zip files (*.zip *.cbz)"));
+    QString imageExtensions = "*." + Settings::Instance()->getFiltersImage().join(" *.");
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), this->modelFilesystem->filePath(this->filesystemView->currentIndex()),
+                                                    tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
     {
         this->openFile(fileName);

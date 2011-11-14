@@ -129,6 +129,22 @@ void PictureItem::PictureItemGL::initializeGL()
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
 
+    uint _glFormat = GL_RGB;  // Better since QImage RGBA is BGRA
+
+    QGL::setPreferredPaintEngine(QPaintEngine::OpenGL2);
+
+    QGLFormat glFmt;
+    glFmt.setSwapInterval(1); // 1= vsync on
+    glFmt.setAlpha(GL_RGBA==_glFormat);
+    glFmt.setRgba(GL_RGBA==_glFormat);
+    glFmt.setDoubleBuffer(true); // default
+    glFmt.setOverlay(false);
+    glFmt.setSampleBuffers(false);
+    QGLFormat::setDefaultFormat(glFmt);
+
+    setAttribute(Qt::WA_OpaquePaintEvent,true);
+    setAttribute(Qt::WA_PaintOnScreen,true);
+
     GLint size = 0;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
     this->texImg->setTexMaxSize(size);
