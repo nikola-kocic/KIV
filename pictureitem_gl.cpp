@@ -2,10 +2,16 @@
 #include "settings.h"
 #include "picture_loader.h"
 
-//#include <QtCore/qdebug.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qpalette.h>
 #include <QtGui/qevent.h>
+#include <QtOpenGL/qglframebufferobject.h>
+
+#define DEBUG_PICTUREITEM_GL
+
+#ifdef DEBUG_PICTUREITEM_GL
+    #include <QtCore/qdebug.h>
+#endif
 
 PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f)
 {
@@ -21,6 +27,7 @@ PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f
 
 PictureItem::PictureItemGL::~PictureItemGL()
 {
+    old_textures = textures;
     clearTextures();
     delete this->texImg;
 }
@@ -28,17 +35,21 @@ PictureItem::PictureItemGL::~PictureItemGL()
 void PictureItem::PictureItemGL::clearTextures()
 {
     //Delete old textures
-    for (int hIndex = 0; hIndex < this->textures.count(); ++hIndex)
+    for (int hIndex = 0; hIndex < this->old_textures.count(); ++hIndex)
     {
-        for (int vIndex = 0; vIndex < this->textures.at(hIndex).count(); ++vIndex)
+        for (int vIndex = 0; vIndex < this->old_textures.at(hIndex).count(); ++vIndex)
         {
-            deleteTexture(this->textures.at(hIndex).at(vIndex));
+            deleteTexture(this->old_textures.at(hIndex).at(vIndex));
+#ifdef DEBUG_PICTUREITEM_GL
+            qDebug() << "deleted texture" << this->old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
+#endif
         }
     }
 }
 
 void PictureItem::PictureItemGL::setImage(QImage img)
 {
+    old_textures = textures;
     if(img.isNull())
     {
         clearTextures();
@@ -53,7 +64,6 @@ void PictureItem::PictureItemGL::setImage(QImage img)
 
     this->texImg->setImage(img);
 
-    clearTextures();
     this->textures = QVector < QVector < GLuint > >(this->texImg->hTile->tileCount);
     QList<TexIndex> indexes;
     for (int hIndex = 0; hIndex < this->texImg->hTile->tileCount; ++hIndex)
@@ -73,6 +83,7 @@ void PictureItem::PictureItemGL::setImage(QImage img)
     }
 
     this->picItem->loadTextures(indexes);
+    clearTextures();
 }
 
 void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
@@ -82,6 +93,9 @@ void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
 
     this->textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
+#ifdef DEBUG_PICTUREITEM_GL
+    qDebug() << "binded texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
+#endif
 }
 
 void PictureItem::PictureItemGL::textureLoadFinished()

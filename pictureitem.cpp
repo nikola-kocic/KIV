@@ -1,8 +1,8 @@
 #include "pictureitem.h"
 #include "settings.h"
 
-#include <QtCore/qdebug.h>
 #include <QtGui/qevent.h>
+
 
 PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
 {
@@ -193,12 +193,18 @@ void PictureItem::setPixmap(const FileInfo &info)
     }
     else
     {
+#ifdef DEBUG_PICTUREITEM
+    t.start();
+#endif
         this->imageLoader->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
     }
 }
 
 void PictureItem::imageFinished(int num)
 {
+#ifdef DEBUG_PICTUREITEM
+    qDebug() << "loaded image" << t.restart();
+#endif
     this->setPixmapNull(this->imageLoader->resultAt(num).isNull());
     if (this->opengl)
     {
@@ -230,6 +236,10 @@ void PictureItem::textureFinished(int num)
             this->setPixmapNull(false);
             this->textureLoader->setFuture(QFuture<QImage>());
             this->imageDisplayGL->textureLoadFinished();
+
+#ifdef DEBUG_PICTUREITEM
+            qDebug() << "loaded textures" << t.elapsed();
+#endif
             emit imageChanged();
         }
     }

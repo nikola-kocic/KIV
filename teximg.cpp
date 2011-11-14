@@ -18,7 +18,7 @@ int TexImg::getTexMaxSize()
 
 void TexImg::setTexMaxSize(int size)
 {
-    this->texMaxSize = qMin(8192, size);
+    this->texMaxSize = qMin(2048, size);
 }
 
 void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
@@ -140,45 +140,31 @@ void TexImg::setImage(QImage img)
 
 QImage TexImg::CreatePow2Bitmap(TexIndex index)
 {
-    int channels = 4;
-    QSize bmpSize = index.bitmapData.size();
     QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, index.bitmapData.format());
 
     int vLimit;
-    if (index.vBorderOffset + index.currentTileHeight >= bmpSize.height())
+    if (index.vBorderOffset + index.currentTileHeight >= index.bitmapData.height())
     {
-        vLimit = bmpSize.height() - index.vBorderOffset;
+        vLimit = index.bitmapData.height() - index.vBorderOffset;
     }
     else
     {
         vLimit = index.currentTileHeight;
     }
 
-    for (int h = 0; h < vLimit; ++h)
+    int hLimit;
+    if (index.hBorderOffset + index.currentTileWidth >= index.bitmapData.width())
     {
-        uchar *texPointer = texImage.scanLine(h);
-        const uchar* rgb = index.bitmapData.constScanLine(index.vBorderOffset + h);
-        for (int i = 0; i < index.hBorderOffset * channels; i++)
-        {
-            ++rgb;
-        }
-
-        int hLimit;
-        if (index.hBorderOffset + index.currentTileWidth >= bmpSize.width())
-        {
-            hLimit = bmpSize.width() - index.hBorderOffset;
-        }
-        else
-        {
-            hLimit = index.currentTileWidth;
-        }
-
-        for (int w = 0; w < hLimit * channels; ++w)
-        {
-            *texPointer++ = *rgb;
-            ++rgb;
-        }
+        hLimit = index.bitmapData.width() - index.hBorderOffset;
     }
+    else
+    {
+        hLimit = index.currentTileWidth;
+    }
+
+    QPainter p(&texImage);
+    p.drawImage(QRectF(0, 0, hLimit, vLimit), index.bitmapData, QRectF(index.hBorderOffset, index.vBorderOffset, hLimit, vLimit));
+    p.end();
 
     return texImage;
 }

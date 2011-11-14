@@ -11,6 +11,12 @@
 #include <QtCore/qtconcurrentmap.h>
 #include <QtCore/qtconcurrentrun.h>
 
+#define DEBUG_PICTUREITEM
+
+#ifdef DEBUG_PICTUREITEM
+    #include <qdatetime.h>
+#endif
+
 class PictureItem : public QWidget
 {
     Q_OBJECT
@@ -74,6 +80,7 @@ private:
         QColor clearColor;
         QPoint lastPos;
         QVector < QVector <GLuint> > textures;
+        QVector < QVector <GLuint> > old_textures;
         TexImg *texImg;
 
     protected:
@@ -103,6 +110,9 @@ private:
     bool rotating;
     QPoint dragPoint;
     LockMode::Mode lockMode;
+#ifdef DEBUG_PICTUREITEM
+    QTime t;
+#endif
 
     QPoint pointToOrigin(int width, int height);
     void avoidOutOfScreen();

@@ -5,7 +5,7 @@
 #include "teximg.h"
 #include "quazip/JlCompress.h"
 
-#include <QtCore/qdebug.h>
+//#include <QtCore/qdebug.h>
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
 #include <QtGui/qaction.h>
