@@ -73,7 +73,7 @@ void PictureItem::PictureItemGL::setImage(QImage img)
         for (int vIndex = 0; vIndex < this->texImg->vTile->tileCount; ++vIndex)
         {
             TexIndex tex;
-            tex.bitmapData = this->texImg->bitmapData;
+            tex.bitmapData = img;
             tex.currentTileWidth = this->texImg->hTile->tileSize.at(hIndex);
             tex.currentTileHeight = this->texImg->vTile->tileSize.at(vIndex);
             tex.hBorderOffset = this->texImg->hTile->offsetBorder.at(hIndex);
@@ -100,9 +100,6 @@ void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
 
 void PictureItem::PictureItemGL::textureLoadFinished()
 {
-    //Free memory
-    this->texImg->bitmapData = QImage();
-
     //Update view
 
     this->picItem->setRotation(0);

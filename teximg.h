@@ -24,14 +24,9 @@ public:
     void setTexMaxSize(int size);
     void setImage(QImage img);
     static const int MinTileSize = 128;
-    uint getKbSizeTileBuffer();
-    QImage bitmapData;
 
     TileDim *hTile;
     TileDim *vTile;
-
-    //[Vert][Horiz]
-    int channels;
 
 public slots:
     static QImage CreatePow2Bitmap(TexIndex index);

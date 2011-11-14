@@ -5,7 +5,6 @@
 
 TexImg::TexImg()
 {
-    this->channels = 4;
     this->texMaxSize = 2048;
     this->hTile = 0;
     this->vTile = 0;
@@ -18,7 +17,7 @@ int TexImg::getTexMaxSize()
 
 void TexImg::setTexMaxSize(int size)
 {
-    this->texMaxSize = qMin(2048, size);
+    this->texMaxSize = qMin(8192, size);
 }
 
 void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
@@ -119,8 +118,6 @@ int TexImg::Pad4(int yBytes)
 
 void TexImg::setImage(QImage img)
 {
-    bitmapData = img.convertToFormat(QImage::Format_RGB32);
-    this->channels = 4;
     if (this->hTile != 0)
     {
         delete this->hTile;
@@ -128,7 +125,7 @@ void TexImg::setImage(QImage img)
     }
     this->hTile = new TileDim();
     this->vTile = new TileDim();
-    QSize bmpSize = bitmapData.size();
+    QSize bmpSize = img.size();
     this->hTile->bmpSize = bmpSize.width();
     this->vTile->bmpSize = bmpSize.height();
 
@@ -140,7 +137,7 @@ void TexImg::setImage(QImage img)
 
 QImage TexImg::CreatePow2Bitmap(TexIndex index)
 {
-    QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, index.bitmapData.format());
+    QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, QImage::Format_RGB32);
 
     int vLimit;
     if (index.vBorderOffset + index.currentTileHeight >= index.bitmapData.height())
