@@ -95,3 +95,16 @@ void Settings_Dialog::on_cbScrollChangesPage_clicked(bool checked)
     this->ui->labelWaitTime->setEnabled(checked);
     this->ui->cbJumpToEnd->setEnabled(checked);
 }
+
+
+void Settings_Dialog::on_ddWheel_currentIndexChanged(int index)
+{
+    if (this->ddWheelOrder.at(index) != Wheel::Scroll)
+    {
+        ui->groupBox->setEnabled(false);
+    }
+    else
+    {
+        ui->groupBox->setEnabled(true);
+    }
+}
