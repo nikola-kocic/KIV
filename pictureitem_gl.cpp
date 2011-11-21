@@ -74,6 +74,7 @@ void PictureItem::PictureItemGL::setImage(QImage img)
         {
             TexIndex tex;
             tex.bitmapData = img;
+            tex.background = this->clearColor;
             tex.currentTileWidth = this->texImg->hTile->tileSize.at(hIndex);
             tex.currentTileHeight = this->texImg->vTile->tileSize.at(vIndex);
             tex.hBorderOffset = this->texImg->hTile->offsetBorder.at(hIndex);
@@ -129,6 +130,8 @@ void PictureItem::PictureItemGL::initializeGL()
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
 
+    qglClearColor(clearColor);
+
     uint _glFormat = GL_RGB;  // Better since QImage RGBA is BGRA
 
     QGL::setPreferredPaintEngine(QPaintEngine::OpenGL2);
@@ -166,7 +169,6 @@ void PictureItem::PictureItemGL::updateSize()
 
 void PictureItem::PictureItemGL::paintGL()
 {
-    qglClearColor(clearColor);
     glClear(GL_COLOR_BUFFER_BIT);
 
     if (this->textures.count() == 0)

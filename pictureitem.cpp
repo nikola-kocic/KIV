@@ -148,6 +148,8 @@ void PictureItem::setZoom(qreal z)
     {
         this->imageDisplayRaster->setZoom(this->zoom, previous);
     }
+
+    emit zoomChanged();
 }
 
 

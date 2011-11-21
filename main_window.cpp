@@ -79,7 +79,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->layout()->setMargin(0);
 
     this->toolbar->addAction(this->togglePanelAct);
-    this->toolbar->addAction(this->toggleFullscreenAct);
     this->toolbar->addSeparator();
     this->toolbar->addWidget(this->lineEditPath);
 //    this->toolbar->addWidget(mainMenu);
@@ -96,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addSeparator();
     this->toolbar->addAction(this->rotateLeftAct);
     this->toolbar->addAction(this->rotateRightAct);
+    this->toolbar->addAction(this->toggleFullscreenAct);
 
     vboxMain->addWidget(this->toolbar);
 
@@ -281,10 +281,10 @@ void MainWindow::createActions()
 
     //Options Actions
 
-    this->pagePreviousAct = new QAction(QIcon::fromTheme("media-skip-backward"), tr("&Previous Page"), this);
+    this->pagePreviousAct = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous Page"), this);
     this->pagePreviousAct->setShortcut(Qt::Key_PageUp);
 
-    this->pageNextAct = new QAction(QIcon::fromTheme("media-skip-forward"), tr("&Next Page"), this);
+    this->pageNextAct = new QAction(QIcon::fromTheme("go-next"), tr("&Next Page"), this);
     this->pageNextAct->setShortcut(Qt::Key_PageDown);
 
     this->rotateLeftAct = new QAction(QIcon::fromTheme("object-rotate-left"), tr("Rotate &Left"), this);
@@ -838,7 +838,7 @@ void MainWindow::toggleLargeIcons(bool value)
     {
 
 //	e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
-	e = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+        e = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     }
     else
     {

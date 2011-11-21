@@ -160,6 +160,8 @@ QImage TexImg::CreatePow2Bitmap(TexIndex index)
     }
 
     QPainter p(&texImage);
+    QBrush b(index.background);
+    p.fillRect(texImage.rect(), b);
     p.drawImage(QRectF(0, 0, hLimit, vLimit), index.bitmapData, QRectF(index.hBorderOffset, index.vBorderOffset, hLimit, vLimit));
     p.end();
 

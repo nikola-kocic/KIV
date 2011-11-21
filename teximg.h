@@ -13,6 +13,7 @@ struct TexIndex{
     int vBorderOffset;
     int currentTileWidth;
     int hBorderOffset;
+    QColor background;
 };
 
 class TexImg
@@ -28,7 +29,6 @@ public:
     TileDim *hTile;
     TileDim *vTile;
 
-public slots:
     static QImage CreatePow2Bitmap(TexIndex index);
 
 private:
