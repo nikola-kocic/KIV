@@ -30,7 +30,6 @@ private:
     bool acceptFileDrop(const QMimeData *mimeData);
     void openFile(const QString &source);
     void updatePath(const QString &filePath);
-    bool parseZoom(const QString &zoomText);
 
     QTreeView *filesystemView;
     ViewArchiveDirs *archiveDirsView;
@@ -84,6 +83,8 @@ private:
     QAction *dirUpAct;
     QAction *refreshPathAct;
 
+    QMenu *contextMenu;
+
 private slots:
 
     //File Menu Actions Slots
@@ -118,13 +119,14 @@ private slots:
 
     void updateActions();
     void OnPathEdited();
-    void OnZoomChanged();
+    void OnZoomChanged(qreal current, qreal previous);
     void OnComboBoxZoomIndexChanged(const int &index);
     void OnComboBoxZoomTextChanged();
     void OnTreeViewItemActivated(const QModelIndex &index);
     void OnTreeViewCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
     void OnFilesViewItemActivated(const QModelIndex &index);
     void OnFilesViewCurrentChanged(const FileInfo &info);
+    void onCustomContextMenuRequested(const QPoint &pos);
 
 protected:
     void closeEvent(QCloseEvent *event);

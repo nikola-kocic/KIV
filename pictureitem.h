@@ -33,7 +33,7 @@ public:
     void setHardwareAcceleration(bool b);
     bool getHardwareAcceleration();
     void setPixmap(const FileInfo &info);
-    QVector<qreal> getDefaultZoomSizes();
+    QList<qreal> getDefaultZoomSizes();
     void loadTextures(QList<TexIndex> indexes);
 
 private:
@@ -100,7 +100,7 @@ private:
     QTimer *timerScrollPage;
     bool flagJumpToEnd;
     void start_timerScrollPage();
-    QVector<qreal> defaultZoomSizes;
+    QList<qreal> defaultZoomSizes;
     void afterPixmapLoad();
     void ScrollPageHorizontal(int value);
     void ScrollPageVertical(int value);
@@ -131,7 +131,8 @@ signals:
     void pageNext();
     void pagePrevious();
     void toggleFullscreen();
-    void zoomChanged();
+    void fullscreenEnabled(bool);
+    void zoomChanged(qreal current, qreal previous);
     void imageChanged();
     void updateCursor(Qt::CursorShape);
 

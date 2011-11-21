@@ -71,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->comboBoxZoom->setMinimumContentsLength(8);
     this->comboBoxZoom->setEditable(true);
     this->comboBoxZoom->setFocusPolicy(Qt::ClickFocus);
+    this->comboBoxZoom->lineEdit()->setCompleter(0);
 
     this->toolbar = new QToolBar(this);
     this->toolbar->setMovable(false);
@@ -80,13 +81,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->toolbar->addAction(this->togglePanelAct);
     this->toolbar->addSeparator();
+    this->toolbar->addAction(this->dirUpAct);
+    this->toolbar->addAction(this->refreshPathAct);
     this->toolbar->addWidget(this->lineEditPath);
 //    this->toolbar->addWidget(mainMenu);
     this->toolbar->addSeparator();
     this->toolbar->addAction(this->pagePreviousAct);
     this->toolbar->addAction(this->pageNextAct);
-    this->toolbar->addAction(this->dirUpAct);
-    this->toolbar->addAction(this->refreshPathAct);
     this->toolbar->addSeparator();
     this->toolbar->addAction(this->zoomInAct);
     this->toolbar->addAction(this->zoomOutAct);
@@ -96,6 +97,15 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addAction(this->rotateLeftAct);
     this->toolbar->addAction(this->rotateRightAct);
     this->toolbar->addAction(this->toggleFullscreenAct);
+
+    this->contextMenu = new QMenu(this);
+    contextMenu->addAction(this->pageNextAct);
+    contextMenu->addAction(this->pagePreviousAct);
+    contextMenu->addSeparator();
+    contextMenu->addAction(this->zoomInAct);
+    contextMenu->addAction(this->zoomOutAct);
+    contextMenu->addSeparator();
+    contextMenu->addAction(this->toggleFullscreenAct);
 
     vboxMain->addWidget(this->toolbar);
 
@@ -157,11 +167,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->archiveDirsView->setModel(this->modelFiles);
 
-
-
     foreach (const qreal &i, this->imageDisplay->getDefaultZoomSizes())
     {
-        this->comboBoxZoom->addItem(QString::number((int)(i * 100)) + "%");
+        this->comboBoxZoom->addItem(QString::number((i * 100), 'f', 0) + "%", i);
         if (i == 1)
         {
             this->comboBoxZoom->setCurrentIndex(this->comboBoxZoom->count() - 1);
@@ -245,7 +253,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
         else if (this->comboBoxZoom->lineEdit()->hasFocus())
         {
-            OnZoomChanged();
+            OnZoomChanged(this->imageDisplay->getZoom(), this->imageDisplay->getZoom());
             event->accept();
         }
     }
@@ -476,15 +484,22 @@ void MainWindow::connectActions()
     connect(this->imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
     connect(this->imageDisplay, SIGNAL(toggleFullscreen()), this->toggleFullscreenAct, SLOT(toggle()));
+    connect(this->imageDisplay, SIGNAL(fullscreenEnabled(bool)), this->toggleFullscreenAct, SLOT(setChecked(bool)));
     connect(this->imageDisplay, SIGNAL(pageNext()), this->filesView, SLOT(pageNext()));
     connect(this->imageDisplay, SIGNAL(pagePrevious()), this->filesView, SLOT(pagePrevious()));
-    connect(this->imageDisplay, SIGNAL(zoomChanged()), this, SLOT(OnZoomChanged()));
-    connect(this->comboBoxZoom, SIGNAL(currentIndexChanged(int)), this, SLOT(OnComboBoxZoomIndexChanged(int)));
+    connect(this->imageDisplay, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(OnZoomChanged(qreal,qreal)));
+    connect(this->imageDisplay, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onCustomContextMenuRequested(QPoint)));
+    connect(this->comboBoxZoom, SIGNAL(activated(int)), this, SLOT(OnComboBoxZoomIndexChanged(int)));
     connect(this->comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(OnComboBoxZoomTextChanged()));
 
     connect(this->refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(this->dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
 
+}
+
+void MainWindow::onCustomContextMenuRequested(const QPoint &pos)
+{
+    contextMenu->popup(this->imageDisplay->mapToGlobal(pos));
 }
 
 void MainWindow::OnFilesViewCurrentChanged(const FileInfo &info)
@@ -852,15 +867,51 @@ void MainWindow::toggleLargeIcons(bool value)
     Settings::Instance()->setLargeIcons(value);
 }
 
-void MainWindow::OnZoomChanged()
+void MainWindow::OnZoomChanged(qreal current, qreal previous)
 {
-    QString zoomText = QString::number((int)(this->imageDisplay->getZoom() * 100)) + "%";
-    this->comboBoxZoom->setEditText(zoomText);
+    if (!this->imageDisplay->getDefaultZoomSizes().contains(current))
+    {
+        QString zoomText = QString::number((current * 100), 'f', 0) + "%";
+        int insertIndex = 0;
+        for (; insertIndex < this->comboBoxZoom->count(); ++insertIndex)
+        {
+            if (this->comboBoxZoom->itemData(insertIndex).toReal() > current)
+            {
+                break;
+            }
+        }
+
+        this->comboBoxZoom->insertItem(insertIndex, zoomText, current);
+        this->comboBoxZoom->setCurrentIndex(insertIndex);
+    }
+    else
+    {
+        for (int existingIndex = 0; existingIndex < this->comboBoxZoom->count(); ++existingIndex)
+        {
+            if (FuzzyCompare(this->comboBoxZoom->itemData(existingIndex).toReal(), current))
+            {
+                this->comboBoxZoom->setCurrentIndex(existingIndex);
+                break;
+            }
+        }
+    }
+
+    if (!this->imageDisplay->getDefaultZoomSizes().contains(previous))
+    {
+        for (int existingIndex = 0; existingIndex < this->comboBoxZoom->count(); ++existingIndex)
+        {
+            if (FuzzyCompare(this->comboBoxZoom->itemData(existingIndex).toReal(), previous))
+            {
+                this->comboBoxZoom->removeItem(existingIndex);
+                break;
+            }
+        }
+    }
 }
 
-bool MainWindow::parseZoom(const QString &zoomText)
+void MainWindow::OnComboBoxZoomTextChanged()
 {
-    QString zoomvalue = zoomText;
+    QString zoomvalue = this->comboBoxZoom->lineEdit()->text();
     zoomvalue = zoomvalue.remove('%');
 
     bool ok;
@@ -871,21 +922,11 @@ bool MainWindow::parseZoom(const QString &zoomText)
         qreal z = (qreal)dec / 100;
         this->imageDisplay->setZoom(z);
     }
-
-    return ok;
-}
-
-void MainWindow::OnComboBoxZoomTextChanged()
-{
-    if (!this->parseZoom(this->comboBoxZoom->lineEdit()->text()))
-    {
-        OnZoomChanged();
-    }
 }
 
 void MainWindow::OnComboBoxZoomIndexChanged(const int &index)
 {
-    this->imageDisplay->setZoom(this->imageDisplay->getDefaultZoomSizes().at(index));
+    this->imageDisplay->setZoom(this->comboBoxZoom->itemData(index).toReal());
 }
 
 void MainWindow::toggleShowThumbnails(bool)

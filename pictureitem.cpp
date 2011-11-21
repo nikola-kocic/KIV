@@ -7,7 +7,8 @@
 PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
 {
     this->opengl = opengl;
-    setCursor(Qt::OpenHandCursor);
+    this->setCursor(Qt::OpenHandCursor);
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
 
     QVBoxLayout *vboxMain = new QVBoxLayout(this);
     vboxMain->setSpacing(0);
@@ -18,7 +19,7 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
     this->timerScrollPage = new QTimer(this);
     connect(this->timerScrollPage, SIGNAL(timeout()), this, SLOT(on_timerScrollPage_timeout()));
 
-    this->defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1 << 1.25 << 1.5 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
+    this->defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
     this->flagJumpToEnd = false;
     this->zoom = 1;
     this->dragging = false;
@@ -149,7 +150,7 @@ void PictureItem::setZoom(qreal z)
         this->imageDisplayRaster->setZoom(this->zoom, previous);
     }
 
-    emit zoomChanged();
+    emit zoomChanged(z, previous);
 }
 
 
@@ -165,7 +166,7 @@ void PictureItem::setLockMode(LockMode::Mode mode)
 }
 
 
-QVector<qreal> PictureItem::getDefaultZoomSizes()
+QList<qreal> PictureItem::getDefaultZoomSizes()
 {
     return this->defaultZoomSizes;
 }
@@ -219,7 +220,7 @@ void PictureItem::imageFinished(int num)
         emit imageChanged();
     }
 
-    //Free result memory
+    // Free result memory
     this->imageLoader->setFuture(QFuture<QImage>());
 }
 
@@ -286,7 +287,6 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
         if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
         {
             emit pageNext();
-//            _HandledPageChange
         }
     }
     else if (ev->button() == Qt::LeftButton
@@ -296,7 +296,6 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
         if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
         {
             emit pagePrevious();
-//            _HandledPageChange = true;
         }
         else
         {
@@ -368,25 +367,31 @@ void PictureItem::resizeEvent(QResizeEvent *)
 
 void PictureItem::keyPressEvent(QKeyEvent *ev)
 {
-    if (ev->key() == Qt::Key_Up)
+    switch (ev->key())
     {
+    case Qt::Key_Up:
         this->ScrollPageVertical(120);
         ev->accept();
-    }
-    else if (ev->key() == Qt::Key_Down)
-    {
+        break;
+
+    case Qt::Key_Down:
         this->ScrollPageVertical(-120);
         ev->accept();
-    }
-    else if (ev->key() == Qt::Key_Left)
-    {
+        break;
+
+    case Qt::Key_Left:
         this->ScrollPageHorizontal(120);
         ev->accept();
-    }
-    else if (ev->key() == Qt::Key_Right)
-    {
+        break;
+
+    case Qt::Key_Right:
         this->ScrollPageHorizontal(-120);
         ev->accept();
+        break;
+
+    case Qt::Key_Escape:
+        emit fullscreenEnabled(false);
+        break;
     }
 }
 
@@ -433,7 +438,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
         {
             if (this->boundingRect.height() > this->size().height() || this->boundingRect.width() > this->size().width())
             {
-                //If we scroll to bottom of page, start timer
+                // If we scroll to bottom of page, start timer
                 if (event->delta() < 0 && -this->boundingRect.y() + this->size().height() >= this->boundingRect.height() && !this->timerScrollPage->isActive())
                 {
                     if (Settings::Instance()->getScrollPageByWidth())
@@ -526,11 +531,11 @@ void PictureItem::on_timerScrollPage_timeout()
     this->timerScrollPage->stop();
 }
 
-//End Region Rotation
+// End Region Rotation
 
 
 
-//Region Zoom
+// Region Zoom
 
 
 
@@ -676,6 +681,7 @@ void PictureItem::fitHeight()
 
 }
 
+// Use in setpixmap and resize events
 void PictureItem::updateLockMode()
 {
     if (this->isPixmapNull())
@@ -683,7 +689,6 @@ void PictureItem::updateLockMode()
         return;
     }
 
-    //use in setpixmap and resize events
     switch (this->lockMode)
     {
     case LockMode::Autofit:
@@ -747,11 +752,11 @@ void PictureItem::avoidOutOfScreen()
     }
 }
 
-//End Region Zoom
+// End Region Zoom
 
 
 
-//Region Drag
+// Region Drag
 
 void PictureItem::drag(const QPoint &pt)
 {
@@ -840,7 +845,7 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
-//End Region Drag
+// End Region Drag
 
 void PictureItem::ScrollPageVertical(int value)
 {
