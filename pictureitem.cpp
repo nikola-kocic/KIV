@@ -191,6 +191,7 @@ void PictureItem::setPixmap(const FileInfo &info)
         {
             this->imageDisplayRaster->setImage(QImage());
         }
+        this->setPixmapNull(true);
         emit imageChanged();
     }
     else
