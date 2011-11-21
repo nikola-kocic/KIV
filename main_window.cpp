@@ -327,7 +327,7 @@ void MainWindow::createActions()
     this->zoomOutAct->setEnabled(false);
 
     this->zoomResetAct = new QAction(QIcon::fromTheme("zoom-original"), tr("&Original Size (100%)"), this);
-    this->zoomResetAct->setShortcut(Qt::CTRL | Qt::Key_1);
+    this->zoomResetAct->setShortcut(Qt::CTRL | Qt::Key_0);
     this->zoomResetAct->setEnabled(false);
 
     this->fitToWindowAct = new QAction(QIcon::fromTheme("zoom-fit-best"), tr("&Fit to Window"), this);
