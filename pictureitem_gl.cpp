@@ -7,7 +7,7 @@
 #include <QtGui/qevent.h>
 #include <QtOpenGL/qglframebufferobject.h>
 
-#define DEBUG_PICTUREITEM_GL
+//#define DEBUG_PICTUREITEM_GL
 
 #ifdef DEBUG_PICTUREITEM_GL
     #include <QtCore/qdebug.h>

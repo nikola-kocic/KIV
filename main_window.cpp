@@ -99,7 +99,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     vboxMain->addWidget(this->toolbar);
 
-    //Panel start
+    // Panel start
 
     this->splitterPanel = new QSplitter(Qt::Vertical, this);
 
@@ -133,15 +133,15 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->splitterMain->setSizes(QList<int>() << 300);
 
-    //Panel end
+    // Panel end
 
 
-    //Content start
+    // Content start
     this->imageDisplay = new PictureItem(Settings::Instance()->getHardwareAcceleration(), this);
     this->imageDisplay->setSizePolicy(policy);
 
     this->splitterMain->addWidget(this->imageDisplay);
-    //Content end
+    // Content end
 
 
     vboxMain->addWidget(this->splitterMain);
@@ -191,7 +191,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     layoutPanel->addWidget(framePanel);
 
 
-    //Large icons are On by default but I want small icons by default
+    // Large icons are On by default but I want small icons by default
     if (Settings::Instance()->getLargeIcons())
     {
         this->largeIconsAct->setChecked(true);
@@ -231,23 +231,23 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape)
     {
         if (this->lineEditPath->hasFocus())
-	{
-//	    if (lineEditPath->palette() != QApplication::palette())
-//	    {
-//		lineEditPath->setPalette(QApplication::palette());
-//	    }
+        {
+//            if (lineEditPath->palette() != QApplication::palette())
+//            {
+//              lineEditPath->setPalette(QApplication::palette());
+//            }
 
-//	    updatePath(fsm->filePath(index));
+//            updatePath(fsm->filePath(index));
 
-	    refreshPath();
+            refreshPath();
 
-	    event->accept();
-	}
+            event->accept();
+        }
         else if (this->comboBoxZoom->lineEdit()->hasFocus())
-	{
-	    OnZoomChanged();
-	    event->accept();
-	}
+        {
+            OnZoomChanged();
+            event->accept();
+        }
     }
 }
 
@@ -256,11 +256,11 @@ void MainWindow::createActions()
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "glyphs";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
-        //If there is no default working icon theme then we should
-        //use an icon theme that we provide via a icons folder
-        //This case happens under Windows and Mac OS X
-        //This does not happen under GNOME or KDE
-//        QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
+        // If there is no default working icon theme then we should
+        // use an icon theme that we provide via a icons folder
+        // This case happens under Windows and Mac OS X
+        // This does not happen under GNOME or KDE
+        //        QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
@@ -271,15 +271,15 @@ void MainWindow::createActions()
     this->saveAct->setShortcut(tr("Ctrl+S"));
     this->saveAct->setEnabled(false);
 
-    //    printAct = new QAction(tr("&Print..."), this);
-    //    printAct->setShortcut(tr("Ctrl+P"));
-    //    printAct->setEnabled(false);
-    //    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
+//    printAct = new QAction(tr("&Print..."), this);
+//    printAct->setShortcut(tr("Ctrl+P"));
+//    printAct->setEnabled(false);
+//    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
 
     this->exitAct = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
     this->exitAct->setShortcut(tr("Ctrl+Q"));
 
-    //Options Actions
+    // Options Actions
 
     this->pagePreviousAct = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous Page"), this);
     this->pagePreviousAct->setShortcut(Qt::Key_PageUp);
@@ -316,7 +316,7 @@ void MainWindow::createActions()
 
 
 
-    //Zoom Actions
+    // Zoom Actions
 
     this->zoomInAct = new QAction(QIcon::fromTheme("zoom-in"), tr("Zoom &In"), this);
     this->zoomInAct->setShortcut(Qt::CTRL | Qt::Key_Plus);
@@ -522,14 +522,14 @@ void MainWindow::openFile(const QString &source)
 
 bool MainWindow::acceptFileDrop(const QMimeData *mimeData)
 {
-     if (mimeData->hasUrls())
-     {
-         return checkFileExtension(QFileInfo(mimeData->urls().at(0).toLocalFile()));
-     }
-     else
-     {
-         return false;
-     }
+    if (mimeData->hasUrls())
+    {
+        return checkFileExtension(QFileInfo(mimeData->urls().at(0).toLocalFile()));
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -542,7 +542,6 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
-    // if some actions should not be usable, like move, this code must be adopted
     event->acceptProposedAction();
 }
 
@@ -682,15 +681,15 @@ void MainWindow::toggleFullscreen(bool value)
     if (value)
     {
 
-	showFullScreen();
+        showFullScreen();
     }
     else
     {
 #ifdef linux
-	//workaround for bug https://bugreports.qt.nokia.com//browse/QTBUG-10594
-	showNormal();
+        // Workaround for bug https://bugreports.qt.nokia.com//browse/QTBUG-10594
+        showNormal();
 #endif
-	showMaximized();
+        showMaximized();
     }
 }
 
@@ -804,7 +803,7 @@ void MainWindow::settingsDialog()
     Settings_Dialog sd(this);
     if (sd.exec() == QDialog::Accepted)
     {
-        //update settings
+        // Update settings
         if (Settings::Instance()->getHardwareAcceleration() != this->imageDisplay->getHardwareAcceleration())
         {
             this->imageDisplay->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
@@ -837,12 +836,12 @@ void MainWindow::toggleLargeIcons(bool value)
     if (value)
     {
 
-//	e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
+//        e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
         e = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     }
     else
     {
-	e = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+        e = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     }
 
     QSize iconSize = QSize(e, e);

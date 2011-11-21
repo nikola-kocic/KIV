@@ -11,7 +11,7 @@
 #include <QtCore/qtconcurrentmap.h>
 #include <QtCore/qtconcurrentrun.h>
 
-#define DEBUG_PICTUREITEM
+//#define DEBUG_PICTUREITEM
 
 #ifdef DEBUG_PICTUREITEM
     #include <qdatetime.h>
