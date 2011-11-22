@@ -8,10 +8,9 @@ Settings::Settings()
     this->settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
 
     this->filters_archive << "zip" << "cbz";
-
-    foreach (const QByteArray &ext, QImageReader::supportedImageFormats())
+    for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
     {
-        this->filters_image << ext;
+        this->filters_image.append(QImageReader::supportedImageFormats().at(i));
     }
 
     this->middleClickHash["none"]         = MiddleClick::None;

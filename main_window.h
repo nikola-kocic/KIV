@@ -31,6 +31,9 @@ private:
     void openFile(const QString &source);
     void updatePath(const QString &filePath);
 
+    QFileSystemModel *modelFilesystem;
+    FilesModel *modelFiles;
+
     QTreeView *filesystemView;
     ViewArchiveDirs *archiveDirsView;
     ViewFiles *filesView;
@@ -38,19 +41,19 @@ private:
     QSplitter *splitterMain;
     PictureItem *imageDisplay;
     QSplitter *splitterPanel;
-    QLineEdit *lineEditPath;
-    QFileSystemModel *modelFilesystem;
-    QComboBox *comboBoxZoom;
-    QToolBar *toolbar;
-//    QToolBar *toolbarDirectory;
-    FilesModel *modelFiles;
 
-    //File Menu Actions
+    QMenuBar *mainMenu;
+
+    QToolBar *toolbar;
+    QLineEdit *lineEditPath;
+    QComboBox *comboBoxZoom;
+
+    /* File Menu Actions */
     QAction *openAct;
     QAction *saveAct;
     QAction *exitAct;
 
-    //Edit Menu Actions
+    /* Edit Menu Actions */
     QAction *rotateLeftAct;
     QAction *rotateRightAct;
     QAction *rotateResetAct;
@@ -66,7 +69,7 @@ private:
     QAction *lockFitHeightAct;
     QAction *lockNoneAct;
 
-    //Options Menu Actions
+    /* Options Menu Actions */
     QAction *pagePreviousAct;
     QAction *pageNextAct;
     QAction *toggleFullscreenAct;
@@ -75,11 +78,11 @@ private:
     QAction *largeIconsAct;
     QAction *settingsAct;
 
-    //Help Actions
+    /* Help Actions */
     QAction *webSiteAct;
     QAction *aboutAct;
 
-    //Directory Toolbar Actions
+    /* Toolbar Actions */
     QAction *dirUpAct;
     QAction *refreshPathAct;
 
@@ -87,11 +90,13 @@ private:
 
 private slots:
 
-    //File Menu Actions Slots
+    void updateActions();
+
+    /* File Menu Actions Slots */
     void open();
     bool saveAs();
 
-    //Edit Menu Actions Slots
+    /* Edit Menu Actions Slots */
     void rotateLeft();
     void rotateRight();
     void rotateReset();
@@ -102,31 +107,30 @@ private slots:
     void lockFitHeight();
     void lockNone();
 
-    //Options Menu Actions Slots
+    /* Options Menu Actions Slots */
     void toggleFullscreen(bool);
     void togglePanel(bool);
     void toggleLargeIcons(bool);
     void settingsDialog();
     void toggleShowThumbnails(bool);
 
-    //Help Menu Actions Slots
+    /* Help Menu Actions Slots */
     void about();
     void website();
 
-    //Directory Toolbar Actions Slots
+    /* Directory Toolbar Actions Slots */
     void refreshPath();
     void dirUp();
 
-    void updateActions();
-    void OnPathEdited();
-    void OnZoomChanged(qreal current, qreal previous);
-    void OnComboBoxZoomIndexChanged(const int &index);
-    void OnComboBoxZoomTextChanged();
-    void OnTreeViewItemActivated(const QModelIndex &index);
-    void OnTreeViewCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
-    void OnFilesViewItemActivated(const QModelIndex &index);
-    void OnFilesViewCurrentChanged(const FileInfo &info);
-    void onCustomContextMenuRequested(const QPoint &pos);
+    void on_lineEditPath_editingFinished();
+    void on_zoom_changed(qreal current, qreal previous);
+    void on_comboBoxZoom_activated(const int &index);
+    void on_comboBoxZoom_TextChanged();
+    void on_filesystemView_item_clicked(const QModelIndex &index);
+    void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void on_filesView_item_activated(const QModelIndex &index);
+    void on_filesView_currentChanged(const FileInfo &info);
+    void on_customContextMenuRequested(const QPoint &pos);
 
 protected:
     void closeEvent(QCloseEvent *event);

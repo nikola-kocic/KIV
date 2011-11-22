@@ -50,8 +50,8 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 }
 
 
-//This is index from ArchiveModel
-void ViewFiles::OnTreeViewArchiveDirsCurrentChanged(const QModelIndex &index)
+/* This is index from ArchiveModel */
+void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
 {
     if (!index.isValid())
     {

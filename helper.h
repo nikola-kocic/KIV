@@ -18,12 +18,10 @@ namespace ViewMode
 class FileInfo
 {
 public:
-    //Doesn't end with "/"
-    QString containerPath;
+    QString containerPath; /* Doesn't end with "/" */
     QString imageFileName;
 
-    //Ends with "/"
-    QString zipPathToImage;
+    QString zipPathToImage; /* Ends with "/" */
     QString zipImageFileName;
     int thumbSize;
 

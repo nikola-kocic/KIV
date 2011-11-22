@@ -13,12 +13,12 @@ int main(int argc, char *argv[])
 
 #ifdef WIN32
     QStringList l_libPaths;
-    // Build plugins path
+    /* Build plugins path */
     QDir l_pluginsPath(QApplication::applicationDirPath());
     l_pluginsPath.mkdir("plugins");
     l_pluginsPath.cd("plugins");
 
-    // Set library paths
+    /* Set library paths */
     l_libPaths << l_pluginsPath.path() << QApplication::applicationDirPath();
     QApplication::setLibraryPaths(l_libPaths);
 #endif

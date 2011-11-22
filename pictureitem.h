@@ -144,7 +144,6 @@ public slots:
     void fitHeight();
 
 private slots:
-    void on_timerScrollPage_timeout();
     void textureFinished(int num);
     void imageFinished(int num);
 

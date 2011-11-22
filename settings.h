@@ -71,7 +71,7 @@ public:
 
 private:
 
-// Make your constructors private
+/* Make your constructors private */
         Settings();
         Settings(const Settings&);
         Settings& operator= (const Settings&);

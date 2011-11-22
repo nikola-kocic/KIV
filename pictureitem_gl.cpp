@@ -34,10 +34,10 @@ PictureItem::PictureItemGL::~PictureItemGL()
 
 void PictureItem::PictureItemGL::clearTextures()
 {
-    //Delete old textures
-    for (int hIndex = 0; hIndex < this->old_textures.count(); ++hIndex)
+    /* Delete old textures */
+    for (int hIndex = 0; hIndex < this->old_textures.size(); ++hIndex)
     {
-        for (int vIndex = 0; vIndex < this->old_textures.at(hIndex).count(); ++vIndex)
+        for (int vIndex = 0; vIndex < this->old_textures.at(hIndex).size(); ++vIndex)
         {
             deleteTexture(this->old_textures.at(hIndex).at(vIndex));
 #ifdef DEBUG_PICTUREITEM_GL
@@ -50,7 +50,7 @@ void PictureItem::PictureItemGL::clearTextures()
 void PictureItem::PictureItemGL::setImage(QImage img)
 {
     old_textures = textures;
-    if(img.isNull())
+    if (img.isNull())
     {
         clearTextures();
         this->texImg->setImage(QImage());
@@ -101,7 +101,7 @@ void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
 
 void PictureItem::PictureItemGL::textureLoadFinished()
 {
-    //Update view
+    /* Update view */
 
     this->picItem->setRotation(0);
     if (this->picItem->getLockMode() != LockMode::Zoom)
@@ -155,7 +155,7 @@ void PictureItem::PictureItemGL::initializeGL()
 
 void PictureItem::PictureItemGL::updateSize()
 {
-    if (this->textures.count() == 0)
+    if (this->textures.size() == 0)
     {
         return;
     }
@@ -171,7 +171,7 @@ void PictureItem::PictureItemGL::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (this->textures.count() == 0)
+    if (this->textures.size() == 0)
     {
         return;
     }

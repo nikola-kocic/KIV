@@ -19,7 +19,7 @@ void FilesModel::setPath(const FileInfo &info)
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
         QFileIconProvider fip;
 
-        for (int i = 0; i < list.count(); ++i)
+        for (int i = 0; i < list.size(); ++i)
         {
             QStandardItem *item = 0;
 
@@ -72,7 +72,7 @@ void FilesModel::setPath(const FileInfo &info)
         }
 
 
-        //Populate treeViewFile
+        /* Populate treeViewFile */
 
         QFileIconProvider fip;
         QStandardItem *root = new QStandardItem();
@@ -83,20 +83,19 @@ void FilesModel::setPath(const FileInfo &info)
 
         QStandardItem *node = root;
 
-        for (int i = 0; i < archive_files.count(); ++i)
+        for (int i = 0; i < archive_files.size(); ++i)
         {
             node = root;
             QStringList file_path_parts = archive_files.at(i).split('/');
-            for (int j = 0; j < file_path_parts.count(); ++j)
+            for (int j = 0; j < file_path_parts.size(); ++j)
             {
-                if (file_path_parts.at(j).count() > 0)
+                if (file_path_parts.at(j).size() > 0)
                 {
-                    if (j < file_path_parts.count() - 1)
+                    if (j < file_path_parts.size() - 1)
                     {
                         node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR);
                     }
                     else
-                        //if (j == file_path_parts.count() - 1)
                     {
                         QFileInfo fi(archive_files.at(i));
                         if (isImage(fi))

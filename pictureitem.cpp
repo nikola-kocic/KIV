@@ -3,28 +3,23 @@
 
 #include <QtGui/qevent.h>
 
-
 PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
 {
-    this->opengl = opengl;
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    QVBoxLayout *vboxMain = new QVBoxLayout(this);
-    vboxMain->setSpacing(0);
-    vboxMain->setMargin(0);
+    this->opengl = opengl;
     this->imageDisplayRaster = 0;
     this->imageDisplayGL = 0;
+    this->defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
+    this->zoom = 1.0;
+    this->rotation = 0.0;
+    this->dragging = false;
+    this->flagJumpToEnd = false;
+    this->lockMode = LockMode::None;
 
     this->timerScrollPage = new QTimer(this);
-    connect(this->timerScrollPage, SIGNAL(timeout()), this, SLOT(on_timerScrollPage_timeout()));
-
-    this->defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
-    this->flagJumpToEnd = false;
-    this->zoom = 1;
-    this->dragging = false;
-    this->rotation = 0;
-    this->lockMode = LockMode::None;
+    connect(this->timerScrollPage, SIGNAL(timeout()), this->timerScrollPage, SLOT(stop()));
 
     this->textureLoader = new QFutureWatcher<QImage>(this);
     connect(this->textureLoader, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
@@ -32,12 +27,13 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
     this->imageLoader = new QFutureWatcher<QImage>(this);
     connect(this->imageLoader, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
+    QVBoxLayout *layoutMain = new QVBoxLayout(this);
+    layoutMain->setSpacing(0);
+    layoutMain->setMargin(0);
+    this->setLayout(layoutMain);
 
     initPictureItem();
-
-    this->setLayout(vboxMain);
 }
-
 
 void PictureItem::initPictureItem()
 {
@@ -220,7 +216,7 @@ void PictureItem::imageFinished(int num)
         emit imageChanged();
     }
 
-    // Free result memory
+    /* Free result memory */
     this->imageLoader->setFuture(QFuture<QImage>());
 }
 
@@ -300,13 +296,13 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
         else
         {
 
-            // Start dragging
+            /* Start dragging */
             this->beginDrag(ev->pos());
         }
     }
     else if (ev->button() == Qt::MiddleButton)
     {
-        switch(Settings::Instance()->getMiddleClick())
+        switch (Settings::Instance()->getMiddleClick())
         {
         case MiddleClick::Fullscreen :
             emit(toggleFullscreen());
@@ -345,11 +341,10 @@ void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
     if (this->dragging && ev->button() == Qt::LeftButton)
     {
         this->endDrag();
-        this->setCursor(Qt::OpenHandCursor);
     }
 }
 
-//End Region Drag
+/* End Region Drag */
 
 
 
@@ -438,7 +433,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
         {
             if (this->boundingRect.height() > this->size().height() || this->boundingRect.width() > this->size().width())
             {
-                // If we scroll to bottom of page, start timer
+                /* If page is scrolled to bottom, start timer */
                 if (event->delta() < 0 && -this->boundingRect.y() + this->size().height() >= this->boundingRect.height() && !this->timerScrollPage->isActive())
                 {
                     if (Settings::Instance()->getScrollPageByWidth())
@@ -486,7 +481,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                 else
                 {
 
-                    // Keep dragging
+                    /* Keep dragging */
                     ScrollPageVertical(event->delta());
 
                     if ((this->boundingRect.height() + this->boundingRect.y() == this->size().height()
@@ -526,16 +521,11 @@ void PictureItem::start_timerScrollPage()
     }
 }
 
-void PictureItem::on_timerScrollPage_timeout()
-{
-    this->timerScrollPage->stop();
-}
-
-// End Region Rotation
+/* End Region Rotation */
 
 
 
-// Region Zoom
+/* Region Zoom */
 
 
 
@@ -579,7 +569,7 @@ QPoint PictureItem::pointToOrigin(int width, int height)
 
 void PictureItem::zoomIn()
 {
-    for (int i = 0; i < this->defaultZoomSizes.count(); ++i)
+    for (int i = 0; i < this->defaultZoomSizes.size(); ++i)
     {
         if (this->defaultZoomSizes.at(i) > this->zoom)
         {
@@ -593,7 +583,7 @@ void PictureItem::zoomIn()
 
 void PictureItem::zoomOut()
 {
-    for (int i = 0; i < this->defaultZoomSizes.count(); ++i)
+    for (int i = 0; i < this->defaultZoomSizes.size(); ++i)
     {
         if (this->defaultZoomSizes.at(i) >= this->zoom)
         {
@@ -681,7 +671,7 @@ void PictureItem::fitHeight()
 
 }
 
-// Use in setpixmap and resize events
+/* Use in setpixmap and resize events */
 void PictureItem::updateLockMode()
 {
     if (this->isPixmapNull())
@@ -713,7 +703,7 @@ void PictureItem::avoidOutOfScreen()
         return;
     }
 
-    // Am I lined out to the left?
+    /* Am I lined out to the left? */
     if (this->boundingRect.x() >= 0)
     {
         this->boundingRect.moveLeft(0);
@@ -722,17 +712,17 @@ void PictureItem::avoidOutOfScreen()
     {
         if ((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2) <= 0)
         {
-            // I am too far to the left!
+            /* I am too far to the left! */
             this->boundingRect.moveLeft((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2));
         }
         else
         {
-            // I am too far to the right!
+            /* I am too far to the right! */
             this->boundingRect.moveLeft(0);
         }
     }
 
-    // Am I lined out to the top?
+    /* Am I lined out to the top? */
     if (this->boundingRect.y() >= 0)
     {
         this->boundingRect.moveTop(0);
@@ -741,22 +731,22 @@ void PictureItem::avoidOutOfScreen()
     {
         if ((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2) <= 0)
         {
-            // I am too far to the top!
+            /* I am too far to the top! */
             this->boundingRect.moveTop((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2));
         }
         else
         {
-            // I am too far to the bottom!
+            /* I am too far to the bottom! */
             this->boundingRect.moveTop(0);
         }
     }
 }
 
-// End Region Zoom
+/* End Region Zoom */
 
 
 
-// Region Drag
+/* Region Drag */
 
 void PictureItem::drag(const QPoint &pt)
 {
@@ -767,44 +757,44 @@ void PictureItem::drag(const QPoint &pt)
 
     if (this->dragging)
     {
-        // Am I dragging it outside of the panel?
+        /* Am I dragging it outside of the panel? */
         if ((pt.x() - this->dragPoint.x() >= (this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2)) && (pt.x() - this->dragPoint.x() <= 0))
         {
-            // No, everything is just fine
+            /* No, everything is just fine */
             this->boundingRect.moveLeft(pt.x() - this->dragPoint.x());
         }
         else if ((pt.x() - this->dragPoint.x() > 0))
         {
-            // Now don't drag it out of the panel please
+            /* Now don't drag it out of the panel please */
             this->boundingRect.moveLeft(0);
         }
         else if ((pt.x() - this->dragPoint.x() < (this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2)))
         {
-            // I am dragging it out of my panel. How many pixels do I have left?
+            /* I am dragging it out of my panel. How many pixels do I have left? */
             if ((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2) <= 0)
             {
-                // Make it fit perfectly
+                /* Make it fit perfectly */
                 this->boundingRect.moveLeft((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2));
             }
         }
 
-        // Am I dragging it outside of the panel?
+        /* Am I dragging it outside of the panel? */
         if (pt.y() - this->dragPoint.y() >= (this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2) && (pt.y() - this->dragPoint.y() <= 0))
         {
-            // No, everything is just fine
+            /* No, everything is just fine */
             this->boundingRect.moveTop(pt.y() - this->dragPoint.y());
         }
         else if ((pt.y() - this->dragPoint.y() > 0))
         {
-            // Now don't drag it out of the panel please
+            /* Now don't drag it out of the panel please */
             this->boundingRect.moveTop(0);
         }
         else if (pt.y() - this->dragPoint.y() < (this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2))
         {
-            // I am dragging it out of my panel. How many pixels do I have left?
+            /* I am dragging it out of my panel. How many pixels do I have left? */
             if ((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2) <= 0)
             {
-                // Make it fit perfectly
+                /* Make it fit perfectly */
                 this->boundingRect.moveTop((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height()- this->size().height()) * 2));
             }
         }
@@ -827,7 +817,7 @@ void PictureItem::beginDrag(const QPoint &pt)
         return;
     }
 
-    // Initial drag position
+    /* Initial drag position */
     this->dragPoint.setX(pt.x() - this->boundingRect.x());
     this->dragPoint.setY(pt.y() - this->boundingRect.y());
     this->dragging = true;
@@ -845,7 +835,7 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
-// End Region Drag
+/* End Region Drag */
 
 void PictureItem::ScrollPageVertical(int value)
 {

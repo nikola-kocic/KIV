@@ -26,27 +26,25 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    if(Settings::Instance()->getFiltersImage().contains("svg"))
+    if (Settings::Instance()->getFiltersImage().contains("svg"))
     {
         this->setWindowIcon(QIcon(":/icons/kiv.svg"));
     }
 
-    this->modelFilesystem = new QFileSystemModel(this);
+    /* Start modelFilesystem */
     QStringList filters;
-
-    foreach (const QString &ext, Settings::Instance()->getFiltersArchive())
+    for (int i = 0; i < Settings::Instance()->getFiltersArchive().size(); ++i)
     {
-        filters << "*." + ext;
+        filters.append("*." + Settings::Instance()->getFiltersArchive().at(i));
     }
 
+    this->modelFilesystem = new QFileSystemModel(this);
     this->modelFilesystem->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
     this->modelFilesystem->setNameFilterDisables(false);
     this->modelFilesystem->setNameFilters(filters);
     this->modelFilesystem->setRootPath("");
+    /* End modelFilesystem */
 
-    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    policy.setHorizontalStretch(1);
-    policy.setVerticalStretch(0);
 
     this->modelFiles = new FilesModel();
     this->createActions();
@@ -58,12 +56,14 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     vboxMain->setSpacing(0);
     vboxMain->setMargin(0);
 
-    QMenuBar *mainMenu = new QMenuBar(this);
-    this->createMenus(mainMenu);
-    this->setMenuBar(mainMenu);
+    this->mainMenu = new QMenuBar(this);
+    this->createMenus(this->mainMenu);
+    this->setMenuBar(this->mainMenu);
 
     this->lineEditPath = new QLineEdit(this);
 
+
+    /* Start comboBoxZoom */
     this->comboBoxZoom = new QComboBox(this);
     this->comboBoxZoom->setEnabled(false);
     this->comboBoxZoom->setInsertPolicy(QComboBox::NoInsert);
@@ -72,11 +72,13 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->comboBoxZoom->setEditable(true);
     this->comboBoxZoom->setFocusPolicy(Qt::ClickFocus);
     this->comboBoxZoom->lineEdit()->setCompleter(0);
+    /* End comboBoxZoom */
 
+
+    /* Start toolbar */
     this->toolbar = new QToolBar(this);
     this->toolbar->setMovable(false);
     this->toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
-//    toolbar->setIconSize(QSize(16,16));
     this->toolbar->layout()->setMargin(0);
 
     this->toolbar->addAction(this->togglePanelAct);
@@ -84,7 +86,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addAction(this->dirUpAct);
     this->toolbar->addAction(this->refreshPathAct);
     this->toolbar->addWidget(this->lineEditPath);
-//    this->toolbar->addWidget(mainMenu);
     this->toolbar->addSeparator();
     this->toolbar->addAction(this->pagePreviousAct);
     this->toolbar->addAction(this->pageNextAct);
@@ -97,36 +98,50 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->toolbar->addAction(this->rotateLeftAct);
     this->toolbar->addAction(this->rotateRightAct);
     this->toolbar->addAction(this->toggleFullscreenAct);
+    /* End toolbar */
 
+
+    /* Start contextMenu */
     this->contextMenu = new QMenu(this);
-    contextMenu->addAction(this->pageNextAct);
-    contextMenu->addAction(this->pagePreviousAct);
-    contextMenu->addSeparator();
-    contextMenu->addAction(this->zoomInAct);
-    contextMenu->addAction(this->zoomOutAct);
-    contextMenu->addSeparator();
-    contextMenu->addAction(this->toggleFullscreenAct);
+    this->contextMenu->addAction(this->pageNextAct);
+    this->contextMenu->addAction(this->pagePreviousAct);
+    this->contextMenu->addSeparator();
+    this->contextMenu->addAction(this->zoomInAct);
+    this->contextMenu->addAction(this->zoomOutAct);
+    this->contextMenu->addSeparator();
+    this->contextMenu->addAction(this->toggleFullscreenAct);
+    /* End contextMenu */
+
 
     vboxMain->addWidget(this->toolbar);
 
-    // Panel start
+    /* Start Panel */
 
     this->splitterPanel = new QSplitter(Qt::Vertical, this);
 
+
+    /* Start filesystemView */
     this->filesystemView = new QTreeView(this);
     this->filesystemView->setUniformRowHeights(true);
     this->filesystemView->setHeaderHidden(true);
 
     this->splitterPanel->addWidget(this->filesystemView);
+    /* End filesystemView */
+
 
     QSplitter *splitterFiles = new QSplitter(Qt::Vertical, this);
 
+
+    /* Start archiveDirsView */
     this->archiveDirsView = new ViewArchiveDirs();
     this->archiveDirsView->hide();
 
     splitterFiles->addWidget(this->archiveDirsView);
     splitterFiles->setSizes(QList<int>() << 100);
+    /* End archiveDirsView */
 
+
+    /* Start filesView */
     this->filesView = new ViewFiles(this);
     this->filesView->setModel(modelFiles);
 
@@ -136,22 +151,26 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->filesView->setSizePolicy(policyV);
     splitterFiles->addWidget(this->filesView);
+    /* End filesView */
+
 
     this->splitterPanel->addWidget(splitterFiles);
-
     this->splitterMain->addWidget(this->splitterPanel);
-
     this->splitterMain->setSizes(QList<int>() << 300);
 
-    // Panel end
+    /* End Panel */
 
 
-    // Content start
+    /* Start imageDisplay */
+    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    policy.setHorizontalStretch(1);
+    policy.setVerticalStretch(0);
+
     this->imageDisplay = new PictureItem(Settings::Instance()->getHardwareAcceleration(), this);
     this->imageDisplay->setSizePolicy(policy);
 
     this->splitterMain->addWidget(this->imageDisplay);
-    // Content end
+    /* End imageDisplay */
 
 
     vboxMain->addWidget(this->splitterMain);
@@ -167,17 +186,18 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     this->archiveDirsView->setModel(this->modelFiles);
 
-    foreach (const qreal &i, this->imageDisplay->getDefaultZoomSizes())
+    for (int i = 0; i < this->imageDisplay->getDefaultZoomSizes().size(); ++i)
     {
-        this->comboBoxZoom->addItem(QString::number((i * 100), 'f', 0) + "%", i);
-        if (i == 1)
+        const qreal &z = this->imageDisplay->getDefaultZoomSizes().at(i);
+        this->comboBoxZoom->addItem(QString::number((z * 100), 'f', 0) + "%", z);
+        if (z == 1)
         {
             this->comboBoxZoom->setCurrentIndex(this->comboBoxZoom->count() - 1);
         }
     }
 
-    // Now add the line to the splitter handle
-    // Note: index 0 handle is always hidden, index 1 is between the two widgets
+    /* Now add the line to the splitter handle
+       Note: index 0 handle is always hidden, index 1 is between the two widgets */
     QSplitterHandle *handleMain = this->splitterMain->handle(1);
     QVBoxLayout *layoutMain = new QVBoxLayout(handleMain);
     layoutMain->setSpacing(0);
@@ -187,8 +207,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     frameMain->setFrameShadow(QFrame::Raised);
     layoutMain->addWidget(frameMain);
 
-    // Now add the line to the splitter handle
-    // Note: index 0 handle is always hidden, index 1 is between the two widgets
+    /* Now add the line to the splitter handle
+       Note: index 0 handle is always hidden, index 1 is between the two widgets */
     QSplitterHandle *handlePanel = this->splitterPanel->handle(1);
     QVBoxLayout *layoutPanel = new QVBoxLayout(handlePanel);
     layoutPanel->setSpacing(0);
@@ -199,7 +219,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     layoutPanel->addWidget(framePanel);
 
 
-    // Large icons are On by default but I want small icons by default
+    /* Large icons are On by default but I want small icons by default */
     if (Settings::Instance()->getLargeIcons())
     {
         this->largeIconsAct->setChecked(true);
@@ -215,7 +235,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     completer->setModel(this->modelFilesystem);
     this->lineEditPath->setCompleter(completer);
 
-    if (QApplication::arguments().count() > 1)
+    if (QApplication::arguments().size() > 1)
     {
         this->openFile(QApplication::arguments().at(1));
     }
@@ -240,12 +260,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     {
         if (this->lineEditPath->hasFocus())
         {
-//            if (lineEditPath->palette() != QApplication::palette())
-//            {
-//              lineEditPath->setPalette(QApplication::palette());
-//            }
+            //            if (lineEditPath->palette() != QApplication::palette())
+            //            {
+            //              lineEditPath->setPalette(QApplication::palette());
+            //            }
 
-//            updatePath(fsm->filePath(index));
+            //            updatePath(fsm->filePath(index));
 
             refreshPath();
 
@@ -253,7 +273,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
         else if (this->comboBoxZoom->lineEdit()->hasFocus())
         {
-            OnZoomChanged(this->imageDisplay->getZoom(), this->imageDisplay->getZoom());
+            on_zoom_changed(this->imageDisplay->getZoom(), this->imageDisplay->getZoom());
             event->accept();
         }
     }
@@ -264,13 +284,16 @@ void MainWindow::createActions()
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "glyphs";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
-        // If there is no default working icon theme then we should
-        // use an icon theme that we provide via a icons folder
-        // This case happens under Windows and Mac OS X
-        // This does not happen under GNOME or KDE
-        //        QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
+        /* If there is no default working icon theme then we should
+           use an icon theme that we provide via a icons folder
+           This case happens under Windows and Mac OS X
+           This does not happen under GNOME or KDE */
+//                QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
+
+
+    /* File Actions */
 
     this->openAct = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
     this->openAct->setShortcut(tr("Ctrl+O"));
@@ -279,15 +302,16 @@ void MainWindow::createActions()
     this->saveAct->setShortcut(tr("Ctrl+S"));
     this->saveAct->setEnabled(false);
 
-//    printAct = new QAction(tr("&Print..."), this);
-//    printAct->setShortcut(tr("Ctrl+P"));
-//    printAct->setEnabled(false);
-//    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
+    //    printAct = new QAction(tr("&Print..."), this);
+    //    printAct->setShortcut(tr("Ctrl+P"));
+    //    printAct->setEnabled(false);
+    //    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
 
     this->exitAct = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
     this->exitAct->setShortcut(tr("Ctrl+Q"));
 
-    // Options Actions
+
+    /* Options Actions */
 
     this->pagePreviousAct = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous Page"), this);
     this->pagePreviousAct->setShortcut(Qt::Key_PageUp);
@@ -320,11 +344,10 @@ void MainWindow::createActions()
 
     this->settingsAct = new QAction(QIcon::fromTheme("configure", QIcon::fromTheme("gtk-preferences")), tr("&Settings..."), this);
     this->settingsAct->setMenuRole(QAction::PreferencesRole);
-//    settingsAct->setVisible(false);
+    //    settingsAct->setVisible(false);
 
 
-
-    // Zoom Actions
+    /* Zoom Actions */
 
     this->zoomInAct = new QAction(QIcon::fromTheme("zoom-in"), tr("Zoom &In"), this);
     this->zoomInAct->setShortcut(Qt::CTRL | Qt::Key_Plus);
@@ -364,10 +387,16 @@ void MainWindow::createActions()
     this->lockZoomAct = new QAction(tr("Lock Zoom &Value"), this);
     this->lockZoomAct->setCheckable(true);
 
+
+    /* Help Actions */
+
     this->webSiteAct = new QAction(tr("&Web Site"), this);
 
     this->aboutAct = new QAction(tr("&About"), this);
     this->aboutAct->setShortcut(Qt::Key_F1);
+
+
+    /* Toolbar Actions */
 
     this->refreshPathAct = new QAction(QIcon::fromTheme("view-refresh"), tr("&Refresh"), this);
 
@@ -473,36 +502,36 @@ void MainWindow::connectActions()
     connect(this->webSiteAct, SIGNAL(triggered()), this, SLOT(website()));
 
 
-    connect(this->filesView, SIGNAL(activated(QModelIndex)), this, SLOT(OnFilesViewItemActivated(QModelIndex)));
-    connect(this->lineEditPath, SIGNAL(editingFinished()), this, SLOT(OnPathEdited()));
-    connect(this->filesystemView, SIGNAL(clicked(QModelIndex)), this, SLOT(OnTreeViewItemActivated(QModelIndex)));
+    connect(this->filesView, SIGNAL(activated(QModelIndex)), this, SLOT(on_filesView_item_activated(QModelIndex)));
+    connect(this->lineEditPath, SIGNAL(editingFinished()), this, SLOT(on_lineEditPath_editingFinished()));
+    connect(this->filesystemView, SIGNAL(clicked(QModelIndex)), this, SLOT(on_filesystemView_item_clicked(QModelIndex)));
 
-    connect(this->filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(OnTreeViewCurrentChanged(QModelIndex,QModelIndex)));
-    connect(this->archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), this->filesView, SLOT(OnTreeViewArchiveDirsCurrentChanged(QModelIndex)));
+    connect(this->filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
+    connect(this->archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), this->filesView, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
 
-    connect(this->filesView, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(OnFilesViewCurrentChanged(FileInfo)));
+    connect(this->filesView, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
     connect(this->imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
     connect(this->imageDisplay, SIGNAL(toggleFullscreen()), this->toggleFullscreenAct, SLOT(toggle()));
     connect(this->imageDisplay, SIGNAL(fullscreenEnabled(bool)), this->toggleFullscreenAct, SLOT(setChecked(bool)));
     connect(this->imageDisplay, SIGNAL(pageNext()), this->filesView, SLOT(pageNext()));
     connect(this->imageDisplay, SIGNAL(pagePrevious()), this->filesView, SLOT(pagePrevious()));
-    connect(this->imageDisplay, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(OnZoomChanged(qreal,qreal)));
-    connect(this->imageDisplay, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onCustomContextMenuRequested(QPoint)));
-    connect(this->comboBoxZoom, SIGNAL(activated(int)), this, SLOT(OnComboBoxZoomIndexChanged(int)));
-    connect(this->comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(OnComboBoxZoomTextChanged()));
+    connect(this->imageDisplay, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(on_zoom_changed(qreal,qreal)));
+    connect(this->imageDisplay, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
+    connect(this->comboBoxZoom, SIGNAL(activated(int)), this, SLOT(on_comboBoxZoom_activated(int)));
+    connect(this->comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_comboBoxZoom_TextChanged()));
 
     connect(this->refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(this->dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
 
 }
 
-void MainWindow::onCustomContextMenuRequested(const QPoint &pos)
+void MainWindow::on_customContextMenuRequested(const QPoint &pos)
 {
     contextMenu->popup(this->imageDisplay->mapToGlobal(pos));
 }
 
-void MainWindow::OnFilesViewCurrentChanged(const FileInfo &info)
+void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 {
     this->setCursor(Qt::BusyCursor);
     this->imageDisplay->setPixmap(info);
@@ -511,16 +540,16 @@ void MainWindow::OnFilesViewCurrentChanged(const FileInfo &info)
 void MainWindow::openFile(const QString &source)
 {
     QFileInfo info(source);
-    if(info.isDir())
+    if (info.isDir())
     {
         this->filesystemView->setCurrentIndex(this->modelFilesystem->index(source));
     }
     else
     {
-        // Select directory
+        /* Select directory */
         this->filesystemView->setCurrentIndex(this->modelFilesystem->index(info.absolutePath()));
 
-        // Select file
+        /* Select file */
         for (int i = 0; i < this->modelFiles->invisibleRootItem()->rowCount(); ++i)
         {
             if (this->modelFiles->invisibleRootItem()->child(i)->data(Qt::DisplayRole) == info.fileName())
@@ -575,7 +604,7 @@ void MainWindow::dropEvent(QDropEvent *event)
     event->acceptProposedAction();
 }
 
-void MainWindow::OnPathEdited()
+void MainWindow::on_lineEditPath_editingFinished()
 {
     QFileInfo fi(this->lineEditPath->text());
     bool valid = false;
@@ -621,10 +650,10 @@ void MainWindow::updatePath(const QString &filePath)
 
 void MainWindow::refreshPath()
 {
-    OnTreeViewCurrentChanged(this->filesystemView->currentIndex(), this->filesystemView->currentIndex());
+    on_filesystemView_currentRowChanged(this->filesystemView->currentIndex(), this->filesystemView->currentIndex());
 }
 
-void MainWindow::OnTreeViewItemActivated(const QModelIndex &index)
+void MainWindow::on_filesystemView_item_clicked(const QModelIndex &index)
 {
     if (this->lineEditPath->palette() != QApplication::palette())
     {
@@ -634,7 +663,7 @@ void MainWindow::OnTreeViewItemActivated(const QModelIndex &index)
     }
 }
 
-void MainWindow::OnTreeViewCurrentChanged(const QModelIndex &current, const QModelIndex &previous)
+void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     this->dirUpAct->setEnabled(current.parent().isValid());
     this->filesystemView->scrollTo(current);
@@ -670,7 +699,7 @@ void MainWindow::OnTreeViewCurrentChanged(const QModelIndex &current, const QMod
     this->imageDisplay->setPixmap(info);
 }
 
-void MainWindow::OnFilesViewItemActivated(const QModelIndex &index)
+void MainWindow::on_filesView_item_activated(const QModelIndex &index)
 {
     int type = index.data(ROLE_TYPE).toInt();
     if (type == TYPE_DIR || type == TYPE_ARCHIVE)
@@ -701,7 +730,7 @@ void MainWindow::toggleFullscreen(bool value)
     else
     {
 #ifdef linux
-        // Workaround for bug https://bugreports.qt.nokia.com//browse/QTBUG-10594
+        /* Workaround for bug https://bugreports.qt.nokia.com//browse/QTBUG-10594 */
         showNormal();
 #endif
         showMaximized();
@@ -818,7 +847,7 @@ void MainWindow::settingsDialog()
     Settings_Dialog sd(this);
     if (sd.exec() == QDialog::Accepted)
     {
-        // Update settings
+        /* Update settings */
         if (Settings::Instance()->getHardwareAcceleration() != this->imageDisplay->getHardwareAcceleration())
         {
             this->imageDisplay->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
@@ -851,7 +880,7 @@ void MainWindow::toggleLargeIcons(bool value)
     if (value)
     {
 
-//        e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
+        //        e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
         e = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     }
     else
@@ -861,16 +890,18 @@ void MainWindow::toggleLargeIcons(bool value)
 
     QSize iconSize = QSize(e, e);
     this->toolbar->setIconSize(iconSize);
-//    this->toolbarDirectory->setIconSize(iconSize);
+    //    this->toolbarDirectory->setIconSize(iconSize);
 
 
     Settings::Instance()->setLargeIcons(value);
 }
 
-void MainWindow::OnZoomChanged(qreal current, qreal previous)
+void MainWindow::on_zoom_changed(qreal current, qreal previous)
 {
     if (!this->imageDisplay->getDefaultZoomSizes().contains(current))
     {
+        /* Add current Zoom value to comboBox */
+
         QString zoomText = QString::number((current * 100), 'f', 0) + "%";
         int insertIndex = 0;
         for (; insertIndex < this->comboBoxZoom->count(); ++insertIndex)
@@ -886,6 +917,8 @@ void MainWindow::OnZoomChanged(qreal current, qreal previous)
     }
     else
     {
+        /* Add select current Zoom value from comboBox */
+
         for (int existingIndex = 0; existingIndex < this->comboBoxZoom->count(); ++existingIndex)
         {
             if (FuzzyCompare(this->comboBoxZoom->itemData(existingIndex).toReal(), current))
@@ -898,6 +931,8 @@ void MainWindow::OnZoomChanged(qreal current, qreal previous)
 
     if (!this->imageDisplay->getDefaultZoomSizes().contains(previous))
     {
+        /* Remove previous Zoom value if it's not in default zoom sizes */
+
         for (int existingIndex = 0; existingIndex < this->comboBoxZoom->count(); ++existingIndex)
         {
             if (FuzzyCompare(this->comboBoxZoom->itemData(existingIndex).toReal(), previous))
@@ -909,7 +944,7 @@ void MainWindow::OnZoomChanged(qreal current, qreal previous)
     }
 }
 
-void MainWindow::OnComboBoxZoomTextChanged()
+void MainWindow::on_comboBoxZoom_TextChanged()
 {
     QString zoomvalue = this->comboBoxZoom->lineEdit()->text();
     zoomvalue = zoomvalue.remove('%');
@@ -922,9 +957,13 @@ void MainWindow::OnComboBoxZoomTextChanged()
         qreal z = (qreal)dec / 100;
         this->imageDisplay->setZoom(z);
     }
+    else
+    {
+        on_zoom_changed(this->imageDisplay->getZoom(), this->imageDisplay->getZoom());
+    }
 }
 
-void MainWindow::OnComboBoxZoomIndexChanged(const int &index)
+void MainWindow::on_comboBoxZoom_activated(const int &index)
 {
     this->imageDisplay->setZoom(this->comboBoxZoom->itemData(index).toReal());
 }

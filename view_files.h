@@ -37,7 +37,7 @@ private:
 private slots:
     void showThumbnail(int num);
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
-    void OnTreeViewArchiveDirsCurrentChanged(const QModelIndex &index);
+    void on_archiveDirsView_currentRowChanged(const QModelIndex &index);
 
 signals:
     void currentFileChanged(FileInfo);

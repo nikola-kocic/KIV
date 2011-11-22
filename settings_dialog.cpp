@@ -26,7 +26,7 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 //                          << MiddleClick::FollowMouse
                                ;
 
-    for (int i = 0; i < this->ddMidleClickOrder.count(); ++i)
+    for (int i = 0; i < this->ddMidleClickOrder.size(); ++i)
     {
         this->ui->ddMiddleClick->addItem(ddMiddleClickHash.key(this->ddMidleClickOrder.at(i)));
         if (this->ddMidleClickOrder.at(i) == Settings::Instance()->getMiddleClick())
@@ -48,7 +48,7 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
                        << Wheel::Zoom
                           ;
 
-    for (int i = 0; i < this->ddWheelOrder.count(); ++i)
+    for (int i = 0; i < this->ddWheelOrder.size(); ++i)
     {
         this->ui->ddWheel->addItem(ddWheelHash.key(this->ddWheelOrder.at(i)));
         if (this->ddWheelOrder.at(i) == Settings::Instance()->getWheel())
