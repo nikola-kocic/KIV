@@ -1,11 +1,17 @@
 #include "view_files.h"
 #include "settings.h"
 
-//#include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtGui/qfileiconprovider.h>
 #include <QtGui/qapplication.h>
 #include <QtGui/qstyleditemdelegate.h>
+
+//#define DEBUG_VIEW_FILES
+
+#ifdef DEBUG_VIEW_FILES
+#include <QtCore/qdebug.h>
+#include <QTime>
+#endif
 
 ViewFiles::ViewFiles(QWidget *parent)
 {
@@ -75,6 +81,10 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
 {
     int type = current.data(ROLE_TYPE).toInt();
     QString filename = current.data(Qt::DisplayRole).toString();
+
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::currentChanged" << filename;
+#endif
 
     if (type == TYPE_FILE)
     {

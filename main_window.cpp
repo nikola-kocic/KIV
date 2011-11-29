@@ -4,7 +4,7 @@
 #include "teximg.h"
 #include "quazip/JlCompress.h"
 
-//#include <QtCore/qdebug.h>
+
 #include <QtCore/qbuffer.h>
 #include <QtCore/QUrl>
 #include <QtGui/qaction.h>
@@ -18,6 +18,11 @@
 #include <QtGui/qcompleter.h>
 #include <QtGui/qmessagebox.h>
 #include <QtGui/qdesktopservices.h>
+
+//#define DEBUG_MAIN_WINDOW
+#ifdef DEBUG_MAIN_WINDOW
+#include <QtCore/qdebug.h>
+#endif
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 {
@@ -540,7 +545,7 @@ void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 void MainWindow::openFile(const QString &source)
 {
     QFileInfo info(source);
-    if (info.isDir())
+    if (info.isDir() || isArchive(info))
     {
         this->filesystemView->setCurrentIndex(this->modelFilesystem->index(source));
     }
@@ -560,7 +565,6 @@ void MainWindow::openFile(const QString &source)
         }
 
         this->filesView->scrollTo(this->filesView->currentIndex(), QAbstractItemView::PositionAtTop);
-
     }
 }
 
@@ -606,6 +610,9 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::on_lineEditPath_editingFinished()
 {
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_editingFinished" << this->lineEditPath->text();
+#endif
     QFileInfo fi(this->lineEditPath->text());
     bool valid = false;
     if (fi.exists())
@@ -668,6 +675,9 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     this->dirUpAct->setEnabled(current.parent().isValid());
     this->filesystemView->scrollTo(current);
     QString currentFolder = this->modelFilesystem->filePath(current);
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesystemView_currentRowChanged" << currentFolder;
+#endif
     this->setWindowTitle(this->modelFilesystem->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
     this->updatePath(currentFolder);
 
@@ -701,6 +711,11 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
 
 void MainWindow::on_filesView_item_activated(const QModelIndex &index)
 {
+
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesView_item_activated" << index;
+#endif
+
     int type = index.data(ROLE_TYPE).toInt();
     if (type == TYPE_DIR || type == TYPE_ARCHIVE)
     {

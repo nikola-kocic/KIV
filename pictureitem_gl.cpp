@@ -95,7 +95,7 @@ void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
     this->textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << "binded texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
+    qDebug() << "bound texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
 #endif
 }
 
@@ -278,10 +278,8 @@ void PictureItem::PictureItemGL::setZoom(qreal current, qreal previous)
     QPointF p = this->picItem->pointToOrigin(scaledW, scaledH);
     this->picItem->boundingRect = QRectF(p.x(), p.y(), scaledW, scaledH);
 
-    this->setUpdatesEnabled(false);
     this->picItem->avoidOutOfScreen();
     this->setRotation(this->picItem->getRotation());
-    this->setUpdatesEnabled(true);
 
     this->updateGL();
 }
