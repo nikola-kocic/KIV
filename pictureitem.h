@@ -131,7 +131,6 @@ signals:
     void pageNext();
     void pagePrevious();
     void toggleFullscreen();
-    void fullscreenEnabled(bool);
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
     void updateCursor(Qt::CursorShape);

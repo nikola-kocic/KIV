@@ -73,6 +73,7 @@ private:
     QAction *pagePreviousAct;
     QAction *pageNextAct;
     QAction *toggleFullscreenAct;
+    QAction *exitFullscreenAct;
     QAction *showThumbnailsAct;
     QAction *togglePanelAct;
     QAction *largeIconsAct;

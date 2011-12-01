@@ -340,6 +340,9 @@ void MainWindow::createActions()
     this->toggleFullscreenAct->setShortcut(Qt::Key_F11);
     this->toggleFullscreenAct->setCheckable(true);
 
+    this->exitFullscreenAct = new QAction(tr("Exit Full Screen"), this);
+    this->exitFullscreenAct->setShortcut(Qt::Key_Escape);
+
     this->togglePanelAct = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Show Side&bar"), this);
     this->togglePanelAct->setCheckable(true);
     this->togglePanelAct->setChecked(true);
@@ -456,6 +459,7 @@ void MainWindow::createMenus(QMenuBar *parent)
     optionsMenu->addSeparator();
     optionsMenu->addAction(this->showThumbnailsAct);
     this->addAction(this->toggleFullscreenAct);
+    this->addAction(this->exitFullscreenAct);
     optionsMenu->addAction(this->toggleFullscreenAct);
     optionsMenu->addAction(this->togglePanelAct);
     optionsMenu->addAction(this->largeIconsAct);
@@ -484,6 +488,7 @@ void MainWindow::connectActions()
 
     connect(this->showThumbnailsAct, SIGNAL(toggled(bool)), this, SLOT(toggleShowThumbnails(bool)));
     connect(this->toggleFullscreenAct, SIGNAL(toggled(bool)), this, SLOT(toggleFullscreen(bool)));
+    connect(this->exitFullscreenAct, SIGNAL(triggered(bool)), this->toggleFullscreenAct, SLOT(setChecked(bool)));
     connect(this->largeIconsAct, SIGNAL(toggled(bool)), this, SLOT(toggleLargeIcons(bool)));
     connect(this->togglePanelAct, SIGNAL(toggled(bool)), this, SLOT(togglePanel(bool)));
 
@@ -518,7 +523,6 @@ void MainWindow::connectActions()
     connect(this->imageDisplay, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
     connect(this->imageDisplay, SIGNAL(toggleFullscreen()), this->toggleFullscreenAct, SLOT(toggle()));
-    connect(this->imageDisplay, SIGNAL(fullscreenEnabled(bool)), this->toggleFullscreenAct, SLOT(setChecked(bool)));
     connect(this->imageDisplay, SIGNAL(pageNext()), this->filesView, SLOT(pageNext()));
     connect(this->imageDisplay, SIGNAL(pagePrevious()), this->filesView, SLOT(pagePrevious()));
     connect(this->imageDisplay, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(on_zoom_changed(qreal,qreal)));
@@ -737,6 +741,7 @@ void MainWindow::toggleFullscreen(bool value)
 {
     this->togglePanelAct->setChecked(!value);
     this->menuBar()->setVisible(!value);
+//    this->exitFullscreenAct->setEnabled(value);
     if (value)
     {
 

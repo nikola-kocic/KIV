@@ -383,10 +383,6 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
         this->ScrollPageHorizontal(-120);
         ev->accept();
         break;
-
-    case Qt::Key_Escape:
-        emit fullscreenEnabled(false);
-        break;
     }
 }
 
