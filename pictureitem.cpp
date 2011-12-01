@@ -194,7 +194,7 @@ void PictureItem::setPixmap(const FileInfo &info)
     else
     {
 #ifdef DEBUG_PICTUREITEM
-    t.start();
+        t.start();
 #endif
         this->imageLoader->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
     }
@@ -391,9 +391,123 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
 }
 
 void PictureItem::wheelEvent(QWheelEvent *event)
-{    if (event->modifiers() == Qt::ControlModifier
-         || (event->modifiers() == Qt::NoModifier && Settings::Instance()->getWheel() == Wheel::Zoom)
-         )
+{
+    /* event->delta() > 0 == Up
+       event->delta() < 0 == Down */
+
+    if (Qt::NoModifier == event->modifiers())
+    {
+        /* If page can't be scrolled, change page if necessary */
+        if (Wheel::ChangePage == Settings::Instance()->getWheel() ||
+                (
+                    (Wheel::Scroll == Settings::Instance()->getWheel()) &&
+                    (Settings::Instance()->getScrollChangesPage()) &&
+                    (
+                        (LockMode::Autofit == this->lockMode) ||
+                        (LockMode::FitHeight == this->lockMode) ||
+                        (this->boundingRect.height() <= this->size().height() && this->boundingRect.width() <= this->size().width())
+                        )
+                    )
+                )
+        {
+            if (event->delta() < 0)
+            {
+                emit pageNext();
+            }
+            else
+            {
+                this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
+                emit pagePrevious();
+            }
+        }
+        /* Scroll page */
+        else if (Wheel::Scroll == Settings::Instance()->getWheel())
+        {
+            if (
+                    (event->delta() < 0) &&
+                    (!this->timerScrollPage->isActive()) &&
+                    ((-this->boundingRect.y() + this->size().height()) >= this->boundingRect.height())
+                    )
+            {
+                /* Scroll horizontally; If page is scrolled to end, start timer */
+                if (Settings::Instance()->getScrollPageByWidth())
+                {
+                    if (Settings::Instance()->getRightToLeft())
+                    {
+                        if (this->boundingRect.x() < 0)
+                        {
+                            this->ScrollPageHorizontal(-event->delta());
+
+                            if (0 == this->boundingRect.x())
+                            {
+                                this->start_timerScrollPage();
+                            }
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if ((this->boundingRect.width() + this->boundingRect.x()) > this->size().width())
+                        {
+                            this->ScrollPageHorizontal(event->delta());
+
+
+                            if ((this->boundingRect.width() + this->boundingRect.x()) == this->size().width())
+                            {
+                                this->start_timerScrollPage();
+                            }
+                            return;
+                        }
+                    }
+                }
+                /* If this code is reached (page was already scrolled to end), change page to next */
+                if (
+                        (Settings::Instance()->getScrollChangesPage()) &&
+                        (!this->timerScrollPage->isActive())
+                        )
+                {
+                    this->start_timerScrollPage();
+                    emit pageNext();
+                }
+            }
+            /* If page is at top, change page to previous */
+            else if (
+                     (Settings::Instance()->getScrollChangesPage()) &&
+                     (event->delta() > 0) &&
+                     (this->boundingRect.y() == 0) &&
+                     (!this->timerScrollPage->isActive())
+                     )
+            {
+                this->start_timerScrollPage();
+                this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
+                emit pagePrevious();
+            }
+            /* Scroll vertically; If page is scrolled to top or bottom, start timer */
+            else
+            {
+                ScrollPageVertical(event->delta());
+
+                if (
+                        (
+                            ((this->boundingRect.height() + this->boundingRect.y()) == this->size().height()) ||
+                            (0 == this->boundingRect.y())
+                            ) &&
+                        (!this->timerScrollPage->isActive())
+                        )
+                {
+                    this->start_timerScrollPage();
+                }
+            }
+
+        }
+    }
+    else if (
+             (Qt::ControlModifier == event->modifiers()) ||
+             (
+                 (Qt::NoModifier == event->modifiers()) &&
+                 (Wheel::Zoom == Settings::Instance()->getWheel())
+                 )
+             )
     {
         if (event->delta() < 0)
         {
@@ -404,112 +518,18 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             this->zoomIn();
         }
     }
-    else if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
+    else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
     {
-        this->setZoom(this->zoom * (1 + ((event->delta() / 4.8) / 100)));
+        this->setZoom(this->zoom * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
     }
-    else if (event->modifiers() == Qt::ShiftModifier)
+    else if (Qt::ShiftModifier == event->modifiers())
     {
         this->ScrollPageVertical(event->delta());
     }
-    else if (event->modifiers() == Qt::AltModifier)
+    else if (Qt::AltModifier == event->modifiers())
     {
         this->ScrollPageHorizontal(event->delta());
     }
-    else if (event->modifiers() == Qt::NoModifier)
-    {
-        if (Settings::Instance()->getWheel() == Wheel::ChangePage)
-        {
-            if (event->delta() < 0)
-            {
-                emit pageNext();
-            }
-            else
-            {
-                emit pagePrevious();
-            }
-        }
-        else if (Settings::Instance()->getWheel() == Wheel::Scroll)
-        {
-            if (this->boundingRect.height() > this->size().height() || this->boundingRect.width() > this->size().width())
-            {
-                /* If page is scrolled to bottom, start timer */
-                if (event->delta() < 0 && -this->boundingRect.y() + this->size().height() >= this->boundingRect.height() && !this->timerScrollPage->isActive())
-                {
-                    if (Settings::Instance()->getScrollPageByWidth())
-                    {
-                        if (Settings::Instance()->getRightToLeft())
-                        {
-                            if (this->boundingRect.x() < 0)
-                            {
-                                this->ScrollPageHorizontal(-event->delta());
-
-                                if (this->boundingRect.x() == 0)
-                                {
-                                    this->start_timerScrollPage();
-                                }
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            if ((this->boundingRect.width() + this->boundingRect.x()) > this->size().width())
-                            {
-                                this->ScrollPageHorizontal(event->delta());
-
-
-                                if (this->boundingRect.width() + this->boundingRect.x() == this->size().width())
-                                {
-                                    this->start_timerScrollPage();
-                                }
-                                return;
-                            }
-                        }
-                    }
-                    if ((Settings::Instance()->getScrollChangesPage()) && !this->timerScrollPage->isActive())
-                    {
-                        this->start_timerScrollPage();
-                        emit pageNext();
-                    }
-                }
-                else if ((Settings::Instance()->getScrollChangesPage()) && (event->delta() > 0 && this->boundingRect.y() == 0 && !this->timerScrollPage->isActive()))
-                {
-                    this->start_timerScrollPage();
-                    this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
-                    emit pagePrevious();
-                }
-                else
-                {
-
-                    /* Keep dragging */
-                    ScrollPageVertical(event->delta());
-
-                    if ((this->boundingRect.height() + this->boundingRect.y() == this->size().height()
-                         || this->boundingRect.y() == 0)
-                            && !this->timerScrollPage->isActive()
-                            )
-                    {
-                        this->start_timerScrollPage();
-                    }
-                }
-            }
-            else
-            {
-                if (Settings::Instance()->getScrollChangesPage())
-                {
-                    if (event->delta() > 0)
-                    {
-                        emit pagePrevious();
-                    }
-                    else if (event->delta() < 0)
-                    {
-                        emit pageNext();
-                    }
-                }
-            }
-        }
-    }
-    this->update();
 }
 
 
