@@ -37,6 +37,8 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
     ui->sbThumbSize->setValue(Settings::Instance()->getThumbnailSize());
 
+    ui->checkBox_calculate_average_color->setChecked(Settings::Instance()->getCalculateAverageColor());
+
     on_cbScrollChangesPage_clicked(ui->cbScrollChangesPage->isChecked());
 }
 
@@ -53,6 +55,7 @@ void Settings_Dialog::on_buttonBox_accepted()
 
     Settings::Instance()->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
     Settings::Instance()->setThumbnailSize(ui->sbThumbSize->value());
+    Settings::Instance()->setCalculateAverageColor(ui->checkBox_calculate_average_color->isChecked());
 }
 
 Settings_Dialog::~Settings_Dialog()

@@ -81,7 +81,6 @@ private:
         qreal scaleY;
         int offsetX;
         int offsetY;
-        QColor clearColor;
         QPoint lastPos;
         QVector < QVector <GLuint> > textures;
         QVector < QVector <GLuint> > old_textures;
@@ -114,6 +113,7 @@ private:
     bool pixmapNull;
     QPoint dragPoint;
     LockMode::Mode lockMode;
+    QColor clearColor;
 
     QPoint pointToOrigin(int width, int height);
     void avoidOutOfScreen();

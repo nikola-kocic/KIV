@@ -27,6 +27,8 @@ Settings::Settings()
     m_lastPath            = m_settings->value("Interface/LastPath", "").toString();
     m_hardwareAcceleration= m_settings->value("Interface/HardwareAcceleration", false).toBool();
     m_thumbSize           = m_settings->value("Interface/ThumbnailSize", 200).toInt();
+
+    m_calculateAverageColor = m_settings->value("Interface/CalculateAverageColor", false).toBool();
 }
 
 Settings *Settings::Instance()
@@ -168,4 +170,15 @@ void Settings::setScrollChangesPage(bool b)
     m_scrollChangesPage = b;
     m_settings->setValue("Behavior/ScrollChangesPage", m_scrollChangesPage);
 
+}
+
+bool Settings::getCalculateAverageColor() const
+{
+    return m_calculateAverageColor;
+}
+
+void Settings::setCalculateAverageColor(bool b)
+{
+    m_calculateAverageColor = b;
+    m_settings->setValue("Interface/CalculateAverageColor", m_calculateAverageColor);
 }

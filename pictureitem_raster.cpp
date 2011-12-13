@@ -14,6 +14,19 @@ PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::Windo
 void PictureItem::PictureItemRaster::setImage(QImage img)
 {
     this->setUpdatesEnabled(false);
+    if (Settings::Instance()->getCalculateAverageColor())
+    {
+        QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        picItem->clearColor = QColor::fromRgb(averageColorImage.pixel(0,0));
+    }
+    else
+    {
+        if (picItem->clearColor != Qt::lightGray)
+        {
+            picItem->clearColor = Qt::lightGray;
+        }
+    }
+
     this->pixmap = QPixmap::fromImage(img);
 
     this->pixmap_edited = this->pixmap;
@@ -42,6 +55,7 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
     p.setClipRect(event->region().boundingRect());
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
+    p.fillRect(event->region().boundingRect(), picItem->clearColor);
     qreal zoom = this->picItem->getZoom();
     QRectF sourceRect = QRectF(-this->picItem->boundingRect.x() / zoom,
                                -this->picItem->boundingRect.y() / zoom,

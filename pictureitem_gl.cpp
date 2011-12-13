@@ -19,7 +19,6 @@ PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f
 
     this->texImg = new TexImg();
 
-    this->clearColor = Qt::lightGray;
     this->offsetX = offsetY = 0;
     this->scaleY = scaleX = 0;
     this->textures = QVector < QVector < GLuint > >(0);
@@ -62,6 +61,19 @@ void PictureItem::PictureItemGL::setImage(QImage img)
 
     this->setUpdatesEnabled(false);
 
+    if (Settings::Instance()->getCalculateAverageColor())
+    {
+        QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        setClearColor(QColor::fromRgb(averageColorImage.pixel(0,0)));
+    }
+    else
+    {
+        if (picItem->clearColor != Qt::lightGray)
+        {
+            setClearColor(Qt::lightGray);
+        }
+    }
+
     this->texImg->setImage(img);
 
     this->textures = QVector < QVector < GLuint > >(this->texImg->hTile->tileCount);
@@ -74,7 +86,7 @@ void PictureItem::PictureItemGL::setImage(QImage img)
         {
             TexIndex tex;
             tex.bitmapData = img;
-            tex.background = this->clearColor;
+            tex.background = picItem->clearColor;
             tex.currentTileWidth = this->texImg->hTile->tileSize.at(hIndex);
             tex.currentTileHeight = this->texImg->vTile->tileSize.at(vIndex);
             tex.hBorderOffset = this->texImg->hTile->offsetBorder.at(hIndex);
@@ -121,7 +133,8 @@ void PictureItem::PictureItemGL::textureLoadFinished()
 
 void PictureItem::PictureItemGL::setClearColor(const QColor &color)
 {
-    this->clearColor = color;
+    picItem->clearColor = color;
+    qglClearColor(picItem->clearColor);
     this->updateGL();
 }
 
@@ -130,7 +143,7 @@ void PictureItem::PictureItemGL::initializeGL()
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
 
-    qglClearColor(clearColor);
+    qglClearColor(picItem->clearColor);
 
     uint _glFormat = GL_RGB;  // Better since QImage RGBA is BGRA
 

@@ -72,6 +72,8 @@ public:
     bool getScrollChangesPage() const;
     void setScrollChangesPage(bool);
 
+    bool getCalculateAverageColor() const;
+    void setCalculateAverageColor(bool);
 
 private:
 
@@ -98,6 +100,8 @@ private:
 
     bool m_hardwareAcceleration;
     int m_thumbSize;
+
+    bool m_calculateAverageColor;
 };
 
 
