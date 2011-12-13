@@ -111,10 +111,33 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->contextMenu->addAction(this->pageNextAct);
     this->contextMenu->addAction(this->pagePreviousAct);
     this->contextMenu->addSeparator();
-    this->contextMenu->addAction(this->zoomInAct);
-    this->contextMenu->addAction(this->zoomOutAct);
-    this->contextMenu->addSeparator();
     this->contextMenu->addAction(this->toggleFullscreenAct);
+    this->contextMenu->addAction(this->togglePanelAct);
+    this->contextMenu->addSeparator();
+
+    QMenu *menuZoom = this->contextMenu->addMenu("Zoom");
+    menuZoom->addAction(this->zoomInAct);
+    menuZoom->addAction(this->zoomOutAct);
+    menuZoom->addAction(this->zoomResetAct);
+
+    QMenu *menuRotate = this->contextMenu->addMenu("Rotate");
+    menuRotate->addAction(this->rotateLeftAct);
+    menuRotate->addAction(this->rotateRightAct);
+    menuRotate->addAction(this->rotateResetAct);
+
+    QMenu *menuFit = this->contextMenu->addMenu("Fit");
+    menuFit->addAction(this->fitToHeightAct);
+    menuFit->addAction(this->fitToWidthAct);
+    menuFit->addAction(this->fitToWindowAct);
+
+    QMenu *menuLock = this->contextMenu->addMenu("Lock");
+    menuLock->addAction(this->lockNoneAct);
+    menuLock->addAction(this->lockZoomAct);
+    menuLock->addAction(this->lockAutofitAct);
+    menuLock->addAction(this->lockFitWidthAct);
+    menuLock->addAction(this->lockFitHeightAct);
+
+
     /* End contextMenu */
 
 
@@ -418,16 +441,16 @@ void MainWindow::createMenus(QMenuBar *parent)
     fileMenu->addAction(this->exitAct);
 
     QMenu *editMenu = new QMenu(tr("&Edit"), parent);
-    editMenu->addAction(this->rotateLeftAct);
-    editMenu->addAction(this->rotateRightAct);
-    editMenu->addAction(this->rotateResetAct);
-    editMenu->addSeparator();
     editMenu->addAction(this->zoomInAct);
     this->addAction(this->zoomInAct);
     editMenu->addAction(this->zoomOutAct);
     this->addAction(this->zoomOutAct);
     editMenu->addAction(this->zoomResetAct);
     this->addAction(this->zoomResetAct);
+    editMenu->addSeparator();
+    editMenu->addAction(this->rotateLeftAct);
+    editMenu->addAction(this->rotateRightAct);
+    editMenu->addAction(this->rotateResetAct);
     editMenu->addSeparator();
     editMenu->addAction(this->fitToWindowAct);
     this->addAction(this->fitToWindowAct);
@@ -740,6 +763,10 @@ void MainWindow::on_filesView_item_activated(const QModelIndex &index)
 void MainWindow::togglePanel(bool value)
 {
     this->splitterPanel->setVisible(value);
+    if (toggleFullscreenAct->isChecked())
+    {
+        this->mainMenu->setVisible(value);
+    }
 }
 
 void MainWindow::toggleFullscreen(bool value)

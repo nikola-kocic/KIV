@@ -283,18 +283,24 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
 
     if (ev->button() ==  Qt::RightButton)
     {
+        if (this->contextMenuPolicy() == Qt::PreventContextMenu)
+        {
+            this->setContextMenuPolicy(Qt::CustomContextMenu);
+        }
         if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
         {
+            this->setContextMenuPolicy(Qt::PreventContextMenu);
             emit pageNext();
+            ev->accept();
         }
     }
-    else if (ev->button() == Qt::LeftButton
-//             || LockDrag
-             )
+    else if (ev->button() == Qt::LeftButton)
     {
         if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
         {
+            this->setContextMenuPolicy(Qt::PreventContextMenu);
             emit pagePrevious();
+            ev->accept();
         }
         else
         {
@@ -309,32 +315,33 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
         {
         case MiddleClick::Fullscreen :
             emit(toggleFullscreen());
+            ev->accept();
             break;
 
         case MiddleClick::AutoFit:
             this->fitToScreen();
+            ev->accept();
             break;
 
         case MiddleClick::ZoomReset:
             this->setZoom(1);
+            ev->accept();
             break;
 
         case MiddleClick::NextPage:
             emit pageNext();
+            ev->accept();
             break;
 
         case MiddleClick::Quit:
             emit quit();
+            ev->accept();
             break;
 
         case MiddleClick::Boss:
             emit boss();
+            ev->accept();
             break;
-
-//        case MiddleClick::FollowMouse:
-
-//            LockDrag = !LockDrag;
-//            break;
 
         default: break;
 
@@ -363,6 +370,7 @@ void PictureItem::mouseDoubleClickEvent(QMouseEvent *ev)
     if (ev->buttons() == Qt::LeftButton)
     {
         emit(toggleFullscreen());
+        ev->accept();
     }
 }
 
@@ -404,7 +412,14 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
 
     case Qt::Key_B:
         emit boss();
+        ev->accept();
         break;
+
+    case Qt::Key_Menu:
+        if (this->contextMenuPolicy() == Qt::PreventContextMenu)
+        {
+            this->setContextMenuPolicy(Qt::CustomContextMenu);
+        }
     }
 }
 
@@ -431,16 +446,19 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             if (event->delta() < 0)
             {
                 emit pageNext();
+                event->accept();
             }
             else
             {
                 this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
                 emit pagePrevious();
+                event->accept();
             }
         }
         /* Scroll page */
         else if (Wheel::Scroll == Settings::Instance()->getWheel())
         {
+            event->accept();
             if (
                     (event->delta() < 0) &&
                     (!this->timerScrollPage->isActive()) &&
@@ -530,23 +548,28 @@ void PictureItem::wheelEvent(QWheelEvent *event)
         if (event->delta() < 0)
         {
             this->zoomOut();
+            event->accept();
         }
         else
         {
             this->zoomIn();
+            event->accept();
         }
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
     {
         this->setZoom(this->zoom * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
+        event->accept();
     }
     else if (Qt::ShiftModifier == event->modifiers())
     {
         this->ScrollPageVertical(event->delta());
+        event->accept();
     }
     else if (Qt::AltModifier == event->modifiers())
     {
         this->ScrollPageHorizontal(event->delta());
+        event->accept();
     }
 }
 

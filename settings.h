@@ -17,7 +17,6 @@ enum Action {
     NextPage = 4,
     Quit = 5,
     Boss = 6
-//    ,FollowMouse = 7
 };
 }
 
