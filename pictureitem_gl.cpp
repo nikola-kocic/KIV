@@ -41,7 +41,7 @@ void PictureItem::PictureItemGL::clearTextures()
         {
             deleteTexture(this->old_textures.at(hIndex).at(vIndex));
 #ifdef DEBUG_PICTUREITEM_GL
-            qDebug() << "deleted texture" << this->old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
+            qDebug() << QDateTime::currentDateTime() << "deleted texture" << this->old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
 #endif
         }
     }
@@ -95,7 +95,7 @@ void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
     this->textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << "bound texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
+    qDebug() << QDateTime::currentDateTime() << "bound texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
 #endif
 }
 

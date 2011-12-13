@@ -6,6 +6,7 @@
 #include "pictureitem.h"
 #include "model_files.h"
 #include "view_archive_dirs.h"
+#include "mylineedit.h"
 
 #include <QtGui/qfilesystemmodel.h>
 #include <QtGui/qlineedit.h>
@@ -29,7 +30,6 @@ private:
     void connectActions();
     bool acceptFileDrop(const QMimeData *mimeData);
     void openFile(const QString &source);
-    void updatePath(const QString &filePath);
 
     QFileSystemModel *modelFilesystem;
     FilesModel *modelFiles;
@@ -45,7 +45,7 @@ private:
     QMenuBar *mainMenu;
 
     QToolBar *toolbar;
-    QLineEdit *lineEditPath;
+    MyLineEdit *lineEditPath;
     QComboBox *comboBoxZoom;
 
     /* File Menu Actions */
@@ -124,10 +124,10 @@ private slots:
     void dirUp();
 
     void on_lineEditPath_editingFinished();
+    void on_lineEditPath_focus_lost();
     void on_zoom_changed(qreal current, qreal previous);
     void on_comboBoxZoom_activated(const int &index);
     void on_comboBoxZoom_TextChanged();
-    void on_filesystemView_item_clicked(const QModelIndex &index);
     void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
     void on_filesView_item_activated(const QModelIndex &index);
     void on_filesView_currentChanged(const FileInfo &info);

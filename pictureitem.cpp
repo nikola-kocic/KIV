@@ -177,8 +177,11 @@ QList<qreal> PictureItem::getDefaultZoomSizes() const
 
 void PictureItem::setPixmap(const FileInfo &info)
 {
+#ifdef DEBUG_PICTUREITEM
+    qDebug() << QDateTime::currentDateTime() << "PictureItem::setPixmap" << info.getFilePath();
+#endif
     this->returnTexCount = 0;
-    if (info.imageFileName.isEmpty() && info.zipImageFileName.isEmpty())
+    if (!info.fileExists())
     {
         if (opengl)
         {
@@ -203,7 +206,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 void PictureItem::imageFinished(int num)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << "\nloaded image" << t.restart();
+    qDebug() << QDateTime::currentDateTime() << "\nloaded image" << t.restart();
 #endif
     this->setPixmapNull(this->imageLoader->resultAt(num).isNull());
     if (this->opengl)
@@ -238,7 +241,7 @@ void PictureItem::textureFinished(int num)
             this->imageDisplayGL->textureLoadFinished();
 
 #ifdef DEBUG_PICTUREITEM
-            qDebug() << "loaded textures" << t.elapsed();
+            qDebug() << QDateTime::currentDateTime() << "loaded textures" << t.elapsed();
 #endif
             emit imageChanged();
         }
@@ -320,11 +323,13 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
             emit pageNext();
             break;
 
-//        case MiddleClick::Close:
-//            break;
+        case MiddleClick::Quit:
+            emit quit();
+            break;
 
-//        case MiddleClick::Boss:
-//            break;
+        case MiddleClick::Boss:
+            emit boss();
+            break;
 
 //        case MiddleClick::FollowMouse:
 
@@ -395,6 +400,10 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
     case Qt::Key_Right:
         this->ScrollPageHorizontal(-120);
         ev->accept();
+        break;
+
+    case Qt::Key_B:
+        emit boss();
         break;
     }
 }

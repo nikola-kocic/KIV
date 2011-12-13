@@ -12,9 +12,13 @@ class FilesModel : public QStandardItemModel
 
 public:
     void setPath(const FileInfo &info);
+    QModelIndex getDirectory(const QString &path);
+    QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());
+    QModelIndex findRootIndexChild(const QString &text);
 
 private:
     QStandardItem* AddNode(QStandardItem *node, const QString &name, int type);
+    int indexToInsertByName(QStandardItem *parent, const QString &name);
 };
 
 #endif // ARCHIVE_MODEL_H

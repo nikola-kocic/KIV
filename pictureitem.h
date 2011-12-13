@@ -138,6 +138,8 @@ signals:
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
     void updateCursor(Qt::CursorShape);
+    void quit();
+    void boss();
 
 public slots:
     void zoomIn();

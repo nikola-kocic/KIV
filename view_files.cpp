@@ -44,6 +44,14 @@ QModelIndex ViewFiles::getIndexFromProxy(const QModelIndex &index) const
     return this->proxy->mapToSource(index);
 }
 
+void ViewFiles::setCurrentIndexFromSource(const QModelIndex &index)
+{
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::setCurrentIndexFromSource" << index.data();
+#endif
+    QListView::setCurrentIndex(this->proxy->mapFromSource(index));
+}
+
 void ViewFiles::setCurrentDirectory(const FileInfo &info)
 {
     this->currentInfo = info;
@@ -59,6 +67,9 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 /* This is index from ArchiveModel */
 void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
 {
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::on_archiveDirsView_currentRowChanged" << index.data();
+#endif
     if (!index.isValid())
     {
         return;
@@ -72,10 +83,13 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
         cindex = cindex.parent();
     }
 
-    this->currentInfo.zipPathToImage = pathToImage;
+    this->currentInfo.zipPath = pathToImage;
+    this->currentInfo.zipImageFileName.clear();
     this->setRootIndex(this->proxy->mapFromSource(index));
+    this->selectionModel()->clear();
 
     this->startShowingThumbnails();
+    emit currentFileChanged(this->currentInfo);
 }
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -92,7 +106,7 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
     {
         this->currentInfo.imageFileName = filename;
         this->currentInfo.zipImageFileName.clear();
-        this->currentInfo.zipPathToImage.clear();
+        this->currentInfo.zipPath.clear();
     }
     else if (type == TYPE_ARCHIVE_FILE)
     {

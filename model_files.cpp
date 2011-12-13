@@ -4,19 +4,26 @@
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
-//#include <QtCore/qdebug.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qdir.h>
 
-void FilesModel::setPath(const FileInfo &info)
+//#define DEBUG_MODEL_FILES
+#ifdef DEBUG_MODEL_FILES
+#include <QDebug>
+#endif
+
+void FilesModel::setPath(const FileInfo &path)
 {
+#ifdef DEBUG_MODEL_FILES
+    qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << path.getFilePath();
+#endif
     this->clear();
 
-    if (!info.isZip())
+    if (!path.isZip())
     {
-        QDir dir(info.containerPath);
+        QDir dir(path.containerPath);
 
-        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name);
+        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
         QFileIconProvider fip;
 
         for (int i = 0; i < list.size(); ++i)
@@ -24,6 +31,7 @@ void FilesModel::setPath(const FileInfo &info)
             QStandardItem *item = 0;
 
             QFileInfo info = list.at(i);
+
             if (info.isDir())
             {
                 item = new QStandardItem();
@@ -47,14 +55,15 @@ void FilesModel::setPath(const FileInfo &info)
                 item->setToolTip(item->text());
 
                 this->invisibleRootItem()->appendRow(item);
+#ifdef DEBUG_MODEL_FILES
+    qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << "appendRow" << info.fileName();
+#endif
             }
         }
     }
     else
     {
-        this->clear();
-
-        QFile zipFile(info.containerPath);
+        QFile zipFile(path.containerPath);
         QuaZip zip(&zipFile);
         if (!zip.open(QuaZip::mdUnzip))
         {
@@ -128,21 +137,8 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
     if (type == TYPE_DIR || type == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(getDirectoryIcon());
-        int lastFolderIndex = 0;
-        for (int i = 0; i < node->rowCount(); ++i)
-        {
-            int currentItemType = node->child(lastFolderIndex)->data(ROLE_TYPE).toInt();
-            if (currentItemType == TYPE_DIR || currentItemType == TYPE_ARCHIVE_DIR)
-            {
-                if (node->child(lastFolderIndex)->data(Qt::DisplayRole).toString().compare(name) > 0)
-                {
-                    break;
-                }
-
-                ++lastFolderIndex;
-            }
-        }
-        node->insertRow(lastFolderIndex, ntvi);
+        indexToInsertByName(node, name);
+        node->insertRow(indexToInsertByName(node, name), ntvi);
     }
     else
     {
@@ -150,4 +146,65 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
         node->appendRow(ntvi);
     }
     return ntvi;
+}
+
+int FilesModel::indexToInsertByName(QStandardItem *parent, const QString &name)
+{
+    int lastFolderIndex = 0;
+    for (int i = 0; i < parent->rowCount(); ++i)
+    {
+        int currentItemType = parent->child(lastFolderIndex)->data(ROLE_TYPE).toInt();
+        if (currentItemType == TYPE_DIR || currentItemType == TYPE_ARCHIVE_DIR)
+        {
+            if (parent->child(lastFolderIndex)->data(Qt::DisplayRole).toString().compare(name) > 0)
+            {
+                break;
+            }
+
+            ++lastFolderIndex;
+        }
+    }
+    return lastFolderIndex;
+}
+
+QModelIndex FilesModel::getDirectory(const QString &path)
+{
+    QModelIndex cri = invisibleRootItem()->child(0)->index();
+
+    QStringList file_path_parts = path.split('/', QString::SkipEmptyParts);
+    for (int j = 0; j < file_path_parts.size(); ++j)
+    {
+        cri = findIndexChild(file_path_parts.at(j), cri);
+        if (!cri.isValid())
+        {
+            return QModelIndex();
+        }
+    }
+
+    return cri;
+}
+
+QModelIndex FilesModel::findIndexChild(const QString &text, const QModelIndex &root)
+{
+    if (!root.isValid()) return QModelIndex();
+    for (int i = 0; root.child(i, 0).isValid(); ++i)
+    {
+        if (root.child(i, 0).data() == text)
+        {
+            return root.child(i, 0);
+        }
+    }
+    return QModelIndex();
+}
+
+QModelIndex FilesModel::findRootIndexChild(const QString &text)
+{
+    for (int i = 0; i < this->rowCount(); ++i)
+    {
+        if (index(i, 0).data() == text)
+        {
+            return index(i, 0);
+        }
+    }
+    return QModelIndex();
 }

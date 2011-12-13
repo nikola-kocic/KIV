@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->createMenus(this->mainMenu);
     this->setMenuBar(this->mainMenu);
 
-    this->lineEditPath = new QLineEdit(this);
+    this->lineEditPath = new MyLineEdit(this);
 
 
     /* Start comboBoxZoom */
@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     /* Start archiveDirsView */
     this->archiveDirsView = new ViewArchiveDirs();
-//    this->archiveDirsView->hide();
+    this->archiveDirsView->hide();
 
     splitterFiles->addWidget(this->archiveDirsView);
     splitterFiles->setSizes(QList<int>() << 100);
@@ -246,11 +246,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     }
     else
     {
-        QString path = Settings::Instance()->getLastPath();
-        if (!path.isEmpty())
-        {
-            this->filesystemView->setCurrentIndex(this->modelFilesystem->index(path));
-        }
+        this->openFile(Settings::Instance()->getLastPath());
     }
 }
 
@@ -261,20 +257,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::keyPressEvent" << event->key();
+#endif
     if (event->key() == Qt::Key_Escape)
     {
-        qDebug() << "esc";
+
         if (this->lineEditPath->hasFocus())
         {
-            //            if (lineEditPath->palette() != QApplication::palette())
-            //            {
-            //              lineEditPath->setPalette(QApplication::palette());
-            //            }
-
-            //            updatePath(fsm->filePath(index));
-
-            refreshPath();
-
+            this->lineEditPath->setText(filesView->getCurrentFileInfo().getFilePath());
             event->accept();
         }
         else if (this->comboBoxZoom->lineEdit()->hasFocus())
@@ -282,6 +273,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             on_zoom_changed(this->imageDisplay->getZoom(), this->imageDisplay->getZoom());
             event->accept();
         }
+    }
+    else if (event->key() == Qt::Key_B)
+    {
+        showMinimized();
+        event->accept();
     }
 }
 
@@ -515,8 +511,8 @@ void MainWindow::connectActions()
 
 
     connect(this->filesView, SIGNAL(activated(QModelIndex)), this, SLOT(on_filesView_item_activated(QModelIndex)));
-    connect(this->lineEditPath, SIGNAL(editingFinished()), this, SLOT(on_lineEditPath_editingFinished()));
-    connect(this->filesystemView, SIGNAL(clicked(QModelIndex)), this, SLOT(on_filesystemView_item_clicked(QModelIndex)));
+    connect(this->lineEditPath, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
+    connect(this->lineEditPath, SIGNAL(focusLost()), this, SLOT(on_lineEditPath_focus_lost()));
 
     connect(this->filesystemView->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
     connect(this->archiveDirsView, SIGNAL(currentRowChanged(QModelIndex)), this->filesView, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
@@ -529,8 +525,10 @@ void MainWindow::connectActions()
     connect(this->imageDisplay, SIGNAL(pagePrevious()), this->filesView, SLOT(pagePrevious()));
     connect(this->imageDisplay, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(on_zoom_changed(qreal,qreal)));
     connect(this->imageDisplay, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
+    connect(this->imageDisplay, SIGNAL(quit()), this, SLOT(close()));
+    connect(this->imageDisplay, SIGNAL(boss()), this, SLOT(showMinimized()));
     connect(this->comboBoxZoom, SIGNAL(activated(int)), this, SLOT(on_comboBoxZoom_activated(int)));
-    connect(this->comboBoxZoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_comboBoxZoom_TextChanged()));
+    connect(this->comboBoxZoom->lineEdit(), SIGNAL(editingFinished()), this, SLOT(on_comboBoxZoom_TextChanged()));
 
     connect(this->refreshPathAct, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(this->dirUpAct, SIGNAL(triggered()), this, SLOT(dirUp()));
@@ -545,33 +543,50 @@ void MainWindow::on_customContextMenuRequested(const QPoint &pos)
 void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 {
     this->setCursor(Qt::BusyCursor);
+    this->lineEditPath->setText(info.getFilePath());
     this->imageDisplay->setPixmap(info);
 }
 
 void MainWindow::openFile(const QString &source)
 {
-    QFileInfo info(source);
-    if (info.isDir() || isArchive(info))
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile" << source;
+#endif
+    FileInfo info = FileInfo::fromPath(source);
+
+    if (!info.isValidContainer())
     {
-        this->filesystemView->setCurrentIndex(this->modelFilesystem->index(source));
+        return;
+    }
+
+    this->filesystemView->setCurrentIndex(this->modelFilesystem->index(info.containerPath));
+
+    if (info.isZip())
+    {
+        QModelIndex dirIndex = modelFiles->getDirectory(info.zipPath);
+        archiveDirsView->setCurrentIndexFromSource(dirIndex);
+
+        if (!info.fileExists())
+        {
+            return;
+        }
+
+        filesView->setCurrentIndexFromSource(modelFiles->findIndexChild(info.zipImageFileName, dirIndex));
     }
     else
     {
-        /* Select directory */
-        this->filesystemView->setCurrentIndex(this->modelFilesystem->index(info.absolutePath()));
-
-        /* Select file */
-        for (int i = 0; i < this->modelFiles->invisibleRootItem()->rowCount(); ++i)
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile info.fileExists()";
+#endif
+        if (!info.fileExists())
         {
-            if (this->modelFiles->invisibleRootItem()->child(i)->data(Qt::DisplayRole) == info.fileName())
-            {
-                this->filesView->setCurrentIndex(this->modelFiles->invisibleRootItem()->child(i)->index());
-                break;
-            }
+            return;
         }
 
-        this->filesView->scrollTo(this->filesView->currentIndex(), QAbstractItemView::PositionAtTop);
+        filesView->setCurrentIndexFromSource(modelFiles->findRootIndexChild(info.imageFileName));
     }
+
+    this->filesView->scrollTo(this->filesView->currentIndex());
 }
 
 bool MainWindow::acceptFileDrop(const QMimeData *mimeData)
@@ -616,17 +631,24 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::on_lineEditPath_editingFinished()
 {
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_editingFinished" << this->lineEditPath->text();
-#endif
-    QFileInfo fi(this->lineEditPath->text());
+
+    FileInfo info = FileInfo::fromPath(this->lineEditPath->text());
     bool valid = false;
-    if (fi.exists())
+    if (info.isValidContainer())
     {
-        if (checkFileExtension(fi))
+        if (info.isZip())
         {
-            this->openFile(this->lineEditPath->text());
             valid = true;
+        }
+        else
+        {
+            QFileInfo fi(this->lineEditPath->text());
+
+            if (checkFileExtension(fi))
+            {
+                this->openFile(this->lineEditPath->text());
+                valid = true;
+            }
         }
     }
 
@@ -634,46 +656,25 @@ void MainWindow::on_lineEditPath_editingFinished()
 
     if (!valid)
     {
-        QApplication::beep();
-        QPalette palette(this->lineEditPath->palette());
-        palette.setColor(QPalette::Base, QColor::fromRgb(255,150,150));
-        this->lineEditPath->setPalette(palette);
+        this->lineEditPath->setText(filesView->getCurrentFileInfo().getFilePath());
     }
-    else
-    {
-        if (this->lineEditPath->palette() != QApplication::palette())
-        {
-            this->lineEditPath->setPalette(QApplication::palette());
-        }
-    }
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_editingFinished" << this->lineEditPath->text() << "valid" << valid;
+#endif
+//    this->lineEditPath->clearFocus();
 }
 
-void MainWindow::updatePath(const QString &filePath)
+void MainWindow::on_lineEditPath_focus_lost()
 {
-    QFileInfo fi(filePath);
-    if (fi.isDir())
-    {
-        this->lineEditPath->setText(fi.absoluteFilePath() + "/");
-    }
-    else
-    {
-        this->lineEditPath->setText(fi.absoluteFilePath());
-    }
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_focus_lost" << this->lineEditPath->text();
+#endif
+    this->lineEditPath->setText(this->filesView->getCurrentFileInfo().getFilePath());
 }
 
 void MainWindow::refreshPath()
 {
     on_filesystemView_currentRowChanged(this->filesystemView->currentIndex(), this->filesystemView->currentIndex());
-}
-
-void MainWindow::on_filesystemView_item_clicked(const QModelIndex &index)
-{
-    if (this->lineEditPath->palette() != QApplication::palette())
-    {
-        this->lineEditPath->setPalette(QApplication::palette());
-
-        this->updatePath(this->modelFilesystem->filePath(index));
-    }
 }
 
 void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -685,7 +686,6 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesystemView_currentRowChanged" << currentFolder;
 #endif
     this->setWindowTitle(this->modelFilesystem->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
-    this->updatePath(currentFolder);
 
     FileInfo info;
     info.containerPath = currentFolder;
@@ -696,14 +696,24 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     }
     else
     {
-        info.zipPathToImage = "/";
+        info.zipPath = "/";
     }
 
     this->modelFiles->setPath(info);
 
-    archiveDirsView->setVisible(info.isZip());
+    if(info.isZip())
+    {
+        this->archiveDirsView->setCurrentIndexFromSource(modelFiles->index(0,0));
+        this->archiveDirsView->show();
+    }
+    else
+    {
+        this->archiveDirsView->hide();
+    }
 
     this->filesView->setCurrentDirectory(info);
+
+    this->lineEditPath->setText(info.getFilePath());
 
     this->imageDisplay->setPixmap(info);
 }
@@ -737,7 +747,6 @@ void MainWindow::toggleFullscreen(bool value)
     this->exitFullscreenAct->setEnabled(value);
     this->togglePanelAct->setChecked(!value);
     this->menuBar()->setVisible(!value);
-//    this->exitFullscreenAct->setEnabled(value);
     if (value)
     {
 

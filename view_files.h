@@ -19,6 +19,7 @@ public:
     void setViewMode(ViewMode mode);
     void setCurrentDirectory(const FileInfo &info);
     QModelIndex getIndexFromProxy(const QModelIndex &index) const;
+    void setCurrentIndexFromSource(const QModelIndex &index);
     FileInfo getCurrentFileInfo() const;
 
 public slots:

@@ -12,7 +12,11 @@
 QImage PictureLoader::getImage(const FileInfo &info)
 {
 //    qDebug() << info.containerPath << info.imageFileName << info.thumbSize << info.zipImageFileName << info.zipPathToImage;
-    if (info.isZip())
+    if (!info.fileExists())
+    {
+        return QImage(0,0);
+    }
+    else if (info.isZip())
     {
         return PictureLoader::getImageFromZip(info);
     }
@@ -24,10 +28,6 @@ QImage PictureLoader::getImage(const FileInfo &info)
 
 QImage PictureLoader::getImageFromFile(const FileInfo &info)
 {
-    if (info.imageFileName.isEmpty())
-    {
-        return QImage(0,0);
-    }
     QImageReader image_reader(info.getFilePath());
 //    qDebug() << image_reader.format();
     if (info.thumbSize != 0)
@@ -39,11 +39,6 @@ QImage PictureLoader::getImageFromFile(const FileInfo &info)
 
 QImage PictureLoader::getImageFromZip(const FileInfo &info)
 {
-    if (info.containerPath.isEmpty())
-    {
-        return QImage(0, 0);
-    }
-
     QFile zipFile(info.containerPath);
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))

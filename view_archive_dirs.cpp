@@ -1,6 +1,7 @@
 #include "view_archive_dirs.h"
 #include "helper.h"
-
+#include <QDebug>
+#include <QDateTime>
 ViewArchiveDirs::ViewArchiveDirs()
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -20,17 +21,16 @@ void ViewArchiveDirs::currentChanged(const QModelIndex &current, const QModelInd
     emit currentRowChanged(this->proxy->mapToSource(current));
 }
 
-void ViewArchiveDirs::show()
-{
-    this->setCurrentIndex(this->proxy->index(0,0,this->rootIndex()));
-    this->expand(this->currentIndex());
-    QTreeView::show();
-}
-
 void ViewArchiveDirs::setCurrentIndexFromSource(const QModelIndex &index)
 {
     QTreeView::setCurrentIndex(this->proxy->mapFromSource(index));
-    this->expand(this->currentIndex());
+
+    QModelIndex expandIndex = this->currentIndex();
+    while (!this->isExpanded(expandIndex) && expandIndex.isValid())
+    {
+        this->expand(expandIndex);
+        expandIndex = expandIndex.parent();
+    }
 }
 
 bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const

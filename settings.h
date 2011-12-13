@@ -14,10 +14,10 @@ enum Action {
     Fullscreen = 1,
     AutoFit = 2,
     ZoomReset = 3,
-    NextPage = 4
-    //        Close = 5,
-    //        Boss = 6
-    //        ,FollowMouse
+    NextPage = 4,
+    Quit = 5,
+    Boss = 6
+//    ,FollowMouse = 7
 };
 }
 

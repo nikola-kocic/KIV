@@ -15,8 +15,8 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     ui->ddMiddleClick->addItem(tr("Autofit"),     MiddleClick::AutoFit);
     ui->ddMiddleClick->addItem(tr("Actual Size"), MiddleClick::ZoomReset);
     ui->ddMiddleClick->addItem(tr("Next Page"),   MiddleClick::NextPage);
-//    ui->ddMiddleClick->addItem(tr("Boss Key"),    MiddleClick::Boss);
-//    ui->ddMiddleClick->addItem(tr("Close"),       MiddleClick::Close);
+    ui->ddMiddleClick->addItem(tr("Boss Key"),    MiddleClick::Boss);
+    ui->ddMiddleClick->addItem(tr("Quit"),       MiddleClick::Quit);
 
     ui->ddMiddleClick->setCurrentIndex(ui->ddMiddleClick->findData(Settings::Instance()->getMiddleClick()));
 
