@@ -2,12 +2,12 @@
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
-//#include <QtCore/qdebug.h>
+//#include <QDebug>
 //#include <QTime>
-#include <QtCore/qfile.h>
-#include <QtCore/qbuffer.h>
-#include <QtGui/qimagereader.h>
-#include <QtCore/qcryptographichash.h>
+#include <QFile>
+#include <QBuffer>
+#include <QImageReader>
+//#include <QCryptographicHash>
 
 QImage PictureLoader::getImage(const FileInfo &info)
 {

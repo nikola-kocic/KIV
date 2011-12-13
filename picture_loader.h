@@ -3,7 +3,7 @@
 
 #include "helper.h"
 
-#include <QtGui/qpixmap.h>
+#include <QImage>
 
 class PictureLoader
 {

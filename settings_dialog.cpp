@@ -1,9 +1,6 @@
 #include "settings_dialog.h"
 #include "ui_settings_dialog.h"
 
-#include <QtGui/qpushbutton.h>
-#include <QtGui/qvalidator.h>
-
 Settings_Dialog::Settings_Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Settings_Dialog)

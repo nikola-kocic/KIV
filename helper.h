@@ -2,9 +2,9 @@
 #define HELPER_H
 
 #include "fileinfo.h"
-#include <QtCore/qstringlist.h>
-#include <QtCore/qfileinfo.h>
-#include <QtGui/QApplication>
+#include <QStringList>
+#include <QFileInfo>
+#include <QApplication>
 
 namespace LockMode
 {

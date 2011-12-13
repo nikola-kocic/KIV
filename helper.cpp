@@ -1,7 +1,7 @@
 #include "helper.h"
 #include "settings.h"
 
-//#include <QtCore/qdebug.h>
+//#include <QDebug>
 #include <QtGui/QStyle>
 
 bool checkFileExtension(const QFileInfo &info)

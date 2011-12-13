@@ -3,9 +3,8 @@
 
 #include "fileinfo.h"
 
-#include <QtCore/qsettings.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qstringlist.h>
+#include <QSettings>
+#include <QStringList>
 
 namespace MiddleClick
 {
@@ -22,7 +21,8 @@ enum Action {
 
 namespace Wheel
 {
-enum Action {
+enum Action
+{
     None,
     Scroll,
     ChangePage,
@@ -30,7 +30,8 @@ enum Action {
 };
 }
 
-class Settings{
+class Settings
+{
 
 public:
     static Settings  *Instance();

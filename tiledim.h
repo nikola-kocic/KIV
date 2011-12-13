@@ -1,7 +1,7 @@
 #ifndef TILEDIM_H
 #define TILEDIM_H
 
-#include <QtCore/qvector.h>
+#include <QVector>
 
 class TileDim
 {

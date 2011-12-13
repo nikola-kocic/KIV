@@ -3,8 +3,8 @@
 
 #include "picture_loader.h"
 
-#include <QtGui/qstandarditemmodel.h>
-#include <QtGui/qfileiconprovider.h>
+#include <QStandardItemModel>
+#include <QFileIconProvider>
 
 class FilesModel : public QStandardItemModel
 {

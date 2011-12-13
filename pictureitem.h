@@ -4,17 +4,17 @@
 #include "picture_loader.h"
 #include "teximg.h"
 
-#include <QtOpenGL/qgl.h>
-#include <QtGui/qboxlayout.h>
-#include <QtCore/qfuturewatcher.h>
-#include <QtCore/qtimer.h>
-#include <QtCore/qtconcurrentmap.h>
-#include <QtCore/qtconcurrentrun.h>
+#include <QGLWidget>
+#include <QBoxLayout>
+#include <QFutureWatcher>
+#include <QTimer>
+#include <QtConcurrentMap>
+#include <QtConcurrentRun>
 
 //#define DEBUG_PICTUREITEM
 
 #ifdef DEBUG_PICTUREITEM
-    #include <qdatetime.h>
+    #include <QDateTime>
 #endif
 
 class PictureItem : public QWidget
@@ -51,9 +51,9 @@ private:
         void setImage(QImage img);
 
     private:
-        QPixmap pixmap_edited;
-        PictureItem *picItem;
-        QPixmap pixmap;
+        QPixmap m_pixmap_edited;
+        PictureItem *m_picItem;
+        QPixmap m_pixmap;
 
     protected:
         void paintEvent(QPaintEvent *event);
@@ -75,16 +75,16 @@ private:
     private:
         void updateSize();
         void clearTextures();
-        PictureItem *picItem;
+        PictureItem *m_picItem;
 
-        qreal scaleX;
-        qreal scaleY;
-        int offsetX;
-        int offsetY;
-        QPoint lastPos;
-        QVector < QVector <GLuint> > textures;
-        QVector < QVector <GLuint> > old_textures;
-        TexImg *texImg;
+        qreal m_scaleX;
+        qreal m_scaleY;
+        int m_offsetX;
+        int m_offsetY;
+        QPoint m_lastPos;
+        QVector < QVector <GLuint> > m_textures;
+        QVector < QVector <GLuint> > m_old_textures;
+        TexImg *m_texImg;
 
     protected:
         void initializeGL();
@@ -99,21 +99,21 @@ private:
     void ScrollPageHorizontal(int value);
     void ScrollPageVertical(int value);
 
-    PictureItemGL *imageDisplayGL;
-    PictureItemRaster *imageDisplayRaster;
-    QFutureWatcher< QImage > *imageLoader;
-    QFutureWatcher< QImage > *textureLoader;
-    int returnTexCount;
-    bool opengl;
-    QTimer *timerScrollPage;
-    bool flagJumpToEnd;
-    QList<qreal> defaultZoomSizes;
-    qreal zoom;
-    qreal rotation;
-    bool pixmapNull;
-    QPoint dragPoint;
-    LockMode::Mode lockMode;
-    QColor clearColor;
+    PictureItemGL *m_imageDisplay_gl;
+    PictureItemRaster *m_imageDisplay_raster;
+    QFutureWatcher< QImage > *m_loader_image;
+    QFutureWatcher< QImage > *m_loader_texture;
+    int m_returnTexCount;
+    bool m_opengl;
+    QTimer *m_timer_scrollPage;
+    bool m_flag_jumpToEnd;
+    QList<qreal> m_defaultZoomSizes;
+    qreal m_zoom_value;
+    qreal m_rotation_value;
+    bool m_pixmapNull;
+    QPoint m_point_drag;
+    LockMode::Mode m_lockMode;
+    QColor m_color_clear;
 
     QPoint pointToOrigin(int width, int height);
     void avoidOutOfScreen();
@@ -121,9 +121,9 @@ private:
     void beginDrag(const QPoint &pt);
     void endDrag();
     void updateLockMode();
-    bool dragging;
     void setPixmapNull(bool value);
-    QRectF boundingRect;
+    QRectF m_boundingRect;
+    bool m_dragging;
 
 #ifdef DEBUG_PICTUREITEM
     QTime t;

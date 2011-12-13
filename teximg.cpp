@@ -1,23 +1,23 @@
 #include "teximg.h"
 
-//#include <QtCore/qdebug.h>
-#include <QtCore/qsize.h>
+//#include <QDebug>
+#include <QSize>
 
 TexImg::TexImg()
 {
-    this->texMaxSize = 2048;
+    this->m_texMaxSize = 2048;
     this->hTile = 0;
     this->vTile = 0;
 }
 
 int TexImg::getTexMaxSize()
 {
-    return this->texMaxSize;
+    return this->m_texMaxSize;
 }
 
 void TexImg::setTexMaxSize(int size)
 {
-    this->texMaxSize = qMin(8192, size);
+    this->m_texMaxSize = qMin(8192, size);
 }
 
 void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)

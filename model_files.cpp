@@ -4,8 +4,8 @@
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
 
-#include <QtCore/qfile.h>
-#include <QtCore/qdir.h>
+#include <QFile>
+#include <QDir>
 
 //#define DEBUG_MODEL_FILES
 #ifdef DEBUG_MODEL_FILES

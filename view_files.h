@@ -4,10 +4,10 @@
 #include "helper.h"
 #include "picture_loader.h"
 
-#include <QtGui/qlistview.h>
-#include <QtGui/qsortfilterproxymodel.h>
-#include <QtCore/qfuturewatcher.h>
-#include <QtCore/qtconcurrentmap.h>
+#include <QListView>
+#include <QSortFilterProxyModel>
+#include <QFutureWatcher>
+#include <QtConcurrentMap>
 
 class ViewFiles : public QListView
 {
@@ -29,10 +29,10 @@ public slots:
 private:
     void startShowingThumbnails();
 
-    int returnThumbCount;
-    QFutureWatcher<QImage> *watcherThumbnail;
-    FileInfo currentInfo;
-    QSortFilterProxyModel *proxy;
+    int m_returnThumbCount;
+    QFutureWatcher<QImage> *m_watcherThumbnail;
+    FileInfo m_currentInfo;
+    QSortFilterProxyModel *m_proxy;
 
 private slots:
     void showThumbnail(int num);

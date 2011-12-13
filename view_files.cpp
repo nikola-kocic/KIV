@@ -1,47 +1,44 @@
 #include "view_files.h"
 #include "settings.h"
 
-#include <QtCore/qdir.h>
-#include <QtGui/qfileiconprovider.h>
-#include <QtGui/qapplication.h>
-#include <QtGui/qstyleditemdelegate.h>
+#include <QFileIconProvider>
 
 //#define DEBUG_VIEW_FILES
 
 #ifdef DEBUG_VIEW_FILES
-#include <QtCore/qdebug.h>
+#include <QDebug>
 #include <QTime>
 #endif
 
 ViewFiles::ViewFiles(QWidget *parent)
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    this->proxy = new QSortFilterProxyModel(this);
-    this->currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+    m_proxy = new QSortFilterProxyModel(this);
+    m_currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
 
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
     this->setUniformItemSizes(true);
 
-    this->returnThumbCount = 0;
-    this->watcherThumbnail = new QFutureWatcher<QImage>(this);
-    connect(this->watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
+    m_returnThumbCount = 0;
+    m_watcherThumbnail = new QFutureWatcher<QImage>(this);
+    connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
 }
 
 FileInfo ViewFiles::getCurrentFileInfo() const
 {
-    return this->currentInfo;
+    return m_currentInfo;
 }
 
 void ViewFiles::setModel(QAbstractItemModel *model)
 {
-    this->proxy->setSourceModel(model);
-    QListView::setModel(this->proxy);
+    m_proxy->setSourceModel(model);
+    QListView::setModel(m_proxy);
 }
 
 QModelIndex ViewFiles::getIndexFromProxy(const QModelIndex &index) const
 {
-    return this->proxy->mapToSource(index);
+    return m_proxy->mapToSource(index);
 }
 
 void ViewFiles::setCurrentIndexFromSource(const QModelIndex &index)
@@ -49,16 +46,16 @@ void ViewFiles::setCurrentIndexFromSource(const QModelIndex &index)
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime() << "ViewFiles::setCurrentIndexFromSource" << index.data();
 #endif
-    QListView::setCurrentIndex(this->proxy->mapFromSource(index));
+    QListView::setCurrentIndex(m_proxy->mapFromSource(index));
 }
 
 void ViewFiles::setCurrentDirectory(const FileInfo &info)
 {
-    this->currentInfo = info;
+    m_currentInfo = info;
 
     if (this->viewMode() == QListView::IconMode)
     {
-        this->currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+        m_currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
         this->startShowingThumbnails();
     }
 }
@@ -83,13 +80,13 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
         cindex = cindex.parent();
     }
 
-    this->currentInfo.zipPath = pathToImage;
-    this->currentInfo.zipImageFileName.clear();
-    this->setRootIndex(this->proxy->mapFromSource(index));
+    m_currentInfo.zipPath = pathToImage;
+    m_currentInfo.zipImageFileName.clear();
+    this->setRootIndex(m_proxy->mapFromSource(index));
     this->selectionModel()->clear();
 
     this->startShowingThumbnails();
-    emit currentFileChanged(this->currentInfo);
+    emit currentFileChanged(m_currentInfo);
 }
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -104,22 +101,22 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
 
     if (type == TYPE_FILE)
     {
-        this->currentInfo.imageFileName = filename;
-        this->currentInfo.zipImageFileName.clear();
-        this->currentInfo.zipPath.clear();
+        m_currentInfo.imageFileName = filename;
+        m_currentInfo.zipImageFileName.clear();
+        m_currentInfo.zipPath.clear();
     }
     else if (type == TYPE_ARCHIVE_FILE)
     {
-        this->currentInfo.zipImageFileName = filename;
+        m_currentInfo.zipImageFileName = filename;
     }
     else
     {
-        this->currentInfo.zipImageFileName.clear();
-        this->currentInfo.imageFileName.clear();
+        m_currentInfo.zipImageFileName.clear();
+        m_currentInfo.imageFileName.clear();
     }
 
 
-    FileInfo info = this->currentInfo;
+    FileInfo info = m_currentInfo;
     info.thumbSize = 0;
     emit currentFileChanged(info);
 }
@@ -133,18 +130,18 @@ void ViewFiles::setViewMode(ViewMode mode)
 
     if (mode == QListView::IconMode)
     {
-        this->currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
-        iconSize = this->currentInfo.thumbSize;
+        m_currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+        iconSize = m_currentInfo.thumbSize;
         gridSize = iconSize + 50;
     }
     else
     {
         QFileIconProvider fip;
-        for (int i = 0; i < this->proxy->rowCount(this->rootIndex()); ++i)
+        for (int i = 0; i < m_proxy->rowCount(this->rootIndex()); ++i)
         {
-            QString text = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
-            this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), QVariant(), Qt::SizeHintRole);
-            this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), fip.icon(this->currentInfo.containerPath + "/" + text), Qt::DecorationRole);
+            QString text = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+            m_proxy->setData(m_proxy->index(i, 0, this->rootIndex()), QVariant(), Qt::SizeHintRole);
+            m_proxy->setData(m_proxy->index(i, 0, this->rootIndex()), fip.icon(m_currentInfo.containerPath + "/" + text), Qt::DecorationRole);
         }
     }
     QListView::setViewMode(mode);
@@ -152,61 +149,61 @@ void ViewFiles::setViewMode(ViewMode mode)
     this->setIconSize(QSize(iconSize, iconSize));
     this->setGridSize(QSize(gridSize, gridSize));
 
-    this->setCurrentDirectory(this->currentInfo);
+    this->setCurrentDirectory(m_currentInfo);
 }
 
 void ViewFiles::startShowingThumbnails()
 {
-    if (this->proxy->rowCount(this->rootIndex()) == 0 || this->viewMode() != QListView::IconMode)
+    if (m_proxy->rowCount(this->rootIndex()) == 0 || this->viewMode() != QListView::IconMode)
     {
         return;
     }
 
 
     QList <FileInfo> files;
-    for (int i = 0; i < this->proxy->rowCount(this->rootIndex()); ++i)
+    for (int i = 0; i < m_proxy->rowCount(this->rootIndex()); ++i)
     {
-        this->proxy->setData(this->proxy->index(i, 0, this->rootIndex()), QSize(this->currentInfo.thumbSize + 20, this->currentInfo.thumbSize + 20), Qt::SizeHintRole);
+        m_proxy->setData(m_proxy->index(i, 0, this->rootIndex()), QSize(m_currentInfo.thumbSize + 20, m_currentInfo.thumbSize + 20), Qt::SizeHintRole);
         FileInfo info;
-        if (this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
-                || (this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE))
+        if (m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
+                || (m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE))
         {
-            info = this->currentInfo;
+            info = m_currentInfo;
 
-            if (!this->currentInfo.isZip())
+            if (!m_currentInfo.isZip())
             {
-                info.imageFileName = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+                info.imageFileName = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
             else
             {
-                info.zipImageFileName = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+                info.zipImageFileName = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
         }
         else
         {
-            info.thumbSize = this->currentInfo.thumbSize;
+            info.thumbSize = m_currentInfo.thumbSize;
         }
         files.append(info);
     }
 
-    if (this->watcherThumbnail->isRunning())
+    if (m_watcherThumbnail->isRunning())
     {
-        this->watcherThumbnail->cancel();
-        this->watcherThumbnail->waitForFinished();
+        m_watcherThumbnail->cancel();
+        m_watcherThumbnail->waitForFinished();
     }
-    this->watcherThumbnail->setFuture(QtConcurrent::mapped(files, PictureLoader::getImage));
+    m_watcherThumbnail->setFuture(QtConcurrent::mapped(files, PictureLoader::getImage));
 }
 
 void ViewFiles::showThumbnail(int num)
 {
-    if (!this->watcherThumbnail->resultAt(num).isNull())
+    if (!m_watcherThumbnail->resultAt(num).isNull())
     {
-        this->proxy->setData(this->proxy->index(num, 0, this->rootIndex()), QPixmap::fromImage(this->watcherThumbnail->resultAt(num)), Qt::DecorationRole);
+        m_proxy->setData(m_proxy->index(num, 0, this->rootIndex()), QPixmap::fromImage(m_watcherThumbnail->resultAt(num)), Qt::DecorationRole);
     }
-    if (++this->returnThumbCount == this->proxy->rowCount(this->rootIndex()))
+    if (++m_returnThumbCount == m_proxy->rowCount(this->rootIndex()))
     {
-        this->returnThumbCount = 0;
-        this->watcherThumbnail->setFuture(QFuture<QImage>());
+        m_returnThumbCount = 0;
+        m_watcherThumbnail->setFuture(QFuture<QImage>());
     }
 }
 
@@ -214,12 +211,12 @@ void ViewFiles::pageNext()
 {
     if (!this->currentIndex().isValid()) return;
 
-    for (int i = this->currentIndex().row() + 1; i < this->proxy->rowCount(this->rootIndex()); ++i)
+    for (int i = this->currentIndex().row() + 1; i < m_proxy->rowCount(this->rootIndex()); ++i)
     {
-        int type = this->proxy->index(i, 0, this->rootIndex()).data(ROLE_TYPE).toInt();
+        int type = m_proxy->index(i, 0, this->rootIndex()).data(ROLE_TYPE).toInt();
         if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            this->setCurrentIndex(this->proxy->index(i, 0, this->rootIndex()));
+            this->setCurrentIndex(m_proxy->index(i, 0, this->rootIndex()));
             break;
         }
     }
@@ -231,10 +228,10 @@ void ViewFiles::pagePrevious()
 
     for (int i = this->currentIndex().row() - 1; i >= 0; --i)
     {
-        int type = this->proxy->index(i, 0, this->rootIndex()).data(ROLE_TYPE).toInt();
+        int type = m_proxy->index(i, 0, this->rootIndex()).data(ROLE_TYPE).toInt();
         if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            this->setCurrentIndex(this->proxy->index(i, 0, this->rootIndex()));
+            this->setCurrentIndex(m_proxy->index(i, 0, this->rootIndex()));
             break;
         }
     }

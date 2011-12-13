@@ -4,10 +4,11 @@
 #include "tiledim.h"
 #include "picture_loader.h"
 
-#include <QtGui/qimage.h>
-#include <QtOpenGL/qgl.h>
+#include <QImage>
+#include <QPainter>
 
-struct TexIndex{
+struct TexIndex
+{
     QImage bitmapData;
     int currentTileHeight;
     int vBorderOffset;
@@ -34,7 +35,7 @@ public:
 private:
     static const int TexMinSize = 16;
     static const int ThresholdTileSize = 1024;
-    int texMaxSize;
+    int m_texMaxSize;
 
     void ComputeBitmapPow2Size(TileDim *tileDim);
     void InitTiles(TileDim *tileDim);

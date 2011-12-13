@@ -8,14 +8,13 @@
 #include "view_archive_dirs.h"
 #include "mylineedit.h"
 
-#include <QtGui/qfilesystemmodel.h>
-#include <QtGui/qlineedit.h>
-#include <QtGui/qsplitter.h>
-#include <QtGui/qmenubar.h>
-#include <QtGui/qtoolbar.h>
-#include <QtGui/qcombobox.h>
-#include <QtGui/qtreeview.h>
-#include <QtGui/qmainwindow.h>
+#include <QFileSystemModel>
+#include <QSplitter>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QComboBox>
+#include <QTreeView>
+#include <QMainWindow>
 
 class MainWindow : public QMainWindow
 {
@@ -31,63 +30,63 @@ private:
     bool acceptFileDrop(const QMimeData *mimeData);
     void openFile(const QString &source);
 
-    QFileSystemModel *modelFilesystem;
-    FilesModel *modelFiles;
+    QFileSystemModel *m_model_filesystem;
+    FilesModel *m_model_files;
 
-    QTreeView *filesystemView;
-    ViewArchiveDirs *archiveDirsView;
-    ViewFiles *filesView;
+    QTreeView *m_view_filesystem;
+    ViewArchiveDirs *m_view_archiveDirs;
+    ViewFiles *m_view_files;
 
-    QSplitter *splitterMain;
-    PictureItem *imageDisplay;
-    QSplitter *splitterPanel;
+    QSplitter *m_splitter_main;
+    QSplitter *m_splitter_sidebar;
+    PictureItem *m_picture_item;
 
-    QMenuBar *mainMenu;
+    QMenuBar *m_menu_main;
 
-    QToolBar *toolbar;
-    MyLineEdit *lineEditPath;
-    QComboBox *comboBoxZoom;
+    QToolBar *m_toolbar;
+    MyLineEdit *m_lineEdit_path;
+    QComboBox *m_comboBox_zoom;
 
     /* File Menu Actions */
-    QAction *openAct;
-    QAction *saveAct;
-    QAction *exitAct;
+    QAction *m_act_open;
+    QAction *m_act_save;
+    QAction *m_act_exit;
 
     /* Edit Menu Actions */
-    QAction *rotateLeftAct;
-    QAction *rotateRightAct;
-    QAction *rotateResetAct;
-    QAction *zoomInAct;
-    QAction *zoomOutAct;
-    QAction *zoomResetAct;
-    QAction *fitToWindowAct;
-    QAction *fitToWidthAct;
-    QAction *fitToHeightAct;
-    QAction *lockZoomAct;
-    QAction *lockAutofitAct;
-    QAction *lockFitWidthAct;
-    QAction *lockFitHeightAct;
-    QAction *lockNoneAct;
+    QAction *m_act_zoomIn;
+    QAction *m_act_zoomOut;
+    QAction *m_act_zoomReset;
+    QAction *m_act_rotateLeft;
+    QAction *m_act_rotateRight;
+    QAction *m_act_rotateReset;
+    QAction *m_act_fitToWindow;
+    QAction *m_act_fitToWidth;
+    QAction *m_act_fitToHeight;
+    QAction *m_act_lockZoom;
+    QAction *m_act_lockAutofit;
+    QAction *m_act_lockFitWidth;
+    QAction *m_act_lockFitHeight;
+    QAction *m_act_lockNone;
 
     /* Options Menu Actions */
-    QAction *pagePreviousAct;
-    QAction *pageNextAct;
-    QAction *toggleFullscreenAct;
-    QAction *exitFullscreenAct;
-    QAction *showThumbnailsAct;
-    QAction *togglePanelAct;
-    QAction *largeIconsAct;
-    QAction *settingsAct;
+    QAction *m_act_pagePrevious;
+    QAction *m_act_pageNext;
+    QAction *m_act_fullscreen;
+    QAction *m_act_exitFullscreen;
+    QAction *m_act_thumbnails;
+    QAction *m_act_sidebar;
+    QAction *m_act_largeIcons;
+    QAction *m_act_settings;
 
     /* Help Actions */
-    QAction *webSiteAct;
-    QAction *aboutAct;
+    QAction *m_act_webSite;
+    QAction *m_act_about;
 
     /* Toolbar Actions */
-    QAction *dirUpAct;
-    QAction *refreshPathAct;
+    QAction *m_act_dirUp;
+    QAction *m_act_refreshPath;
 
-    QMenu *contextMenu;
+    QMenu *m_menu_context;
 
 private slots:
 
@@ -110,7 +109,7 @@ private slots:
 
     /* Options Menu Actions Slots */
     void toggleFullscreen(bool);
-    void togglePanel(bool);
+    void toggleSidebar(bool);
     void toggleLargeIcons(bool);
     void settingsDialog();
     void toggleShowThumbnails(bool);

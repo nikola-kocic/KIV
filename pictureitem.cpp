@@ -1,31 +1,31 @@
 #include "pictureitem.h"
 #include "settings.h"
 
-#include <QtGui/qevent.h>
+#include <QMouseEvent>
 
 PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    this->opengl = opengl;
-    this->imageDisplayRaster = 0;
-    this->imageDisplayGL = 0;
-    this->defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
-    this->zoom = 1.0;
-    this->rotation = 0.0;
-    this->dragging = false;
-    this->flagJumpToEnd = false;
-    this->lockMode = LockMode::None;
+    m_opengl = opengl;
+    m_imageDisplay_raster = 0;
+    m_imageDisplay_gl = 0;
+    m_defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
+    m_zoom_value = 1.0;
+    m_rotation_value = 0.0;
+    m_dragging = false;
+    m_flag_jumpToEnd = false;
+    m_lockMode = LockMode::None;
 
-    this->timerScrollPage = new QTimer(this);
-    connect(this->timerScrollPage, SIGNAL(timeout()), this->timerScrollPage, SLOT(stop()));
+    m_timer_scrollPage = new QTimer(this);
+    connect(m_timer_scrollPage, SIGNAL(timeout()), m_timer_scrollPage, SLOT(stop()));
 
-    this->textureLoader = new QFutureWatcher<QImage>(this);
-    connect(this->textureLoader, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
+    m_loader_texture = new QFutureWatcher<QImage>(this);
+    connect(m_loader_texture, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
 
-    this->imageLoader = new QFutureWatcher<QImage>(this);
-    connect(this->imageLoader, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
+    m_loader_image = new QFutureWatcher<QImage>(this);
+    connect(m_loader_image, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
     layoutMain->setSpacing(0);
@@ -37,41 +37,41 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
 
 void PictureItem::initPictureItem()
 {
-    if (this->opengl)
+    if (m_opengl)
     {
-        this->imageDisplayGL = new PictureItemGL(this);
-        this->imageDisplayRaster = 0;
-        this->layout()->addWidget(this->imageDisplayGL);
+        m_imageDisplay_gl = new PictureItemGL(this);
+        m_imageDisplay_raster = 0;
+        this->layout()->addWidget(m_imageDisplay_gl);
     }
     else
     {
-        this->imageDisplayRaster = new PictureItemRaster(this);
-        this->imageDisplayGL = 0;
-        this->layout()->addWidget(this->imageDisplayRaster);
+        m_imageDisplay_raster = new PictureItemRaster(this);
+        m_imageDisplay_gl = 0;
+        this->layout()->addWidget(m_imageDisplay_raster);
     }
 }
 
 bool PictureItem::getHardwareAcceleration() const
 {
-    return this->opengl;
+    return m_opengl;
 }
 
 void PictureItem::setHardwareAcceleration(bool b)
 {
-    if (this->opengl != b)
+    if (m_opengl != b)
     {
-        if (this->opengl)
+        if (m_opengl)
         {
-            this->imageDisplayGL->disconnect();
-            this->imageDisplayGL->deleteLater();
+            m_imageDisplay_gl->disconnect();
+            m_imageDisplay_gl->deleteLater();
         }
         else
         {
-            this->imageDisplayRaster->disconnect();
-            this->imageDisplayRaster->deleteLater();
+            m_imageDisplay_raster->disconnect();
+            m_imageDisplay_raster->deleteLater();
         }
 
-        this->opengl = b;
+        m_opengl = b;
         initPictureItem();
     }
 }
@@ -79,18 +79,18 @@ void PictureItem::setHardwareAcceleration(bool b)
 
 bool PictureItem::isPixmapNull() const
 {
-    return this->pixmapNull;
+    return m_pixmapNull;
 }
 
 void PictureItem::setPixmapNull(bool value)
 {
-    this->pixmapNull = value;
+    m_pixmapNull = value;
 }
 
 
 qreal PictureItem::getRotation() const
 {
-    return this->rotation;
+    return m_rotation_value;
 }
 
 void PictureItem::setRotation(qreal r)
@@ -100,22 +100,22 @@ void PictureItem::setRotation(qreal r)
         return;
     }
 
-    this->rotation = r;
+    m_rotation_value = r;
 
-    if (this->opengl)
+    if (m_opengl)
     {
-        this->imageDisplayGL->setRotation(r);
+        m_imageDisplay_gl->setRotation(r);
     }
     else
     {
-        this->imageDisplayRaster->setRotation(r);
+        m_imageDisplay_raster->setRotation(r);
     }
 }
 
 
 qreal PictureItem::getZoom()
 {
-    return this->zoom;
+    return m_zoom_value;
 }
 
 void PictureItem::setZoom(qreal z)
@@ -134,16 +134,16 @@ void PictureItem::setZoom(qreal z)
         z = 1000;
     }
 
-    qreal previous = this->zoom;
-    this->zoom = z;
+    qreal previous = m_zoom_value;
+    m_zoom_value = z;
 
-    if (this->opengl)
+    if (m_opengl)
     {
-        this->imageDisplayGL->setZoom(this->zoom, previous);
+        m_imageDisplay_gl->setZoom(m_zoom_value, previous);
     }
     else
     {
-        this->imageDisplayRaster->setZoom(this->zoom, previous);
+        m_imageDisplay_raster->setZoom(m_zoom_value, previous);
     }
 
     emit zoomChanged(z, previous);
@@ -152,19 +152,19 @@ void PictureItem::setZoom(qreal z)
 
 LockMode::Mode PictureItem::getLockMode() const
 {
-    return this->lockMode;
+    return m_lockMode;
 }
 
 void PictureItem::setLockMode(LockMode::Mode mode)
 {
-    this->lockMode = mode;
+    m_lockMode = mode;
     this->updateLockMode();
 }
 
 
 QList<qreal> PictureItem::getDefaultZoomSizes() const
 {
-    return this->defaultZoomSizes;
+    return m_defaultZoomSizes;
 }
 
 
@@ -180,16 +180,16 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
     qDebug() << QDateTime::currentDateTime() << "PictureItem::setPixmap" << info.getFilePath();
 #endif
-    this->returnTexCount = 0;
+    m_returnTexCount = 0;
     if (!info.fileExists())
     {
-        if (opengl)
+        if (m_opengl)
         {
-            this->imageDisplayGL->setImage(QImage());
+            m_imageDisplay_gl->setImage(QImage());
         }
         else
         {
-            this->imageDisplayRaster->setImage(QImage());
+            m_imageDisplay_raster->setImage(QImage());
         }
         this->setPixmapNull(true);
         emit imageChanged();
@@ -199,7 +199,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
         t.start();
 #endif
-        this->imageLoader->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
+        m_loader_image->setFuture(QtConcurrent::run(PictureLoader::getImage, info));
     }
 }
 
@@ -208,37 +208,37 @@ void PictureItem::imageFinished(int num)
 #ifdef DEBUG_PICTUREITEM
     qDebug() << QDateTime::currentDateTime() << "\nloaded image" << t.restart();
 #endif
-    this->setPixmapNull(this->imageLoader->resultAt(num).isNull());
-    if (this->opengl)
+    this->setPixmapNull(m_loader_image->resultAt(num).isNull());
+    if (m_opengl)
     {
-        this->imageDisplayGL->setImage(this->imageLoader->resultAt(num));
+        m_imageDisplay_gl->setImage(m_loader_image->resultAt(num));
     }
     else
     {
-        this->imageDisplayRaster->setImage(this->imageLoader->resultAt(num));
+        m_imageDisplay_raster->setImage(m_loader_image->resultAt(num));
         emit imageChanged();
     }
 
     /* Free result memory */
-    this->imageLoader->setFuture(QFuture<QImage>());
+    m_loader_image->setFuture(QFuture<QImage>());
 }
 
 void PictureItem::loadTextures(QList<TexIndex> indexes)
 {
-    returnTexCount = indexes.size();
-    this->textureLoader->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
+    m_returnTexCount = indexes.size();
+    m_loader_texture->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
 }
 
 void PictureItem::textureFinished(int num)
 {
-    if (this->opengl)
+    if (m_opengl)
     {
-        this->imageDisplayGL->setTexture(this->textureLoader->resultAt(num), num);
-        if (--this->returnTexCount == 0)
+        m_imageDisplay_gl->setTexture(m_loader_texture->resultAt(num), num);
+        if (--m_returnTexCount == 0)
         {
             this->setPixmapNull(false);
-            this->textureLoader->setFuture(QFuture<QImage>());
-            this->imageDisplayGL->textureLoadFinished();
+            m_loader_texture->setFuture(QFuture<QImage>());
+            m_imageDisplay_gl->textureLoadFinished();
 
 #ifdef DEBUG_PICTUREITEM
             qDebug() << QDateTime::currentDateTime() << "loaded textures" << t.elapsed();
@@ -252,24 +252,24 @@ void PictureItem::afterPixmapLoad()
 {
     this->updateLockMode();
 
-    if (this->boundingRect.width() > this->size().width())
+    if (m_boundingRect.width() > this->size().width())
     {
-        if ((Settings::Instance()->getRightToLeft() && !this->flagJumpToEnd)
-                || (!Settings::Instance()->getRightToLeft() && this->flagJumpToEnd)
+        if ((Settings::Instance()->getRightToLeft() && !m_flag_jumpToEnd)
+                || (!Settings::Instance()->getRightToLeft() && m_flag_jumpToEnd)
 
                 )
         {
-            this->boundingRect.moveLeft(-(this->boundingRect.width() - this->size().width()));
+            m_boundingRect.moveLeft(-(m_boundingRect.width() - this->size().width()));
         }
     }
 
-    if (this->flagJumpToEnd)
+    if (m_flag_jumpToEnd)
     {
-        if (this->boundingRect.height() > this->size().height())
+        if (m_boundingRect.height() > this->size().height())
         {
-            this->boundingRect.moveTop(-(this->boundingRect.height() - this->size().height()));
+            m_boundingRect.moveTop(-(m_boundingRect.height() - this->size().height()));
         }
-        this->flagJumpToEnd = false;
+        m_flag_jumpToEnd = false;
     }
 }
 
@@ -356,7 +356,7 @@ void PictureItem::mouseMoveEvent(QMouseEvent *ev)
 
 void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 {
-    if (this->dragging && ev->button() == Qt::LeftButton)
+    if (m_dragging && ev->button() == Qt::LeftButton)
     {
         this->endDrag();
     }
@@ -436,9 +436,9 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                     (Wheel::Scroll == Settings::Instance()->getWheel()) &&
                     (Settings::Instance()->getScrollChangesPage()) &&
                     (
-                        (LockMode::Autofit == this->lockMode) ||
-                        (LockMode::FitHeight == this->lockMode) ||
-                        (this->boundingRect.height() <= this->size().height() && this->boundingRect.width() <= this->size().width())
+                        (LockMode::Autofit == m_lockMode) ||
+                        (LockMode::FitHeight == m_lockMode) ||
+                        (m_boundingRect.height() <= this->size().height() && m_boundingRect.width() <= this->size().width())
                         )
                     )
                 )
@@ -450,7 +450,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
             else
             {
-                this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
+                m_flag_jumpToEnd = Settings::Instance()->getJumpToEnd();
                 emit pagePrevious();
                 event->accept();
             }
@@ -461,8 +461,8 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             event->accept();
             if (
                     (event->delta() < 0) &&
-                    (!this->timerScrollPage->isActive()) &&
-                    ((-this->boundingRect.y() + this->size().height()) >= this->boundingRect.height())
+                    (!m_timer_scrollPage->isActive()) &&
+                    ((-m_boundingRect.y() + this->size().height()) >= m_boundingRect.height())
                     )
             {
                 /* Scroll horizontally; If page is scrolled to end, start timer */
@@ -470,11 +470,11 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                 {
                     if (Settings::Instance()->getRightToLeft())
                     {
-                        if (this->boundingRect.x() < 0)
+                        if (m_boundingRect.x() < 0)
                         {
                             this->ScrollPageHorizontal(-event->delta());
 
-                            if (0 == this->boundingRect.x())
+                            if (0 == m_boundingRect.x())
                             {
                                 this->start_timerScrollPage();
                             }
@@ -483,12 +483,12 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                     }
                     else
                     {
-                        if ((this->boundingRect.width() + this->boundingRect.x()) > this->size().width())
+                        if ((m_boundingRect.width() + m_boundingRect.x()) > this->size().width())
                         {
                             this->ScrollPageHorizontal(event->delta());
 
 
-                            if ((this->boundingRect.width() + this->boundingRect.x()) == this->size().width())
+                            if ((m_boundingRect.width() + m_boundingRect.x()) == this->size().width())
                             {
                                 this->start_timerScrollPage();
                             }
@@ -499,7 +499,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                 /* If this code is reached (page was already scrolled to end), change page to next */
                 if (
                         (Settings::Instance()->getScrollChangesPage()) &&
-                        (!this->timerScrollPage->isActive())
+                        (!m_timer_scrollPage->isActive())
                         )
                 {
                     this->start_timerScrollPage();
@@ -510,12 +510,12 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             else if (
                      (Settings::Instance()->getScrollChangesPage()) &&
                      (event->delta() > 0) &&
-                     (this->boundingRect.y() == 0) &&
-                     (!this->timerScrollPage->isActive())
+                     (m_boundingRect.y() == 0) &&
+                     (!m_timer_scrollPage->isActive())
                      )
             {
                 this->start_timerScrollPage();
-                this->flagJumpToEnd = Settings::Instance()->getJumpToEnd();
+                m_flag_jumpToEnd = Settings::Instance()->getJumpToEnd();
                 emit pagePrevious();
             }
             /* Scroll vertically; If page is scrolled to top or bottom, start timer */
@@ -525,10 +525,10 @@ void PictureItem::wheelEvent(QWheelEvent *event)
 
                 if (
                         (
-                            ((this->boundingRect.height() + this->boundingRect.y()) == this->size().height()) ||
-                            (0 == this->boundingRect.y())
+                            ((m_boundingRect.height() + m_boundingRect.y()) == this->size().height()) ||
+                            (0 == m_boundingRect.y())
                             ) &&
-                        (!this->timerScrollPage->isActive())
+                        (!m_timer_scrollPage->isActive())
                         )
                 {
                     this->start_timerScrollPage();
@@ -558,7 +558,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
     {
-        this->setZoom(this->zoom * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
+        this->setZoom(m_zoom_value * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
         event->accept();
     }
     else if (Qt::ShiftModifier == event->modifiers())
@@ -578,7 +578,7 @@ void PictureItem::start_timerScrollPage()
 {
     if (Settings::Instance()->getPageChangeTimeout() > 0)
     {
-        this->timerScrollPage->start(Settings::Instance()->getPageChangeTimeout());
+        m_timer_scrollPage->start(Settings::Instance()->getPageChangeTimeout());
     }
 }
 
@@ -592,13 +592,13 @@ void PictureItem::start_timerScrollPage()
 
 QPoint PictureItem::pointToOrigin(int width, int height)
 {
-    qreal zoomX = (qreal)width / (qreal)this->boundingRect.width();
-    qreal zoomY = (qreal)height / (qreal)this->boundingRect.height();
+    qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
+    qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
 
     if (width > this->size().width())
     {
-        qreal oldX = (this->boundingRect.x() - (this->boundingRect.x() * 2)) + (this->size().width() / 2);
-        qreal oldY = (this->boundingRect.y() - (this->boundingRect.y() * 2)) + (this->size().height() / 2);
+        qreal oldX = (m_boundingRect.x() - (m_boundingRect.x() * 2)) + (this->size().width() / 2);
+        qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
 
         qreal newX = oldX * zoomX;
         qreal newY = oldY * zoomY;
@@ -612,7 +612,7 @@ QPoint PictureItem::pointToOrigin(int width, int height)
     {
         if (height > this->size().height())
         {
-            qreal oldY = (this->boundingRect.y() - (this->boundingRect.y() * 2)) + (this->size().height() / 2);
+            qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
 
             qreal newY = oldY * zoomY;
 
@@ -630,37 +630,37 @@ QPoint PictureItem::pointToOrigin(int width, int height)
 
 void PictureItem::zoomIn()
 {
-    for (int i = 0; i < this->defaultZoomSizes.size(); ++i)
+    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
     {
-        if (this->defaultZoomSizes.at(i) > this->zoom)
+        if (m_defaultZoomSizes.at(i) > m_zoom_value)
         {
-            this->setZoom(this->defaultZoomSizes.at(i));
+            this->setZoom(m_defaultZoomSizes.at(i));
             return;
         }
     }
 
-    this->setZoom(this->zoom * 1.25);
+    this->setZoom(m_zoom_value * 1.25);
 }
 
 void PictureItem::zoomOut()
 {
-    for (int i = 0; i < this->defaultZoomSizes.size(); ++i)
+    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
     {
-        if (this->defaultZoomSizes.at(i) >= this->zoom)
+        if (m_defaultZoomSizes.at(i) >= m_zoom_value)
         {
             if (i != 0)
             {
-                this->setZoom(this->defaultZoomSizes.at(i - 1));
+                this->setZoom(m_defaultZoomSizes.at(i - 1));
             }
             else
             {
-                this->setZoom(this->zoom / 1.25);
+                this->setZoom(m_zoom_value / 1.25);
             }
             return;
         }
     }
 
-    setZoom(this->zoom / 1.25);
+    setZoom(m_zoom_value / 1.25);
 }
 
 void PictureItem::fitToScreen()
@@ -670,7 +670,7 @@ void PictureItem::fitToScreen()
         return;
     }
 
-    QRect temp = QRect(this->boundingRect.x(), this->boundingRect.y(), this->boundingRect.width() / this->zoom, this->boundingRect.height() / this->zoom);
+    QRect temp = QRect(m_boundingRect.x(), m_boundingRect.y(), m_boundingRect.width() / m_zoom_value, m_boundingRect.height() / m_zoom_value);
 
     qreal x_ratio = (qreal)this->size().width() / temp.width();
     qreal y_ratio = (qreal)this->size().height() / temp.height();
@@ -696,7 +696,7 @@ void PictureItem::fitWidth()
         return;
     }
 
-    qreal tw = this->boundingRect.width() / this->zoom;
+    qreal tw = m_boundingRect.width() / m_zoom_value;
 
     qreal x_ratio = (qreal)this->size().width() / tw;
 
@@ -717,7 +717,7 @@ void PictureItem::fitHeight()
         return;
     }
 
-    qreal th = this->boundingRect.height() / this->zoom;
+    qreal th = m_boundingRect.height() / m_zoom_value;
 
     qreal y_ratio = (qreal)this->size().height() / th;
 
@@ -740,7 +740,7 @@ void PictureItem::updateLockMode()
         return;
     }
 
-    switch (this->lockMode)
+    switch (m_lockMode)
     {
     case LockMode::Autofit:
         this->fitToScreen();
@@ -765,40 +765,40 @@ void PictureItem::avoidOutOfScreen()
     }
 
     /* Am I lined out to the left? */
-    if (this->boundingRect.x() >= 0)
+    if (m_boundingRect.x() >= 0)
     {
-        this->boundingRect.moveLeft(0);
+        m_boundingRect.moveLeft(0);
     }
-    else if ((this->boundingRect.x() <= (this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2)))
+    else if ((m_boundingRect.x() <= (m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2)))
     {
-        if ((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2) <= 0)
+        if ((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2) <= 0)
         {
             /* I am too far to the left! */
-            this->boundingRect.moveLeft((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2));
+            m_boundingRect.moveLeft((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2));
         }
         else
         {
             /* I am too far to the right! */
-            this->boundingRect.moveLeft(0);
+            m_boundingRect.moveLeft(0);
         }
     }
 
     /* Am I lined out to the top? */
-    if (this->boundingRect.y() >= 0)
+    if (m_boundingRect.y() >= 0)
     {
-        this->boundingRect.moveTop(0);
+        m_boundingRect.moveTop(0);
     }
-    else if ((this->boundingRect.y() <= (this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2)))
+    else if ((m_boundingRect.y() <= (m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2)))
     {
-        if ((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2) <= 0)
+        if ((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2) <= 0)
         {
             /* I am too far to the top! */
-            this->boundingRect.moveTop((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2));
+            m_boundingRect.moveTop((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2));
         }
         else
         {
             /* I am too far to the bottom! */
-            this->boundingRect.moveTop(0);
+            m_boundingRect.moveTop(0);
         }
     }
 }
@@ -816,57 +816,57 @@ void PictureItem::drag(const QPoint &pt)
         return;
     }
 
-    if (this->dragging)
+    if (m_dragging)
     {
         /* Am I dragging it outside of the panel? */
-        if ((pt.x() - this->dragPoint.x() >= (this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2)) && (pt.x() - this->dragPoint.x() <= 0))
+        if ((pt.x() - m_point_drag.x() >= (m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2)) && (pt.x() - m_point_drag.x() <= 0))
         {
             /* No, everything is just fine */
-            this->boundingRect.moveLeft(pt.x() - this->dragPoint.x());
+            m_boundingRect.moveLeft(pt.x() - m_point_drag.x());
         }
-        else if ((pt.x() - this->dragPoint.x() > 0))
+        else if ((pt.x() - m_point_drag.x() > 0))
         {
             /* Now don't drag it out of the panel please */
-            this->boundingRect.moveLeft(0);
+            m_boundingRect.moveLeft(0);
         }
-        else if ((pt.x() - this->dragPoint.x() < (this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2)))
+        else if ((pt.x() - m_point_drag.x() < (m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2)))
         {
             /* I am dragging it out of my panel. How many pixels do I have left? */
-            if ((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2) <= 0)
+            if ((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2) <= 0)
             {
                 /* Make it fit perfectly */
-                this->boundingRect.moveLeft((this->boundingRect.width() - this->size().width()) - ((this->boundingRect.width() - this->size().width()) * 2));
+                m_boundingRect.moveLeft((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2));
             }
         }
 
         /* Am I dragging it outside of the panel? */
-        if (pt.y() - this->dragPoint.y() >= (this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2) && (pt.y() - this->dragPoint.y() <= 0))
+        if (pt.y() - m_point_drag.y() >= (m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2) && (pt.y() - m_point_drag.y() <= 0))
         {
             /* No, everything is just fine */
-            this->boundingRect.moveTop(pt.y() - this->dragPoint.y());
+            m_boundingRect.moveTop(pt.y() - m_point_drag.y());
         }
-        else if ((pt.y() - this->dragPoint.y() > 0))
+        else if ((pt.y() - m_point_drag.y() > 0))
         {
             /* Now don't drag it out of the panel please */
-            this->boundingRect.moveTop(0);
+            m_boundingRect.moveTop(0);
         }
-        else if (pt.y() - this->dragPoint.y() < (this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2))
+        else if (pt.y() - m_point_drag.y() < (m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2))
         {
             /* I am dragging it out of my panel. How many pixels do I have left? */
-            if ((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height() - this->size().height()) * 2) <= 0)
+            if ((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2) <= 0)
             {
                 /* Make it fit perfectly */
-                this->boundingRect.moveTop((this->boundingRect.height() - this->size().height()) - ((this->boundingRect.height()- this->size().height()) * 2));
+                m_boundingRect.moveTop((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height()- this->size().height()) * 2));
             }
         }
 
-        if (this->opengl)
+        if (m_opengl)
         {
-            this->imageDisplayGL->update();
+            m_imageDisplay_gl->update();
         }
         else
         {
-            this->imageDisplayRaster->update();
+            m_imageDisplay_raster->update();
         }
     }
 }
@@ -879,9 +879,9 @@ void PictureItem::beginDrag(const QPoint &pt)
     }
 
     /* Initial drag position */
-    this->dragPoint.setX(pt.x() - this->boundingRect.x());
-    this->dragPoint.setY(pt.y() - this->boundingRect.y());
-    this->dragging = true;
+    m_point_drag.setX(pt.x() - m_boundingRect.x());
+    m_point_drag.setY(pt.y() - m_boundingRect.y());
+    m_dragging = true;
     this->setCursor(Qt::ClosedHandCursor);
 }
 
@@ -892,7 +892,7 @@ void PictureItem::endDrag()
         return;
     }
 
-    this->dragging = false;
+    m_dragging = false;
     this->setCursor(Qt::OpenHandCursor);
 }
 

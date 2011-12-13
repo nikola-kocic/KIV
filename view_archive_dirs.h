@@ -1,8 +1,8 @@
 #ifndef VIEW_ARCHIVE_DIRS_H
 #define VIEW_ARCHIVE_DIRS_H
 
-#include <QtGui/qsortfilterproxymodel.h>
-#include <QtGui/qtreeview.h>
+#include <QSortFilterProxyModel>
+#include <QTreeView>
 
 class ViewArchiveDirs : public QTreeView
 {

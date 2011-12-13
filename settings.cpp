@@ -1,7 +1,7 @@
 #include "settings.h"
 
-#include <QtGui/qapplication.h>
-#include <QtGui/qimagereader.h>
+#include <QApplication>
+#include <QImageReader>
 
 
 Settings::Settings()
