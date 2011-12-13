@@ -12,33 +12,23 @@
 QImage PictureLoader::getImage(const FileInfo &info)
 {
 //    qDebug() << info.containerPath << info.imageFileName << info.thumbSize << info.zipImageFileName << info.zipPathToImage;
-    if (info.zipImageFileName.isEmpty())
+    if (info.isZip())
     {
-        if (info.imageFileName.isEmpty())
-        {
-            return QImage(0,0);
-        }
-        else
-        {
-            return PictureLoader::getImageFromFile(info);
-        }
+        return PictureLoader::getImageFromZip(info);
     }
     else
     {
-        if (info.containerPath.isEmpty())
-        {
-            return QImage(0, 0);
-        }
-        else
-        {
-            return PictureLoader::getImageFromZip(info);
-        }
+        return PictureLoader::getImageFromFile(info);
     }
 }
 
 QImage PictureLoader::getImageFromFile(const FileInfo &info)
 {
-    QImageReader image_reader(info.containerPath + "/" + info.imageFileName);
+    if (info.imageFileName.isEmpty())
+    {
+        return QImage(0,0);
+    }
+    QImageReader image_reader(info.getFilePath());
 //    qDebug() << image_reader.format();
     if (info.thumbSize != 0)
     {
@@ -49,6 +39,11 @@ QImage PictureLoader::getImageFromFile(const FileInfo &info)
 
 QImage PictureLoader::getImageFromZip(const FileInfo &info)
 {
+    if (info.containerPath.isEmpty())
+    {
+        return QImage(0, 0);
+    }
+
     QFile zipFile(info.containerPath);
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
@@ -58,7 +53,7 @@ QImage PictureLoader::getImageFromZip(const FileInfo &info)
     }
     zip.setFileNameCodec("UTF-8");
 
-    zip.setCurrentFile((info.zipPathToImage.compare("/") == 0 ? "" : info.zipPathToImage) + info.zipImageFileName);
+    zip.setCurrentFile(info.zipImagePath());
 
     QuaZipFile file(&zip);
     char c;

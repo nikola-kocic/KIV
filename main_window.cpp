@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     /* Start archiveDirsView */
     this->archiveDirsView = new ViewArchiveDirs();
-    this->archiveDirsView->hide();
+//    this->archiveDirsView->hide();
 
     splitterFiles->addWidget(this->archiveDirsView);
     splitterFiles->setSizes(QList<int>() << 100);
@@ -256,13 +256,14 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    Settings::Instance()->setLastPath(filesView->getCurrentFileInfo().containerPath);
+    Settings::Instance()->setLastPath(filesView->getCurrentFileInfo().getFilePath());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)
     {
+        qDebug() << "esc";
         if (this->lineEditPath->hasFocus())
         {
             //            if (lineEditPath->palette() != QApplication::palette())
@@ -341,6 +342,7 @@ void MainWindow::createActions()
     this->toggleFullscreenAct->setCheckable(true);
 
     this->exitFullscreenAct = new QAction(tr("Exit Full Screen"), this);
+    this->exitFullscreenAct->setEnabled(false);
     this->exitFullscreenAct->setShortcut(Qt::Key_Escape);
 
     this->togglePanelAct = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Show Side&bar"), this);
@@ -699,14 +701,7 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
 
     this->modelFiles->setPath(info);
 
-    if (info.zipPathToImage.isEmpty())
-    {
-        this->archiveDirsView->hide();
-    }
-    else
-    {
-        this->archiveDirsView->show();
-    }
+    archiveDirsView->setVisible(info.isZip());
 
     this->filesView->setCurrentDirectory(info);
 
@@ -739,6 +734,7 @@ void MainWindow::togglePanel(bool value)
 
 void MainWindow::toggleFullscreen(bool value)
 {
+    this->exitFullscreenAct->setEnabled(value);
     this->togglePanelAct->setChecked(!value);
     this->menuBar()->setVisible(!value);
 //    this->exitFullscreenAct->setEnabled(value);
@@ -779,19 +775,7 @@ void MainWindow::open()
 bool MainWindow::saveAs()
 {
     FileInfo info = this->filesView->getCurrentFileInfo();
-    QString tempFileName;
-
-
-    if (info.zipImageFileName.isEmpty())
-    {
-        tempFileName = info.imageFileName;
-    }
-    else
-    {
-        tempFileName = info.zipImageFileName;
-    }
-
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), tempFileName);
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), info.getImageFileName());
     if (fileName.isEmpty())
     {
         return false;
@@ -801,15 +785,15 @@ bool MainWindow::saveAs()
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if (info.zipImageFileName.isEmpty())
+    if (info.isZip())
     {
-        QFile::copy(info.containerPath + "/" + info.imageFileName, fileName);
+        JlCompress::extractFile(info.containerPath, info.zipImagePath(), fileName);
     }
     else
     {
-        JlCompress::extractFile(info.containerPath, (info.zipPathToImage.compare("/") == 0 ? "" : info.zipPathToImage) + info.zipImageFileName, fileName);
+        QFile::copy(info.getFilePath(), fileName);
     }
-    PictureLoader::getImage(this->filesView->getCurrentFileInfo()).save(fileName, "PNG");
+//    PictureLoader::getImage(info).save(fileName, "PNG");
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif

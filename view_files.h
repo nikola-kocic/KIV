@@ -3,7 +3,6 @@
 
 #include "helper.h"
 #include "picture_loader.h"
-#include "model_files.h"
 
 #include <QtGui/qlistview.h>
 #include <QtGui/qsortfilterproxymodel.h>
@@ -19,8 +18,8 @@ public:
     void setModel(QAbstractItemModel *model);
     void setViewMode(ViewMode mode);
     void setCurrentDirectory(const FileInfo &info);
-    QModelIndex getIndexFromProxy(const QModelIndex &index);
-    FileInfo getCurrentFileInfo();
+    QModelIndex getIndexFromProxy(const QModelIndex &index) const;
+    FileInfo getCurrentFileInfo() const;
 
 public slots:
     void pageNext();

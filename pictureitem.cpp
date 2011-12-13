@@ -51,7 +51,7 @@ void PictureItem::initPictureItem()
     }
 }
 
-bool PictureItem::getHardwareAcceleration()
+bool PictureItem::getHardwareAcceleration() const
 {
     return this->opengl;
 }
@@ -77,7 +77,7 @@ void PictureItem::setHardwareAcceleration(bool b)
 }
 
 
-bool PictureItem::isPixmapNull()
+bool PictureItem::isPixmapNull() const
 {
     return this->pixmapNull;
 }
@@ -88,7 +88,7 @@ void PictureItem::setPixmapNull(bool value)
 }
 
 
-qreal PictureItem::getRotation()
+qreal PictureItem::getRotation() const
 {
     return this->rotation;
 }
@@ -150,7 +150,7 @@ void PictureItem::setZoom(qreal z)
 }
 
 
-LockMode::Mode PictureItem::getLockMode()
+LockMode::Mode PictureItem::getLockMode() const
 {
     return this->lockMode;
 }
@@ -162,7 +162,7 @@ void PictureItem::setLockMode(LockMode::Mode mode)
 }
 
 
-QList<qreal> PictureItem::getDefaultZoomSizes()
+QList<qreal> PictureItem::getDefaultZoomSizes() const
 {
     return this->defaultZoomSizes;
 }
@@ -319,6 +319,12 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
         case MiddleClick::NextPage:
             emit pageNext();
             break;
+
+//        case MiddleClick::Close:
+//            break;
+
+//        case MiddleClick::Boss:
+//            break;
 
 //        case MiddleClick::FollowMouse:
 

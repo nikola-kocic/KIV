@@ -1,99 +1,103 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "fileinfo.h"
+
 #include <QtCore/qsettings.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qstringlist.h>
 
 namespace MiddleClick
 {
-    enum Action {
-        None = 0,
-        Fullscreen = 1,
-        AutoFit = 2,
-        ZoomReset = 3,
-        NextPage = 4
-//        ,FollowMouse
-    };
+enum Action {
+    None = 0,
+    Fullscreen = 1,
+    AutoFit = 2,
+    ZoomReset = 3,
+    NextPage = 4
+    //        Close = 5,
+    //        Boss = 6
+    //        ,FollowMouse
+};
 }
 
 namespace Wheel
 {
-    enum Action {
-        None,
-        Scroll,
-        ChangePage,
-        Zoom
-    };
+enum Action {
+    None,
+    Scroll,
+    ChangePage,
+    Zoom
+};
 }
 
 class Settings{
 
 public:
-  static Settings  *Instance();
+    static Settings  *Instance();
 
-  MiddleClick::Action getMiddleClick();
-  void setMiddleClick(int v);
+    MiddleClick::Action getMiddleClick() const;
+    void setMiddleClick(int);
 
-  Wheel::Action getWheel();
-  void setWheel(int v);
+    Wheel::Action getWheel() const;
+    void setWheel(int);
 
-  bool getScrollPageByWidth();
-  void setScrollPageByWidth(bool b);
+    bool getScrollPageByWidth() const;
+    void setScrollPageByWidth(bool);
 
-  bool getRightToLeft();
-  void setRightToLeft(bool b);
+    bool getRightToLeft() const;
+    void setRightToLeft(bool);
 
-  int getPageChangeTimeout();
-  void setPageChangeTimeout(int v);
+    int getPageChangeTimeout() const;
+    void setPageChangeTimeout(int);
 
-  bool getLargeIcons();
-  void setLargeIcons(bool b);
+    bool getLargeIcons() const;
+    void setLargeIcons(bool);
 
-  QString getLastPath();
-  void setLastPath(QString s);
+    QString getLastPath() const;
+    void setLastPath(QString);
 
-  bool getJumpToEnd();
-  void setJumpToEnd(bool b);
+    bool getJumpToEnd() const;
+    void setJumpToEnd(bool);
 
-  bool getHardwareAcceleration();
-  void setHardwareAcceleration(bool b);
+    bool getHardwareAcceleration() const;
+    void setHardwareAcceleration(bool);
 
-  QStringList getFiltersImage();
-  QStringList getFiltersArchive();
+    QStringList getFiltersImage() const;
+    QStringList getFiltersArchive() const;
 
-  int getThumbnailSize();
-  void setThumbnailSize(int v);
+    int getThumbnailSize() const;
+    void setThumbnailSize(int);
 
-  bool getScrollChangesPage();
-  void setScrollChangesPage(bool b);
+    bool getScrollChangesPage() const;
+    void setScrollChangesPage(bool);
 
 
 private:
 
-/* Make your constructors private */
-        Settings();
-        Settings(const Settings&);
-        Settings& operator= (const Settings&);
+    /* Make your constructors private */
+    Settings();
+    Settings(const Settings&);
+    Settings& operator= (const Settings&);
 
-        QSettings *settings;
+    QSettings *m_settings;
 
-        MiddleClick::Action middleClick;
-        Wheel::Action wheel;
+    MiddleClick::Action m_middleClick;
+    Wheel::Action m_wheel;
 
-        bool largeIcons;
-        QString LastPath;
-        QStringList filters_image;
-        QStringList filters_archive;
+    bool m_largeIcons;
+    QString m_lastPath;
+    QStringList m_filters_image;
+    QStringList m_filters_archive;
 
-        bool scrollPageByWidth;
-        bool rightToLeft;
-        int pageChangeTimeout;
-        bool jumpToEnd;
-        bool scrollChangesPage;
+    bool m_scrollPageByWidth;
+    bool m_rightToLeft;
+    int m_pageChangeTimeout;
+    bool m_jumpToEnd;
+    bool m_scrollChangesPage;
 
-        bool HardwareAcceleration;
-        int thumbSize;
+    bool m_hardwareAcceleration;
+    int m_thumbSize;
 };
 
 

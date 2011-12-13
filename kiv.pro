@@ -21,7 +21,8 @@ SOURCES += \
     teximg.cpp \
     picture_loader.cpp \
     model_files.cpp \
-    helper.cpp
+    helper.cpp \
+    fileinfo.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -47,7 +48,8 @@ HEADERS += \
     teximg.h \
     picture_loader.h \
     model_files.h \
-    helper.h
+    helper.h \
+    fileinfo.h
 
 RESOURCES += \
     kiv.qrc
@@ -69,5 +71,7 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
+
+
 
 

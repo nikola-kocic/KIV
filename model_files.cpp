@@ -12,7 +12,7 @@ void FilesModel::setPath(const FileInfo &info)
 {
     this->clear();
 
-    if (info.zipPathToImage.isEmpty())
+    if (!info.isZip())
     {
         QDir dir(info.containerPath);
 
@@ -108,7 +108,6 @@ void FilesModel::setPath(const FileInfo &info)
         }
 
         this->invisibleRootItem()->appendRow(root);
-
     }
 }
 

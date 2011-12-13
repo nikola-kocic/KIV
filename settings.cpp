@@ -3,29 +3,30 @@
 #include <QtGui/qapplication.h>
 #include <QtGui/qimagereader.h>
 
+
 Settings::Settings()
 {
-    this->settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
+    m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
 
-    this->filters_archive << "zip" << "cbz";
+    m_filters_archive << "zip" << "cbz";
     for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
     {
-        this->filters_image.append(QImageReader::supportedImageFormats().at(i));
+        m_filters_image.append(QImageReader::supportedImageFormats().at(i));
     }
 
-    this->middleClick = (MiddleClick::Action)settings->value("Mouse/MiddleClick", 1).toInt();
-    this->wheel = (Wheel::Action)settings->value("Mouse/Wheel", 1).toInt();
+    m_middleClick = (MiddleClick::Action)m_settings->value("Mouse/MiddleClick", 1).toInt();
+    m_wheel = (Wheel::Action)m_settings->value("Mouse/Wheel", 1).toInt();
 
-    this->jumpToEnd           = this->settings->value("Behavior/JumpToBottom", false).toBool();
-    this->scrollPageByWidth   = this->settings->value("Behavior/ScrollPageByWidth", false).toBool();
-    this->rightToLeft         = this->settings->value("Behavior/RightToLeft", false).toBool();
-    this->pageChangeTimeout   = this->settings->value("Behavior/PageChangeTimeout", 300).toInt();
-    this->scrollChangesPage   = this->settings->value("Behavior/ScrollChangesPage", true).toBool();
+    m_jumpToEnd           = m_settings->value("Behavior/JumpToBottom", false).toBool();
+    m_scrollPageByWidth   = m_settings->value("Behavior/ScrollPageByWidth", false).toBool();
+    m_rightToLeft         = m_settings->value("Behavior/RightToLeft", false).toBool();
+    m_pageChangeTimeout   = m_settings->value("Behavior/PageChangeTimeout", 300).toInt();
+    m_scrollChangesPage   = m_settings->value("Behavior/ScrollChangesPage", true).toBool();
 
-    this->largeIcons          = this->settings->value("Interface/LargeIcons", false).toBool();
-    this->LastPath            = this->settings->value("Interface/LastPath", "").toString();
-    this->HardwareAcceleration= this->settings->value("Interface/HardwareAcceleration", false).toBool();
-    this->thumbSize           = this->settings->value("Interface/ThumbnailSize", 200).toInt();
+    m_largeIcons          = m_settings->value("Interface/LargeIcons", false).toBool();
+    m_lastPath            = m_settings->value("Interface/LastPath", "").toString();
+    m_hardwareAcceleration= m_settings->value("Interface/HardwareAcceleration", false).toBool();
+    m_thumbSize           = m_settings->value("Interface/ThumbnailSize", 200).toInt();
 }
 
 Settings *Settings::Instance()
@@ -35,136 +36,136 @@ Settings *Settings::Instance()
 }
 
 
-MiddleClick::Action Settings::getMiddleClick()
+MiddleClick::Action Settings::getMiddleClick() const
 {
-    return this->middleClick;
+    return m_middleClick;
 }
 
 void Settings::setMiddleClick(int v)
 {
-    this->middleClick = (MiddleClick::Action)v;
-    settings->setValue("Mouse/MiddleClick", v);
+    m_middleClick = (MiddleClick::Action)v;
+    m_settings->setValue("Mouse/MiddleClick", v);
 }
 
 
-Wheel::Action Settings::getWheel()
+Wheel::Action Settings::getWheel() const
 {
-    return this->wheel;
+    return m_wheel;
 }
 
 void Settings::setWheel(int v)
 {
-    this->wheel = (Wheel::Action)v;
-    this->settings->setValue("Mouse/Wheel", v);
+    m_wheel = (Wheel::Action)v;
+    m_settings->setValue("Mouse/Wheel", v);
 }
 
-bool Settings::getScrollPageByWidth()
+bool Settings::getScrollPageByWidth() const
 {
-    return this->scrollPageByWidth;
+    return m_scrollPageByWidth;
 }
 
 void Settings::setScrollPageByWidth(bool b)
 {
-    this->scrollPageByWidth = b;
-    this->settings->setValue("Behavior/ScrollPageByWidth", this->scrollPageByWidth);
+    m_scrollPageByWidth = b;
+    m_settings->setValue("Behavior/ScrollPageByWidth", m_scrollPageByWidth);
 }
 
-bool Settings::getRightToLeft()
+bool Settings::getRightToLeft() const
 {
-    return this->rightToLeft;
+    return m_rightToLeft;
 }
 
 void Settings::setRightToLeft(bool b)
 {
-    this->rightToLeft = b;
-    this->settings->setValue("Behavior/RightToLeft", this->rightToLeft);
+    m_rightToLeft = b;
+    m_settings->setValue("Behavior/RightToLeft", m_rightToLeft);
 }
 
-int Settings::getPageChangeTimeout()
+int Settings::getPageChangeTimeout() const
 {
-    return pageChangeTimeout;
+    return m_pageChangeTimeout;
 }
 
 void Settings::setPageChangeTimeout(int v)
 {
-    this->pageChangeTimeout = v;
-    this->settings->setValue("Behavior/PageChangeTimeout", this->pageChangeTimeout);
+    m_pageChangeTimeout = v;
+    m_settings->setValue("Behavior/PageChangeTimeout", m_pageChangeTimeout);
 }
 
-bool Settings::getLargeIcons()
+bool Settings::getLargeIcons() const
 {
-    return this->largeIcons;
+    return m_largeIcons;
 }
 
 void Settings::setLargeIcons(bool b)
 {
-    this->largeIcons = b;
-    this->settings->setValue("Interface/LargeIcons", this->largeIcons);
+    m_largeIcons = b;
+    m_settings->setValue("Interface/LargeIcons", m_largeIcons);
 }
 
-QString Settings::getLastPath()
+QString Settings::getLastPath() const
 {
-    return this->LastPath;
+    return m_lastPath;
 }
 
 void Settings::setLastPath(QString s)
 {
-    this->LastPath = s;
-    this->settings->setValue("Interface/LastPath", this->LastPath);
+    m_lastPath = s;
+    m_settings->setValue("Interface/LastPath", m_lastPath);
 }
 
-bool Settings::getJumpToEnd()
+bool Settings::getJumpToEnd() const
 {
-    return this->jumpToEnd;
+    return m_jumpToEnd;
 }
 
 void Settings::setJumpToEnd(bool b)
 {
-    this->jumpToEnd = b;
-    this->settings->setValue("Behavior/JumpToBottom", this->jumpToEnd);
+    m_jumpToEnd = b;
+    m_settings->setValue("Behavior/JumpToBottom", m_jumpToEnd);
 }
 
-bool Settings::getHardwareAcceleration()
+bool Settings::getHardwareAcceleration() const
 {
-    return this->HardwareAcceleration;
+    return m_hardwareAcceleration;
 }
 
 void Settings::setHardwareAcceleration(bool b)
 {
-    this->HardwareAcceleration = b;
-    this->settings->setValue("Interface/HardwareAcceleration", this->HardwareAcceleration);
+    m_hardwareAcceleration = b;
+    m_settings->setValue("Interface/HardwareAcceleration", m_hardwareAcceleration);
 }
 
 
-QStringList Settings::getFiltersImage()
+QStringList Settings::getFiltersImage() const
 {
-    return this->filters_image;
+    return m_filters_image;
 }
 
-QStringList Settings::getFiltersArchive()
+QStringList Settings::getFiltersArchive() const
 {
-    return this->filters_archive;
+    return m_filters_archive;
 }
 
-int Settings::getThumbnailSize()
+int Settings::getThumbnailSize() const
 {
-    return this->thumbSize;
+    return m_thumbSize;
 }
 
 void Settings::setThumbnailSize(int v)
 {
-    this->thumbSize = v;
-    this->settings->setValue("Interface/ThumbnailSize", this->thumbSize);
+    m_thumbSize = v;
+    m_settings->setValue("Interface/ThumbnailSize", m_thumbSize);
 }
 
-bool Settings::getScrollChangesPage()
+bool Settings::getScrollChangesPage() const
 {
-    return this->scrollChangesPage;
+    return m_scrollChangesPage;
 }
 
 void Settings::setScrollChangesPage(bool b)
 {
-    this->scrollChangesPage = b;
-    this->settings->setValue("Behavior/ScrollChangesPage", this->scrollChangesPage);
+    m_scrollChangesPage = b;
+    m_settings->setValue("Behavior/ScrollChangesPage", m_scrollChangesPage);
 
 }

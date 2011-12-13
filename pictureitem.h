@@ -25,19 +25,19 @@ public:
 
     void setZoom(qreal z);
     qreal getZoom();
-    QList<qreal> getDefaultZoomSizes();
+    QList<qreal> getDefaultZoomSizes() const;
 
     void setRotation(qreal r);
-    qreal getRotation();
+    qreal getRotation() const;
 
     void setLockMode(LockMode::Mode);
-    LockMode::Mode getLockMode();
+    LockMode::Mode getLockMode() const;
 
     void setHardwareAcceleration(bool b);
-    bool getHardwareAcceleration();
+    bool getHardwareAcceleration() const;
 
     void setPixmap(const FileInfo &info);
-    bool isPixmapNull();
+    bool isPixmapNull() const;
 
 
 private:

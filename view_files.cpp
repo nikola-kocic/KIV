@@ -28,7 +28,7 @@ ViewFiles::ViewFiles(QWidget *parent)
     connect(this->watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
 }
 
-FileInfo ViewFiles::getCurrentFileInfo()
+FileInfo ViewFiles::getCurrentFileInfo() const
 {
     return this->currentInfo;
 }
@@ -39,7 +39,7 @@ void ViewFiles::setModel(QAbstractItemModel *model)
     QListView::setModel(this->proxy);
 }
 
-QModelIndex ViewFiles::getIndexFromProxy(const QModelIndex &index)
+QModelIndex ViewFiles::getIndexFromProxy(const QModelIndex &index) const
 {
     return this->proxy->mapToSource(index);
 }
@@ -64,14 +64,15 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
         return;
     }
 
-    this->currentInfo.zipPathToImage.clear();
+    QString pathToImage = "";
     QModelIndex cindex = index;
     while (cindex.parent().isValid())
     {
-        this->currentInfo.zipPathToImage = cindex.data(Qt::DisplayRole).toString() + "/" + this->currentInfo.zipPathToImage;
+        pathToImage = cindex.data(Qt::DisplayRole).toString() + "/" + pathToImage;
         cindex = cindex.parent();
     }
 
+    this->currentInfo.zipPathToImage = pathToImage;
     this->setRootIndex(this->proxy->mapFromSource(index));
 
     this->startShowingThumbnails();
@@ -93,10 +94,16 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
         this->currentInfo.zipImageFileName.clear();
         this->currentInfo.zipPathToImage.clear();
     }
-    if (type == TYPE_ARCHIVE_FILE)
+    else if (type == TYPE_ARCHIVE_FILE)
     {
         this->currentInfo.zipImageFileName = filename;
     }
+    else
+    {
+        this->currentInfo.zipImageFileName.clear();
+        this->currentInfo.imageFileName.clear();
+    }
+
 
     FileInfo info = this->currentInfo;
     info.thumbSize = 0;
@@ -152,7 +159,7 @@ void ViewFiles::startShowingThumbnails()
         {
             info = this->currentInfo;
 
-            if (this->currentInfo.zipPathToImage.isEmpty())
+            if (!this->currentInfo.isZip())
             {
                 info.imageFileName = this->proxy->data(this->proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
