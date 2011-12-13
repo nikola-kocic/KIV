@@ -19,16 +19,11 @@ public:
 
 private slots:
     void on_buttonBox_accepted();
-
     void on_cbScrollChangesPage_clicked(bool checked);
-
     void on_ddWheel_currentIndexChanged(int index);
 
 private:
     Ui::Settings_Dialog *ui;
-
-    QVector<Wheel::Action> ddWheelOrder;
-    QVector<MiddleClick::Action> ddMidleClickOrder;
 };
 
 #endif // SETTINGS_DIALOG_H

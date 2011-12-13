@@ -79,6 +79,7 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
+    this->scrollTo(current);
     int type = current.data(ROLE_TYPE).toInt();
     QString filename = current.data(Qt::DisplayRole).toString();
 

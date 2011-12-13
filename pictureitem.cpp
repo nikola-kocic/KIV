@@ -347,6 +347,13 @@ void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
 /* End Region Drag */
 
 
+void PictureItem::mouseDoubleClickEvent(QMouseEvent *ev)
+{
+    if (ev->buttons() == Qt::LeftButton)
+    {
+        emit(toggleFullscreen());
+    }
+}
 
 void PictureItem::resizeEvent(QResizeEvent *)
 {

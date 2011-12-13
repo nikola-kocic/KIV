@@ -13,30 +13,19 @@ Settings::Settings()
         this->filters_image.append(QImageReader::supportedImageFormats().at(i));
     }
 
-    this->middleClickHash["none"]         = MiddleClick::None;
-    this->middleClickHash["fullscreen"]   = MiddleClick::Fullscreen;
-    this->middleClickHash["autofit"]      = MiddleClick::AutoFit;
-    this->middleClickHash["zoomreset"]    = MiddleClick::ZoomReset;
-//    this->middleClickHash["followmouse"]  = MiddleClick::FollowMouse;
-    this->middleClickHash["nextpage"]     = MiddleClick::NextPage;
-    this->middleClick = getMiddleClickFromString(settings->value("Mouse/MiddleClick", "fullscreen").toString());
+    this->middleClick = (MiddleClick::Action)settings->value("Mouse/MiddleClick", 1).toInt();
+    this->wheel = (Wheel::Action)settings->value("Mouse/Wheel", 1).toInt();
 
-    this->wheelHash["none"]       = Wheel::None;
-    this->wheelHash["scroll"]     = Wheel::Scroll;
-    this->wheelHash["changepage"] = Wheel::ChangePage;
-    this->wheelHash["zoom"]       = Wheel::Zoom;
-    this->wheel = getWheelFromString(settings->value("Mouse/Wheel", "scroll").toString());
-
-    this->jumpToEnd           = this->settings->value("Behavior/JumpToBottom",         false).toBool();
-    this->scrollPageByWidth   = this->settings->value("Behavior/ScrollPageByWidth",    false).toBool();
-    this->rightToLeft         = this->settings->value("Behavior/RightToLeft",          false).toBool();
-    this->pageChangeTimeout   = this->settings->value("Behavior/PageChangeTimeout",    "300").toInt();
-    this->scrollChangesPage   = this->settings->value("Behavior/ScrollChangesPage",    true).toBool();
+    this->jumpToEnd           = this->settings->value("Behavior/JumpToBottom", false).toBool();
+    this->scrollPageByWidth   = this->settings->value("Behavior/ScrollPageByWidth", false).toBool();
+    this->rightToLeft         = this->settings->value("Behavior/RightToLeft", false).toBool();
+    this->pageChangeTimeout   = this->settings->value("Behavior/PageChangeTimeout", 300).toInt();
+    this->scrollChangesPage   = this->settings->value("Behavior/ScrollChangesPage", true).toBool();
 
     this->largeIcons          = this->settings->value("Interface/LargeIcons", false).toBool();
     this->LastPath            = this->settings->value("Interface/LastPath", "").toString();
     this->HardwareAcceleration= this->settings->value("Interface/HardwareAcceleration", false).toBool();
-    this->thumbSize           = this->settings->value("Interface/ThumbnailSize", "200").toInt();
+    this->thumbSize           = this->settings->value("Interface/ThumbnailSize", 200).toInt();
 }
 
 Settings *Settings::Instance()
@@ -51,41 +40,22 @@ MiddleClick::Action Settings::getMiddleClick()
     return this->middleClick;
 }
 
-void Settings::setMiddleClick(MiddleClick::Action m)
+void Settings::setMiddleClick(int v)
 {
-    this->middleClick = m;
-    settings->setValue("Mouse/MiddleClick", this->getStringFromMiddleClick(this->middleClick));
+    this->middleClick = (MiddleClick::Action)v;
+    settings->setValue("Mouse/MiddleClick", v);
 }
 
-MiddleClick::Action Settings::getMiddleClickFromString(QString s)
-{
-    return this->middleClickHash.value(s, MiddleClick::None);
-}
-
-QString Settings::getStringFromMiddleClick(MiddleClick::Action m)
-{
-    return this->middleClickHash.key(m, "none");
-}
 
 Wheel::Action Settings::getWheel()
 {
     return this->wheel;
 }
 
-void Settings::setWheel(Wheel::Action w)
+void Settings::setWheel(int v)
 {
-    this->wheel = w;
-    this->settings->setValue("Mouse/Wheel", this->getStringFromWheel(this->wheel));
-}
-
-Wheel::Action Settings::getWheelFromString(QString s)
-{
-    return this->wheelHash.value(s, Wheel::None);
-}
-
-QString Settings::getStringFromWheel(Wheel::Action w)
-{
-    return this->wheelHash.key(w, "none");
+    this->wheel = (Wheel::Action)v;
+    this->settings->setValue("Mouse/Wheel", v);
 }
 
 bool Settings::getScrollPageByWidth()

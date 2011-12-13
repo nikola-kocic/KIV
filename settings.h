@@ -8,11 +8,11 @@
 namespace MiddleClick
 {
     enum Action {
-        None,
-        Fullscreen,
-        AutoFit,
-        ZoomReset,
-        NextPage
+        None = 0,
+        Fullscreen = 1,
+        AutoFit = 2,
+        ZoomReset = 3,
+        NextPage = 4
 //        ,FollowMouse
     };
 }
@@ -33,10 +33,10 @@ public:
   static Settings  *Instance();
 
   MiddleClick::Action getMiddleClick();
-  void setMiddleClick(MiddleClick::Action m);
+  void setMiddleClick(int v);
 
   Wheel::Action getWheel();
-  void setWheel(Wheel::Action w);
+  void setWheel(int v);
 
   bool getScrollPageByWidth();
   void setScrollPageByWidth(bool b);
@@ -77,13 +77,6 @@ private:
         Settings& operator= (const Settings&);
 
         QSettings *settings;
-
-        QHash<QString, MiddleClick::Action> middleClickHash;
-        QHash<QString, Wheel::Action> wheelHash;
-        MiddleClick::Action getMiddleClickFromString(QString s);
-        QString getStringFromMiddleClick(MiddleClick::Action a);
-        Wheel::Action getWheelFromString(QString s);
-        QString getStringFromWheel(Wheel::Action w);
 
         MiddleClick::Action middleClick;
         Wheel::Action wheel;

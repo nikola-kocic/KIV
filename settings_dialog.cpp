@@ -8,98 +8,67 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Settings_Dialog)
 {
-    this->ui->setupUi(this);
+    ui->setupUi(this);
 
-    QHash<QString, MiddleClick::Action> ddMiddleClickHash;
-    ddMiddleClickHash["<None>"]       = MiddleClick::None;
-    ddMiddleClickHash["Full Screen"]  = MiddleClick::Fullscreen;
-    ddMiddleClickHash["Autofit"]      = MiddleClick::AutoFit;
-    ddMiddleClickHash["Actual Size"]  = MiddleClick::ZoomReset;
-//    ddMiddleClickHash["Follow Mouse"] = MiddleClick::FollowMouse;
-    ddMiddleClickHash["Next Page"]    = MiddleClick::NextPage;
+    ui->ddMiddleClick->addItem(tr("<None>"),      MiddleClick::None);
+    ui->ddMiddleClick->addItem(tr("Full Screen"), MiddleClick::Fullscreen);
+    ui->ddMiddleClick->addItem(tr("Autofit"),     MiddleClick::AutoFit);
+    ui->ddMiddleClick->addItem(tr("Actual Size"), MiddleClick::ZoomReset);
+    ui->ddMiddleClick->addItem(tr("Next Page"),   MiddleClick::NextPage);
 
-    this->ddMidleClickOrder << MiddleClick::None
-                            << MiddleClick::Fullscreen
-                            << MiddleClick::AutoFit
-                            << MiddleClick::ZoomReset
-                            << MiddleClick::NextPage
-//                          << MiddleClick::FollowMouse
-                               ;
-
-    for (int i = 0; i < this->ddMidleClickOrder.size(); ++i)
-    {
-        this->ui->ddMiddleClick->addItem(ddMiddleClickHash.key(this->ddMidleClickOrder.at(i)));
-        if (this->ddMidleClickOrder.at(i) == Settings::Instance()->getMiddleClick())
-        {
-            this->ui->ddMiddleClick->setCurrentIndex(i);
-        }
-    }
+    ui->ddMiddleClick->setCurrentIndex(ui->ddMiddleClick->findData(Settings::Instance()->getMiddleClick()));
 
 
-    QHash<QString, Wheel::Action> ddWheelHash;
-    ddWheelHash["<None>"]               = Wheel::None;
-    ddWheelHash["Scroll Page"]          = Wheel::Scroll;
-    ddWheelHash["Next / Previous Page"] = Wheel::ChangePage;
-    ddWheelHash["Zoom In / Out"]        = Wheel::Zoom;
+    ui->ddWheel->addItem(tr("<None>"),               Wheel::None);
+    ui->ddWheel->addItem(tr("Scroll Page"),          Wheel::Scroll);
+    ui->ddWheel->addItem(tr("Next / Previous Page"), Wheel::ChangePage);
+    ui->ddWheel->addItem(tr("Zoom In / Out"),        Wheel::Zoom);
 
-    this->ddWheelOrder << Wheel::None
-                       << Wheel::Scroll
-                       << Wheel::ChangePage
-                       << Wheel::Zoom
-                          ;
+    ui->ddWheel->setCurrentIndex(ui->ddWheel->findData(Settings::Instance()->getWheel()));
 
-    for (int i = 0; i < this->ddWheelOrder.size(); ++i)
-    {
-        this->ui->ddWheel->addItem(ddWheelHash.key(this->ddWheelOrder.at(i)));
-        if (this->ddWheelOrder.at(i) == Settings::Instance()->getWheel())
-        {
-            this->ui->ddWheel->setCurrentIndex(i);
-        }
-    }
+    ui->cbScrollByWidth->setChecked(Settings::Instance()->getScrollPageByWidth());
+    ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
+    ui->cbScrollChangesPage->setChecked(Settings::Instance()->getScrollChangesPage());
+    ui->sbWaitTime->setValue(Settings::Instance()->getPageChangeTimeout());
+    ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
 
-    this->ui->cbScrollByWidth->setChecked(Settings::Instance()->getScrollPageByWidth());
-    this->ui->cbRTL->setChecked(Settings::Instance()->getRightToLeft());
-    this->ui->cbScrollChangesPage->setChecked(Settings::Instance()->getScrollChangesPage());
-    this->ui->sbWaitTime->setValue(Settings::Instance()->getPageChangeTimeout());
-    this->ui->cbJumpToEnd->setChecked(Settings::Instance()->getJumpToEnd());
+    ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
+    ui->sbThumbSize->setValue(Settings::Instance()->getThumbnailSize());
 
-    this->ui->cbHardwareAcceleration->setChecked(Settings::Instance()->getHardwareAcceleration());
-    this->ui->sbThumbSize->setValue(Settings::Instance()->getThumbnailSize());
-
-    on_cbScrollChangesPage_clicked(this->ui->cbScrollChangesPage->isChecked());
+    on_cbScrollChangesPage_clicked(ui->cbScrollChangesPage->isChecked());
 }
 
 void Settings_Dialog::on_buttonBox_accepted()
 {
-    Settings::Instance()->setMiddleClick(this->ddMidleClickOrder.at(this->ui->ddMiddleClick->currentIndex()));
-    Settings::Instance()->setWheel(this->ddWheelOrder.at(this->ui->ddWheel->currentIndex()));
+    Settings::Instance()->setMiddleClick(ui->ddMiddleClick->itemData(ui->ddMiddleClick->currentIndex()).toInt());
+    Settings::Instance()->setWheel(ui->ddWheel->itemData(ui->ddWheel->currentIndex()).toInt());
 
-    Settings::Instance()->setScrollPageByWidth(this->ui->cbScrollByWidth->isChecked());
-    Settings::Instance()->setRightToLeft(this->ui->cbRTL->isChecked());
-    Settings::Instance()->setScrollChangesPage(this->ui->cbScrollChangesPage->isChecked());
-    Settings::Instance()->setJumpToEnd(this->ui->cbJumpToEnd->isChecked());
-    Settings::Instance()->setPageChangeTimeout(this->ui->sbWaitTime->value());
+    Settings::Instance()->setScrollPageByWidth(ui->cbScrollByWidth->isChecked());
+    Settings::Instance()->setRightToLeft(ui->cbRTL->isChecked());
+    Settings::Instance()->setScrollChangesPage(ui->cbScrollChangesPage->isChecked());
+    Settings::Instance()->setJumpToEnd(ui->cbJumpToEnd->isChecked());
+    Settings::Instance()->setPageChangeTimeout(ui->sbWaitTime->value());
 
-    Settings::Instance()->setHardwareAcceleration(this->ui->cbHardwareAcceleration->isChecked());
-    Settings::Instance()->setThumbnailSize(this->ui->sbThumbSize->value());
+    Settings::Instance()->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
+    Settings::Instance()->setThumbnailSize(ui->sbThumbSize->value());
 }
 
 Settings_Dialog::~Settings_Dialog()
 {
-    delete this->ui;
+    delete ui;
 }
 
 void Settings_Dialog::on_cbScrollChangesPage_clicked(bool checked)
 {
-    this->ui->sbWaitTime->setEnabled(checked);
-    this->ui->labelWaitTime->setEnabled(checked);
-    this->ui->cbJumpToEnd->setEnabled(checked);
+    ui->sbWaitTime->setEnabled(checked);
+    ui->labelWaitTime->setEnabled(checked);
+    ui->cbJumpToEnd->setEnabled(checked);
 }
 
 
 void Settings_Dialog::on_ddWheel_currentIndexChanged(int index)
 {
-    if (this->ddWheelOrder.at(index) != Wheel::Scroll)
+    if (ui->ddWheel->itemData(index).toInt() != Wheel::Scroll)
     {
         ui->groupBox->setEnabled(false);
     }

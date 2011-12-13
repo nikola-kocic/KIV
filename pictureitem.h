@@ -23,18 +23,22 @@ class PictureItem : public QWidget
 public:
     PictureItem(bool opengl, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    bool isPixmapNull();
     void setZoom(qreal z);
     qreal getZoom();
+    QList<qreal> getDefaultZoomSizes();
+
     void setRotation(qreal r);
     qreal getRotation();
+
     void setLockMode(LockMode::Mode);
     LockMode::Mode getLockMode();
+
     void setHardwareAcceleration(bool b);
     bool getHardwareAcceleration();
+
     void setPixmap(const FileInfo &info);
-    QList<qreal> getDefaultZoomSizes();
-    void loadTextures(QList<TexIndex> indexes);
+    bool isPixmapNull();
+
 
 private:
     class PictureItemRaster : public QWidget
@@ -90,29 +94,26 @@ private:
 
     };
 
+    void initPictureItem();
+    void start_timerScrollPage();
+    void afterPixmapLoad();
+    void ScrollPageHorizontal(int value);
+    void ScrollPageVertical(int value);
+
     PictureItemGL *imageDisplayGL;
     PictureItemRaster *imageDisplayRaster;
     QFutureWatcher< QImage > *imageLoader;
     QFutureWatcher< QImage > *textureLoader;
     int returnTexCount;
     bool opengl;
-    void initPictureItem();
     QTimer *timerScrollPage;
     bool flagJumpToEnd;
-    void start_timerScrollPage();
     QList<qreal> defaultZoomSizes;
-    void afterPixmapLoad();
-    void ScrollPageHorizontal(int value);
-    void ScrollPageVertical(int value);
     qreal zoom;
     qreal rotation;
     bool pixmapNull;
-    bool rotating;
     QPoint dragPoint;
     LockMode::Mode lockMode;
-#ifdef DEBUG_PICTUREITEM
-    QTime t;
-#endif
 
     QPoint pointToOrigin(int width, int height);
     void avoidOutOfScreen();
@@ -124,6 +125,9 @@ private:
     void setPixmapNull(bool value);
     QRectF boundingRect;
 
+#ifdef DEBUG_PICTUREITEM
+    QTime t;
+#endif
 
 
 
@@ -147,10 +151,12 @@ private slots:
     void imageFinished(int num);
 
 protected:
+    void loadTextures(QList<TexIndex> indexes);
     void wheelEvent(QWheelEvent *);
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *ev);
     void mouseReleaseEvent(QMouseEvent *);
+    void mouseDoubleClickEvent(QMouseEvent *);
     void resizeEvent(QResizeEvent *);
     void keyPressEvent(QKeyEvent *);
 };
