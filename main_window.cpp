@@ -900,11 +900,12 @@ void MainWindow::about()
 {
     QMessageBox *aboutBox = new QMessageBox(this);
     aboutBox->setWindowTitle("About " + QApplication::applicationName());
+    aboutBox->setTextFormat(Qt::RichText);
     aboutBox->setText(
-                QApplication::applicationName() +
-                tr(" version ") + QApplication::applicationVersion() +
-                trUtf8("\n\nAuthor: Nikola Kocić (nikolakocic@gmail.com)") +
-                "\n\nWebsite: http://nikola-kocic.github.com/KIV/"
+                QApplication::applicationName() + tr(" version ") + QApplication::applicationVersion() +
+                trUtf8("<br><br>Author: Nikola Kocić<br>") +
+                "<br>email: <a href = \"mailto:nikolakocic@gmail.com\">nikolakocic@gmail.com</a><br>"+
+                "<br>Website: <a href = \"http://nikola-kocic.github.com/KIV/\">http://nikola-kocic.github.com/KIV/</a>"
                 );
     aboutBox->exec();
 }
