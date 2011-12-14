@@ -3,7 +3,7 @@
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f)
+PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f) : QWidget(parent)
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -413,6 +413,19 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
     case Qt::Key_B:
         emit boss();
         ev->accept();
+        break;
+
+    case Qt::Key_Escape:
+        emit setFullscreen(false);
+        ev->accept();
+        break;
+
+    case Qt::Key_Return:
+        if (ev->modifiers() & Qt::AltModifier)
+        {
+            emit toggleFullscreen();
+            ev->accept();
+        }
         break;
 
     case Qt::Key_Menu:

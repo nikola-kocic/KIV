@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f)
+PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f) : QWidget(parent)
 {
     m_picItem = parent;
 }

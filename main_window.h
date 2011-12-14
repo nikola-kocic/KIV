@@ -6,7 +6,6 @@
 #include "pictureitem.h"
 #include "model_files.h"
 #include "view_archive_dirs.h"
-#include "mylineedit.h"
 
 #include <QFileSystemModel>
 #include <QSplitter>
@@ -15,6 +14,7 @@
 #include <QComboBox>
 #include <QTreeView>
 #include <QMainWindow>
+#include <QLineEdit>
 
 class MainWindow : public QMainWindow
 {
@@ -44,7 +44,7 @@ private:
     QMenuBar *m_menu_main;
 
     QToolBar *m_toolbar;
-    MyLineEdit *m_lineEdit_path;
+    QLineEdit *m_lineEdit_path;
     QComboBox *m_comboBox_zoom;
 
     /* File Menu Actions */
@@ -72,7 +72,6 @@ private:
     QAction *m_act_pagePrevious;
     QAction *m_act_pageNext;
     QAction *m_act_fullscreen;
-    QAction *m_act_exitFullscreen;
     QAction *m_act_thumbnails;
     QAction *m_act_sidebar;
     QAction *m_act_largeIcons;
@@ -127,6 +126,7 @@ private slots:
     void on_zoom_changed(qreal current, qreal previous);
     void on_comboBoxZoom_activated(const int &index);
     void on_comboBoxZoom_TextChanged();
+    void on_comboBoxZoom_focus_lost();
     void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
     void on_filesView_item_activated(const QModelIndex &index);
     void on_filesView_currentChanged(const FileInfo &info);
@@ -139,6 +139,7 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
+    bool eventFilter(QObject *, QEvent *);
 };
 
 const int LV_COLNAME = 0;

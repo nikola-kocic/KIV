@@ -22,8 +22,7 @@ SOURCES += \
     picture_loader.cpp \
     model_files.cpp \
     helper.cpp \
-    fileinfo.cpp \
-    mylineedit.cpp
+    fileinfo.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -50,8 +49,7 @@ HEADERS += \
     picture_loader.h \
     model_files.h \
     helper.h \
-    fileinfo.h \
-    mylineedit.h
+    fileinfo.h
 
 RESOURCES += \
     kiv.qrc

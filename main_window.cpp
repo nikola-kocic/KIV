@@ -61,7 +61,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->createMenus(m_menu_main);
     this->setMenuBar(m_menu_main);
 
-    m_lineEdit_path = new MyLineEdit(this);
+    m_lineEdit_path = new QLineEdit(this);
+    m_lineEdit_path->installEventFilter(this);
 
 
     /* Start comboBoxZoom */
@@ -73,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     m_comboBox_zoom->setEditable(true);
     m_comboBox_zoom->setFocusPolicy(Qt::ClickFocus);
     m_comboBox_zoom->lineEdit()->setCompleter(0);
+    m_comboBox_zoom->installEventFilter(this);
     /* End comboBoxZoom */
 
 
@@ -270,6 +272,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     {
         this->openFile(Settings::Instance()->getLastPath());
     }
+
+    m_picture_item->setFocus();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -288,11 +292,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         if (m_lineEdit_path->hasFocus())
         {
             m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
+            m_lineEdit_path->clearFocus();
             event->accept();
         }
         else if (m_comboBox_zoom->lineEdit()->hasFocus())
         {
             on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
+            m_comboBox_zoom->clearFocus();
             event->accept();
         }
     }
@@ -358,10 +364,6 @@ void MainWindow::createActions()
     m_act_fullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("&Full Screen"), this);
     m_act_fullscreen->setShortcut(Qt::Key_F11);
     m_act_fullscreen->setCheckable(true);
-
-    m_act_exitFullscreen = new QAction(tr("Exit Full Screen"), this);
-    m_act_exitFullscreen->setEnabled(false);
-    m_act_exitFullscreen->setShortcut(Qt::Key_Escape);
 
     m_act_sidebar = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Show Side&bar"), this);
     m_act_sidebar->setCheckable(true);
@@ -479,7 +481,6 @@ void MainWindow::createMenus(QMenuBar *parent)
     optionsMenu->addSeparator();
     optionsMenu->addAction(m_act_thumbnails);
     this->addAction(m_act_fullscreen);
-    this->addAction(m_act_exitFullscreen);
     optionsMenu->addAction(m_act_fullscreen);
     optionsMenu->addAction(m_act_sidebar);
     optionsMenu->addAction(m_act_largeIcons);
@@ -508,7 +509,6 @@ void MainWindow::connectActions()
 
     connect(m_act_thumbnails, SIGNAL(toggled(bool)), this, SLOT(toggleShowThumbnails(bool)));
     connect(m_act_fullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullscreen(bool)));
-    connect(m_act_exitFullscreen, SIGNAL(triggered(bool)), m_act_fullscreen, SLOT(setChecked(bool)));
     connect(m_act_largeIcons, SIGNAL(toggled(bool)), this, SLOT(toggleLargeIcons(bool)));
     connect(m_act_sidebar, SIGNAL(toggled(bool)), this, SLOT(toggleSidebar(bool)));
 
@@ -534,7 +534,6 @@ void MainWindow::connectActions()
 
     connect(m_view_files, SIGNAL(activated(QModelIndex)), this, SLOT(on_filesView_item_activated(QModelIndex)));
     connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
-    connect(m_lineEdit_path, SIGNAL(focusLost()), this, SLOT(on_lineEditPath_focus_lost()));
 
     connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
     connect(m_view_archiveDirs, SIGNAL(currentRowChanged(QModelIndex)), m_view_files, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
@@ -549,8 +548,10 @@ void MainWindow::connectActions()
     connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
     connect(m_picture_item, SIGNAL(quit()), this, SLOT(close()));
     connect(m_picture_item, SIGNAL(boss()), this, SLOT(showMinimized()));
+    connect(m_picture_item, SIGNAL(setFullscreen(bool)), m_act_fullscreen, SLOT(setChecked(bool)));
+
     connect(m_comboBox_zoom, SIGNAL(activated(int)), this, SLOT(on_comboBoxZoom_activated(int)));
-    connect(m_comboBox_zoom->lineEdit(), SIGNAL(editingFinished()), this, SLOT(on_comboBoxZoom_TextChanged()));
+    connect(m_comboBox_zoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_comboBoxZoom_TextChanged()));
 
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(m_act_dirUp, SIGNAL(triggered()), this, SLOT(dirUp()));
@@ -651,6 +652,24 @@ void MainWindow::dropEvent(QDropEvent *event)
     event->acceptProposedAction();
 }
 
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::FocusOut)
+    {
+        if (obj == m_lineEdit_path)
+        {
+            on_lineEditPath_focus_lost();
+        }
+        else if (obj == m_comboBox_zoom)
+        {
+            on_comboBoxZoom_focus_lost();
+        }
+    }
+
+    // standard event processing
+    return QObject::eventFilter(obj, event);
+}
+
 void MainWindow::on_lineEditPath_editingFinished()
 {
 
@@ -692,6 +711,7 @@ void MainWindow::on_lineEditPath_focus_lost()
     qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_focus_lost" << this->lineEditPath->text();
 #endif
     m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
+    m_lineEdit_path->clearFocus();
 }
 
 void MainWindow::refreshPath()
@@ -770,7 +790,6 @@ void MainWindow::toggleSidebar(bool value)
 
 void MainWindow::toggleFullscreen(bool value)
 {
-    m_act_exitFullscreen->setEnabled(value);
     m_act_sidebar->setChecked(!value);
     this->menuBar()->setVisible(!value);
     if (value)
@@ -1001,6 +1020,15 @@ void MainWindow::on_comboBoxZoom_TextChanged()
     {
         on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
     }
+}
+
+void MainWindow::on_comboBoxZoom_focus_lost()
+{
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_comboBoxZoom_focus_lost" << m_comboBox_zoom->lineEdit()->text();
+#endif
+    on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
+    m_comboBox_zoom->clearFocus();
 }
 
 void MainWindow::on_comboBoxZoom_activated(const int &index)

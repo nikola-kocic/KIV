@@ -8,7 +8,7 @@
     #include <QDebug>
 #endif
 
-PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f)
+PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f) : QGLWidget(parent)
 {
     m_picItem = parent;
 
