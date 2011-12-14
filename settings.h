@@ -30,6 +30,22 @@ enum Action
 };
 }
 
+class Bookmark
+{
+public:
+    Bookmark (QString name, QString path) : m_name(name), m_path(path) {}
+
+    QString getName() const { return m_name; }
+    void setName(QString name) { m_name = name; }
+
+    QString getPath() const { return m_path; }
+    void setPath(QString path) { m_path = path; }
+
+private:
+    QString m_name;
+    QString m_path;
+};
+
 class Settings
 {
 
@@ -75,6 +91,11 @@ public:
     bool getCalculateAverageColor() const;
     void setCalculateAverageColor(bool);
 
+    void addBookmark(QString name, QString path);
+    void deleteBookmark(int index);
+    int getBookmarkCount();
+    QList<Bookmark> getBookmarks();
+
 private:
 
     /* Make your constructors private */
@@ -82,6 +103,7 @@ private:
     Settings(const Settings&);
     Settings& operator= (const Settings&);
 
+    void refreshBookmarks();
     QSettings *m_settings;
 
     MiddleClick::Action m_middleClick;
@@ -102,6 +124,8 @@ private:
     int m_thumbSize;
 
     bool m_calculateAverageColor;
+
+    QList<Bookmark> m_bookmarks;
 };
 
 

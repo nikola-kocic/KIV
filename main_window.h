@@ -25,8 +25,9 @@ public:
 
 private:
     void createActions();
-    void createMenus(QMenuBar *parent);
+    void createMenus();
     void connectActions();
+    void populateBookmarks();
     bool acceptFileDrop(const QMimeData *mimeData);
     void openFile(const QString &source);
 
@@ -51,6 +52,10 @@ private:
     QAction *m_act_open;
     QAction *m_act_save;
     QAction *m_act_exit;
+
+    /* Bookmarks Menu Actions */
+    QAction *m_act_bookmark_add;
+
 
     /* Edit Menu Actions */
     QAction *m_act_zoomIn;
@@ -85,7 +90,11 @@ private:
     QAction *m_act_dirUp;
     QAction *m_act_refreshPath;
 
-    QMenu *m_menu_context;
+    QMenu *m_menu_bookmarks;
+    QMenu *m_menu_context_picture;
+    QMenu *m_menu_context_bookmark;
+
+    QAction *m_act_bookmark_delete;
 
 private slots:
 
@@ -94,6 +103,11 @@ private slots:
     /* File Menu Actions Slots */
     void open();
     bool saveAs();
+
+    /* Bookmark Menu Action Slots */
+    void addBookmark();
+    void on_bookmark_triggered();
+    void deleteBookmark();
 
     /* Edit Menu Actions Slots */
     void rotateLeft();
@@ -131,6 +145,7 @@ private slots:
     void on_filesView_item_activated(const QModelIndex &index);
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
+    void on_bookmark_customContextMenuRequested(const QPoint &pos);
 
 protected:
     void closeEvent(QCloseEvent *event);

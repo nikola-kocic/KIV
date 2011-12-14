@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QKeyEvent>
+#include <QInputDialog>
 
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
@@ -48,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 
     m_model_files = new FilesModel();
-    this->createActions();
+    createActions();
 
     m_splitter_main = new QSplitter(Qt::Horizontal, this);
 
@@ -58,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     vboxMain->setMargin(0);
 
     m_menu_main = new QMenuBar(this);
-    this->createMenus(m_menu_main);
+    createMenus();
     this->setMenuBar(m_menu_main);
 
     m_lineEdit_path = new QLineEdit(this);
@@ -105,41 +106,44 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 
     /* Start contextMenu */
-    m_menu_context = new QMenu(this);
-    m_menu_context->addAction(m_act_pageNext);
-    m_menu_context->addAction(m_act_pagePrevious);
-    m_menu_context->addSeparator();
-    m_menu_context->addAction(m_act_fullscreen);
-    m_menu_context->addAction(m_act_sidebar);
-    m_menu_context->addSeparator();
+    m_menu_context_picture = new QMenu(this);
+    m_menu_context_picture->addAction(m_act_pageNext);
+    m_menu_context_picture->addAction(m_act_pagePrevious);
+    m_menu_context_picture->addSeparator();
+    m_menu_context_picture->addAction(m_act_fullscreen);
+    m_menu_context_picture->addAction(m_act_sidebar);
+    m_menu_context_picture->addSeparator();
 
-    QMenu *menuZoom = m_menu_context->addMenu(tr("Zoom"));
+    QMenu *menuZoom = m_menu_context_picture->addMenu(tr("Zoom"));
     menuZoom->addAction(m_act_zoomIn);
     menuZoom->addAction(m_act_zoomOut);
     menuZoom->addAction(m_act_zoomReset);
 
-    QMenu *menuRotate = m_menu_context->addMenu(tr("Rotate"));
+    QMenu *menuRotate = m_menu_context_picture->addMenu(tr("Rotate"));
     menuRotate->addAction(m_act_rotateLeft);
     menuRotate->addAction(m_act_rotateRight);
     menuRotate->addAction(m_act_rotateReset);
 
-    QMenu *menuFit = m_menu_context->addMenu(tr("Fit"));
+    QMenu *menuFit = m_menu_context_picture->addMenu(tr("Fit"));
     menuFit->addAction(m_act_fitToHeight);
     menuFit->addAction(m_act_fitToWidth);
     menuFit->addAction(m_act_fitToWindow);
 
-    QMenu *menuLock = m_menu_context->addMenu(tr("Lock"));
+    QMenu *menuLock = m_menu_context_picture->addMenu(tr("Lock"));
     menuLock->addAction(m_act_lockNone);
     menuLock->addAction(m_act_lockZoom);
     menuLock->addAction(m_act_lockAutofit);
     menuLock->addAction(m_act_lockFitWidth);
     menuLock->addAction(m_act_lockFitHeight);
 
-    m_menu_context->addSeparator();
-    m_menu_context->addAction(m_act_exit);
+    m_menu_context_picture->addSeparator();
+    m_menu_context_picture->addAction(m_act_exit);
 
 
     /* End contextMenu */
+
+    m_menu_context_bookmark = new QMenu(this);
+    m_menu_context_bookmark->addAction(m_act_bookmark_delete);
 
 
     vboxMain->addWidget(m_toolbar);
@@ -340,6 +344,9 @@ void MainWindow::createActions()
     m_act_exit = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
     m_act_exit->setShortcut(tr("Ctrl+Q"));
 
+    m_act_bookmark_add = new QAction(tr("Bookmark &This Page"), this);
+    m_act_bookmark_add->setShortcut(tr("Ctrl+D"));
+
 
     /* Options Actions */
 
@@ -432,16 +439,29 @@ void MainWindow::createActions()
 
     m_act_dirUp = new QAction(QIcon::fromTheme("go-up"), tr("Go &Up"), this);
     m_act_dirUp->setEnabled(false);
+
+    m_act_bookmark_delete = new QAction(tr("&Delete Bookmark"), this);
+
 }
 
-void MainWindow::createMenus(QMenuBar *parent)
+void MainWindow::createMenus()
 {
-    QMenu *fileMenu = new QMenu(tr("&File"), parent);
+    QMenu *fileMenu = m_menu_main->addMenu(tr("&File"));
     fileMenu->addAction(m_act_open);
     fileMenu->addAction(m_act_save);
+
+    m_menu_bookmarks = fileMenu->addMenu(tr("&Bookmarks"));
+    m_menu_bookmarks->addAction(m_act_bookmark_add);
+    m_menu_bookmarks->addSeparator();
+
+    m_menu_bookmarks->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_menu_bookmarks, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_bookmark_customContextMenuRequested(QPoint)));
+
+    populateBookmarks();
+
     fileMenu->addAction(m_act_exit);
 
-    QMenu *editMenu = new QMenu(tr("&Edit"), parent);
+    QMenu *editMenu = m_menu_main->addMenu(tr("&Edit"));
     editMenu->addAction(m_act_zoomIn);
     this->addAction(m_act_zoomIn);
     editMenu->addAction(m_act_zoomOut);
@@ -473,7 +493,7 @@ void MainWindow::createMenus(QMenuBar *parent)
     editMenu->addAction(m_act_lockFitHeight);
 
 
-    QMenu *optionsMenu = new QMenu(tr("&Options"), parent);
+    QMenu *optionsMenu = m_menu_main->addMenu(tr("&Options"));
     this->addAction(m_act_pagePrevious);
     this->addAction(m_act_pageNext);
     optionsMenu->addAction(m_act_pagePrevious);
@@ -486,14 +506,10 @@ void MainWindow::createMenus(QMenuBar *parent)
     optionsMenu->addAction(m_act_largeIcons);
     optionsMenu->addAction(m_act_settings);
 
-    QMenu *helpMenu = new QMenu(tr("&Help"), parent);
+    QMenu *helpMenu = m_menu_main->addMenu(tr("&Help"));
     helpMenu->addAction(m_act_webSite);
     helpMenu->addAction(m_act_about);
 
-    parent->addMenu(fileMenu);
-    parent->addMenu(editMenu);
-    parent->addMenu(optionsMenu);
-    parent->addMenu(helpMenu);
 }
 
 void MainWindow::connectActions()
@@ -501,6 +517,8 @@ void MainWindow::connectActions()
     connect(m_act_open, SIGNAL(triggered()), this, SLOT(open()));
     connect(m_act_save, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(m_act_exit, SIGNAL(triggered()), this, SLOT(close()));
+
+    connect(m_act_bookmark_add, SIGNAL(triggered()), this, SLOT(addBookmark()));
 
     connect(m_act_settings, SIGNAL(triggered()), this, SLOT(settingsDialog()));
     connect(m_act_pagePrevious, SIGNAL(triggered()), m_view_files, SLOT(pagePrevious()));
@@ -556,11 +574,65 @@ void MainWindow::connectActions()
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(m_act_dirUp, SIGNAL(triggered()), this, SLOT(dirUp()));
 
+    connect(m_act_bookmark_delete, SIGNAL(triggered()), this, SLOT(deleteBookmark()));
+
+}
+
+void MainWindow::populateBookmarks()
+{
+    QList<QAction*> oldActions = m_menu_bookmarks->actions();
+
+    for (int i = 0; i < oldActions.size(); ++i)
+    {
+        if (!oldActions.at(i)->data().toString().isEmpty())
+        {
+#ifdef DEBUG_MAIN_WINDOW
+                qDebug() << QDateTime::currentDateTime() << "MainWindow::populateBookmarks()" << "removed bookmark" << oldActions.at(i)->text() << oldActions.at(i)->data().toString();
+#endif
+            oldActions.at(i)->deleteLater();
+        }
+    }
+
+    QList<Bookmark> bookmarks = Settings::Instance()->getBookmarks();
+    for (int i = 0; i < bookmarks.size(); ++i)
+    {
+        QAction *bookmark = new QAction(bookmarks.at(i).getName(), this);
+        bookmark->setData(i);
+        connect(bookmark, SIGNAL(triggered()), this, SLOT(on_bookmark_triggered()));
+        m_menu_bookmarks->addAction(bookmark);
+#ifdef DEBUG_MAIN_WINDOW
+                qDebug() << QDateTime::currentDateTime() << "MainWindow::populateBookmarks()" << "added bookmark" << bookmark->text() << bookmark->data().toString();
+#endif
+    }
 }
 
 void MainWindow::on_customContextMenuRequested(const QPoint &pos)
 {
-    m_menu_context->popup(m_picture_item->mapToGlobal(pos));
+    m_menu_context_picture->popup(m_picture_item->mapToGlobal(pos));
+}
+
+void MainWindow::on_bookmark_triggered()
+{
+    if (QAction *action = qobject_cast<QAction *>(sender()))
+    {
+        if (action->data().isNull())
+            return;
+        int bookmarkIndex = action->data().toInt();
+#ifdef DEBUG_MAIN_WINDOW
+                qDebug() << QDateTime::currentDateTime() << "MainWindow::on_bookmark_triggered()" << path;
+#endif
+        openFile(Settings::Instance()->getBookmarks().at(bookmarkIndex).getPath());
+    }
+}
+
+void MainWindow::deleteBookmark()
+{
+    if (m_act_bookmark_delete->data().isNull())
+        return;
+
+    Settings::Instance()->deleteBookmark(m_act_bookmark_delete->data().toInt());
+    populateBookmarks();
+    m_act_bookmark_delete->setData(QVariant());
 }
 
 void MainWindow::on_filesView_currentChanged(const FileInfo &info)
@@ -855,6 +927,19 @@ bool MainWindow::saveAs()
     return true;
 }
 
+void MainWindow::addBookmark()
+{
+    QInputDialog dialog;
+    dialog.setLabelText(tr("Bookmark Name:"));
+    dialog.setTextValue(m_view_files->getCurrentFileInfo().getFilePath());
+    if(dialog.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+    Settings::Instance()->addBookmark(dialog.textValue(), m_view_files->getCurrentFileInfo().getFilePath());
+    populateBookmarks();
+}
+
 void MainWindow::zoomReset()
 {
     m_picture_item->setZoom(1);
@@ -1065,4 +1150,16 @@ void MainWindow::updateActions()
     m_act_fitToHeight->setEnabled(enableActions);
     m_act_rotateReset->setEnabled(enableActions);
     m_comboBox_zoom->setEnabled(enableActions);
+}
+
+void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
+{
+    if (QAction *action = m_menu_bookmarks->actionAt(pos))
+    {
+        if (action->data().isNull())
+            return;
+
+        m_act_bookmark_delete->setData(action->data());
+        m_menu_context_bookmark->popup(m_menu_bookmarks->mapToGlobal(pos));
+    }
 }

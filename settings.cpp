@@ -29,6 +29,21 @@ Settings::Settings()
     m_thumbSize           = m_settings->value("Interface/ThumbnailSize", 200).toInt();
 
     m_calculateAverageColor = m_settings->value("Interface/CalculateAverageColor", false).toBool();
+
+    for (int i = 0; ; ++i)
+    {
+        QVariant varName = m_settings->value("Bookmarks/" + QString::number(i) + "/Name");
+        QVariant varPath = m_settings->value("Bookmarks/" + QString::number(i) + "/Path");
+        if (varName.isValid() && varPath.isValid())
+        {
+            m_bookmarks.append(Bookmark(varName.toString(), varPath.toString()));
+        }
+        else
+        {
+            break;
+        }
+    }
+
 }
 
 Settings *Settings::Instance()
@@ -181,4 +196,52 @@ void Settings::setCalculateAverageColor(bool b)
 {
     m_calculateAverageColor = b;
     m_settings->setValue("Interface/CalculateAverageColor", m_calculateAverageColor);
+}
+
+void Settings::addBookmark(QString name, QString path)
+{
+    int oldcount = m_bookmarks.size();
+    m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Name", name);
+    m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Path", path);
+
+    m_bookmarks.append(Bookmark(name, path));
+}
+
+void Settings::deleteBookmark(int index)
+{
+    m_bookmarks.removeAt(index);
+    refreshBookmarks();
+}
+
+int Settings::getBookmarkCount()
+{
+    return m_bookmarks.size();
+}
+
+QList<Bookmark> Settings::getBookmarks()
+{
+    return m_bookmarks;
+}
+
+void Settings::refreshBookmarks()
+{
+    for (int i = 0; ; ++i)
+    {
+        QVariant varName = m_settings->value("Bookmarks/" + QString::number(i) + "/Name");
+        QVariant varPath = m_settings->value("Bookmarks/" + QString::number(i) + "/Path");
+        if (varName.isValid() && varPath.isValid())
+        {
+            m_settings->remove("Bookmarks/" + QString::number(i));
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    for (int i = 0; i < m_bookmarks.size(); ++i)
+    {
+        m_settings->setValue("Bookmarks/" + QString::number(i) + "/Name", m_bookmarks.at(i).getName());
+        m_settings->setValue("Bookmarks/" + QString::number(i) + "/Path", m_bookmarks.at(i).getPath());
+    }
 }

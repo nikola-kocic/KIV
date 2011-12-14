@@ -17,6 +17,7 @@ PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f) : QWid
     m_dragging = false;
     m_flag_jumpToEnd = false;
     m_lockMode = LockMode::None;
+    m_color_clear = Qt::lightGray;
 
     m_timer_scrollPage = new QTimer(this);
     connect(m_timer_scrollPage, SIGNAL(timeout()), m_timer_scrollPage, SLOT(stop()));
