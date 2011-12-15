@@ -22,8 +22,6 @@ public:
 
     QString zipPath; /* Ends with "/" */
     QString zipImageFileName;
-    int thumbSize;
-
 };
 
 #endif // FILEINFO_H

@@ -180,7 +180,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     /* Start filesView */
     m_view_files = new ViewFiles(this);
-    m_view_files->setThumbnailsSize(QSize(m_settings->getThumbnailSize(), m_settings->getThumbnailSize()));
+    m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
     m_view_files->setModel(m_model_files);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -1009,6 +1009,7 @@ void MainWindow::settingsDialog()
         {
             m_picture_item->setHardwareAcceleration(m_settings->getHardwareAcceleration());
         }
+        m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
         m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
     }
 }

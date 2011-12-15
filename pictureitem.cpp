@@ -208,7 +208,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 void PictureItem::imageFinished(int num)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime() << "\nloaded image" << t.restart();
+    qDebug() << QDateTime::currentDateTime() << "PictureItem::imageFinished" << t.restart() << m_loader_image->resultAt(num).size();
 #endif
     this->setPixmapNull(m_loader_image->resultAt(num).isNull());
     calculateAverageColor(m_loader_image->resultAt(num));
@@ -685,16 +685,16 @@ void PictureItem::fitToScreen()
         return;
     }
 
-    QRect temp = QRect(m_boundingRect.x(), m_boundingRect.y(), m_boundingRect.width() / m_zoom_value, m_boundingRect.height() / m_zoom_value);
+    QRect orig_size = QRect(m_boundingRect.x(), m_boundingRect.y(), m_boundingRect.width() / m_zoom_value, m_boundingRect.height() / m_zoom_value);
 
-    qreal x_ratio = (qreal)this->size().width() / temp.width();
-    qreal y_ratio = (qreal)this->size().height() / temp.height();
+    qreal x_ratio = (qreal)this->size().width() / orig_size.width();
+    qreal y_ratio = (qreal)this->size().height() / orig_size.height();
 
-    if ((temp.width() <= this->size().width()) && (temp.height() <= this->size().height()))
+    if ((orig_size.width() <= this->size().width()) && (orig_size.height() <= this->size().height()))
     {
         this->setZoom(1);
     }
-    else if ((x_ratio * temp.height()) < this->size().height())
+    else if ((x_ratio * orig_size.height()) < this->size().height())
     {
         this->setZoom(x_ratio);
     }

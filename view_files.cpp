@@ -14,7 +14,7 @@ ViewFiles::ViewFiles(QWidget *parent)
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_proxy = new QSortFilterProxyModel(this);
-    m_currentInfo.thumbSize = 200;
+    m_thumb_size = QSize(200, 200);
 
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
@@ -55,15 +55,21 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 
     if (this->viewMode() == QListView::IconMode)
     {
-        m_currentInfo.thumbSize = m_thumb_size.width();;
         this->startShowingThumbnails();
     }
 }
 
 void ViewFiles::setThumbnailsSize(const QSize &size)
 {
-     m_currentInfo.thumbSize = size.width();
-     m_thumb_size = size;
+    if (m_thumb_size != size)
+    {
+        m_thumb_size = size;
+        if (this->viewMode() == QListView::IconMode)
+        {
+            this->setViewMode(QListView::IconMode);
+            this->startShowingThumbnails();
+        }
+    }
 }
 
 
@@ -121,27 +127,25 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
         m_currentInfo.imageFileName.clear();
     }
 
-
-    FileInfo info = m_currentInfo;
-    info.thumbSize = 0;
-    emit currentFileChanged(info);
+    emit currentFileChanged(m_currentInfo);
 }
 
 void ViewFiles::setViewMode(ViewMode mode)
 {
-    if (mode == this->viewMode()) return;
+//    if (mode == this->viewMode()) return;
 
-    int iconSize = -1;
-    int gridSize = -1;
+    QSize iconSize;
+    QSize gridSize;
 
     if (mode == QListView::IconMode)
     {
-        m_currentInfo.thumbSize = m_thumb_size.width();
-        iconSize = m_currentInfo.thumbSize;
-        gridSize = iconSize + 50;
+        iconSize = m_thumb_size;
+        gridSize = QSize(iconSize.width() + 50, iconSize.height() + 50);
     }
     else
     {
+        iconSize = QSize(-1, -1);
+        gridSize = QSize(-1, -1);
         QFileIconProvider fip;
         for (int i = 0; i < m_proxy->rowCount(this->rootIndex()); ++i)
         {
@@ -152,8 +156,8 @@ void ViewFiles::setViewMode(ViewMode mode)
     }
     QListView::setViewMode(mode);
 
-    this->setIconSize(QSize(iconSize, iconSize));
-    this->setGridSize(QSize(gridSize, gridSize));
+    this->setIconSize(iconSize);
+    this->setGridSize(gridSize);
 
     this->setCurrentDirectory(m_currentInfo);
 }
@@ -166,30 +170,27 @@ void ViewFiles::startShowingThumbnails()
     }
 
 
-    QList <FileInfo> files;
+    QList <ThumbnailInfo> files;
     for (int i = 0; i < m_proxy->rowCount(this->rootIndex()); ++i)
     {
-        m_proxy->setData(m_proxy->index(i, 0, this->rootIndex()), QSize(m_currentInfo.thumbSize + 20, m_currentInfo.thumbSize + 20), Qt::SizeHintRole);
-        FileInfo info;
-        if (m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_FILE
-                || (m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE))
+        m_proxy->setData(m_proxy->index(i, 0, this->rootIndex()), QSize(m_thumb_size.width() + 20, m_thumb_size.height() + 20), Qt::SizeHintRole);
+        FileInfo pli_info;
+
+        int type = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), ROLE_TYPE).toInt();
+        if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            info = m_currentInfo;
+            pli_info = m_currentInfo;
 
             if (!m_currentInfo.isZip())
             {
-                info.imageFileName = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+                pli_info.imageFileName = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
             else
             {
-                info.zipImageFileName = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
+                pli_info.zipImageFileName = m_proxy->data(m_proxy->index(i, 0, this->rootIndex()), Qt::DisplayRole).toString();
             }
         }
-        else
-        {
-            info.thumbSize = m_currentInfo.thumbSize;
-        }
-        files.append(info);
+        files.append(ThumbnailInfo(pli_info, m_thumb_size));
     }
 
     if (m_watcherThumbnail->isRunning())
@@ -197,7 +198,7 @@ void ViewFiles::startShowingThumbnails()
         m_watcherThumbnail->cancel();
         m_watcherThumbnail->waitForFinished();
     }
-    m_watcherThumbnail->setFuture(QtConcurrent::mapped(files, PictureLoader::getImage));
+    m_watcherThumbnail->setFuture(QtConcurrent::mapped(files, PictureLoader::getThumbnail));
 }
 
 void ViewFiles::showThumbnail(int num)

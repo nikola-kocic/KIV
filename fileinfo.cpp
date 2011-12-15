@@ -12,8 +12,7 @@ FileInfo::FileInfo() :
     containerPath(""),
     imageFileName(""),
     zipPath(""),
-    zipImageFileName(""),
-    thumbSize(0)
+    zipImageFileName("")
 {
 }
 

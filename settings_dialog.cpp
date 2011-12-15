@@ -34,7 +34,8 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent) :
     ui->cbJumpToEnd->setChecked(m_settings->getJumpToEnd());
 
     ui->cbHardwareAcceleration->setChecked(m_settings->getHardwareAcceleration());
-    ui->sbThumbSize->setValue(m_settings->getThumbnailSize());
+    ui->spinBox_thumbnail_width->setValue(m_settings->getThumbnailSize().width());
+    ui->spinBox_thumbnail_height->setValue(m_settings->getThumbnailSize().height());
 
     ui->checkBox_calculate_average_color->setChecked(m_settings->getCalculateAverageColor());
 
@@ -53,7 +54,7 @@ void Settings_Dialog::on_buttonBox_accepted()
     m_settings->setPageChangeTimeout(ui->sbWaitTime->value());
 
     m_settings->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
-    m_settings->setThumbnailSize(ui->sbThumbSize->value());
+    m_settings->setThumbnailSize(QSize(ui->spinBox_thumbnail_width->value(), ui->spinBox_thumbnail_height->value()));
     m_settings->setCalculateAverageColor(ui->checkBox_calculate_average_color->isChecked());
 }
 

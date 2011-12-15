@@ -4,7 +4,7 @@
 #include "fileinfo.h"
 
 #include <QSettings>
-#include <QStringList>
+#include <QSize>
 
 class MiddleClickAction
 {
@@ -68,7 +68,7 @@ public:
     void setLargeIcons(bool);
 
     QString getLastPath() const;
-    void setLastPath(QString);
+    void setLastPath(QString path);
 
     bool getJumpToEnd() const;
     void setJumpToEnd(bool);
@@ -77,8 +77,8 @@ public:
     void setHardwareAcceleration(bool);
 
 
-    int getThumbnailSize() const;
-    void setThumbnailSize(int);
+    QSize getThumbnailSize() const;
+    void setThumbnailSize(QSize size);
 
     bool getScrollChangesPage() const;
     void setScrollChangesPage(bool);
@@ -108,7 +108,7 @@ private:
     bool m_scrollChangesPage;
 
     bool m_hardwareAcceleration;
-    int m_thumbSize;
+    QSize m_thumbSize;
 
     bool m_calculateAverageColor;
 

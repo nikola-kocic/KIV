@@ -1,6 +1,7 @@
 #include "settings.h"
 
 #include <QApplication>
+#include <QDebug>
 
 Settings::Settings()
 {
@@ -18,7 +19,7 @@ Settings::Settings()
     m_largeIcons          = m_settings->value("Interface/LargeIcons", false).toBool();
     m_lastPath            = m_settings->value("Interface/LastPath", "").toString();
     m_hardwareAcceleration= m_settings->value("Interface/HardwareAcceleration", false).toBool();
-    m_thumbSize           = m_settings->value("Interface/ThumbnailSize", 200).toInt();
+    m_thumbSize           = m_settings->value("Interface/ThumbnailSize", QSize(200, 200)).toSize();
 
     m_calculateAverageColor = m_settings->value("Interface/CalculateAverageColor", false).toBool();
 
@@ -139,14 +140,14 @@ void Settings::setHardwareAcceleration(bool b)
 }
 
 
-int Settings::getThumbnailSize() const
+QSize Settings::getThumbnailSize() const
 {
     return m_thumbSize;
 }
 
-void Settings::setThumbnailSize(int v)
+void Settings::setThumbnailSize(QSize size)
 {
-    m_thumbSize = v;
+    m_thumbSize = size;
     m_settings->setValue("Interface/ThumbnailSize", m_thumbSize);
 }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>309</width>
-    <height>280</height>
+    <height>278</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,56 +25,40 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
             <string>Middle Click:</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QComboBox" name="ddMiddleClick"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="ddMiddleClick">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
+         <item row="1" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>Mouse Wheel:</string>
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QComboBox" name="ddWheel"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="ddWheel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </item>
@@ -209,7 +193,30 @@
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="sbThumbSize">
+          <widget class="QSpinBox" name="spinBox_thumbnail_width">
+           <property name="minimum">
+            <number>20</number>
+           </property>
+           <property name="maximum">
+            <number>1000</number>
+           </property>
+           <property name="singleStep">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>200</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>x</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBox_thumbnail_height">
            <property name="minimum">
             <number>20</number>
            </property>
