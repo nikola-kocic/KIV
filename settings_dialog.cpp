@@ -7,21 +7,21 @@ Settings_Dialog::Settings_Dialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->ddMiddleClick->addItem(tr("<None>"),      MiddleClick::None);
-    ui->ddMiddleClick->addItem(tr("Full Screen"), MiddleClick::Fullscreen);
-    ui->ddMiddleClick->addItem(tr("Autofit"),     MiddleClick::AutoFit);
-    ui->ddMiddleClick->addItem(tr("Actual Size"), MiddleClick::ZoomReset);
-    ui->ddMiddleClick->addItem(tr("Next Page"),   MiddleClick::NextPage);
-    ui->ddMiddleClick->addItem(tr("Boss Key"),    MiddleClick::Boss);
-    ui->ddMiddleClick->addItem(tr("Quit"),       MiddleClick::Quit);
+    ui->ddMiddleClick->addItem(tr("<None>"),      MiddleClickAction::None);
+    ui->ddMiddleClick->addItem(tr("Full Screen"), MiddleClickAction::Fullscreen);
+    ui->ddMiddleClick->addItem(tr("Autofit"),     MiddleClickAction::AutoFit);
+    ui->ddMiddleClick->addItem(tr("Actual Size"), MiddleClickAction::ZoomReset);
+    ui->ddMiddleClick->addItem(tr("Next Page"),   MiddleClickAction::NextPage);
+    ui->ddMiddleClick->addItem(tr("Boss Key"),    MiddleClickAction::Boss);
+    ui->ddMiddleClick->addItem(tr("Quit"),        MiddleClickAction::Quit);
 
     ui->ddMiddleClick->setCurrentIndex(ui->ddMiddleClick->findData(Settings::Instance()->getMiddleClick()));
 
 
-    ui->ddWheel->addItem(tr("<None>"),               Wheel::None);
-    ui->ddWheel->addItem(tr("Scroll Page"),          Wheel::Scroll);
-    ui->ddWheel->addItem(tr("Next / Previous Page"), Wheel::ChangePage);
-    ui->ddWheel->addItem(tr("Zoom In / Out"),        Wheel::Zoom);
+    ui->ddWheel->addItem(tr("<None>"),               WheelAction::None);
+    ui->ddWheel->addItem(tr("Scroll Page"),          WheelAction::Scroll);
+    ui->ddWheel->addItem(tr("Next / Previous Page"), WheelAction::ChangePage);
+    ui->ddWheel->addItem(tr("Zoom In / Out"),        WheelAction::Zoom);
 
     ui->ddWheel->setCurrentIndex(ui->ddWheel->findData(Settings::Instance()->getWheel()));
 
@@ -70,7 +70,7 @@ void Settings_Dialog::on_cbScrollChangesPage_clicked(bool checked)
 
 void Settings_Dialog::on_ddWheel_currentIndexChanged(int index)
 {
-    if (ui->ddWheel->itemData(index).toInt() != Wheel::Scroll)
+    if (ui->ddWheel->itemData(index).toInt() != WheelAction::Scroll)
     {
         ui->groupBox->setEnabled(false);
     }

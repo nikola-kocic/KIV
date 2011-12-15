@@ -16,6 +16,8 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 
+#define DEBUG_MAIN_WINDOW_ICONS
+
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
 #include <QDebug>
@@ -315,6 +317,15 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::createActions()
 {
+#ifdef DEBUG_MAIN_WINDOW_ICONS
+    QDir appdir(QApplication::applicationDirPath());
+    if (appdir.dirName() == "release" || appdir.dirName() == "debug")
+    {
+        appdir.cd("../../src/icons");
+        QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());
+    }
+#endif
+
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "glyphs";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {

@@ -6,29 +6,26 @@
 #include <QSettings>
 #include <QStringList>
 
-namespace MiddleClick
+class MiddleClickAction
 {
-enum Action {
-    None = 0,
-    Fullscreen = 1,
-    AutoFit = 2,
-    ZoomReset = 3,
-    NextPage = 4,
-    Quit = 5,
-    Boss = 6
+public:
+    static const int None = 0;
+    static const int Fullscreen = 1;
+    static const int AutoFit = 2;
+    static const int ZoomReset = 3;
+    static const int NextPage = 4;
+    static const int Quit = 5;
+    static const int Boss = 6;
 };
-}
 
-namespace Wheel
+class WheelAction
 {
-enum Action
-{
-    None,
-    Scroll,
-    ChangePage,
-    Zoom
+public:
+    static const int None = 0;
+    static const int Scroll = 1;
+    static const int ChangePage = 2;
+    static const int Zoom = 3;
 };
-}
 
 class Bookmark
 {
@@ -52,10 +49,10 @@ class Settings
 public:
     static Settings  *Instance();
 
-    MiddleClick::Action getMiddleClick() const;
+    int getMiddleClick() const;
     void setMiddleClick(int);
 
-    Wheel::Action getWheel() const;
+    int getWheel() const;
     void setWheel(int);
 
     bool getScrollPageByWidth() const;
@@ -106,8 +103,8 @@ private:
     void refreshBookmarks();
     QSettings *m_settings;
 
-    MiddleClick::Action m_middleClick;
-    Wheel::Action m_wheel;
+    int m_middleClick;
+    int m_wheel;
 
     bool m_largeIcons;
     QString m_lastPath;

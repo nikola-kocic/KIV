@@ -14,8 +14,8 @@ Settings::Settings()
         m_filters_image.append(QImageReader::supportedImageFormats().at(i));
     }
 
-    m_middleClick = (MiddleClick::Action)m_settings->value("Mouse/MiddleClick", 1).toInt();
-    m_wheel = (Wheel::Action)m_settings->value("Mouse/Wheel", 1).toInt();
+    m_middleClick = m_settings->value("Mouse/MiddleClick", 1).toInt();
+    m_wheel = m_settings->value("Mouse/Wheel", 1).toInt();
 
     m_jumpToEnd           = m_settings->value("Behavior/JumpToBottom", false).toBool();
     m_scrollPageByWidth   = m_settings->value("Behavior/ScrollPageByWidth", false).toBool();
@@ -53,26 +53,26 @@ Settings *Settings::Instance()
 }
 
 
-MiddleClick::Action Settings::getMiddleClick() const
+int Settings::getMiddleClick() const
 {
     return m_middleClick;
 }
 
 void Settings::setMiddleClick(int v)
 {
-    m_middleClick = (MiddleClick::Action)v;
+    m_middleClick = v;
     m_settings->setValue("Mouse/MiddleClick", v);
 }
 
 
-Wheel::Action Settings::getWheel() const
+int Settings::getWheel() const
 {
     return m_wheel;
 }
 
 void Settings::setWheel(int v)
 {
-    m_wheel = (Wheel::Action)v;
+    m_wheel = v;
     m_settings->setValue("Mouse/Wheel", v);
 }
 

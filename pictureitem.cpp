@@ -314,32 +314,32 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
     {
         switch (Settings::Instance()->getMiddleClick())
         {
-        case MiddleClick::Fullscreen :
+        case MiddleClickAction::Fullscreen :
             emit(toggleFullscreen());
             ev->accept();
             break;
 
-        case MiddleClick::AutoFit:
+        case MiddleClickAction::AutoFit:
             this->fitToScreen();
             ev->accept();
             break;
 
-        case MiddleClick::ZoomReset:
+        case MiddleClickAction::ZoomReset:
             this->setZoom(1);
             ev->accept();
             break;
 
-        case MiddleClick::NextPage:
+        case MiddleClickAction::NextPage:
             emit pageNext();
             ev->accept();
             break;
 
-        case MiddleClick::Quit:
+        case MiddleClickAction::Quit:
             emit quit();
             ev->accept();
             break;
 
-        case MiddleClick::Boss:
+        case MiddleClickAction::Boss:
             emit boss();
             ev->accept();
             break;
@@ -441,13 +441,31 @@ void PictureItem::wheelEvent(QWheelEvent *event)
 {
     /* event->delta() > 0 == Up
        event->delta() < 0 == Down */
-
-    if (Qt::NoModifier == event->modifiers())
+    if (
+            (Qt::ControlModifier == event->modifiers()) ||
+            (
+                (Qt::NoModifier == event->modifiers()) &&
+                (WheelAction::Zoom == Settings::Instance()->getWheel())
+                )
+            )
+    {
+        if (event->delta() < 0)
+        {
+            this->zoomOut();
+            event->accept();
+        }
+        else
+        {
+            this->zoomIn();
+            event->accept();
+        }
+    }
+    else if (Qt::NoModifier == event->modifiers())
     {
         /* If page can't be scrolled, change page if necessary */
-        if (Wheel::ChangePage == Settings::Instance()->getWheel() ||
+        if (WheelAction::ChangePage == Settings::Instance()->getWheel() ||
                 (
-                    (Wheel::Scroll == Settings::Instance()->getWheel()) &&
+                    (WheelAction::Scroll == Settings::Instance()->getWheel()) &&
                     (Settings::Instance()->getScrollChangesPage()) &&
                     (
                         (LockMode::Autofit == m_lockMode) ||
@@ -470,7 +488,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
         }
         /* Scroll page */
-        else if (Wheel::Scroll == Settings::Instance()->getWheel())
+        else if (WheelAction::Scroll == Settings::Instance()->getWheel())
         {
             event->accept();
             if (
@@ -549,25 +567,6 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                 }
             }
 
-        }
-    }
-    else if (
-             (Qt::ControlModifier == event->modifiers()) ||
-             (
-                 (Qt::NoModifier == event->modifiers()) &&
-                 (Wheel::Zoom == Settings::Instance()->getWheel())
-                 )
-             )
-    {
-        if (event->delta() < 0)
-        {
-            this->zoomOut();
-            event->accept();
-        }
-        else
-        {
-            this->zoomIn();
-            event->accept();
         }
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
