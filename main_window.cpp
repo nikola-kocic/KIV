@@ -25,21 +25,23 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 {
+    m_settings = new Settings();
     this->setAcceptDrops(true);
     this->resize(QApplication::desktop()->width() - 100,
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    if (Settings::Instance()->getFiltersImage().contains("svg"))
+    if (getFiltersImage().contains("svg"))
     {
         this->setWindowIcon(QIcon(":/icons/kiv.svg"));
     }
 
     /* Start modelFilesystem */
     QStringList filters;
-    for (int i = 0; i < Settings::Instance()->getFiltersArchive().size(); ++i)
+    QStringList filtersArchive = getFiltersArchive();
+    for (int i = 0; i < filtersArchive.size(); ++i)
     {
-        filters.append("*." + Settings::Instance()->getFiltersArchive().at(i));
+        filters.append("*." + filtersArchive.at(i));
     }
 
     m_model_filesystem = new QFileSystemModel(this);
@@ -178,6 +180,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     /* Start filesView */
     m_view_files = new ViewFiles(this);
+    m_view_files->setThumbnailsSize(QSize(m_settings->getThumbnailSize(), m_settings->getThumbnailSize()));
     m_view_files->setModel(m_model_files);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -201,7 +204,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
 
-    m_picture_item = new PictureItem(Settings::Instance()->getHardwareAcceleration(), this);
+    m_picture_item = new PictureItem(m_settings, this);
     m_picture_item->setSizePolicy(policy);
 
     m_splitter_main->addWidget(m_picture_item);
@@ -255,7 +258,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 
     /* Large icons are On by default but I want small icons by default */
-    if (Settings::Instance()->getLargeIcons())
+    if (m_settings->getLargeIcons())
     {
         m_act_largeIcons->setChecked(true);
     }
@@ -276,7 +279,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     }
     else
     {
-        this->openFile(Settings::Instance()->getLastPath());
+        this->openFile(m_settings->getLastPath());
     }
 
     m_picture_item->setFocus();
@@ -284,7 +287,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    Settings::Instance()->setLastPath(m_view_files->getCurrentFileInfo().getFilePath());
+    m_settings->setLastPath(m_view_files->getCurrentFileInfo().getFilePath());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -327,7 +330,7 @@ void MainWindow::createActions()
 #endif
 
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
-    static const char * FALLBACK_ICON_THEME = "glyphs";
+    static const char * FALLBACK_ICON_THEME = "default";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
         /* If there is no default working icon theme then we should
            use an icon theme that we provide via a icons folder
@@ -604,7 +607,7 @@ void MainWindow::populateBookmarks()
         }
     }
 
-    QList<Bookmark> bookmarks = Settings::Instance()->getBookmarks();
+    QList<Bookmark> bookmarks = m_settings->getBookmarks();
     for (int i = 0; i < bookmarks.size(); ++i)
     {
         QAction *bookmark = new QAction(bookmarks.at(i).getName(), this);
@@ -632,7 +635,7 @@ void MainWindow::on_bookmark_triggered()
 #ifdef DEBUG_MAIN_WINDOW
                 qDebug() << QDateTime::currentDateTime() << "MainWindow::on_bookmark_triggered()" << path;
 #endif
-        openFile(Settings::Instance()->getBookmarks().at(bookmarkIndex).getPath());
+        openFile(m_settings->getBookmarks().at(bookmarkIndex).getPath());
     }
 }
 
@@ -641,7 +644,7 @@ void MainWindow::deleteBookmark()
     if (m_act_bookmark_delete->data().isNull())
         return;
 
-    Settings::Instance()->deleteBookmark(m_act_bookmark_delete->data().toInt());
+    m_settings->deleteBookmark(m_act_bookmark_delete->data().toInt());
     populateBookmarks();
     m_act_bookmark_delete->setData(QVariant());
 }
@@ -900,7 +903,7 @@ void MainWindow::dirUp()
 
 void MainWindow::open()
 {
-    QString imageExtensions = "*." + Settings::Instance()->getFiltersImage().join(" *.");
+    QString imageExtensions = "*." + getFiltersImage().join(" *.");
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_model_filesystem->filePath(m_view_filesystem->currentIndex()),
                                                     tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
@@ -947,7 +950,7 @@ void MainWindow::addBookmark()
     {
         return;
     }
-    Settings::Instance()->addBookmark(dialog.textValue(), m_view_files->getCurrentFileInfo().getFilePath());
+    m_settings->addBookmark(dialog.textValue(), m_view_files->getCurrentFileInfo().getFilePath());
     populateBookmarks();
 }
 
@@ -998,13 +1001,13 @@ void MainWindow::rotateReset()
 
 void MainWindow::settingsDialog()
 {
-    Settings_Dialog sd(this);
+    Settings_Dialog sd(m_settings, this);
     if (sd.exec() == QDialog::Accepted)
     {
         /* Update settings */
-        if (Settings::Instance()->getHardwareAcceleration() != m_picture_item->getHardwareAcceleration())
+        if (m_settings->getHardwareAcceleration() != m_picture_item->getHardwareAcceleration())
         {
-            m_picture_item->setHardwareAcceleration(Settings::Instance()->getHardwareAcceleration());
+            m_picture_item->setHardwareAcceleration(m_settings->getHardwareAcceleration());
         }
         m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
     }
@@ -1048,7 +1051,7 @@ void MainWindow::toggleLargeIcons(bool value)
     //    this->toolbarDirectory->setIconSize(iconSize);
 
 
-    Settings::Instance()->setLargeIcons(value);
+    m_settings->setLargeIcons(value);
 }
 
 void MainWindow::on_zoom_changed(qreal current, qreal previous)

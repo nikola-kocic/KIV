@@ -18,6 +18,7 @@ public:
     void setModel(QAbstractItemModel *model);
     void setViewMode(ViewMode mode);
     void setCurrentDirectory(const FileInfo &info);
+    void setThumbnailsSize(const QSize &size);
     QModelIndex getIndexFromProxy(const QModelIndex &index) const;
     void setCurrentIndexFromSource(const QModelIndex &index);
     FileInfo getCurrentFileInfo() const;
@@ -33,6 +34,7 @@ private:
     QFutureWatcher<QImage> *m_watcherThumbnail;
     FileInfo m_currentInfo;
     QSortFilterProxyModel *m_proxy;
+    QSize m_thumb_size;
 
 private slots:
     void showThumbnail(int num);

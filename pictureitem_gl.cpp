@@ -56,19 +56,6 @@ void PictureItem::PictureItemGL::setImage(QImage img)
 
     this->setUpdatesEnabled(false);
 
-    if (Settings::Instance()->getCalculateAverageColor())
-    {
-        QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        setClearColor(QColor::fromRgb(averageColorImage.pixel(0,0)));
-    }
-    else
-    {
-        if (m_picItem->m_color_clear != Qt::lightGray)
-        {
-            setClearColor(Qt::lightGray);
-        }
-    }
-
     m_texImg->setImage(img);
 
     m_textures = QVector < QVector < GLuint > >(m_texImg->hTile->tileCount);
@@ -126,9 +113,8 @@ void PictureItem::PictureItemGL::textureLoadFinished()
 }
 
 
-void PictureItem::PictureItemGL::setClearColor(const QColor &color)
+void PictureItem::PictureItemGL::updateClearColor()
 {
-    m_picItem->m_color_clear = color;
     qglClearColor(m_picItem->m_color_clear);
     this->updateGL();
 }

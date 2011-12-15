@@ -17,6 +17,10 @@ namespace ViewMode
 }
 
 
+QStringList getFiltersImage();
+QStringList getFiltersArchive();
+
+
 const int ROLE_TYPE = Qt::UserRole + 1;
 //const int ROLE_ARCHIVE_FILE_NAME = Qt::UserRole + 2;
 //const int ROLE_THUMBNAIL = Qt::UserRole + 3;

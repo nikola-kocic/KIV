@@ -3,6 +3,7 @@
 
 #include "picture_loader.h"
 #include "teximg.h"
+#include "settings.h"
 
 #include <QGLWidget>
 #include <QBoxLayout>
@@ -21,7 +22,7 @@ class PictureItem : public QWidget
 {
     Q_OBJECT
 public:
-    PictureItem(bool opengl, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    PictureItem(Settings *settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     void setZoom(qreal z);
     qreal getZoom();
@@ -66,7 +67,7 @@ private:
         PictureItemGL(PictureItem *parent, Qt::WindowFlags f = 0);
         ~PictureItemGL();
         void setRotation(qreal r);
-        void setClearColor(const QColor &color);
+        void updateClearColor();
         void setZoom(qreal current, qreal previous);
         void setImage(QImage img);
         void setTexture(QImage tex, int num);
@@ -98,7 +99,9 @@ private:
     void afterPixmapLoad();
     void ScrollPageHorizontal(int value);
     void ScrollPageVertical(int value);
+    void calculateAverageColor(const QImage &img);
 
+    Settings *m_settings;
     PictureItemGL *m_imageDisplay_gl;
     PictureItemRaster *m_imageDisplay_raster;
     QFutureWatcher< QImage > *m_loader_image;

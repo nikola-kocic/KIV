@@ -3,6 +3,7 @@
 
 //#include <QDebug>
 #include <QtGui/QStyle>
+#include <QImageReader>
 
 bool checkFileExtension(const QFileInfo &info)
 {
@@ -18,12 +19,12 @@ bool checkFileExtension(const QFileInfo &info)
 
 bool isArchive(const QFileInfo &fi)
 {
-    return Settings::Instance()->getFiltersArchive().contains(fi.suffix().toLower());
+    return getFiltersArchive().contains(fi.suffix().toLower());
 }
 
 bool isImage(const QFileInfo &fi)
 {
-    return Settings::Instance()->getFiltersImage().contains(fi.suffix().toLower());
+    return getFiltersImage().contains(fi.suffix().toLower());
 }
 
 
@@ -35,4 +36,24 @@ QIcon getDirectoryIcon()
 QIcon getFileIcon()
 {
     return QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+}
+
+QStringList getFiltersArchive()
+{
+    QStringList filters_archive;
+
+    filters_archive << "zip" << "cbz";
+
+    return filters_archive;
+}
+
+QStringList getFiltersImage()
+{
+    QStringList filters_image;
+    for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
+    {
+        filters_image.append(QImageReader::supportedImageFormats().at(i));
+    }
+
+    return filters_image;
 }

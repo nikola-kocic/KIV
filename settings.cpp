@@ -1,18 +1,10 @@
 #include "settings.h"
 
 #include <QApplication>
-#include <QImageReader>
-
 
 Settings::Settings()
 {
     m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
-
-    m_filters_archive << "zip" << "cbz";
-    for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
-    {
-        m_filters_image.append(QImageReader::supportedImageFormats().at(i));
-    }
 
     m_middleClick = m_settings->value("Mouse/MiddleClick", 1).toInt();
     m_wheel = m_settings->value("Mouse/Wheel", 1).toInt();
@@ -45,13 +37,6 @@ Settings::Settings()
     }
 
 }
-
-Settings *Settings::Instance()
-{
-    static Settings inst;
-    return &inst;
-}
-
 
 int Settings::getMiddleClick() const
 {
@@ -153,16 +138,6 @@ void Settings::setHardwareAcceleration(bool b)
     m_settings->setValue("Interface/HardwareAcceleration", m_hardwareAcceleration);
 }
 
-
-QStringList Settings::getFiltersImage() const
-{
-    return m_filters_image;
-}
-
-QStringList Settings::getFiltersArchive() const
-{
-    return m_filters_archive;
-}
 
 int Settings::getThumbnailSize() const
 {

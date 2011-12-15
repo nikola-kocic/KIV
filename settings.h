@@ -47,7 +47,7 @@ class Settings
 {
 
 public:
-    static Settings  *Instance();
+    Settings();
 
     int getMiddleClick() const;
     void setMiddleClick(int);
@@ -76,8 +76,6 @@ public:
     bool getHardwareAcceleration() const;
     void setHardwareAcceleration(bool);
 
-    QStringList getFiltersImage() const;
-    QStringList getFiltersArchive() const;
 
     int getThumbnailSize() const;
     void setThumbnailSize(int);
@@ -94,12 +92,6 @@ public:
     QList<Bookmark> getBookmarks();
 
 private:
-
-    /* Make your constructors private */
-    Settings();
-    Settings(const Settings&);
-    Settings& operator= (const Settings&);
-
     void refreshBookmarks();
     QSettings *m_settings;
 
@@ -108,8 +100,6 @@ private:
 
     bool m_largeIcons;
     QString m_lastPath;
-    QStringList m_filters_image;
-    QStringList m_filters_archive;
 
     bool m_scrollPageByWidth;
     bool m_rightToLeft;

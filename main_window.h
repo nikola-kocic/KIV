@@ -31,6 +31,7 @@ private:
     bool acceptFileDrop(const QMimeData *mimeData);
     void openFile(const QString &source);
 
+    Settings *m_settings;
     QFileSystemModel *m_model_filesystem;
     FilesModel *m_model_files;
 

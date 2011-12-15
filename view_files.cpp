@@ -14,7 +14,7 @@ ViewFiles::ViewFiles(QWidget *parent)
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_proxy = new QSortFilterProxyModel(this);
-    m_currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+    m_currentInfo.thumbSize = 200;
 
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
@@ -55,9 +55,15 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 
     if (this->viewMode() == QListView::IconMode)
     {
-        m_currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+        m_currentInfo.thumbSize = m_thumb_size.width();;
         this->startShowingThumbnails();
     }
+}
+
+void ViewFiles::setThumbnailsSize(const QSize &size)
+{
+     m_currentInfo.thumbSize = size.width();
+     m_thumb_size = size;
 }
 
 
@@ -130,7 +136,7 @@ void ViewFiles::setViewMode(ViewMode mode)
 
     if (mode == QListView::IconMode)
     {
-        m_currentInfo.thumbSize = Settings::Instance()->getThumbnailSize();
+        m_currentInfo.thumbSize = m_thumb_size.width();
         iconSize = m_currentInfo.thumbSize;
         gridSize = iconSize + 50;
     }

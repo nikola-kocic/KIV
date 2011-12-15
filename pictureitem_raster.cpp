@@ -14,18 +14,6 @@ PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::Windo
 void PictureItem::PictureItemRaster::setImage(QImage img)
 {
     this->setUpdatesEnabled(false);
-    if (Settings::Instance()->getCalculateAverageColor())
-    {
-        QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        m_picItem->m_color_clear = QColor::fromRgb(averageColorImage.pixel(0,0));
-    }
-    else
-    {
-        if (m_picItem->m_color_clear != Qt::lightGray)
-        {
-            m_picItem->m_color_clear = Qt::lightGray;
-        }
-    }
 
     m_pixmap = QPixmap::fromImage(img);
 

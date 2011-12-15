@@ -1,14 +1,14 @@
 #include "pictureitem.h"
-#include "settings.h"
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(bool opengl, QWidget *parent, Qt::WindowFlags f) : QWidget(parent)
+PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f) : QWidget(parent)
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    m_opengl = opengl;
+    m_settings = settings;
+    m_opengl = settings->getHardwareAcceleration();
     m_imageDisplay_raster = 0;
     m_imageDisplay_gl = 0;
     m_defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
@@ -184,6 +184,7 @@ void PictureItem::setPixmap(const FileInfo &info)
     m_returnTexCount = 0;
     if (!info.fileExists())
     {
+        calculateAverageColor(QImage());
         if (m_opengl)
         {
             m_imageDisplay_gl->setImage(QImage());
@@ -210,6 +211,7 @@ void PictureItem::imageFinished(int num)
     qDebug() << QDateTime::currentDateTime() << "\nloaded image" << t.restart();
 #endif
     this->setPixmapNull(m_loader_image->resultAt(num).isNull());
+    calculateAverageColor(m_loader_image->resultAt(num));
     if (m_opengl)
     {
         m_imageDisplay_gl->setImage(m_loader_image->resultAt(num));
@@ -255,8 +257,8 @@ void PictureItem::afterPixmapLoad()
 
     if (m_boundingRect.width() > this->size().width())
     {
-        if ((Settings::Instance()->getRightToLeft() && !m_flag_jumpToEnd)
-                || (!Settings::Instance()->getRightToLeft() && m_flag_jumpToEnd)
+        if ((m_settings->getRightToLeft() && !m_flag_jumpToEnd)
+                || (!m_settings->getRightToLeft() && m_flag_jumpToEnd)
 
                 )
         {
@@ -312,7 +314,7 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
     }
     else if (ev->button() == Qt::MiddleButton)
     {
-        switch (Settings::Instance()->getMiddleClick())
+        switch (m_settings->getMiddleClick())
         {
         case MiddleClickAction::Fullscreen :
             emit(toggleFullscreen());
@@ -445,7 +447,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             (Qt::ControlModifier == event->modifiers()) ||
             (
                 (Qt::NoModifier == event->modifiers()) &&
-                (WheelAction::Zoom == Settings::Instance()->getWheel())
+                (WheelAction::Zoom == m_settings->getWheel())
                 )
             )
     {
@@ -463,10 +465,10 @@ void PictureItem::wheelEvent(QWheelEvent *event)
     else if (Qt::NoModifier == event->modifiers())
     {
         /* If page can't be scrolled, change page if necessary */
-        if (WheelAction::ChangePage == Settings::Instance()->getWheel() ||
+        if (WheelAction::ChangePage == m_settings->getWheel() ||
                 (
-                    (WheelAction::Scroll == Settings::Instance()->getWheel()) &&
-                    (Settings::Instance()->getScrollChangesPage()) &&
+                    (WheelAction::Scroll == m_settings->getWheel()) &&
+                    (m_settings->getScrollChangesPage()) &&
                     (
                         (LockMode::Autofit == m_lockMode) ||
                         (LockMode::FitHeight == m_lockMode) ||
@@ -482,13 +484,13 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
             else
             {
-                m_flag_jumpToEnd = Settings::Instance()->getJumpToEnd();
+                m_flag_jumpToEnd = m_settings->getJumpToEnd();
                 emit pagePrevious();
                 event->accept();
             }
         }
         /* Scroll page */
-        else if (WheelAction::Scroll == Settings::Instance()->getWheel())
+        else if (WheelAction::Scroll == m_settings->getWheel())
         {
             event->accept();
             if (
@@ -498,9 +500,9 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                     )
             {
                 /* Scroll horizontally; If page is scrolled to end, start timer */
-                if (Settings::Instance()->getScrollPageByWidth())
+                if (m_settings->getScrollPageByWidth())
                 {
-                    if (Settings::Instance()->getRightToLeft())
+                    if (m_settings->getRightToLeft())
                     {
                         if (m_boundingRect.x() < 0)
                         {
@@ -530,7 +532,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                 }
                 /* If this code is reached (page was already scrolled to end), change page to next */
                 if (
-                        (Settings::Instance()->getScrollChangesPage()) &&
+                        (m_settings->getScrollChangesPage()) &&
                         (!m_timer_scrollPage->isActive())
                         )
                 {
@@ -540,14 +542,14 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
             /* If page is at top, change page to previous */
             else if (
-                     (Settings::Instance()->getScrollChangesPage()) &&
+                     (m_settings->getScrollChangesPage()) &&
                      (event->delta() > 0) &&
                      (m_boundingRect.y() == 0) &&
                      (!m_timer_scrollPage->isActive())
                      )
             {
                 this->start_timerScrollPage();
-                m_flag_jumpToEnd = Settings::Instance()->getJumpToEnd();
+                m_flag_jumpToEnd = m_settings->getJumpToEnd();
                 emit pagePrevious();
             }
             /* Scroll vertically; If page is scrolled to top or bottom, start timer */
@@ -589,9 +591,9 @@ void PictureItem::wheelEvent(QWheelEvent *event)
 
 void PictureItem::start_timerScrollPage()
 {
-    if (Settings::Instance()->getPageChangeTimeout() > 0)
+    if (m_settings->getPageChangeTimeout() > 0)
     {
-        m_timer_scrollPage->start(Settings::Instance()->getPageChangeTimeout());
+        m_timer_scrollPage->start(m_settings->getPageChangeTimeout());
     }
 }
 
@@ -916,6 +918,27 @@ void PictureItem::ScrollPageVertical(int value)
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(0,value));
     this->endDrag();
+}
+
+void PictureItem::calculateAverageColor(const QImage &img)
+{
+    if (m_settings->getCalculateAverageColor() && !img.isNull())
+    {
+        QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        m_color_clear = QColor::fromRgb(averageColorImage.pixel(0,0));
+    }
+    else
+    {
+        if (m_color_clear != Qt::lightGray)
+        {
+            m_color_clear = Qt::lightGray;
+        }
+    }
+
+    if (m_opengl)
+    {
+        m_imageDisplay_gl->updateClearColor();
+    }
 }
 
 void PictureItem::ScrollPageHorizontal(int value)
