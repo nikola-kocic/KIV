@@ -55,13 +55,13 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 
 QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thumb_info)
 {
-    QImage thumb(thumb_info.thumbSize.width() + 2, thumb_info.thumbSize.height() + 2, QImage::Format_RGB32);
+    QImage thumb(thumb_info.thumbSize.width() + 2, thumb_info.thumbSize.height() + 2, QImage::Format_ARGB32);
+    thumb.fill(qRgba(0, 200, 0, 0));
     QPainter painter(&thumb);
-    painter.fillRect(0,0,thumb.width(), thumb.height(), Qt::lightGray);
     QPoint imgPoint((thumb.width() - img.width()) / 2, (thumb.height() - img.height()) / 2);
+    painter.setPen(Qt::lightGray);
     painter.drawRect(0, 0, thumb.width() - 1, thumb.height() - 1);
     painter.drawImage(imgPoint, img);
-//    painter.drawRect(imgPoint.x(), imgPoint.y(), img.width(), img.height());
     painter.end();
     return thumb;
 }
@@ -155,7 +155,7 @@ QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &th
 
     QSize result(new_width, new_height);
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime() << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result << "w_scale" << w_scale <<"h_scale" << h_scale;
+    qDebug() << QDateTime::currentDateTime() << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result << "x_scale" << x_scale << "y_scale" << y_scale;
 #endif
     return result;
 }

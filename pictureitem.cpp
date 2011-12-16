@@ -63,12 +63,10 @@ void PictureItem::setHardwareAcceleration(bool b)
     {
         if (m_opengl)
         {
-            m_imageDisplay_gl->disconnect();
             m_imageDisplay_gl->deleteLater();
         }
         else
         {
-            m_imageDisplay_raster->disconnect();
             m_imageDisplay_raster->deleteLater();
         }
 

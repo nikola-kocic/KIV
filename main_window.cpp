@@ -179,9 +179,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 
     /* Start filesView */
-    m_view_files = new ViewFiles(this);
+    m_view_files = new ViewFiles(m_model_files);
     m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
-    m_view_files->setModel(m_model_files);
+//    m_view_files->setModel(m_model_files);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
     policyV.setHorizontalStretch(0);
@@ -680,7 +680,7 @@ void MainWindow::openFile(const QString &source)
             return;
         }
 
-        m_view_files->setCurrentIndexFromSource(m_model_files->findIndexChild(info.zipImageFileName, dirIndex));
+        m_view_files->setCurrentIndex(m_model_files->findIndexChild(info.zipImageFileName, dirIndex));
     }
     else
     {
@@ -692,10 +692,9 @@ void MainWindow::openFile(const QString &source)
             return;
         }
 
-        m_view_files->setCurrentIndexFromSource(m_model_files->findRootIndexChild(info.imageFileName));
+        m_view_files->setCurrentIndex(m_model_files->findRootIndexChild(info.imageFileName));
     }
 
-    m_view_files->scrollTo(m_view_files->currentIndex());
 }
 
 bool MainWindow::acceptFileDrop(const QMimeData *mimeData)
@@ -861,7 +860,7 @@ void MainWindow::on_filesView_item_activated(const QModelIndex &index)
     }
     else if (type == TYPE_ARCHIVE_DIR)
     {
-        m_view_archiveDirs->setCurrentIndexFromSource(m_view_files->getIndexFromProxy(index));
+        m_view_archiveDirs->setCurrentIndexFromSource(index);
     }
 }
 

@@ -22,7 +22,9 @@ SOURCES += \
     picture_loader.cpp \
     model_files.cpp \
     helper.cpp \
-    fileinfo.cpp
+    fileinfo.cpp \
+    view_files_list.cpp \
+    thumbnailitemdelegate.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -49,7 +51,8 @@ HEADERS += \
     picture_loader.h \
     model_files.h \
     helper.h \
-    fileinfo.h
+    fileinfo.h \
+    thumbnailitemdelegate.h
 
 RESOURCES += \
     kiv.qrc

@@ -12,6 +12,33 @@
 #include <QDebug>
 #endif
 
+QString bytesToSize(int bytes, int precision)
+{
+    int kilobyte = 1024;
+    int megabyte = kilobyte * 1024;
+    int gigabyte = megabyte * 1024;
+    int terabyte = gigabyte * 1024;
+
+    if ((bytes >= 0) && (bytes < kilobyte)) {
+        return QString::number(bytes) + " B";
+
+    } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
+        return QString::number(((float)bytes / kilobyte), 'f', precision) + " KB";
+
+    } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
+        return QString::number(((float)bytes / megabyte), 'f', precision) + " MB";
+
+    } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
+        return QString::number(((float)bytes / gigabyte), 'f', precision) + " GB";
+
+    } else if (bytes >= terabyte) {
+        return QString::number(((float)bytes / terabyte), 'f', precision) + " TB";
+
+    } else {
+        return QString::number(bytes) + " B";
+    }
+}
+
 void FilesModel::setPath(const FileInfo &path)
 {
 #ifdef DEBUG_MODEL_FILES
@@ -19,6 +46,7 @@ void FilesModel::setPath(const FileInfo &path)
 #endif
     this->clear();
 
+    this->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Date") << tr("Size"));
     if (!path.isZip())
     {
         QDir dir(path.containerPath);
@@ -30,7 +58,7 @@ void FilesModel::setPath(const FileInfo &path)
         {
             QStandardItem *item = 0;
 
-            QFileInfo info = list.at(i);
+            const QFileInfo &info = list.at(i);
 
             if (info.isDir())
             {
@@ -54,7 +82,10 @@ void FilesModel::setPath(const FileInfo &path)
                 item->setIcon(fip.icon(info));
                 item->setToolTip(item->text());
 
-                this->invisibleRootItem()->appendRow(item);
+                QStandardItem *date = new QStandardItem(info.lastModified().toString(Qt::SystemLocaleShortDate));
+                QStandardItem *size = new QStandardItem(bytesToSize(info.size(), 2));
+
+                this->invisibleRootItem()->appendRow(QList<QStandardItem *>() << item << date << size);
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << "appendRow" << info.fileName();
 #endif
