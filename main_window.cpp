@@ -24,6 +24,7 @@
 #endif
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
+    : QMainWindow(parent, f)
 {
     m_settings = new Settings();
     this->setAcceptDrops(true);
@@ -382,6 +383,13 @@ void MainWindow::createActions()
     m_act_thumbnails = new QAction(QIcon::fromTheme("view-list-icons"), tr("&Show Thumbnails"), this);
     m_act_thumbnails->setCheckable(true);
 
+    m_act_mode_icons = new QAction(tr("&Icons"), this);
+    m_act_mode_icons->setCheckable(true);
+
+    m_act_mode_details = new QAction(tr("&Details"), this);
+    m_act_mode_details->setCheckable(true);
+    m_act_mode_details->setChecked(true);
+
     m_act_fullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("&Full Screen"), this);
     m_act_fullscreen->setShortcut(Qt::Key_F11);
     m_act_fullscreen->setCheckable(true);
@@ -514,6 +522,15 @@ void MainWindow::createMenus()
     optionsMenu->addAction(m_act_pageNext);
     optionsMenu->addSeparator();
     optionsMenu->addAction(m_act_thumbnails);
+
+    QActionGroup *viewModes = new QActionGroup(this);
+    viewModes->addAction(m_act_mode_details);
+    viewModes->addAction(m_act_mode_icons);
+
+    QMenu *menuViewMode = optionsMenu->addMenu("&View Mode");
+    menuViewMode->addAction(m_act_mode_details);
+    menuViewMode->addAction(m_act_mode_icons);
+
     this->addAction(m_act_fullscreen);
     optionsMenu->addAction(m_act_fullscreen);
     optionsMenu->addAction(m_act_sidebar);
@@ -543,6 +560,8 @@ void MainWindow::connectActions()
     connect(m_act_fullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullscreen(bool)));
     connect(m_act_largeIcons, SIGNAL(toggled(bool)), this, SLOT(toggleLargeIcons(bool)));
     connect(m_act_sidebar, SIGNAL(toggled(bool)), this, SLOT(toggleSidebar(bool)));
+    connect(m_act_mode_details, SIGNAL(triggered()), this, SLOT(on_view_mode_details_triggered()));
+    connect(m_act_mode_icons, SIGNAL(triggered()), this, SLOT(on_view_mode_icons_triggered()));
 
     connect(m_act_rotateLeft, SIGNAL(triggered()), this, SLOT(rotateLeft()));
     connect(m_act_rotateRight, SIGNAL(triggered()), this, SLOT(rotateRight()));
@@ -1135,16 +1154,9 @@ void MainWindow::on_comboBoxZoom_activated(const int &index)
     m_picture_item->setZoom(m_comboBox_zoom->itemData(index).toReal());
 }
 
-void MainWindow::toggleShowThumbnails(bool)
+void MainWindow::toggleShowThumbnails(bool b)
 {
-    if (m_act_thumbnails->isChecked())
-    {
-        m_view_files->setViewMode(QListView::IconMode);
-    }
-    else
-    {
-        m_view_files->setViewMode(QListView::ListMode);
-    }
+    m_view_files->setShowThumbnails(b);
 }
 
 void MainWindow::updateActions()
@@ -1176,4 +1188,14 @@ void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
         m_act_bookmark_delete->setData(action->data());
         m_menu_context_bookmark->popup(m_menu_bookmarks->mapToGlobal(pos));
     }
+}
+
+void MainWindow::on_view_mode_details_triggered()
+{
+    m_view_files->setViewMode(QListView::ListMode);
+}
+
+void MainWindow::on_view_mode_icons_triggered()
+{
+    m_view_files->setViewMode(QListView::IconMode);
 }

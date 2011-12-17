@@ -12,9 +12,8 @@ ViewFiles::ListViewFiles::ListViewFiles(ViewFiles *parent)
     this->setViewMode(QListView::IconMode);
 
     //add item delegate
-    m_thumbnail_delegate = new ThumbnailItemDelegate(this);
+    m_thumbnail_delegate = new ThumbnailItemDelegate(m_parent->m_thumb_size, this);
     connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)), m_parent, SLOT(on_thumbnail_finished(QModelIndex)));
-    this->setItemDelegateForColumn(0, m_thumbnail_delegate);
 }
 
 QModelIndex ViewFiles::ListViewFiles::getIndexFromProxy(const QModelIndex &index) const
@@ -39,6 +38,20 @@ void ViewFiles::ListViewFiles::setCurrentIndex(const QModelIndex &index)
 void ViewFiles::ListViewFiles::setRootIndex(const QModelIndex &index)
 {
     QListView::setRootIndex(m_proxy->mapFromSource(index));
+}
+
+void ViewFiles::ListViewFiles::setShowThumbnails(bool b)
+{
+    if (b)
+    {
+        this->setItemDelegateForColumn(0, m_thumbnail_delegate);
+        this->startShowingThumbnails();
+    }
+    else
+    {
+        this->setItemDelegateForColumn(0, 0);
+    }
+    this->doItemsLayout();
 }
 
 void ViewFiles::ListViewFiles::startShowingThumbnails()

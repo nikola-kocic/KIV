@@ -12,7 +12,7 @@ class ThumbnailItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit ThumbnailItemDelegate(QObject *parent);
+    explicit ThumbnailItemDelegate(QSize thumbSize, QObject *parent);
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
     void updateThumbnails(ThumbnailInfo thumb_info);
 

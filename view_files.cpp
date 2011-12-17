@@ -12,7 +12,9 @@
 #endif
 
 ViewFiles::ViewFiles(QAbstractItemModel *model, QWidget *parent)
+    : QWidget(parent)
 {
+    m_show_thumbnails = false;
     m_model = model;
     m_thumb_size = QSize(200, 200);
 
@@ -64,12 +66,24 @@ void ViewFiles::initViewItem()
     {
         m_aiv->setRootIndex(m_index_current_archive_dirs);
     }
-    connect(m_aiv, SIGNAL(activated(QModelIndex)), this, SIGNAL(activated(QModelIndex)));
+    connect(m_aiv, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
     connect(m_aiv->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
     this->layout()->addWidget(m_aiv);
-    if (m_mode == QListView::IconMode)
+    setShowThumbnails(m_show_thumbnails);
+}
+
+void ViewFiles::showThumbnails()
+{
+    if (m_show_thumbnails)
     {
-        m_listView_files->startShowingThumbnails();
+        if (m_mode == QListView::IconMode)
+        {
+            m_listView_files->startShowingThumbnails();
+        }
+        else
+        {
+            m_treeView_files->startShowingThumbnails();
+        }
     }
 }
 
@@ -90,14 +104,7 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
 {
     m_currentInfo = info;
 
-    if (m_mode == QListView::IconMode)
-    {
-        m_listView_files->startShowingThumbnails();
-    }
-//    else
-//    {
-//        m_treeView_files->startShowingThumbnails();
-//    }
+    showThumbnails();
 }
 
 void ViewFiles::setThumbnailsSize(const QSize &size)
@@ -105,14 +112,7 @@ void ViewFiles::setThumbnailsSize(const QSize &size)
     if (m_thumb_size != size)
     {
         m_thumb_size = size;
-        if (m_mode == QListView::IconMode)
-        {
-            m_listView_files->startShowingThumbnails();
-        }
-//        else
-//        {
-//            m_treeView_files->startShowingThumbnails();
-//        }
+        showThumbnails();
     }
 }
 
@@ -141,23 +141,17 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
     m_aiv->setRootIndex(index);
     m_index_current_archive_dirs = index;
     m_aiv->selectionModel()->clear();
-    if (m_mode == QListView::IconMode)
-    {
-        m_listView_files->startShowingThumbnails();
-    }
-//    else
-//    {
-//        m_treeView_files->startShowingThumbnails();
-//    }
+    showThumbnails();
     emit currentFileChanged(m_currentInfo);
 }
 
 void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 {
-    if (m_mode == QListView::IconMode)
-    {
-        m_listView_files->update(index);
-    }
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::on_thumbnail_finished" << index << index.data();
+#endif
+
+    m_aiv->update(index);
 }
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -229,8 +223,30 @@ void ViewFiles::pagePrevious()
 }
 
 
-void ViewFiles::on_thumbnail_activated(const QModelIndex &index)
+void ViewFiles::on_item_activated(const QModelIndex &index)
 {
-    emit activated(m_listView_files->getIndexFromProxy(index));
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::on_thumbnail_activated" <<index <<  index.data();
+#endif
+    if (m_mode == QListView::IconMode)
+    {
+        emit activated(m_listView_files->getIndexFromProxy(index));
+    }
+    else
+    {
+        emit activated(index);
+    }
 }
 
+void ViewFiles::setShowThumbnails(bool b)
+{
+    m_show_thumbnails = b;
+    if (m_mode == QListView::IconMode)
+    {
+        m_listView_files->setShowThumbnails(b);
+    }
+    else
+    {
+        m_treeView_files->setShowThumbnails(b);
+    }
+}

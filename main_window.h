@@ -83,6 +83,10 @@ private:
     QAction *m_act_largeIcons;
     QAction *m_act_settings;
 
+
+    QAction *m_act_mode_icons;
+    QAction *m_act_mode_details;
+
     /* Help Actions */
     QAction *m_act_webSite;
     QAction *m_act_about;
@@ -147,6 +151,8 @@ private slots:
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);
+    void on_view_mode_details_triggered();
+    void on_view_mode_icons_triggered();
 
 protected:
     void closeEvent(QCloseEvent *event);

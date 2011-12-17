@@ -14,28 +14,28 @@
 #endif
 
 
-ThumbnailItemDelegate::ThumbnailItemDelegate(QObject *parent)
+ThumbnailItemDelegate::ThumbnailItemDelegate(QSize thumbSize, QObject *parent)
     : QStyledItemDelegate(parent)
 {
+    m_thumb_size = thumbSize;
     m_watcherThumbnail = new QFutureWatcher<QImage>(this);
     connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
 }
 
 QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if (!m_thumb_size.isEmpty())
-    {
-        QSize size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.fontMetrics.height() + 10);
-        return size_grid;
-    }
-    else
-    {
-        return QStyledItemDelegate::sizeHint(option, index);
-    }
+    QSize size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.fontMetrics.height() + 10);
+    return size_grid;
 }
 
 void ThumbnailItemDelegate::updateThumbnails(ThumbnailInfo thumb_info)
 {
+    if (m_watcherThumbnail->isRunning())
+    {
+        m_watcherThumbnail->cancel();
+        m_watcherThumbnail->waitForFinished();
+    }
+
     m_thumb_size = thumb_info.thumbSize;
     m_thumbs_return_count = 0;
     m_indexes.clear();

@@ -13,9 +13,8 @@ ViewFiles::TreeViewFiles::TreeViewFiles(ViewFiles *parent)
     this->header()->setDefaultSectionSize(100);
 
     //add item delegate
-    m_thumbnail_delegate = new ThumbnailItemDelegate(this);
+    m_thumbnail_delegate = new ThumbnailItemDelegate(m_parent->m_thumb_size, this);
     connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)), m_parent, SLOT(on_thumbnail_finished(QModelIndex)));
-    this->setItemDelegateForColumn(0, m_thumbnail_delegate);
 }
 
 void ViewFiles::TreeViewFiles::startShowingThumbnails()
@@ -26,4 +25,18 @@ void ViewFiles::TreeViewFiles::startShowingThumbnails()
     }
 
     m_thumbnail_delegate->updateThumbnails(ThumbnailInfo(m_parent->m_currentInfo, m_parent->m_thumb_size));
+}
+
+void ViewFiles::TreeViewFiles::setShowThumbnails(bool b)
+{
+    if (b)
+    {
+        this->setItemDelegateForColumn(0, m_thumbnail_delegate);
+        this->startShowingThumbnails();
+    }
+    else
+    {
+        this->setItemDelegateForColumn(0, 0);
+    }
+    this->doItemsLayout();
 }
