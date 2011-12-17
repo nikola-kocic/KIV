@@ -3,12 +3,12 @@
 
 #include "picture_loader.h"
 
-#include <QItemDelegate>
 #include <QModelIndex>
 #include <QPainter>
 #include <QFutureWatcher>
+#include <QStyledItemDelegate>
 
-class ThumbnailItemDelegate : public QItemDelegate
+class ThumbnailItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
@@ -16,13 +16,11 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 protected:
-    void drawDecoration(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QPixmap &pixmap) const;
-    void drawDisplay(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect, const QString &text) const;
-    void drawFocus(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect) const;
+    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const;
 
 private:
     ThumbnailInfo m_thumb_info;
-    QImage m_thumbnail;
+    QIcon m_thumbnail;
     QModelIndex m_index;
     QFutureWatcher<QImage> *m_watcherThumbnail;
 

@@ -10,7 +10,6 @@
 #include <QSortFilterProxyModel>
 #include <QFutureWatcher>
 #include <QtConcurrentMap>
-#include <QItemDelegate>
 
 class ViewFiles : public QWidget
 {
@@ -37,7 +36,6 @@ private:
     public:
         explicit ListViewFiles(ViewFiles *parent);
         void startShowingThumbnails();
-        void setThumbnailsSize(const QSize &size);
 
         void setModel(QAbstractItemModel *model);
         QModelIndex getIndexFromProxy(const QModelIndex &index) const;

@@ -56,18 +56,22 @@ void ViewFiles::ListViewFiles::startShowingThumbnails()
 
         QModelIndex index = m_proxy->index(i, 0, this->rootIndex());
         int type = m_proxy->data(index, ROLE_TYPE).toInt();
+        QString name = m_proxy->data(index, Qt::DisplayRole).toString();
+        pli_info = m_parent->m_currentInfo;
         if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            pli_info = m_parent->m_currentInfo;
-
             if (!m_parent->m_currentInfo.isZip())
             {
-                pli_info.imageFileName = m_proxy->data(index, Qt::DisplayRole).toString();
+                pli_info.imageFileName = name;
             }
             else
             {
-                pli_info.zipImageFileName = m_proxy->data(index, Qt::DisplayRole).toString();
+                pli_info.zipImageFileName = name;
             }
+        }
+        else
+        {
+            pli_info.containerPath += "/" + name;
         }
 
         ThumbnailItemDelegate *tid = new ThumbnailItemDelegate(ThumbnailInfo(pli_info, m_parent->m_thumb_size), index, this);
@@ -76,13 +80,4 @@ void ViewFiles::ListViewFiles::startShowingThumbnails()
         this->setItemDelegateForRow(i, tid);
     }
 
-}
-
-void ViewFiles::ListViewFiles::setThumbnailsSize(const QSize &size)
-{
-    QSize size_grid = QSize(size.width() + 50, size.height() + 50);
-    this->setGridSize(size_grid);
-    this->setIconSize(size);
-
-    startShowingThumbnails();
 }

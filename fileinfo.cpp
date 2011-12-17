@@ -62,6 +62,10 @@ QString FileInfo::getFilePath() const
     {
         return containerPath + "/" + zipImagePath();
     }
+    else if (imageFileName.isEmpty())
+    {
+        return containerPath;
+    }
     else
     {
         return containerPath + "/" + imageFileName;

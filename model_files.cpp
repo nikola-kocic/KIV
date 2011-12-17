@@ -46,9 +46,9 @@ void FilesModel::setPath(const FileInfo &path)
 #endif
     this->clear();
 
-    this->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Date") << tr("Size"));
     if (!path.isZip())
     {
+        this->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Date") << tr("Size"));
         QDir dir(path.containerPath);
 
         QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
@@ -56,36 +56,56 @@ void FilesModel::setPath(const FileInfo &path)
 
         for (int i = 0; i < list.size(); ++i)
         {
-            QStandardItem *item = 0;
+            QStandardItem *name = 0;
 
             const QFileInfo &info = list.at(i);
 
+            bool isFile = true;
             if (info.isDir())
             {
-                item = new QStandardItem();
-                item->setData(TYPE_DIR, ROLE_TYPE);
+                name = new QStandardItem();
+                name->setData(TYPE_DIR, ROLE_TYPE);
+                isFile = false;
             }
             else if (isArchive(info))
             {
-                item = new QStandardItem();
-                item->setData(TYPE_ARCHIVE, ROLE_TYPE);
+                name = new QStandardItem();
+                name->setData(TYPE_ARCHIVE, ROLE_TYPE);
             }
             else if (isImage(info))
             {
-                item = new QStandardItem();
-                item->setData(TYPE_FILE, ROLE_TYPE);
+                name = new QStandardItem();
+                name->setData(TYPE_FILE, ROLE_TYPE);
             }
 
-            if (item != 0)
+            if (name != 0)
             {
-                item->setText(info.fileName());
-                item->setIcon(fip.icon(info));
-                item->setToolTip(item->text());
+                name->setText(info.fileName());
+                name->setIcon(fip.icon(info));
 
                 QStandardItem *date = new QStandardItem(info.lastModified().toString(Qt::SystemLocaleShortDate));
-                QStandardItem *size = new QStandardItem(bytesToSize(info.size(), 2));
+                QStandardItem *size = new QStandardItem("");
+                if (isFile)
+                {
+                    size->setText(bytesToSize(info.size(), 2));
+                }
 
-                this->invisibleRootItem()->appendRow(QList<QStandardItem *>() << item << date << size);
+                QString tooltip = tr("Name: ") + name->text() + "\n" +
+                        tr("Date Modified: ") + date->text();
+
+                if (isFile)
+                {
+                    tooltip += (isFile ? "\n" + (tr("Size: ") + size->text()) : "");
+                }
+                name->setToolTip(tooltip);
+
+                date->setToolTip(tooltip);
+                if (isFile)
+                {
+                    size->setToolTip(tooltip);
+                }
+
+                this->invisibleRootItem()->appendRow(QList<QStandardItem *>() << name << date << size);
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << "appendRow" << info.fileName();
 #endif
@@ -94,6 +114,7 @@ void FilesModel::setPath(const FileInfo &path)
     }
     else
     {
+        this->setHorizontalHeaderLabels(QStringList() << tr("Name"));
         QFile zipFile(path.containerPath);
         QuaZip zip(&zipFile);
         if (!zip.open(QuaZip::mdUnzip))

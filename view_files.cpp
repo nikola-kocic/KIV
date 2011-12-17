@@ -73,7 +73,7 @@ void ViewFiles::initViewItem()
     this->layout()->addWidget(m_aiv);
     if (m_mode == QListView::IconMode)
     {
-        m_listView_files->setThumbnailsSize(m_thumb_size);
+        m_listView_files->startShowingThumbnails();
     }
 }
 
@@ -107,7 +107,7 @@ void ViewFiles::setThumbnailsSize(const QSize &size)
         m_thumb_size = size;
         if (m_mode == QListView::IconMode)
         {
-            m_listView_files->setThumbnailsSize(size);
+            m_listView_files->startShowingThumbnails();
         }
     }
 }

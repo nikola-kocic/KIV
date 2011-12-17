@@ -17,7 +17,18 @@
 
 QImage PictureLoader::getImage(const FileInfo &info)
 {
-    return PictureLoader::getThumbnail(ThumbnailInfo(info, QSize(0, 0)));
+    if (!info.fileExists())
+    {
+        return QImage(0,0);
+    }
+    else if (info.isZip())
+    {
+        return PictureLoader::getImageFromZip(ThumbnailInfo(info, QSize(0, 0)));
+    }
+    else
+    {
+        return PictureLoader::getImageFromFile(ThumbnailInfo(info, QSize(0, 0)));
+    }
 }
 
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
@@ -31,25 +42,11 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
     }
     else if (thumb_info.info.isZip())
     {
-        if (thumb_info.thumbSize.isEmpty())
-        {
-            return PictureLoader::getImageFromZip(thumb_info);
-        }
-        else
-        {
-            return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info);
-        }
+        return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info);
     }
     else
     {
-        if (thumb_info.thumbSize.isEmpty())
-        {
-            return PictureLoader::getImageFromFile(thumb_info);
-        }
-        else
-        {
-            return PictureLoader::styleThumbnail(PictureLoader::getImageFromFile(thumb_info), thumb_info);
-        }
+        return PictureLoader::styleThumbnail(PictureLoader::getImageFromFile(thumb_info), thumb_info);
     }
 }
 
