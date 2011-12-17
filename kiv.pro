@@ -24,7 +24,8 @@ SOURCES += \
     helper.cpp \
     fileinfo.cpp \
     view_files_list.cpp \
-    thumbnailitemdelegate.cpp
+    thumbnailitemdelegate.cpp \
+    view_files_tree.cpp
 
 HEADERS += \
     quazip/zip.h \

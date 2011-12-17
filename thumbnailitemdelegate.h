@@ -12,17 +12,21 @@ class ThumbnailItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    explicit ThumbnailItemDelegate(ThumbnailInfo thumb_info, const QModelIndex &index, QObject *parent = 0);
+    explicit ThumbnailItemDelegate(QObject *parent);
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    void updateThumbnails(ThumbnailInfo thumb_info);
 
 protected:
     void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const;
 
 private:
-    ThumbnailInfo m_thumb_info;
-    QIcon m_thumbnail;
-    QModelIndex m_index;
+    QSize m_thumb_size;
+    QHash<QModelIndex, QIcon> m_thumbnails;
     QFutureWatcher<QImage> *m_watcherThumbnail;
+
+    QList<ThumbnailInfo> m_files;
+    QList<QModelIndex> m_indexes;
+    int m_thumbs_return_count;
 
 signals:
     void thumbnailFinished(QModelIndex);

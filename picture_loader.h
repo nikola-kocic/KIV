@@ -4,6 +4,7 @@
 #include "helper.h"
 
 #include <QImage>
+#include <QAbstractItemModel>
 
 class ThumbnailInfo
 {

@@ -3,7 +3,6 @@
 
 #include <QFileIconProvider>
 #include <QLayout>
-#include <QHeaderView>
 
 //#define DEBUG_VIEW_FILES
 
@@ -54,10 +53,7 @@ void ViewFiles::initViewItem()
     }
     else
     {
-        m_treeView_files = new QTreeView(this);
-        m_treeView_files->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        m_treeView_files->setRootIsDecorated(false);
-        m_treeView_files->header()->setDefaultSectionSize(100);
+        m_treeView_files = new TreeViewFiles(this);
         m_listView_files = 0;
         m_aiv = qobject_cast<QAbstractItemView *>(m_treeView_files);
     }
@@ -98,6 +94,10 @@ void ViewFiles::setCurrentDirectory(const FileInfo &info)
     {
         m_listView_files->startShowingThumbnails();
     }
+//    else
+//    {
+//        m_treeView_files->startShowingThumbnails();
+//    }
 }
 
 void ViewFiles::setThumbnailsSize(const QSize &size)
@@ -109,6 +109,10 @@ void ViewFiles::setThumbnailsSize(const QSize &size)
         {
             m_listView_files->startShowingThumbnails();
         }
+//        else
+//        {
+//            m_treeView_files->startShowingThumbnails();
+//        }
     }
 }
 
@@ -141,12 +145,19 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
     {
         m_listView_files->startShowingThumbnails();
     }
+//    else
+//    {
+//        m_treeView_files->startShowingThumbnails();
+//    }
     emit currentFileChanged(m_currentInfo);
 }
 
 void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 {
-    m_listView_files->update(index);
+    if (m_mode == QListView::IconMode)
+    {
+        m_listView_files->update(index);
+    }
 }
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)

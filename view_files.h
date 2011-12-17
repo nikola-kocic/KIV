@@ -45,11 +45,22 @@ private:
     private:
         ViewFiles *m_parent;
         QSortFilterProxyModel *m_proxy;
-        QList <ThumbnailItemDelegate *> m_row_delegates;
+        ThumbnailItemDelegate *m_thumbnail_delegate;
+    };
+
+    class TreeViewFiles : public QTreeView
+    {
+    public:
+        explicit TreeViewFiles(ViewFiles *parent);
+        void startShowingThumbnails();
+
+    private:
+        ViewFiles *m_parent;
+        ThumbnailItemDelegate *m_thumbnail_delegate;
     };
 
     void initViewItem();
-    QTreeView *m_treeView_files;
+    TreeViewFiles *m_treeView_files;
     ListViewFiles *m_listView_files;
     QAbstractItemView *m_aiv;
     QModelIndex m_index_current_archive_dirs;
@@ -66,7 +77,7 @@ private slots:
     void on_thumbnail_finished(const QModelIndex &index);
 
 signals:
-    void currentFileChanged(FileInfo);
+    void currentFileChanged(const FileInfo &info);
     void activated(const QModelIndex &index);
 
 };
