@@ -65,132 +65,62 @@ void FilesModel::setPath(const FileInfo &path)
 #endif
     this->clear();
 
-    if (!path.isZip())
+    this->setHorizontalHeaderLabels(QStringList() << tr("Name"));
+    QFile zipFile(path.containerPath);
+    QuaZip zip(&zipFile);
+    if (!zip.open(QuaZip::mdUnzip))
     {
-        this->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Date") << tr("Size"));
-        QDir dir(path.containerPath);
-
-        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::Name | QDir::IgnoreCase);
-        QFileIconProvider fip;
-
-        for (int i = 0; i < list.size(); ++i)
-        {
-            QStandardItem *name = 0;
-
-            const QFileInfo &info = list.at(i);
-
-            bool isFile = true;
-            if (info.isDir())
-            {
-                name = new QStandardItem();
-                name->setData(TYPE_DIR, ROLE_TYPE);
-                isFile = false;
-            }
-            else if (isArchive(info))
-            {
-                name = new QStandardItem();
-                name->setData(TYPE_ARCHIVE, ROLE_TYPE);
-            }
-            else if (isImage(info))
-            {
-                name = new QStandardItem();
-                name->setData(TYPE_FILE, ROLE_TYPE);
-            }
-
-            if (name != 0)
-            {
-                name->setText(info.fileName());
-                name->setIcon(fip.icon(info));
-
-                QStandardItem *date = new QStandardItem();
-                QStandardItem *size = new QStandardItem("");
-                date->setData(info.lastModified(), Qt::DisplayRole);
-                if (isFile)
-                {
-                    size->setText(bytesToSize(info.size(), 2));
-                    size->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-                }
-
-                QString tooltip = tr("Name: ") + name->text() + "\n" +
-                        tr("Date Modified: ") + info.lastModified().toString(Qt::SystemLocaleShortDate);
-
-                if (isFile)
-                {
-                    tooltip += (isFile ? "\n" + (tr("Size: ") + size->text()) : "");
-                }
-                name->setToolTip(tooltip);
-
-                date->setToolTip(tooltip);
-                if (isFile)
-                {
-                    size->setToolTip(tooltip);
-                }
-
-                this->invisibleRootItem()->appendRow(QList<QStandardItem *>() << name << date << size);
-#ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << "appendRow" << info.fileName();
-#endif
-            }
-        }
+        qWarning("testRead(): zip.open(): %d", zip.getZipError());
+        return;
     }
-    else
+    zip.setFileNameCodec("UTF-8");
+
+    QStringList archive_files = zip.getFileNameList();
+
+    zip.close();
+    if (zip.getZipError() != UNZ_OK) {
+        qWarning("testRead(): zip.close(): %d", zip.getZipError());
+        return;
+    }
+
+
+    /* Populate treeViewFile */
+
+    QFileIconProvider fip;
+    QStandardItem *root = new QStandardItem();
+//    root->setData(TYPE_ARCHIVE);
+    QFileInfo zip_info(zipFile);
+    root->setIcon(fip.icon(zip_info));
+    root->setText(zip_info.fileName());
+
+    QStandardItem *node = root;
+
+    for (int i = 0; i < archive_files.size(); ++i)
     {
-        this->setHorizontalHeaderLabels(QStringList() << tr("Name"));
-        QFile zipFile(path.containerPath);
-        QuaZip zip(&zipFile);
-        if (!zip.open(QuaZip::mdUnzip))
+        node = root;
+        QStringList file_path_parts = archive_files.at(i).split('/');
+        for (int j = 0; j < file_path_parts.size(); ++j)
         {
-            qWarning("testRead(): zip.open(): %d", zip.getZipError());
-            return;
-        }
-        zip.setFileNameCodec("UTF-8");
-
-        QStringList archive_files = zip.getFileNameList();
-
-        zip.close();
-        if (zip.getZipError() != UNZ_OK) {
-            qWarning("testRead(): zip.close(): %d", zip.getZipError());
-            return;
-        }
-
-
-        /* Populate treeViewFile */
-
-        QFileIconProvider fip;
-        QStandardItem *root = new QStandardItem();
-        root->setData(TYPE_ARCHIVE);
-        QFileInfo zip_info(zipFile);
-        root->setIcon(fip.icon(zip_info));
-        root->setText(zip_info.fileName());
-
-        QStandardItem *node = root;
-
-        for (int i = 0; i < archive_files.size(); ++i)
-        {
-            node = root;
-            QStringList file_path_parts = archive_files.at(i).split('/');
-            for (int j = 0; j < file_path_parts.size(); ++j)
+            if (file_path_parts.at(j).size() > 0)
             {
-                if (file_path_parts.at(j).size() > 0)
+                if (j < file_path_parts.size() - 1)
                 {
-                    if (j < file_path_parts.size() - 1)
+                    node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR);
+                }
+                else
+                {
+                    QFileInfo fi(archive_files.at(i));
+                    if (isImage(fi))
                     {
-                        node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR);
-                    }
-                    else
-                    {
-                        QFileInfo fi(archive_files.at(i));
-                        if (isImage(fi))
-                        {
-                            node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
-                        }
+                        node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
                     }
                 }
             }
         }
-
-        this->invisibleRootItem()->appendRow(root);
     }
+
+    this->invisibleRootItem()->appendRow(root);
+
 }
 
 QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int type)
@@ -207,7 +137,7 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
     ntvi->setData(type, ROLE_TYPE);
     ntvi->setText(name);
     ntvi->setToolTip(name);
-    if (type == TYPE_DIR || type == TYPE_ARCHIVE_DIR)
+    if (type == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(m_icon_dir);
         indexToInsertByName(node, name);
@@ -227,7 +157,7 @@ int FilesModel::indexToInsertByName(QStandardItem *parent, const QString &name)
     for (int i = 0; i < parent->rowCount(); ++i)
     {
         int currentItemType = parent->child(lastFolderIndex)->data(ROLE_TYPE).toInt();
-        if (currentItemType == TYPE_DIR || currentItemType == TYPE_ARCHIVE_DIR)
+        if (currentItemType == TYPE_ARCHIVE_DIR)
         {
             if (parent->child(lastFolderIndex)->data(Qt::DisplayRole).toString().compare(name) > 0)
             {

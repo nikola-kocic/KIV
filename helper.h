@@ -13,10 +13,6 @@ namespace LockMode
 
 const int ROLE_TYPE = Qt::UserRole + 1;
 
-const int TYPE_FILE = 1001;
-const int TYPE_DIR = 1002;
-const int TYPE_ARCHIVE = 1003;
-
 const int TYPE_ARCHIVE_DIR = 1004;
 const int TYPE_ARCHIVE_FILE = 1005;
 

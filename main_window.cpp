@@ -566,7 +566,7 @@ void MainWindow::connectActions()
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
 
-    connect(m_view_files, SIGNAL(activated(QModelIndex)), this, SLOT(on_filesView_item_activated(QModelIndex)));
+    connect(m_view_files, SIGNAL(activated(QString)), this, SLOT(on_filesView_item_activated(QString)));
     connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
 
     connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
@@ -634,7 +634,7 @@ void MainWindow::on_bookmark_triggered()
             return;
         int bookmarkIndex = action->data().toInt();
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime() << "MainWindow::on_bookmark_triggered()" << path;
+                qDebug() << QDateTime::currentDateTime() << "MainWindow::on_bookmark_triggered()";
 #endif
         openFile(m_settings->getBookmarks().at(bookmarkIndex).getPath());
     }
@@ -670,7 +670,9 @@ void MainWindow::openFile(const QString &source)
     }
 
     m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.containerPath));
-
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << info.getDebugInfo();
+#endif
     m_view_files->setCurrentFile(info);
 
 
@@ -764,7 +766,7 @@ void MainWindow::on_lineEditPath_editingFinished()
         m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
     }
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_editingFinished" << this->lineEditPath->text() << "valid" << valid;
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_editingFinished" << this->m_lineEdit_path->text() << "valid" << valid;
 #endif
 //    this->lineEditPath->clearFocus();
 }
@@ -772,7 +774,7 @@ void MainWindow::on_lineEditPath_editingFinished()
 void MainWindow::on_lineEditPath_focus_lost()
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_focus_lost" << this->lineEditPath->text();
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_focus_lost" << this->m_lineEdit_path->text();
 #endif
     m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
     m_lineEdit_path->clearFocus();
@@ -804,7 +806,9 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     {
         info.zipPath = "/";
     }
-
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << info.getDebugInfo();
+#endif
     m_view_files->setCurrentFile(info);
 
     m_lineEdit_path->setText(info.getFilePath());
@@ -812,19 +816,16 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     m_picture_item->setPixmap(info);
 }
 
-void MainWindow::on_filesView_item_activated(const QModelIndex &index)
+void MainWindow::on_filesView_item_activated(const QString &path)
 {
 
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesView_item_activated" << index;
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesView_item_activated" << path;
 #endif
 
-    int type = index.data(ROLE_TYPE).toInt();
-    if (type == TYPE_DIR || type == TYPE_ARCHIVE)
-    {
-        m_view_filesystem->setCurrentIndex(m_model_filesystem->index(m_view_files->getCurrentFileInfo().containerPath + "/" + index.data(Qt::DisplayRole).toString()));
-        m_view_filesystem->expand(m_view_filesystem->currentIndex());
-    }
+    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(path));
+    m_view_filesystem->expand(m_view_filesystem->currentIndex());
+
 }
 
 void MainWindow::toggleSidebar(bool value)

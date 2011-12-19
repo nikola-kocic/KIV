@@ -146,7 +146,7 @@ private slots:
     void on_comboBoxZoom_TextChanged();
     void on_comboBoxZoom_focus_lost();
     void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
-    void on_filesView_item_activated(const QModelIndex &index);
+    void on_filesView_item_activated(const QString &path);
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);

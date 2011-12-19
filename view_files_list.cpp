@@ -1,16 +1,15 @@
 #include "view_files.h"
 
-ViewFiles::ListViewFiles::ListViewFiles(ViewFiles *parent)
+ListViewFiles::ListViewFiles(QWidget *parent)
     : QListView(parent)
 {
-    m_parent = parent;
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setResizeMode(QListView::Adjust);
     this->setMovement(QListView::Static);
     this->setUniformItemSizes(true);
 }
 
-void ViewFiles::ListViewFiles::setViewMode(int mode)
+void ListViewFiles::setViewMode(int mode)
 {
     if (mode == FileViewMode::Icons)
     {
@@ -20,4 +19,17 @@ void ViewFiles::ListViewFiles::setViewMode(int mode)
     {
         QListView::setViewMode(QListView::ListMode);
     }
+}
+
+void ListViewFiles::rowsInserted(const QModelIndex &parent, int start, int end)
+{
+    QListView::rowsInserted(parent, start, end);
+    QModelIndexList indexes;
+    for (int i = start; i <= end; ++i)
+    {
+        indexes.append(parent.child(i, 0));
+
+//        qDebug() << "ListViewFiles::rowsInserted" << parent << i << parent.child(i, 0) << parent.child(i, 0).data().toString();
+    }
+    emit rowsInserted(indexes);
 }

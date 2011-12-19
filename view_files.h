@@ -11,10 +11,31 @@
 
 #include <QListView>
 #include <QTreeView>
-#include <QSortFilterProxyModel>
 #include <QFutureWatcher>
 #include <QtConcurrentMap>
 #include <QSplitter>
+#include <QFileSystemModel>
+
+class ListViewFiles;
+class TreeViewFiles;
+
+class ListViewFiles : public QListView
+{
+    Q_OBJECT
+public:
+    explicit ListViewFiles(QWidget *parent);
+    void setViewMode(int mode);
+protected slots:
+    void rowsInserted(const QModelIndex &parent, int start, int end);
+signals:
+    void rowsInserted(const QModelIndexList &indexes);
+};
+
+class TreeViewFiles : public QTreeView
+{
+public:
+    explicit TreeViewFiles(QWidget *parent);
+};
 
 class ViewFiles : public QWidget
 {
@@ -34,52 +55,38 @@ public slots:
     void pagePrevious();
 
 private:
-
-    class ListViewFiles : public QListView
-    {
-    public:
-        explicit ListViewFiles(ViewFiles *parent);
-        void setViewMode(int mode);
-    private:
-        ViewFiles *m_parent;
-    };
-
-    class TreeViewFiles : public QTreeView
-    {
-    public:
-        explicit TreeViewFiles(ViewFiles *parent);
-
-    private:
-        ViewFiles *m_parent;
-    };
-
     void initViewItem();
     void showThumbnails();
 
-    FilesModel *m_model_files;
     ViewArchiveDirs *m_view_archiveDirs;
+
     TreeViewFiles *m_treeView_files;
     ListViewFiles *m_listView_files;
+    QAbstractItemView *m_view_current;
+
+    FilesModel *m_model_archive_files;
+    QFileSystemModel *m_model_filesystem;
+    QAbstractItemModel *m_model_current;
+
     QSplitter *m_splitter;
     ThumbnailItemDelegate *m_thumbnail_delegate;
 
-    QAbstractItemView *m_view_current;
-    QAbstractItemModel *m_model_current;
     FileInfo m_fileinfo_current;
-
     int m_view_mode;
     QSize m_thumb_size;
     bool m_show_thumbnails;
+    bool m_in_archive;
 
 private slots:
     void on_item_activated(const QModelIndex &index);
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
     void on_archiveDirsView_currentRowChanged(const QModelIndex &index);
     void on_thumbnail_finished(const QModelIndex &index);
+    void on_rows_inserted(const QModelIndexList &indexes);
 
 signals:
     void currentFileChanged(const FileInfo &info);
-    void activated(const QModelIndex &index);
+    void activated(const QString &path);
 
 };
 

@@ -6,7 +6,7 @@
 #include <QAbstractItemView>
 #include <QtConcurrentMap>
 
-//#define DEBUG_THUMBNAIL_ITEM_DELEGATE
+#define DEBUG_THUMBNAIL_ITEM_DELEGATE
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
 #include <QDebug>
@@ -28,57 +28,53 @@ QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const 
     return size_grid;
 }
 
-void ThumbnailItemDelegate::updateThumbnails(ThumbnailInfo thumb_info, QModelIndexList indexes)
+void ThumbnailItemDelegate::updateThumbnail(ThumbnailInfo thumb_info, QModelIndex index)
 {
-    if (m_watcherThumbnail->isRunning())
+    if (m_thumbnails.contains(index.internalId()))
     {
-        m_watcherThumbnail->cancel();
-        m_watcherThumbnail->waitForFinished();
+        return;
     }
 
-    m_thumb_size = thumb_info.thumbSize;
-    m_thumbs_return_count = 0;
-    m_indexes.clear();
-    m_files.clear();
-//    m_thumbnails.clear();
+    FileInfo pli_info;
 
-    for (int i = 0; i < indexes.size(); ++i)
+//    int type = index.data(ROLE_TYPE).toInt();
+    QString name = index.data(Qt::DisplayRole).toString();
+    pli_info = thumb_info.info;
+//    QFileInfo fi(thumb_info.info.getFilePath());
+    if (thumb_info.info.fileExists())
     {
-        FileInfo pli_info;
-
-        int type = indexes.at(i).data(ROLE_TYPE).toInt();
-        QString name = indexes.at(i).data(Qt::DisplayRole).toString();
-        pli_info = thumb_info.info;
-        if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
+        if (!thumb_info.info.isZip())
         {
-            if (!m_thumbnails.contains(indexes.at(i)))
-            {
-                if (!thumb_info.info.isZip())
-                {
-                    pli_info.imageFileName = name;
-                }
-                else
-                {
-                    pli_info.zipImageFileName = name;
-                }
-#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnails" << "insert to files"  << indexes.at(i) << indexes.at(i).data();
-#endif
-                ThumbnailInfo ti(pli_info, thumb_info.thumbSize);
-                m_indexes.append(indexes.at(i));
-                m_files.append(ti);
-            }
+            pli_info.imageFileName = name;
         }
         else
         {
-            QIcon icon = indexes.at(i).data(Qt::DecorationRole).value<QIcon>();
-            icon = QIcon(QPixmap::fromImage(PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), thumb_info)));
-            m_thumbnails.insert(indexes.at(i), icon);
+            pli_info.zipImageFileName = name;
         }
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to files"  << index.internalId() << thumb_info.info.getFilePath();
+#endif
+        ThumbnailInfo ti(pli_info, thumb_info.thumbSize);
+
+        m_thumbnails.insert(index.internalId(), QIcon(QPixmap::fromImage(PictureLoader::getThumbnail(ti))));
+        emit thumbnailFinished(index);
+
+
     }
+    else
+    {
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to dirs"  << index.internalId() << thumb_info.info.getFilePath();
+#endif
+        QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
+        icon = QIcon(QPixmap::fromImage(PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), thumb_info)));
+        m_thumbnails.insert(index.internalId(), icon);
+    }
+}
 
-
-    m_watcherThumbnail->setFuture(QtConcurrent::mapped(m_files, PictureLoader::getThumbnail));
+void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
+{
+    m_thumb_size = size;
 }
 
 void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const
@@ -86,11 +82,11 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
     QStyledItemDelegate::initStyleOption(option, index);
 
 //    qDebug() << index << index.data();
-    if (m_thumbnails.contains(index))
+    if (m_thumbnails.contains(index.internalId()))
     {
         if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
         {
-            v4->icon = m_thumbnails.value(index, QIcon());
+            v4->icon = m_thumbnails.value(index.internalId(), QIcon());
             v4->decorationSize = v4->icon.availableSizes().last();
         }
     }
@@ -98,17 +94,18 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
 
 void ThumbnailItemDelegate::showThumbnail(int num)
 {
-#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::showThumbnail" << m_indexes.at(num) << m_indexes.at(num).data();
-#endif
-    m_thumbnails.insert(m_indexes.at(num), QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num))));
-    emit thumbnailFinished(m_indexes.at(num));
-    ++m_thumbs_return_count;
-    if (m_thumbs_return_count == m_files.size())
-    {
-        m_indexes.clear();
-        m_files.clear();
-        m_thumbs_return_count = 0;
-        m_watcherThumbnail->setFuture(QFuture<QImage>());
-    }
+//#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+//    qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::showThumbnail" << m_indexes.at(num) << m_indexes.at(num).data();
+//#endif
+//    m_thumbnails.insert(m_indexes.at(num), QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num))));
+//    emit thumbnailFinished(m_indexes.at(num));
+//    m_indexes.removeAt(num);
+//    ++m_thumbs_return_count;
+//    if (m_thumbs_return_count == m_files.size())
+//    {
+//        m_indexes.clear();
+//        m_files.clear();
+//        m_thumbs_return_count = 0;
+//        m_watcherThumbnail->setFuture(QFuture<QImage>());
+//    }
 }

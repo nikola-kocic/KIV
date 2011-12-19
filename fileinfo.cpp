@@ -110,6 +110,12 @@ QString FileInfo::getImageFileName() const
     }
 }
 
+QString FileInfo::getDebugInfo() const
+{
+    QString str = "***\ncontainerPath: " + containerPath + "\nimageFileName: " + imageFileName + "\nzipImageFileName: " + zipImageFileName + "\nzipPath: " + zipPath + "\n***";
+    return str;
+}
+
 FileInfo FileInfo::fromPath(const QString &path)
 {
     FileInfo info;
@@ -121,9 +127,14 @@ FileInfo FileInfo::fromPath(const QString &path)
     QFileInfo fi(path);
 
     // If path is only directory or archive
-    if (fi.isDir() || isArchive(fi))
+    if (fi.isDir())
     {
         info.containerPath = fi.absoluteFilePath();
+    }
+    else if (isArchive(fi))
+    {
+        info.containerPath = fi.absoluteFilePath();
+        info.zipPath = "/";
     }
     else
     {

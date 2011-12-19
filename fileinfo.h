@@ -19,6 +19,8 @@ public:
     QString zipImagePath() const;
     QString getImageFileName() const;
 
+    QString getDebugInfo() const;
+
     static QStringList getFiltersImage();
     static QStringList getFiltersArchive();
 
