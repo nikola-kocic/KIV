@@ -33,10 +33,8 @@ private:
 
     Settings *m_settings;
     QFileSystemModel *m_model_filesystem;
-    FilesModel *m_model_files;
 
     QTreeView *m_view_filesystem;
-    ViewArchiveDirs *m_view_archiveDirs;
     ViewFiles *m_view_files;
 
     QSplitter *m_splitter_main;
@@ -86,6 +84,7 @@ private:
 
     QAction *m_act_mode_icons;
     QAction *m_act_mode_details;
+    QAction *m_act_mode_list;
 
     /* Help Actions */
     QAction *m_act_webSite;
@@ -151,6 +150,7 @@ private slots:
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);
+    void on_view_mode_list_triggered();
     void on_view_mode_details_triggered();
     void on_view_mode_icons_triggered();
 

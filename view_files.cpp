@@ -1,7 +1,5 @@
 #include "view_files.h"
-#include "settings.h"
 
-#include <QFileIconProvider>
 #include <QLayout>
 
 //#define DEBUG_VIEW_FILES
@@ -11,113 +9,145 @@
 #include <QTime>
 #endif
 
-ViewFiles::ViewFiles(QAbstractItemModel *model, QWidget *parent)
+ViewFiles::ViewFiles(QWidget *parent)
     : QWidget(parent)
 {
+
+    m_model_files = new FilesModel(this);
     m_show_thumbnails = false;
-    m_model = model;
+    m_model_current = m_model_files;
     m_thumb_size = QSize(200, 200);
 
     m_listView_files = 0;
     m_treeView_files = 0;
 
+    m_splitter = new QSplitter(Qt::Vertical, this);
+
+    //add item delegate
+    m_thumbnail_delegate = new ThumbnailItemDelegate(m_thumb_size, this);
+    connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)), this, SLOT(on_thumbnail_finished(QModelIndex)));
+
+    /* Start archiveDirsView */
+    m_view_archiveDirs = new ViewArchiveDirs();
+    m_view_archiveDirs->hide();
+
+    m_splitter->addWidget(m_view_archiveDirs);
+    m_splitter->setSizes(QList<int>() << 100);
+
+    m_view_archiveDirs->setModel(m_model_files);
+
+    connect(m_view_archiveDirs, SIGNAL(currentRowChanged(QModelIndex)), this, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
+
+    /* End archiveDirsView */
+
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
     layoutMain->setSpacing(0);
     layoutMain->setMargin(0);
+    layoutMain->addWidget(m_splitter);
     this->setLayout(layoutMain);
 
-    m_mode = QListView::ListMode;
+    m_view_mode = FileViewMode::List;
     initViewItem();
-}
-
-void ViewFiles::setCurrentIndex(const QModelIndex &index)
-{
-#ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime() << "ViewFiles::setCurrentIndexFromSource" << index.data();
-#endif
-    m_aiv->setCurrentIndex(index);
-    m_aiv->scrollTo(m_aiv->currentIndex());
 }
 
 FileInfo ViewFiles::getCurrentFileInfo() const
 {
-    return m_currentInfo;
+    return m_fileinfo_current;
 }
 
 
 void ViewFiles::initViewItem()
 {
-    if (m_mode == QListView::IconMode)
-    {
-        m_listView_files = new ListViewFiles(this);
-        m_treeView_files = 0;
-        m_aiv = qobject_cast<QAbstractItemView *>(m_listView_files);
-    }
-    else
+    if (m_view_mode == FileViewMode::Details)
     {
         m_treeView_files = new TreeViewFiles(this);
         m_listView_files = 0;
-        m_aiv = qobject_cast<QAbstractItemView *>(m_treeView_files);
+        m_view_current = qobject_cast<QAbstractItemView *>(m_treeView_files);
+    }
+    else
+    {
+        m_listView_files = new ListViewFiles(this);
+        m_listView_files->setViewMode(m_view_mode);
+        m_treeView_files = 0;
+        m_view_current = qobject_cast<QAbstractItemView *>(m_listView_files);
     }
 
-    m_aiv->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_aiv->setModel(m_model);
-    if (m_currentInfo.isZip())
+    m_view_current->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_view_current->setModel(m_model_current);
+    if (m_fileinfo_current.isZip())
     {
-        m_aiv->setRootIndex(m_index_current_archive_dirs);
+        m_view_current->setRootIndex(m_view_archiveDirs->currentIndex());
     }
-    connect(m_aiv, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
-    connect(m_aiv->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
-    this->layout()->addWidget(m_aiv);
+    connect(m_view_current, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
+    connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
+    m_splitter->addWidget(m_view_current);
+
+    QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    policyV.setHorizontalStretch(0);
+    policyV.setVerticalStretch(1);
+    m_view_current->setSizePolicy(policyV);
+
     setShowThumbnails(m_show_thumbnails);
 }
 
-void ViewFiles::showThumbnails()
+void ViewFiles::setViewMode(int mode)
 {
-    if (m_show_thumbnails)
+    if (m_view_mode != mode)
     {
-        if (m_mode == QListView::IconMode)
+        if ((mode + m_view_mode) == (FileViewMode::Icons + FileViewMode::List))
         {
-            m_listView_files->startShowingThumbnails();
+            m_listView_files->setViewMode(mode);
+            m_view_mode = mode;
         }
         else
         {
-            m_treeView_files->startShowingThumbnails();
+            m_view_current->setModel(0);
+            m_view_current->disconnect();
+            m_view_current->deleteLater();
+            m_view_mode = mode;
+            initViewItem();
         }
     }
 }
 
-void ViewFiles::setViewMode(QListView::ViewMode mode)
+void ViewFiles::setCurrentFile(const FileInfo &info)
 {
-    if (m_mode != mode)
-    {
-        m_aiv->setModel(0);
-        m_aiv->disconnect();
-        m_aiv->deleteLater();
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::setCurrentFile" << info.getFilePath();
+#endif
+    m_fileinfo_current = info;
 
-        m_mode = mode;
-        initViewItem();
-    }
-}
-
-void ViewFiles::setCurrentDirectory(const FileInfo &info)
-{
-    m_currentInfo = info;
-
+    m_model_files->setPath(info);
     showThumbnails();
-}
 
-void ViewFiles::setThumbnailsSize(const QSize &size)
-{
-    if (m_thumb_size != size)
+    if (info.isZip())
     {
-        m_thumb_size = size;
-        showThumbnails();
+        QModelIndex dirIndex = m_model_files->getDirectory(info.zipPath);
+        m_view_archiveDirs->setCurrentIndexFromSource(dirIndex);
+        m_view_archiveDirs->show();
+
+        if (!info.fileExists())
+        {
+            return;
+        }
+
+        m_view_current->setCurrentIndex(m_model_files->findIndexChild(info.zipImageFileName, dirIndex));
     }
+    else
+    {
+        m_view_archiveDirs->hide();
+        if (!info.fileExists())
+        {
+            return;
+        }
+
+        m_view_current->setCurrentIndex(m_model_files->findRootIndexChild(info.imageFileName));
+    }
+
+    m_view_current->scrollTo(m_view_current->currentIndex());
 }
 
 
-/* This is index from ArchiveModel */
 void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
 {
 #ifdef DEBUG_VIEW_FILES
@@ -136,13 +166,12 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
         cindex = cindex.parent();
     }
 
-    m_currentInfo.zipPath = pathToImage;
-    m_currentInfo.zipImageFileName.clear();
-    m_aiv->setRootIndex(index);
-    m_index_current_archive_dirs = index;
-    m_aiv->selectionModel()->clear();
+    m_fileinfo_current.zipPath = pathToImage;
+    m_fileinfo_current.zipImageFileName.clear();
+    m_view_current->setRootIndex(index);
+    m_view_current->selectionModel()->clear();
     showThumbnails();
-    emit currentFileChanged(m_currentInfo);
+    emit currentFileChanged(m_fileinfo_current);
 }
 
 void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
@@ -151,7 +180,7 @@ void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
     qDebug() << QDateTime::currentDateTime() << "ViewFiles::on_thumbnail_finished" << index << index.data();
 #endif
 
-    m_aiv->update(index);
+    m_view_current->update(index);
 }
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
@@ -165,7 +194,7 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
     {
         index = current;
     }
-    m_aiv->scrollTo(index);
+    m_view_current->scrollTo(index);
     int type = index.data(ROLE_TYPE).toInt();
     QString filename = index.data(Qt::DisplayRole).toString();
 
@@ -175,33 +204,33 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
 
     if (type == TYPE_FILE)
     {
-        m_currentInfo.imageFileName = filename;
-        m_currentInfo.zipImageFileName.clear();
-        m_currentInfo.zipPath.clear();
+        m_fileinfo_current.imageFileName = filename;
+        m_fileinfo_current.zipImageFileName.clear();
+        m_fileinfo_current.zipPath.clear();
     }
     else if (type == TYPE_ARCHIVE_FILE)
     {
-        m_currentInfo.zipImageFileName = filename;
+        m_fileinfo_current.zipImageFileName = filename;
     }
     else
     {
-        m_currentInfo.zipImageFileName.clear();
-        m_currentInfo.imageFileName.clear();
+        m_fileinfo_current.zipImageFileName.clear();
+        m_fileinfo_current.imageFileName.clear();
     }
 
-    emit currentFileChanged(m_currentInfo);
+    emit currentFileChanged(m_fileinfo_current);
 }
 
 void ViewFiles::pageNext()
 {
-    if (!m_aiv->currentIndex().isValid()) return;
+    if (!m_view_current->currentIndex().isValid()) return;
 
-    for (int i = m_aiv->currentIndex().row() + 1; i < m_aiv->model()->rowCount(m_aiv->rootIndex()); ++i)
+    for (int i = m_view_current->currentIndex().row() + 1; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
     {
-        int type = m_aiv->model()->index(i, 0, m_aiv->rootIndex()).data(ROLE_TYPE).toInt();
+        int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(ROLE_TYPE).toInt();
         if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            m_aiv->setCurrentIndex(m_aiv->model()->index(i, 0, m_aiv->rootIndex()));
+            m_view_current->setCurrentIndex(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
             break;
         }
     }
@@ -209,14 +238,14 @@ void ViewFiles::pageNext()
 
 void ViewFiles::pagePrevious()
 {
-    if (!m_aiv->currentIndex().isValid()) return;
+    if (!m_view_current->currentIndex().isValid()) return;
 
-    for (int i = m_aiv->currentIndex().row() - 1; i >= 0; --i)
+    for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
     {
-        int type = m_aiv->model()->index(i, 0, m_aiv->rootIndex()).data(ROLE_TYPE).toInt();
+        int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(ROLE_TYPE).toInt();
         if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            m_aiv->setCurrentIndex(m_aiv->model()->index(i, 0, m_aiv->rootIndex()));
+            m_view_current->setCurrentIndex(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
             break;
         }
     }
@@ -228,9 +257,9 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime() << "ViewFiles::on_thumbnail_activated" <<index <<  index.data();
 #endif
-    if (m_mode == QListView::IconMode)
+    if (index.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_DIR)
     {
-        emit activated(m_listView_files->getIndexFromProxy(index));
+        m_view_archiveDirs->setCurrentIndexFromSource(index);
     }
     else
     {
@@ -238,15 +267,55 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
     }
 }
 
+/* Start Thumbnails */
+
+void ViewFiles::setThumbnailsSize(const QSize &size)
+{
+    if (m_thumb_size != size)
+    {
+        m_thumb_size = size;
+        showThumbnails();
+    }
+}
+
+void ViewFiles::showThumbnails()
+{
+
+#ifdef DEBUG_VIEW_FILES
+    qDebug() << QDateTime::currentDateTime() << "ViewFiles::showThumbnails" << m_show_thumbnails;
+#endif
+    if (m_show_thumbnails)
+    {
+        if (m_view_current->model()->rowCount(m_view_current->rootIndex()) == 0)
+        {
+            return;
+        }
+
+        QModelIndexList indexes;
+        for (int i = 0; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
+        {
+            indexes.append(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
+        }
+
+        m_thumbnail_delegate->updateThumbnails(ThumbnailInfo(m_fileinfo_current, m_thumb_size), indexes);
+
+    }
+}
+
 void ViewFiles::setShowThumbnails(bool b)
 {
     m_show_thumbnails = b;
-    if (m_mode == QListView::IconMode)
+
+    if (b)
     {
-        m_listView_files->setShowThumbnails(b);
+        m_view_current->setItemDelegateForColumn(0, m_thumbnail_delegate);
+        showThumbnails();
     }
     else
     {
-        m_treeView_files->setShowThumbnails(b);
+        m_view_current->setItemDelegateForColumn(0, 0);
     }
+    m_view_current->doItemsLayout();
 }
+
+/* End Thumbnails */

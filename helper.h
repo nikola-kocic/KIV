@@ -11,19 +11,7 @@ namespace LockMode
     enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
 }
 
-namespace ViewMode
-{
-    enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
-}
-
-
-QStringList getFiltersImage();
-QStringList getFiltersArchive();
-
-
 const int ROLE_TYPE = Qt::UserRole + 1;
-//const int ROLE_ARCHIVE_FILE_NAME = Qt::UserRole + 2;
-//const int ROLE_THUMBNAIL = Qt::UserRole + 3;
 
 const int TYPE_FILE = 1001;
 const int TYPE_DIR = 1002;
@@ -32,9 +20,6 @@ const int TYPE_ARCHIVE = 1003;
 const int TYPE_ARCHIVE_DIR = 1004;
 const int TYPE_ARCHIVE_FILE = 1005;
 
-
-QIcon getFileIcon();
-QIcon getDirectoryIcon();
 
 bool isImage(const QFileInfo &fi);
 bool isArchive(const QFileInfo &fi);

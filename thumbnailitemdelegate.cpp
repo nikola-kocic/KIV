@@ -28,7 +28,7 @@ QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const 
     return size_grid;
 }
 
-void ThumbnailItemDelegate::updateThumbnails(ThumbnailInfo thumb_info)
+void ThumbnailItemDelegate::updateThumbnails(ThumbnailInfo thumb_info, QModelIndexList indexes)
 {
     if (m_watcherThumbnail->isRunning())
     {
@@ -40,20 +40,18 @@ void ThumbnailItemDelegate::updateThumbnails(ThumbnailInfo thumb_info)
     m_thumbs_return_count = 0;
     m_indexes.clear();
     m_files.clear();
+//    m_thumbnails.clear();
 
-    QAbstractItemView *aiv = qobject_cast<QAbstractItemView *>(this->parent());
-
-    for (int i = 0; i < aiv->model()->rowCount(aiv->rootIndex()); ++i)
+    for (int i = 0; i < indexes.size(); ++i)
     {
         FileInfo pli_info;
 
-        QModelIndex index = aiv->model()->index(i, 0, aiv->rootIndex());
-        int type = aiv->model()->data(index, ROLE_TYPE).toInt();
-        QString name = aiv->model()->data(index, Qt::DisplayRole).toString();
+        int type = indexes.at(i).data(ROLE_TYPE).toInt();
+        QString name = indexes.at(i).data(Qt::DisplayRole).toString();
         pli_info = thumb_info.info;
         if (type == TYPE_FILE || type == TYPE_ARCHIVE_FILE)
         {
-            if (!m_thumbnails.contains(index))
+            if (!m_thumbnails.contains(indexes.at(i)))
             {
                 if (!thumb_info.info.isZip())
                 {
@@ -64,18 +62,18 @@ void ThumbnailItemDelegate::updateThumbnails(ThumbnailInfo thumb_info)
                     pli_info.zipImageFileName = name;
                 }
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnails" << "insert to files"  << index << index.data();
+    qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnails" << "insert to files"  << indexes.at(i) << indexes.at(i).data();
 #endif
                 ThumbnailInfo ti(pli_info, thumb_info.thumbSize);
-                m_indexes.append(index);
+                m_indexes.append(indexes.at(i));
                 m_files.append(ti);
             }
         }
         else
         {
-            QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
+            QIcon icon = indexes.at(i).data(Qt::DecorationRole).value<QIcon>();
             icon = QIcon(QPixmap::fromImage(PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), thumb_info)));
-            m_thumbnails.insert(index, icon);
+            m_thumbnails.insert(indexes.at(i), icon);
         }
     }
 

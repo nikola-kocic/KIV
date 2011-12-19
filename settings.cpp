@@ -19,7 +19,7 @@ Settings::Settings()
     m_largeIcons          = m_settings->value("Interface/LargeIcons", false).toBool();
     m_lastPath            = m_settings->value("Interface/LastPath", "").toString();
     m_hardwareAcceleration= m_settings->value("Interface/HardwareAcceleration", false).toBool();
-    m_thumbSize           = m_settings->value("Interface/ThumbnailSize", QSize(200, 200)).toSize();
+    m_thumbSize           = m_settings->value("Interface/ThumbnailSize", QSize(100, 100)).toSize();
 
     m_calculateAverageColor = m_settings->value("Interface/CalculateAverageColor", false).toBool();
 

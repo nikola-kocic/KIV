@@ -6,11 +6,19 @@
 
 #include <QFile>
 #include <QDir>
+#include <QtGui/QStyle>
 
 //#define DEBUG_MODEL_FILES
 #ifdef DEBUG_MODEL_FILES
 #include <QDebug>
 #endif
+
+FilesModel::FilesModel(QObject *parent)
+    : QStandardItemModel(parent)
+{
+    m_icon_dir = QApplication::style()->standardIcon(QStyle::SP_DirIcon);
+    m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+}
 
 QString bytesToSize(int bytes, int precision)
 {
@@ -19,22 +27,33 @@ QString bytesToSize(int bytes, int precision)
     int gigabyte = megabyte * 1024;
     int terabyte = gigabyte * 1024;
 
-    if ((bytes >= 0) && (bytes < kilobyte)) {
+    if ((bytes >= 0) && (bytes < kilobyte))
+    {
         return QString::number(bytes) + " B";
 
-    } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
-        return QString::number(((float)bytes / kilobyte), 'f', precision) + " KB";
+    }
+    else if ((bytes >= kilobyte) && (bytes < megabyte))
+    {
+        return QString::number(((float)bytes / kilobyte), 'f', precision) + " KiB";
 
-    } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
-        return QString::number(((float)bytes / megabyte), 'f', precision) + " MB";
+    }
+    else if ((bytes >= megabyte) && (bytes < gigabyte))
+    {
+        return QString::number(((float)bytes / megabyte), 'f', precision) + " MiB";
 
-    } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
-        return QString::number(((float)bytes / gigabyte), 'f', precision) + " GB";
+    }
+    else if ((bytes >= gigabyte) && (bytes < terabyte))
+    {
+        return QString::number(((float)bytes / gigabyte), 'f', precision) + " GiB";
 
-    } else if (bytes >= terabyte) {
-        return QString::number(((float)bytes / terabyte), 'f', precision) + " TB";
+    }
+    else if (bytes >= terabyte)
+    {
+        return QString::number(((float)bytes / terabyte), 'f', precision) + " TiB";
 
-    } else {
+    }
+    else
+    {
         return QString::number(bytes) + " B";
     }
 }
@@ -83,15 +102,17 @@ void FilesModel::setPath(const FileInfo &path)
                 name->setText(info.fileName());
                 name->setIcon(fip.icon(info));
 
-                QStandardItem *date = new QStandardItem(info.lastModified().toString(Qt::SystemLocaleShortDate));
+                QStandardItem *date = new QStandardItem();
                 QStandardItem *size = new QStandardItem("");
+                date->setData(info.lastModified(), Qt::DisplayRole);
                 if (isFile)
                 {
                     size->setText(bytesToSize(info.size(), 2));
+                    size->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
                 }
 
                 QString tooltip = tr("Name: ") + name->text() + "\n" +
-                        tr("Date Modified: ") + date->text();
+                        tr("Date Modified: ") + info.lastModified().toString(Qt::SystemLocaleShortDate);
 
                 if (isFile)
                 {
@@ -188,13 +209,13 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
     ntvi->setToolTip(name);
     if (type == TYPE_DIR || type == TYPE_ARCHIVE_DIR)
     {
-        ntvi->setIcon(getDirectoryIcon());
+        ntvi->setIcon(m_icon_dir);
         indexToInsertByName(node, name);
         node->insertRow(indexToInsertByName(node, name), ntvi);
     }
     else
     {
-        ntvi->setIcon(getFileIcon());
+        ntvi->setIcon(m_icon_file);
         node->appendRow(ntvi);
     }
     return ntvi;

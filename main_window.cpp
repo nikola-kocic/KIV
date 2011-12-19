@@ -32,14 +32,14 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    if (getFiltersImage().contains("svg"))
+    if (FileInfo::getFiltersImage().contains("svg"))
     {
         this->setWindowIcon(QIcon(":/icons/kiv.svg"));
     }
 
     /* Start modelFilesystem */
     QStringList filters;
-    QStringList filtersArchive = getFiltersArchive();
+    QStringList filtersArchive = FileInfo::getFiltersArchive();
     for (int i = 0; i < filtersArchive.size(); ++i)
     {
         filters.append("*." + filtersArchive.at(i));
@@ -53,7 +53,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     /* End modelFilesystem */
 
 
-    m_model_files = new FilesModel();
     createActions();
 
     m_splitter_main = new QSplitter(Qt::Horizontal, this);
@@ -167,33 +166,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     /* End filesystemView */
 
 
-    QSplitter *splitterFiles = new QSplitter(Qt::Vertical, this);
-
-
-    /* Start archiveDirsView */
-    m_view_archiveDirs = new ViewArchiveDirs();
-    m_view_archiveDirs->hide();
-
-    splitterFiles->addWidget(m_view_archiveDirs);
-    splitterFiles->setSizes(QList<int>() << 100);
-    /* End archiveDirsView */
-
-
     /* Start filesView */
-    m_view_files = new ViewFiles(m_model_files);
+    m_view_files = new ViewFiles(this);
     m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
 //    m_view_files->setModel(m_model_files);
 
-    QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    policyV.setHorizontalStretch(0);
-    policyV.setVerticalStretch(1);
-
-    m_view_files->setSizePolicy(policyV);
-    splitterFiles->addWidget(m_view_files);
-    /* End filesView */
-
-
-    m_splitter_sidebar->addWidget(splitterFiles);
+    m_splitter_sidebar->addWidget(m_view_files);
     m_splitter_main->addWidget(m_splitter_sidebar);
     m_splitter_main->setSizes(QList<int>() << 300);
 
@@ -222,8 +200,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     {
         m_view_filesystem->hideColumn(i);
     }
-
-    m_view_archiveDirs->setModel(m_model_files);
 
     for (int i = 0; i < m_picture_item->getDefaultZoomSizes().size(); ++i)
     {
@@ -388,7 +364,11 @@ void MainWindow::createActions()
 
     m_act_mode_details = new QAction(tr("&Details"), this);
     m_act_mode_details->setCheckable(true);
-    m_act_mode_details->setChecked(true);
+
+    m_act_mode_list = new QAction(tr("&List"), this);
+    m_act_mode_list->setCheckable(true);
+    m_act_mode_list->setChecked(true);
+
 
     m_act_fullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("&Full Screen"), this);
     m_act_fullscreen->setShortcut(Qt::Key_F11);
@@ -524,10 +504,12 @@ void MainWindow::createMenus()
     optionsMenu->addAction(m_act_thumbnails);
 
     QActionGroup *viewModes = new QActionGroup(this);
+    viewModes->addAction(m_act_mode_list);
     viewModes->addAction(m_act_mode_details);
     viewModes->addAction(m_act_mode_icons);
 
     QMenu *menuViewMode = optionsMenu->addMenu("&View Mode");
+    menuViewMode->addAction(m_act_mode_list);
     menuViewMode->addAction(m_act_mode_details);
     menuViewMode->addAction(m_act_mode_icons);
 
@@ -560,6 +542,7 @@ void MainWindow::connectActions()
     connect(m_act_fullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullscreen(bool)));
     connect(m_act_largeIcons, SIGNAL(toggled(bool)), this, SLOT(toggleLargeIcons(bool)));
     connect(m_act_sidebar, SIGNAL(toggled(bool)), this, SLOT(toggleSidebar(bool)));
+    connect(m_act_mode_list, SIGNAL(triggered()), this, SLOT(on_view_mode_list_triggered()));
     connect(m_act_mode_details, SIGNAL(triggered()), this, SLOT(on_view_mode_details_triggered()));
     connect(m_act_mode_icons, SIGNAL(triggered()), this, SLOT(on_view_mode_icons_triggered()));
 
@@ -587,7 +570,6 @@ void MainWindow::connectActions()
     connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
 
     connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_view_archiveDirs, SIGNAL(currentRowChanged(QModelIndex)), m_view_files, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
 
     connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
@@ -689,30 +671,8 @@ void MainWindow::openFile(const QString &source)
 
     m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.containerPath));
 
-    if (info.isZip())
-    {
-        QModelIndex dirIndex = m_model_files->getDirectory(info.zipPath);
-        m_view_archiveDirs->setCurrentIndexFromSource(dirIndex);
+    m_view_files->setCurrentFile(info);
 
-        if (!info.fileExists())
-        {
-            return;
-        }
-
-        m_view_files->setCurrentIndex(m_model_files->findIndexChild(info.zipImageFileName, dirIndex));
-    }
-    else
-    {
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile info.fileExists()";
-#endif
-        if (!info.fileExists())
-        {
-            return;
-        }
-
-        m_view_files->setCurrentIndex(m_model_files->findRootIndexChild(info.imageFileName));
-    }
 
 }
 
@@ -845,19 +805,7 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
         info.zipPath = "/";
     }
 
-    m_model_files->setPath(info);
-
-    if(info.isZip())
-    {
-        m_view_archiveDirs->setCurrentIndexFromSource(m_model_files->index(0,0));
-        m_view_archiveDirs->show();
-    }
-    else
-    {
-        m_view_archiveDirs->hide();
-    }
-
-    m_view_files->setCurrentDirectory(info);
+    m_view_files->setCurrentFile(info);
 
     m_lineEdit_path->setText(info.getFilePath());
 
@@ -876,10 +824,6 @@ void MainWindow::on_filesView_item_activated(const QModelIndex &index)
     {
         m_view_filesystem->setCurrentIndex(m_model_filesystem->index(m_view_files->getCurrentFileInfo().containerPath + "/" + index.data(Qt::DisplayRole).toString()));
         m_view_filesystem->expand(m_view_filesystem->currentIndex());
-    }
-    else if (type == TYPE_ARCHIVE_DIR)
-    {
-        m_view_archiveDirs->setCurrentIndexFromSource(index);
     }
 }
 
@@ -921,7 +865,7 @@ void MainWindow::dirUp()
 
 void MainWindow::open()
 {
-    QString imageExtensions = "*." + getFiltersImage().join(" *.");
+    QString imageExtensions = "*." + FileInfo::getFiltersImage().join(" *.");
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_model_filesystem->filePath(m_view_filesystem->currentIndex()),
                                                     tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
@@ -1190,12 +1134,17 @@ void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
     }
 }
 
+void MainWindow::on_view_mode_list_triggered()
+{
+    m_view_files->setViewMode(FileViewMode::List);
+}
+
 void MainWindow::on_view_mode_details_triggered()
 {
-    m_view_files->setViewMode(QListView::ListMode);
+    m_view_files->setViewMode(FileViewMode::Details);
 }
 
 void MainWindow::on_view_mode_icons_triggered()
 {
-    m_view_files->setViewMode(QListView::IconMode);
+    m_view_files->setViewMode(FileViewMode::Icons);
 }

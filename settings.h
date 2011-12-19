@@ -27,6 +27,14 @@ public:
     static const int Zoom = 3;
 };
 
+class FileViewMode
+{
+public:
+    static const int List = 0;
+    static const int Details = 1;
+    static const int Icons = 2;
+};
+
 class Bookmark
 {
 public:

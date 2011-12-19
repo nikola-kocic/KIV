@@ -1,6 +1,7 @@
 #include "fileinfo.h"
 #include "helper.h"
 #include <QFileInfo>
+#include <QImageReader>
 
 //#define DEBUG_FILE_INFO
 #ifdef DEBUG_FILE_INFO
@@ -8,12 +9,32 @@
 #include <QDateTime>
 #endif
 
+QStringList FileInfo::m_filters_archive = QStringList() << "zip" << "cbz";
+QStringList FileInfo::m_filters_image = QStringList();
+
 FileInfo::FileInfo() :
     containerPath(""),
     imageFileName(""),
     zipPath(""),
     zipImageFileName("")
 {
+}
+
+QStringList FileInfo::getFiltersArchive()
+{
+    return m_filters_archive;
+}
+
+QStringList FileInfo::getFiltersImage()
+{
+    if (m_filters_image.isEmpty())
+    {
+        for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
+        {
+            m_filters_image.append(QImageReader::supportedImageFormats().at(i));
+        }
+    }
+    return m_filters_image;
 }
 
 bool FileInfo::isZip() const

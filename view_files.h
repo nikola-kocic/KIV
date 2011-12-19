@@ -4,25 +4,28 @@
 #include "helper.h"
 #include "picture_loader.h"
 #include "thumbnailitemdelegate.h"
+#include "model_files.h"
+#include "view_archive_dirs.h"
+#include "settings.h"
+
 
 #include <QListView>
 #include <QTreeView>
 #include <QSortFilterProxyModel>
 #include <QFutureWatcher>
 #include <QtConcurrentMap>
+#include <QSplitter>
 
 class ViewFiles : public QWidget
 {
     Q_OBJECT
 
 public:
-    ViewFiles(QAbstractItemModel *model, QWidget *parent = 0);
-    void setViewMode(QListView::ViewMode mode);
-    void setCurrentDirectory(const FileInfo &info);
+    ViewFiles(QWidget *parent);
+    void setViewMode(int mode);
+    void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
     FileInfo getCurrentFileInfo() const;
-    void setCurrentIndex(const QModelIndex &index);
-    void setRootIndex(const QModelIndex &index);
     void setModel(QAbstractItemModel *model);
     void setShowThumbnails(bool b);
 
@@ -36,42 +39,35 @@ private:
     {
     public:
         explicit ListViewFiles(ViewFiles *parent);
-        void startShowingThumbnails();
-
-        void setModel(QAbstractItemModel *model);
-        QModelIndex getIndexFromProxy(const QModelIndex &index) const;
-        void setCurrentIndex(const QModelIndex &index);
-        void setRootIndex(const QModelIndex &index);
-        void setShowThumbnails(bool b);
-
+        void setViewMode(int mode);
     private:
         ViewFiles *m_parent;
-        QSortFilterProxyModel *m_proxy;
-        ThumbnailItemDelegate *m_thumbnail_delegate;
     };
 
     class TreeViewFiles : public QTreeView
     {
     public:
         explicit TreeViewFiles(ViewFiles *parent);
-        void startShowingThumbnails();
-        void setShowThumbnails(bool b);
 
     private:
         ViewFiles *m_parent;
-        ThumbnailItemDelegate *m_thumbnail_delegate;
     };
 
     void initViewItem();
     void showThumbnails();
+
+    FilesModel *m_model_files;
+    ViewArchiveDirs *m_view_archiveDirs;
     TreeViewFiles *m_treeView_files;
     ListViewFiles *m_listView_files;
-    QAbstractItemView *m_aiv;
-    QModelIndex m_index_current_archive_dirs;
+    QSplitter *m_splitter;
+    ThumbnailItemDelegate *m_thumbnail_delegate;
 
-    QAbstractItemModel *m_model;
-    FileInfo m_currentInfo;
-    QListView::ViewMode m_mode;
+    QAbstractItemView *m_view_current;
+    QAbstractItemModel *m_model_current;
+    FileInfo m_fileinfo_current;
+
+    int m_view_mode;
     QSize m_thumb_size;
     bool m_show_thumbnails;
 
