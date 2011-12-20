@@ -10,12 +10,12 @@ TexImg::TexImg()
     this->vTile = 0;
 }
 
-int TexImg::getTexMaxSize()
+int TexImg::getTexMaxSize() const
 {
     return this->m_texMaxSize;
 }
 
-void TexImg::setTexMaxSize(int size)
+void TexImg::setTexMaxSize(const int size)
 {
     this->m_texMaxSize = qMin(8192, size);
 }
@@ -110,13 +110,13 @@ void TexImg::InitTiles(TileDim *tileDim)
     }
 }
 
-int TexImg::Pad4(int yBytes)
+int TexImg::Pad4(const int yBytes) const
 {
     int num = yBytes % 4;
     return (num == 0) ? yBytes : (yBytes + (4 - num));
 }
 
-void TexImg::setImage(QImage img)
+void TexImg::setImage(const QImage &img)
 {
     if (this->hTile != 0)
     {
@@ -135,7 +135,7 @@ void TexImg::setImage(QImage img)
     this->InitTiles(this->vTile);
 }
 
-QImage TexImg::CreatePow2Bitmap(TexIndex index)
+QImage TexImg::CreatePow2Bitmap(const TexIndex &index)
 {
     QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, QImage::Format_RGB32);
 

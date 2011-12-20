@@ -13,7 +13,6 @@ ViewFiles::ViewFiles(QWidget *parent)
     : QWidget(parent)
 {
 
-//    m_fileinfo_current = info;
     m_model_archive_files = new ArchiveFilesModel(this);
     m_show_thumbnails = false;
 
@@ -21,6 +20,7 @@ ViewFiles::ViewFiles(QWidget *parent)
 
     m_listView_files = 0;
     m_treeView_files = 0;
+    m_view_current = 0;
 
 
 
@@ -44,15 +44,10 @@ ViewFiles::ViewFiles(QWidget *parent)
     m_model_filesystem->setRootPath("");
     /* End modelFilesystem */
 
-//    m_model_current = m_model_files;
-    m_model_current = m_model_filesystem;
     m_in_archive = false;
-
-
 
     m_splitter = new QSplitter(Qt::Vertical, this);
 
-    //add item delegate
     m_thumbnail_delegate = new ThumbnailItemDelegate(m_thumb_size, this);
     connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)), this, SLOT(on_thumbnail_finished(QModelIndex)));
 
@@ -95,6 +90,7 @@ void ViewFiles::initViewItem()
         m_treeView_files = new TreeViewFiles(this);
         m_listView_files = 0;
         m_view_current = qobject_cast<QAbstractItemView *>(m_treeView_files);
+        connect(m_treeView_files, SIGNAL(rowsInserted(QModelIndexList)), this, SLOT(on_rows_inserted(QModelIndexList)));
     }
     else
     {
@@ -106,13 +102,22 @@ void ViewFiles::initViewItem()
     }
 
     m_view_current->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_view_current->setModel(m_model_current);
-    connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
-    if (m_fileinfo_current.isArchive())
+    if (m_in_archive)
     {
-        m_view_current->setRootIndex(m_view_archiveDirs->currentIndex());
+        m_view_current->setModel(m_model_archive_files);
     }
+    else
+    {
+        m_view_current->setModel(m_model_filesystem);
+    }
+
+    connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
     connect(m_view_current, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
+
+    if (m_fileinfo_current.container.exists())
+    {
+        setCurrentFile(m_fileinfo_current);
+    }
     m_splitter->addWidget(m_view_current);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -123,7 +128,7 @@ void ViewFiles::initViewItem()
     setShowThumbnails(m_show_thumbnails);
 }
 
-void ViewFiles::setViewMode(int mode)
+void ViewFiles::setViewMode(const int mode)
 {
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime() << "ViewFiles::setViewMode" << mode;
@@ -153,8 +158,6 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 #endif
     m_fileinfo_current = info;
 
-    showThumbnails();
-
     if (info.isArchive())
     {
         m_model_archive_files->setPath(info);
@@ -162,8 +165,7 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         {
             m_in_archive = true;
             m_view_current->selectionModel()->disconnect();
-            m_model_current = m_model_archive_files;
-            m_view_current->setModel(m_model_current);
+            m_view_current->setModel(m_model_archive_files);
             connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
             m_view_archiveDirs->show();
         }
@@ -181,8 +183,7 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         {
             m_in_archive = false;
             m_view_current->selectionModel()->disconnect();
-            m_model_current = m_model_filesystem;
-            m_view_current->setModel(m_model_current);
+            m_view_current->setModel(m_model_filesystem);
             connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
             m_view_archiveDirs->hide();
         }
@@ -197,6 +198,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 //    qDebug() << m_fileinfo_current.getDebugInfo();
 #endif
     emit currentFileChanged(m_fileinfo_current);
+
+    showThumbnails();
 }
 
 
@@ -344,23 +347,30 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime() << "ViewFiles::on_item_activated" <<index.internalId() <<  index.data().toString();
 #endif
+    QModelIndex fixed_index;
+    if (index.column() > 0)
+    {
+        fixed_index = index.sibling(index.row(), 0);
+    }
+    else
+    {
+        fixed_index = index;
+    }
+
     if (m_in_archive)
     {
-        if (index.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_DIR)
+        if (fixed_index.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_DIR)
         {
-            m_view_archiveDirs->setCurrentIndexFromSource(index);
+            m_view_archiveDirs->setCurrentIndexFromSource(fixed_index);
         }
     }
     else
     {
-        if (m_model_filesystem->isDir(index) || isArchiveFile(m_model_filesystem->fileInfo(index)))
+        if (m_model_filesystem->isDir(fixed_index) || isArchiveFile(m_model_filesystem->fileInfo(fixed_index)))
         {
-
-            m_fileinfo_current.container = m_model_filesystem->fileInfo(index);
-            m_fileinfo_current.image = QFileInfo();
+            emit activated(m_model_filesystem->filePath(index));
         }
     }
-    emit currentFileChanged(m_fileinfo_current);
 }
 
 /* Start Thumbnails */
@@ -383,6 +393,7 @@ void ViewFiles::showThumbnails()
 #endif
     if (m_show_thumbnails)
     {
+        m_thumbnail_delegate->cancelThumbnailGeneration();
         if (m_view_current->model()->rowCount(m_view_current->rootIndex()) == 0)
         {
             return;
@@ -452,7 +463,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
     }
 }
 
-void ViewFiles::setShowThumbnails(bool b)
+void ViewFiles::setShowThumbnails(const bool b)
 {
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime() << "ViewFiles::setShowThumbnails" << b;

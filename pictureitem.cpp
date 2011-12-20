@@ -57,7 +57,7 @@ bool PictureItem::getHardwareAcceleration() const
     return m_opengl;
 }
 
-void PictureItem::setHardwareAcceleration(bool b)
+void PictureItem::setHardwareAcceleration(const bool b)
 {
     if (m_opengl != b)
     {
@@ -81,7 +81,7 @@ bool PictureItem::isPixmapNull() const
     return m_pixmapNull;
 }
 
-void PictureItem::setPixmapNull(bool value)
+void PictureItem::setPixmapNull(const bool value)
 {
     m_pixmapNull = value;
 }
@@ -92,7 +92,7 @@ qreal PictureItem::getRotation() const
     return m_rotation_value;
 }
 
-void PictureItem::setRotation(qreal r)
+void PictureItem::setRotation(const qreal r)
 {
     if (isPixmapNull())
     {
@@ -112,29 +112,32 @@ void PictureItem::setRotation(qreal r)
 }
 
 
-qreal PictureItem::getZoom()
+qreal PictureItem::getZoom() const
 {
     return m_zoom_value;
 }
 
-void PictureItem::setZoom(qreal z)
+void PictureItem::setZoom(const qreal z)
 {
     if (isPixmapNull())
     {
         return;
     }
 
+    const qreal previous = m_zoom_value;
+
     if (z < 0.001)
     {
-        z = 0.001;
+        m_zoom_value = 0.001;
     }
     else if (z > 1000)
     {
-        z = 1000;
+        m_zoom_value = 1000;
     }
-
-    qreal previous = m_zoom_value;
-    m_zoom_value = z;
+    else
+    {
+        m_zoom_value = z;
+    }
 
     if (m_opengl)
     {
@@ -154,7 +157,7 @@ LockMode::Mode PictureItem::getLockMode() const
     return m_lockMode;
 }
 
-void PictureItem::setLockMode(LockMode::Mode mode)
+void PictureItem::setLockMode(const LockMode::Mode &mode)
 {
     m_lockMode = mode;
     this->updateLockMode();
@@ -603,7 +606,7 @@ void PictureItem::start_timerScrollPage()
 
 
 
-QPoint PictureItem::pointToOrigin(int width, int height)
+QPoint PictureItem::pointToOrigin(const int width, const int height)
 {
     qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
     qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
@@ -911,7 +914,7 @@ void PictureItem::endDrag()
 
 /* End Region Drag */
 
-void PictureItem::ScrollPageVertical(int value)
+void PictureItem::ScrollPageVertical(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(0,value));
@@ -939,7 +942,7 @@ void PictureItem::calculateAverageColor(const QImage &img)
     }
 }
 
-void PictureItem::ScrollPageHorizontal(int value)
+void PictureItem::ScrollPageHorizontal(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(value,0));

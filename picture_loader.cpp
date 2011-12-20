@@ -6,7 +6,6 @@
 #include <QBuffer>
 #include <QImageReader>
 #include <QPainter>
-//#include <QCryptographicHash>
 
 //#define DEBUG_PICTURE_LOADER
 
@@ -40,11 +39,11 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 #ifdef DEBUG_PICTURE_LOADER
     qDebug() << QDateTime::currentDateTime() << "PictureLoader::getThumbnail" << thumb_info.info.getFilePath() << thumb_info.thumbSize;
 #endif
-    if (!thumb_info.info.fileExists())
+    if (!thumb_info.getFileInfo().fileExists())
     {
         return QImage(0,0);
     }
-    else if (thumb_info.info.isArchive())
+    else if (thumb_info.getFileInfo().isArchive())
     {
         return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info);
     }
@@ -57,7 +56,7 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 
 QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thumb_info)
 {
-    QImage thumb(thumb_info.thumbSize.width() + 2, thumb_info.thumbSize.height() + 2, QImage::Format_ARGB32);
+    QImage thumb(thumb_info.getThumbSize().width() + 2, thumb_info.getThumbSize().height() + 2, QImage::Format_ARGB32);
     thumb.fill(qRgba(0, 200, 0, 0));
     QPainter painter(&thumb);
     QPoint imgPoint((thumb.width() - img.width()) / 2, (thumb.height() - img.height()) / 2);
@@ -70,13 +69,13 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thu
 
 QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 {
-    QImageReader image_reader(thumb_info.info.getFilePath());
+    QImageReader image_reader(thumb_info.getFileInfo().getFilePath());
 //    qDebug() << image_reader.format();
-    if (!thumb_info.thumbSize.isEmpty())
+    if (!thumb_info.getThumbSize().isEmpty())
     {
-        if (image_reader.size().height() > thumb_info.thumbSize.height() || image_reader.size().width() > thumb_info.thumbSize.width())
+        if (image_reader.size().height() > thumb_info.getThumbSize().height() || image_reader.size().width() > thumb_info.getThumbSize().width())
         {
-            image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size(), thumb_info.thumbSize));
+            image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size(), thumb_info.getThumbSize()));
         }
     }
     return image_reader.read();
@@ -84,7 +83,7 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 
 QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
 {
-    QFile zipFile(thumb_info.info.container.canonicalFilePath());
+    QFile zipFile(thumb_info.getFileInfo().container.canonicalFilePath());
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
     {
@@ -93,7 +92,7 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
     }
     zip.setFileNameCodec("UTF-8");
 
-    zip.setCurrentFile(thumb_info.info.zipImagePath());
+    zip.setCurrentFile(thumb_info.getFileInfo().zipImagePath());
 
     QuaZipFile file(&zip);
     char c;
@@ -125,11 +124,11 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
     qDebug() << QDateTime::currentDateTime() << "PictureLoader::getImageFromZip" << "finished reading from zip";
 #endif
     QImageReader image_reader(&out);
-    if (!thumb_info.thumbSize.isEmpty())
+    if (!thumb_info.getThumbSize().isEmpty())
     {
-        if (image_reader.size().height() > thumb_info.thumbSize.height() || image_reader.size().width() > thumb_info.thumbSize.width())
+        if (image_reader.size().height() > thumb_info.getThumbSize().height() || image_reader.size().width() > thumb_info.getThumbSize().width())
         {
-            image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size(), thumb_info.thumbSize));
+            image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size(), thumb_info.getThumbSize()));
         }
     }
     return image_reader.read();
@@ -161,11 +160,3 @@ QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &th
 #endif
     return result;
 }
-
-//        QFile file;
-//        file.setFileName(filepath);
-//        if (!file.open(QIODevice::ReadOnly))
-//        {
-//                // some Error handling is done here
-//        }
-//        qDebug() << QCryptographicHash::hash(file.readAll(), QCryptographicHash::Md4).toHex();

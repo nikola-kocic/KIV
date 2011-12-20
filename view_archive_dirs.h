@@ -20,6 +20,7 @@ private:
     {
     protected:
         bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+        bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
     };
 
 

@@ -24,17 +24,17 @@ class PictureItem : public QWidget
 public:
     PictureItem(Settings *settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-    void setZoom(qreal z);
-    qreal getZoom();
+    void setZoom(const qreal z);
+    qreal getZoom() const;
     QList<qreal> getDefaultZoomSizes() const;
 
-    void setRotation(qreal r);
+    void setRotation(const qreal r);
     qreal getRotation() const;
 
-    void setLockMode(LockMode::Mode);
+    void setLockMode(const LockMode::Mode &mode);
     LockMode::Mode getLockMode() const;
 
-    void setHardwareAcceleration(bool b);
+    void setHardwareAcceleration(const bool b);
     bool getHardwareAcceleration() const;
 
     void setPixmap(const FileInfo &info);
@@ -46,10 +46,10 @@ private:
     {
     public:
         PictureItemRaster(PictureItem *parent, Qt::WindowFlags f = 0);
-        void setRotation(qreal r);
+        void setRotation(const qreal r);
         void setFile(const FileInfo &info);
-        void setZoom(qreal current, qreal previous);
-        void setImage(QImage img);
+        void setZoom(const qreal current, const qreal previous);
+        void setImage(const QImage &img);
 
     private:
         QPixmap m_pixmap_edited;
@@ -66,11 +66,11 @@ private:
     public:
         PictureItemGL(PictureItem *parent, Qt::WindowFlags f = 0);
         ~PictureItemGL();
-        void setRotation(qreal r);
+        void setRotation(const qreal r);
         void updateClearColor();
-        void setZoom(qreal current, qreal previous);
-        void setImage(QImage img);
-        void setTexture(QImage tex, int num);
+        void setZoom(const qreal current, const qreal previous);
+        void setImage(const QImage &img);
+        void setTexture(const QImage &tex, const int num);
         void textureLoadFinished();
 
     private:
@@ -97,8 +97,8 @@ private:
     void initPictureItem();
     void start_timerScrollPage();
     void afterPixmapLoad();
-    void ScrollPageHorizontal(int value);
-    void ScrollPageVertical(int value);
+    void ScrollPageHorizontal(const int value);
+    void ScrollPageVertical(const int value);
     void calculateAverageColor(const QImage &img);
 
     Settings *m_settings;
@@ -118,13 +118,13 @@ private:
     LockMode::Mode m_lockMode;
     QColor m_color_clear;
 
-    QPoint pointToOrigin(int width, int height);
+    QPoint pointToOrigin(const int width, const int height);
     void avoidOutOfScreen();
     void drag(const QPoint &pt);
     void beginDrag(const QPoint &pt);
     void endDrag();
     void updateLockMode();
-    void setPixmapNull(bool value);
+    void setPixmapNull(const bool value);
     QRectF m_boundingRect;
     bool m_dragging;
 

@@ -24,7 +24,7 @@ class ListViewFiles : public QListView
     Q_OBJECT
 public:
     explicit ListViewFiles(QWidget *parent);
-    void setViewMode(int mode);
+    void setViewMode(const int mode);
 protected slots:
     void rowsInserted(const QModelIndex &parent, int start, int end);
 signals:
@@ -33,8 +33,13 @@ signals:
 
 class TreeViewFiles : public QTreeView
 {
+    Q_OBJECT
 public:
     explicit TreeViewFiles(QWidget *parent);
+protected slots:
+    void rowsInserted(const QModelIndex &parent, int start, int end);
+signals:
+    void rowsInserted(const QModelIndexList &indexes);
 };
 
 class ViewFiles : public QWidget
@@ -43,12 +48,12 @@ class ViewFiles : public QWidget
 
 public:
     ViewFiles(QWidget *parent);
-    void setViewMode(int mode);
+    void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
     FileInfo getCurrentFileInfo() const;
     void setModel(QAbstractItemModel *model);
-    void setShowThumbnails(bool b);
+    void setShowThumbnails(const bool b);
 
 public slots:
     void pageNext();
@@ -66,7 +71,6 @@ private:
 
     ArchiveFilesModel *m_model_archive_files;
     QFileSystemModel *m_model_filesystem;
-    QAbstractItemModel *m_model_current;
 
     QSplitter *m_splitter;
     ThumbnailItemDelegate *m_thumbnail_delegate;
@@ -86,6 +90,7 @@ private slots:
 
 signals:
     void currentFileChanged(const FileInfo &info);
+    void activated(const QString &path);
 };
 
 #endif // VIEWFILES_H

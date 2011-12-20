@@ -566,6 +566,7 @@ void MainWindow::connectActions()
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
+    connect(m_view_files, SIGNAL(activated(QString)), this, SLOT(on_filesView_item_activated(QString)));
     connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
     connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
     connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
@@ -650,9 +651,6 @@ void MainWindow::deleteBookmark()
 void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 {
     this->setCursor(Qt::BusyCursor);
-
-    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.container.canonicalFilePath()));
-    m_view_filesystem->expand(m_view_filesystem->currentIndex());
 
     m_lineEdit_path->setText(info.getFilePath());
     m_picture_item->setPixmap(info);
@@ -825,6 +823,18 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     m_lineEdit_path->setText(info.getFilePath());
 
     m_picture_item->setPixmap(info);
+}
+
+void MainWindow::on_filesView_item_activated(const QString &path)
+{
+
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesView_item_activated" << path;
+#endif
+
+    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(path));
+    m_view_filesystem->expand(m_view_filesystem->currentIndex());
+
 }
 
 void MainWindow::toggleSidebar(bool value)

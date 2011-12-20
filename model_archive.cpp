@@ -65,7 +65,7 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
 #endif
     this->clear();
 
-    this->setHorizontalHeaderLabels(QStringList() << tr("Name"));
+    this->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Size") << tr("Date"));
     QFile zipFile(info.container.canonicalFilePath());
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
@@ -75,7 +75,8 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
     }
     zip.setFileNameCodec("UTF-8");
 
-    QStringList archive_files = zip.getFileNameList();
+    QList<QuaZipFileInfo> archive_files = zip.getFileInfoList();
+//    QStringList archive_files = zip.getFileNameList();
 
     zip.close();
     if (zip.getZipError() != UNZ_OK) {
@@ -98,7 +99,7 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
     for (int i = 0; i < archive_files.size(); ++i)
     {
         node = root;
-        QStringList file_path_parts = archive_files.at(i).split('/');
+        QStringList file_path_parts = archive_files.at(i).name.split('/');
         QString folderPath = info.container.canonicalFilePath() + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
@@ -107,16 +108,16 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
                 folderPath.append(file_path_parts.at(j) + "/");
                 if (j < file_path_parts.size() - 1)
                 {
-                    node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR);
+                    node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR, archive_files.at(i).dateTime);
                     node->setData(folderPath, QFileSystemModel::FilePathRole);
                 }
                 else
                 {
-                    QFileInfo fi(archive_files.at(i));
+                    QFileInfo fi(archive_files.at(i).name);
                     if (isImageFile(fi))
                     {
-                        QString nodeFilePath = info.container.canonicalFilePath() + "/" + archive_files.at(i);
-                        node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
+                        QString nodeFilePath = info.container.canonicalFilePath() + "/" + archive_files.at(i).name;
+                        node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE, archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize);
                         node->setData(nodeFilePath, QFileSystemModel::FilePathRole);
                     }
                 }
@@ -128,7 +129,7 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
 
 }
 
-QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &name, int type)
+QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &name, const int type, const QDateTime &date, const quint64 size)
 {
     for (int i = 0; i < parent->rowCount(); ++i)
     {
@@ -141,16 +142,38 @@ QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &
     QStandardItem *ntvi = new QStandardItem(name);
     ntvi->setData(type, ROLE_TYPE);
     ntvi->setToolTip(name);
+
+
+    QStandardItem *date_item = new QStandardItem();
+    date_item->setData(date, Qt::DisplayRole);
+    ntvi->setData(date, ROLE_FILE_DATE);
+
+
+    QString tooltip = tr("Name: ") + ntvi->text() + "\n" +
+            tr("Date Modified: ") + date.toString(Qt::SystemLocaleShortDate);
+
+    ntvi->setToolTip(tooltip);
+    date_item->setToolTip(tooltip);
+
+
     if (type == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(m_icon_dir);
         indexToInsertByName(parent, name);
-        parent->insertRow(indexToInsertByName(parent, name), ntvi);
+        parent->insertRow(indexToInsertByName(parent, name), QList<QStandardItem *>() << ntvi << new QStandardItem() << date_item);
     }
     else
     {
+        QStandardItem *size_item = new QStandardItem(bytesToSize(size, 2));
+        size_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        tooltip += "\n" + (tr("Size: ") + size_item->text());
+
+        size_item->setToolTip(tooltip);
+
         ntvi->setIcon(m_icon_file);
-        parent->appendRow(ntvi);
+
+        parent->appendRow(QList<QStandardItem *>() << ntvi << size_item << date_item);
     }
     return ntvi;
 }

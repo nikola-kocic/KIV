@@ -47,7 +47,6 @@ HEADERS += \
     main_window.h \
     view_archive_dirs.h \
     view_files.h \
-    tiledim.h \
     teximg.h \
     picture_loader.h \
     helper.h \

@@ -38,17 +38,13 @@ public:
 class Bookmark
 {
 public:
-    Bookmark (QString name, QString path) : m_name(name), m_path(path) {}
-
+    Bookmark (const QString &name, const QString &path) : m_name(name), m_path(path) {}
     QString getName() const { return m_name; }
-    void setName(QString name) { m_name = name; }
-
     QString getPath() const { return m_path; }
-    void setPath(QString path) { m_path = path; }
 
 private:
-    QString m_name;
-    QString m_path;
+    const QString m_name;
+    const QString m_path;
 };
 
 class Settings
@@ -58,44 +54,44 @@ public:
     Settings();
 
     int getMiddleClick() const;
-    void setMiddleClick(int);
+    void setMiddleClick(const int v);
 
     int getWheel() const;
-    void setWheel(int);
+    void setWheel(const int v);
 
     bool getScrollPageByWidth() const;
-    void setScrollPageByWidth(bool);
+    void setScrollPageByWidth(const bool b);
 
     bool getRightToLeft() const;
-    void setRightToLeft(bool);
+    void setRightToLeft(const bool b);
 
     int getPageChangeTimeout() const;
-    void setPageChangeTimeout(int);
+    void setPageChangeTimeout(const int v);
 
     bool getLargeIcons() const;
-    void setLargeIcons(bool);
+    void setLargeIcons(const bool b);
 
     QString getLastPath() const;
-    void setLastPath(QString path);
+    void setLastPath(const QString &path);
 
     bool getJumpToEnd() const;
-    void setJumpToEnd(bool);
+    void setJumpToEnd(const bool b);
 
     bool getHardwareAcceleration() const;
-    void setHardwareAcceleration(bool);
+    void setHardwareAcceleration(const bool b);
 
 
     QSize getThumbnailSize() const;
-    void setThumbnailSize(QSize size);
+    void setThumbnailSize(const QSize &size);
 
     bool getScrollChangesPage() const;
-    void setScrollChangesPage(bool);
+    void setScrollChangesPage(const bool b);
 
     bool getCalculateAverageColor() const;
-    void setCalculateAverageColor(bool);
+    void setCalculateAverageColor(const bool b);
 
-    void addBookmark(QString name, QString path);
-    void deleteBookmark(int index);
+    void addBookmark(const QString &name, const QString &path);
+    void deleteBookmark(const int index);
     int getBookmarkCount();
     QList<Bookmark> getBookmarks();
 

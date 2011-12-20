@@ -8,11 +8,13 @@
 class FileInfo
 {
 public:
+    static FileInfo fromPath(const QString &path);
+    static QStringList getFiltersImage();
+    static QStringList getFiltersArchive();
+
     FileInfo();
-    static FileInfo fromPath(const QString &);
 
     bool isArchive() const;
-
     bool fileExists() const;
     bool isValidContainer() const;
 
@@ -21,9 +23,6 @@ public:
     QString getImageFileName() const;
 
     QString getDebugInfo() const;
-
-    static QStringList getFiltersImage();
-    static QStringList getFiltersArchive();
 
     QFileInfo container; /* Folder must end with "/" */
     QFileInfo image;

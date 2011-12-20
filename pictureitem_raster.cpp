@@ -11,7 +11,7 @@ PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::Windo
     m_picItem = parent;
 }
 
-void PictureItem::PictureItemRaster::setImage(QImage img)
+void PictureItem::PictureItemRaster::setImage(const QImage &img)
 {
     this->setUpdatesEnabled(false);
 
@@ -65,16 +65,16 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
     p.end();
 }
 
-void PictureItem::PictureItemRaster::setRotation(qreal r)
+void PictureItem::PictureItemRaster::setRotation(const qreal r)
 {
-    if ((int)m_picItem->getRotation() % 360 == 0)
+    if ((int)r % 360 == 0)
     {
         m_pixmap_edited = m_pixmap;
     }
     else
     {
         QTransform tRot;
-        tRot.rotate(m_picItem->getRotation());
+        tRot.rotate(r);
 
         Qt::TransformationMode rotateMode;
         rotateMode = Qt::SmoothTransformation;
@@ -89,7 +89,7 @@ void PictureItem::PictureItemRaster::setRotation(qreal r)
     this->update();
 }
 
-void PictureItem::PictureItemRaster::setZoom(qreal current, qreal previous)
+void PictureItem::PictureItemRaster::setZoom(const qreal current, const qreal previous)
 {
     QPointF p = m_picItem->pointToOrigin((m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));
 

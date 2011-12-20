@@ -9,9 +9,12 @@
 class ThumbnailInfo
 {
 public:
-    ThumbnailInfo(FileInfo info_, QSize thumbSize_) : info(info_), thumbSize(thumbSize_) {}
-    FileInfo info;
-    QSize thumbSize;
+    ThumbnailInfo(const FileInfo &info, const QSize &thumbSize) : m_info(info), m_thumbSize(thumbSize) {}
+    FileInfo getFileInfo() const { return m_info; }
+    QSize getThumbSize() const { return m_thumbSize; }
+private:
+    const FileInfo m_info;
+    const QSize m_thumbSize;
 };
 
 class PictureLoader

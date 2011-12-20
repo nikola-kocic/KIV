@@ -38,3 +38,8 @@ bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsRow(int sourceRow, co
     QModelIndex index0 = this->sourceModel()->index(sourceRow, 0, sourceParent);
     return !(index0.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE);
 }
+
+bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const
+{
+    return (source_column == 0);
+}

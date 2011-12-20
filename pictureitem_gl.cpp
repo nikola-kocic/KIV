@@ -41,7 +41,7 @@ void PictureItem::PictureItemGL::clearTextures()
     }
 }
 
-void PictureItem::PictureItemGL::setImage(QImage img)
+void PictureItem::PictureItemGL::setImage(const QImage &img)
 {
     m_old_textures = m_textures;
     if (img.isNull())
@@ -81,7 +81,7 @@ void PictureItem::PictureItemGL::setImage(QImage img)
     clearTextures();
 }
 
-void PictureItem::PictureItemGL::setTexture(QImage tex, int num)
+void PictureItem::PictureItemGL::setTexture(const QImage &tex, const int num)
 {
     int hIndex = num / m_texImg->vTile->tileCount;
     int vIndex = num % m_texImg->vTile->tileCount;
@@ -238,7 +238,7 @@ void PictureItem::PictureItemGL::resizeGL(int width, int height)
 }
 
 
-void PictureItem::PictureItemGL::setRotation(qreal r)
+void PictureItem::PictureItemGL::setRotation(const qreal r)
 {
     QTransform tRot;
     tRot.translate(m_picItem->m_boundingRect.x(), m_picItem->m_boundingRect.y());
@@ -265,7 +265,7 @@ void PictureItem::PictureItemGL::setRotation(qreal r)
     this->updateGL();
 }
 
-void PictureItem::PictureItemGL::setZoom(qreal current, qreal previous)
+void PictureItem::PictureItemGL::setZoom(const qreal current, const qreal previous)
 {
     qreal scaledW = (m_picItem->m_boundingRect.width() / previous) * current;
     qreal scaledH = (m_picItem->m_boundingRect.height() / previous) * current;

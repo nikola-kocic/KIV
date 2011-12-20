@@ -44,7 +44,7 @@ int Settings::getMiddleClick() const
     return m_middleClick;
 }
 
-void Settings::setMiddleClick(int v)
+void Settings::setMiddleClick(const int v)
 {
     m_middleClick = v;
     m_settings->setValue("Mouse/MiddleClick", v);
@@ -56,7 +56,7 @@ int Settings::getWheel() const
     return m_wheel;
 }
 
-void Settings::setWheel(int v)
+void Settings::setWheel(const int v)
 {
     m_wheel = v;
     m_settings->setValue("Mouse/Wheel", v);
@@ -67,7 +67,7 @@ bool Settings::getScrollPageByWidth() const
     return m_scrollPageByWidth;
 }
 
-void Settings::setScrollPageByWidth(bool b)
+void Settings::setScrollPageByWidth(const bool b)
 {
     m_scrollPageByWidth = b;
     m_settings->setValue("Behavior/ScrollPageByWidth", m_scrollPageByWidth);
@@ -78,7 +78,7 @@ bool Settings::getRightToLeft() const
     return m_rightToLeft;
 }
 
-void Settings::setRightToLeft(bool b)
+void Settings::setRightToLeft(const bool b)
 {
     m_rightToLeft = b;
     m_settings->setValue("Behavior/RightToLeft", m_rightToLeft);
@@ -89,7 +89,7 @@ int Settings::getPageChangeTimeout() const
     return m_pageChangeTimeout;
 }
 
-void Settings::setPageChangeTimeout(int v)
+void Settings::setPageChangeTimeout(const int v)
 {
     m_pageChangeTimeout = v;
     m_settings->setValue("Behavior/PageChangeTimeout", m_pageChangeTimeout);
@@ -100,7 +100,7 @@ bool Settings::getLargeIcons() const
     return m_largeIcons;
 }
 
-void Settings::setLargeIcons(bool b)
+void Settings::setLargeIcons(const bool b)
 {
     m_largeIcons = b;
     m_settings->setValue("Interface/LargeIcons", m_largeIcons);
@@ -111,9 +111,9 @@ QString Settings::getLastPath() const
     return m_lastPath;
 }
 
-void Settings::setLastPath(QString s)
+void Settings::setLastPath(const QString &path)
 {
-    m_lastPath = s;
+    m_lastPath = path;
     m_settings->setValue("Interface/LastPath", m_lastPath);
 }
 
@@ -122,7 +122,7 @@ bool Settings::getJumpToEnd() const
     return m_jumpToEnd;
 }
 
-void Settings::setJumpToEnd(bool b)
+void Settings::setJumpToEnd(const bool b)
 {
     m_jumpToEnd = b;
     m_settings->setValue("Behavior/JumpToBottom", m_jumpToEnd);
@@ -133,7 +133,7 @@ bool Settings::getHardwareAcceleration() const
     return m_hardwareAcceleration;
 }
 
-void Settings::setHardwareAcceleration(bool b)
+void Settings::setHardwareAcceleration(const bool b)
 {
     m_hardwareAcceleration = b;
     m_settings->setValue("Interface/HardwareAcceleration", m_hardwareAcceleration);
@@ -145,7 +145,7 @@ QSize Settings::getThumbnailSize() const
     return m_thumbSize;
 }
 
-void Settings::setThumbnailSize(QSize size)
+void Settings::setThumbnailSize(const QSize &size)
 {
     m_thumbSize = size;
     m_settings->setValue("Interface/ThumbnailSize", m_thumbSize);
@@ -156,7 +156,7 @@ bool Settings::getScrollChangesPage() const
     return m_scrollChangesPage;
 }
 
-void Settings::setScrollChangesPage(bool b)
+void Settings::setScrollChangesPage(const bool b)
 {
     m_scrollChangesPage = b;
     m_settings->setValue("Behavior/ScrollChangesPage", m_scrollChangesPage);
@@ -168,13 +168,13 @@ bool Settings::getCalculateAverageColor() const
     return m_calculateAverageColor;
 }
 
-void Settings::setCalculateAverageColor(bool b)
+void Settings::setCalculateAverageColor(const bool b)
 {
     m_calculateAverageColor = b;
     m_settings->setValue("Interface/CalculateAverageColor", m_calculateAverageColor);
 }
 
-void Settings::addBookmark(QString name, QString path)
+void Settings::addBookmark(const QString &name, const QString &path)
 {
     int oldcount = m_bookmarks.size();
     m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Name", name);
@@ -183,7 +183,7 @@ void Settings::addBookmark(QString name, QString path)
     m_bookmarks.append(Bookmark(name, path));
 }
 
-void Settings::deleteBookmark(int index)
+void Settings::deleteBookmark(const int index)
 {
     m_bookmarks.removeAt(index);
     refreshBookmarks();
