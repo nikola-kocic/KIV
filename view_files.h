@@ -86,8 +86,6 @@ private slots:
 
 signals:
     void currentFileChanged(const FileInfo &info);
-    void activated(const QString &path);
-
 };
 
 #endif // VIEWFILES_H

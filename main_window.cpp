@@ -26,6 +26,7 @@
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
 {
+    m_flag_opening = false;
     m_settings = new Settings();
     this->setAcceptDrops(true);
     this->resize(QApplication::desktop()->width() - 100,
@@ -565,15 +566,11 @@ void MainWindow::connectActions()
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
-
-    connect(m_view_files, SIGNAL(activated(QString)), this, SLOT(on_filesView_item_activated(QString)));
     connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
-
     connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
-
     connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
-    connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
 
+    connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
     connect(m_picture_item, SIGNAL(toggleFullscreen()), m_act_fullscreen, SLOT(toggle()));
     connect(m_picture_item, SIGNAL(pageNext()), m_view_files, SLOT(pageNext()));
     connect(m_picture_item, SIGNAL(pagePrevious()), m_view_files, SLOT(pagePrevious()));
@@ -653,6 +650,10 @@ void MainWindow::deleteBookmark()
 void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 {
     this->setCursor(Qt::BusyCursor);
+
+    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.container.canonicalFilePath()));
+    m_view_filesystem->expand(m_view_filesystem->currentIndex());
+
     m_lineEdit_path->setText(info.getFilePath());
     m_picture_item->setPixmap(info);
 }
@@ -663,18 +664,23 @@ void MainWindow::openFile(const QString &source)
     qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile" << source;
 #endif
     FileInfo info = FileInfo::fromPath(source);
+#ifdef DEBUG_MAIN_WINDOW
+    qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile" << info.getDebugInfo();
+#endif
 
     if (!info.isValidContainer())
     {
         return;
     }
 
-    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.containerPath));
+    m_flag_opening = true;
+    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.container.canonicalFilePath()));
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << info.getDebugInfo();
 #endif
     m_view_files->setCurrentFile(info);
 
+    m_flag_opening = false;
 
 }
 
@@ -789,6 +795,11 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
 {
     m_act_dirUp->setEnabled(current.parent().isValid());
     m_view_filesystem->scrollTo(current);
+    if (m_flag_opening)
+    {
+        return;
+    }
+
     QString currentFolder = m_model_filesystem->filePath(current);
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesystemView_currentRowChanged" << currentFolder;
@@ -796,7 +807,7 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     this->setWindowTitle(m_model_filesystem->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
     FileInfo info;
-    info.containerPath = currentFolder;
+    info.container = currentFolder;
 
     if (m_model_filesystem->isDir(current))
     {
@@ -814,18 +825,6 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
     m_lineEdit_path->setText(info.getFilePath());
 
     m_picture_item->setPixmap(info);
-}
-
-void MainWindow::on_filesView_item_activated(const QString &path)
-{
-
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesView_item_activated" << path;
-#endif
-
-    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(path));
-    m_view_filesystem->expand(m_view_filesystem->currentIndex());
-
 }
 
 void MainWindow::toggleSidebar(bool value)
@@ -890,7 +889,7 @@ bool MainWindow::saveAs()
 
     if (info.isZip())
     {
-        JlCompress::extractFile(info.containerPath, info.zipImagePath(), fileName);
+        JlCompress::extractFile(info.container.canonicalFilePath(), info.zipImagePath(), fileName);
     }
     else
     {

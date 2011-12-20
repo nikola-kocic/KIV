@@ -58,7 +58,7 @@ QString bytesToSize(int bytes, int precision)
     }
 }
 
-void FilesModel::setPath(const FileInfo &path)
+void FilesModel::setPath(const FileInfo &info)
 {
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << path.getFilePath();
@@ -66,7 +66,7 @@ void FilesModel::setPath(const FileInfo &path)
     this->clear();
 
     this->setHorizontalHeaderLabels(QStringList() << tr("Name"));
-    QFile zipFile(path.containerPath);
+    QFile zipFile(info.container.canonicalFilePath());
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
     {
@@ -133,9 +133,8 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
         }
     }
 
-    QStandardItem *ntvi = new QStandardItem();
+    QStandardItem *ntvi = new QStandardItem(name);
     ntvi->setData(type, ROLE_TYPE);
-    ntvi->setText(name);
     ntvi->setToolTip(name);
     if (type == TYPE_ARCHIVE_DIR)
     {

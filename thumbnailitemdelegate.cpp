@@ -5,8 +5,10 @@
 #include <QPixmap>
 #include <QAbstractItemView>
 #include <QtConcurrentMap>
+#include <QCryptographicHash>
+#include <QDir>
 
-#define DEBUG_THUMBNAIL_ITEM_DELEGATE
+//#define DEBUG_THUMBNAIL_ITEM_DELEGATE
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
 #include <QDebug>
@@ -28,35 +30,40 @@ QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const 
     return size_grid;
 }
 
-void ThumbnailItemDelegate::updateThumbnail(ThumbnailInfo thumb_info, QModelIndex index)
+void ThumbnailItemDelegate::updateThumbnail(FileInfo info, QModelIndex index)
 {
-    if (m_thumbnails.contains(index.internalId()))
+//    QCryptographicHash::hash(info.getFilePath(), QCryptographicHash::Md4)
+    if (m_thumbnails.contains(index))
     {
+//        if (m_t
         return;
     }
-
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << index.internalId() << info.getFilePath();
+        qDebug() << info.getDebugInfo();
+#endif
     FileInfo pli_info;
 
 //    int type = index.data(ROLE_TYPE).toInt();
     QString name = index.data(Qt::DisplayRole).toString();
-    pli_info = thumb_info.info;
+    pli_info = info;
 //    QFileInfo fi(thumb_info.info.getFilePath());
-    if (thumb_info.info.fileExists())
+    if (info.fileExists())
     {
-        if (!thumb_info.info.isZip())
+        if (!info.isZip())
         {
-            pli_info.imageFileName = name;
+            pli_info.image.setFile(pli_info.image.dir(), name);
         }
         else
         {
             pli_info.zipImageFileName = name;
         }
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to files"  << index.internalId() << thumb_info.info.getFilePath();
+        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to files"  << index.data().toString() << info.getFilePath();
 #endif
-        ThumbnailInfo ti(pli_info, thumb_info.thumbSize);
+        ThumbnailInfo(pli_info, m_thumb_size);
 
-        m_thumbnails.insert(index.internalId(), QIcon(QPixmap::fromImage(PictureLoader::getThumbnail(ti))));
+        m_thumbnails.insert(index, QIcon(QPixmap::fromImage(PictureLoader::getThumbnail(ThumbnailInfo(pli_info, m_thumb_size)))));
         emit thumbnailFinished(index);
 
 
@@ -64,11 +71,14 @@ void ThumbnailItemDelegate::updateThumbnail(ThumbnailInfo thumb_info, QModelInde
     else
     {
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to dirs"  << index.internalId() << thumb_info.info.getFilePath();
+        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to dirs"  <<  index.data().toString() << info.getFilePath();
 #endif
         QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-        icon = QIcon(QPixmap::fromImage(PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), thumb_info)));
-        m_thumbnails.insert(index.internalId(), icon);
+//        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "index.data(Qt::DecorationRole).value<QIcon>()" << icon.availableSizes();
+        QImage thumb = PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), ThumbnailInfo(info, m_thumb_size));
+//        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "thumb = PictureLoader::styleThumbnail(...)";
+        icon = QIcon(QPixmap::fromImage(thumb));
+        m_thumbnails.insert(index, icon);
     }
 }
 
@@ -82,11 +92,11 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
     QStyledItemDelegate::initStyleOption(option, index);
 
 //    qDebug() << index << index.data();
-    if (m_thumbnails.contains(index.internalId()))
+    if (m_thumbnails.contains(index))
     {
         if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
         {
-            v4->icon = m_thumbnails.value(index.internalId(), QIcon());
+            v4->icon = m_thumbnails.value(index, QIcon());
             v4->decorationSize = v4->icon.availableSizes().last();
         }
     }

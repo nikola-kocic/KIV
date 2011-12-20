@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QFutureWatcher>
 #include <QStyledItemDelegate>
+#include <QDateTime>
 
 class ThumbnailItemDelegate : public QStyledItemDelegate
 {
@@ -14,7 +15,7 @@ class ThumbnailItemDelegate : public QStyledItemDelegate
 public:
     explicit ThumbnailItemDelegate(QSize thumbSize, QObject *parent = 0);
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    void updateThumbnail(ThumbnailInfo thumb_info, QModelIndex index);
+    void updateThumbnail(FileInfo info, QModelIndex index);
     void setThumbnailSize(const QSize &size);
 
 protected:
@@ -23,7 +24,8 @@ protected:
 private:
     QSize m_thumb_size;
     QFutureWatcher<QImage> *m_watcherThumbnail;
-    QHash<qint64, QIcon> m_thumbnails;
+    QHash<QModelIndex, QIcon> m_thumbnails;
+//    QHash<QByteArray, ThumbImageDate> m_thumbnails;
 
 //    QList<ThumbnailInfo> m_files;
 //    QList<QModelIndex> m_indexes;

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QFileInfo>
 
 class FileInfo
 {
@@ -24,8 +25,8 @@ public:
     static QStringList getFiltersImage();
     static QStringList getFiltersArchive();
 
-    QString containerPath; /* Doesn't end with "/" */
-    QString imageFileName;
+    QFileInfo container; /* Folder must end with "/" */
+    QFileInfo image;
 
     QString zipPath; /* Ends with "/" */
     QString zipImageFileName;
