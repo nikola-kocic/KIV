@@ -19,10 +19,9 @@
 
 ThumbnailItemDelegate::ThumbnailItemDelegate(const QSize &thumbSize, QObject *parent)
     : QStyledItemDelegate(parent)
+    , m_thumb_size(thumbSize)
+    , m_watcherThumbnail(new QFutureWatcher<QImage>(this))
 {
-//    m_flag_cancel = false;
-    m_thumb_size = thumbSize;
-    m_watcherThumbnail = new QFutureWatcher<QImage>(this);
     connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
 }
 
@@ -57,7 +56,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     const QVariant &date = index.data(ROLE_FILE_DATE);
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << filepath;
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::updateThumbnail" << filepath;
 #endif
 
     if (date.isValid())
@@ -80,7 +79,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     }
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "generating for" << filepath;
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::updateThumbnail" << "generating for" << filepath;
 #endif
 
     QIcon icon;
@@ -94,7 +93,6 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
             m_currentIndex = index;
             m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(info, m_thumb_size)));
         }
-//        icon = QIcon(QPixmap::fromImage(PictureLoader::getThumbnail(ThumbnailInfo(info, m_thumb_size))));
     }
     else
     {
@@ -116,7 +114,6 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
     QStyledItemDelegate::initStyleOption(option, index);
 
     const QByteArray &path_hash = QCryptographicHash::hash(index.data(QFileSystemModel::FilePathRole).toByteArray(), QCryptographicHash::Md4);
-//    qDebug() << index << index.data();
     if (m_thumbnails.contains(path_hash))
     {
         if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
@@ -135,7 +132,7 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
 void ThumbnailItemDelegate::showThumbnail(int num)
 {
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::showThumbnail" << m_currentIndex.data().toString();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::showThumbnail" << m_currentIndex.data().toString();
 #endif
 
     if (!m_currentIndex.isValid() && !m_canceledFiles.isEmpty())

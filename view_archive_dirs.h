@@ -8,7 +8,7 @@ class ViewArchiveDirs : public QTreeView
 {
     Q_OBJECT
 public:
-    ViewArchiveDirs();
+    explicit ViewArchiveDirs(QWidget *parent = 0);
     void setModel(QAbstractItemModel *model);
 
 public slots:
@@ -24,7 +24,7 @@ private:
     };
 
 
-    MySortFilterProxyModel *proxy;
+    MySortFilterProxyModel *m_proxy;
 
 private slots:
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);

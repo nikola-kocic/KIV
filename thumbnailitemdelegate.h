@@ -12,6 +12,7 @@
 class ThumbnailItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
+
 public:
     explicit ThumbnailItemDelegate(const QSize &thumbSize, QObject *parent = 0);
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
@@ -29,11 +30,16 @@ private:
         QIcon thumb;
         QDateTime date;
     };
+
     class ProcessInfo
     {
     public:
         ProcessInfo(const QModelIndex &index, const FileInfo &fileinfo, const QByteArray &pathhash, const QDateTime &date )
-            : m_index(index), m_fileinfo(fileinfo), m_path_hash(pathhash), m_date(date) {}
+            : m_index(index)
+            , m_fileinfo(fileinfo)
+            , m_path_hash(pathhash)
+            , m_date(date)
+        {}
 
         QDateTime getDate() const { return m_date; }
         QModelIndex getIndex() const { return m_index; }
@@ -54,7 +60,6 @@ private:
     QHash<QByteArray, ThumbImageDate> m_thumbnails;
 
     QList<ProcessInfo> m_files_to_process;
-//    bool m_flag_cancel;
 
     QModelIndex m_currentIndex;
     QList<ProcessInfo> m_canceledFiles;

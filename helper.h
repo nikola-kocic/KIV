@@ -18,9 +18,28 @@ const int TYPE_ARCHIVE_DIR = 1004;
 const int TYPE_ARCHIVE_FILE = 1005;
 
 
-bool isImageFile(const QFileInfo &fi);
-bool isArchiveFile(const QFileInfo &fi);
-bool checkFileExtension(const QFileInfo &fi);
+inline bool isArchiveFile(const QFileInfo &fi)
+{
+    return FileInfo::getFiltersArchive().contains(fi.suffix().toLower());
+}
+
+inline bool isImageFile(const QFileInfo &fi)
+{
+    return FileInfo::getFiltersImage().contains(fi.suffix().toLower());
+}
+
+inline bool checkFileExtension(const QFileInfo &info)
+{
+    if (isArchiveFile(info) || info.isDir() || isImageFile(info))
+    {
+       return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 static inline bool FuzzyCompare(double p1, double p2)
 {

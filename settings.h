@@ -51,7 +51,7 @@ class Settings
 {
 
 public:
-    Settings();
+    explicit Settings();
 
     int getMiddleClick() const;
     void setMiddleClick(const int v);

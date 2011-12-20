@@ -16,9 +16,9 @@
 
 ArchiveFilesModel::ArchiveFilesModel(QObject *parent)
     : QStandardItemModel(parent)
+    , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
+    , m_icon_file(QApplication::style()->standardIcon(QStyle::SP_FileIcon))
 {
-    m_icon_dir = QApplication::style()->standardIcon(QStyle::SP_DirIcon);
-    m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
 }
 
 QString bytesToSize(int bytes, int precision)
@@ -31,12 +31,10 @@ QString bytesToSize(int bytes, int precision)
     if ((bytes >= 0) && (bytes < kilobyte))
     {
         return QString::number(bytes) + " B";
-
     }
     else if ((bytes >= kilobyte) && (bytes < megabyte))
     {
         return QString::number(((float)bytes / kilobyte), 'f', precision) + " KiB";
-
     }
     else if ((bytes >= megabyte) && (bytes < gigabyte))
     {
@@ -61,7 +59,7 @@ QString bytesToSize(int bytes, int precision)
 void ArchiveFilesModel::setPath(const FileInfo &info)
 {
 #ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << path.getFilePath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FilesModel::setPath" << path.getFilePath();
 #endif
     this->clear();
 

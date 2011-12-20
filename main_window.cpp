@@ -25,9 +25,23 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
+    , m_flag_opening(false)
+
+    , m_settings(new Settings())
+
+    , m_model_filesystem(new QFileSystemModel(this))
+    , m_view_filesystem(new QTreeView(this))
+    , m_view_files(new ViewFiles(this))
+
+    , m_splitter_main(new QSplitter(Qt::Horizontal, this))
+    , m_splitter_sidebar(new QSplitter(Qt::Vertical, this))
+    , m_picture_item(new PictureItem(m_settings, this))
+
+    , m_menu_main(new QMenuBar(this))
+    , m_toolbar(new QToolBar(this))
+    , m_lineEdit_path(new QLineEdit(this))
+    , m_comboBox_zoom(new QComboBox(this))
 {
-    m_flag_opening = false;
-    m_settings = new Settings();
     this->setAcceptDrops(true);
     this->resize(QApplication::desktop()->width() - 100,
                  QApplication::desktop()->height() - 100);
@@ -46,33 +60,34 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
         filters.append("*." + filtersArchive.at(i));
     }
 
-    m_model_filesystem = new QFileSystemModel(this);
     m_model_filesystem->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
     m_model_filesystem->setNameFilterDisables(false);
     m_model_filesystem->setNameFilters(filters);
     m_model_filesystem->setRootPath("");
     /* End modelFilesystem */
 
+    /* Start filesystemView */
+    m_view_filesystem->setUniformRowHeights(true);
+    m_view_filesystem->setHeaderHidden(true);
+    m_view_filesystem->setModel(m_model_filesystem);
+    for (int i = 1; i < m_view_filesystem->header()->count(); ++i)
+    {
+        m_view_filesystem->hideColumn(i);
+    }
+    /* End filesystemView */
+
+    m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
+
 
     createActions();
-
-    m_splitter_main = new QSplitter(Qt::Horizontal, this);
-
-    QWidget *content = new QWidget(this);
-    QVBoxLayout *vboxMain = new QVBoxLayout(content);
-    vboxMain->setSpacing(0);
-    vboxMain->setMargin(0);
-
-    m_menu_main = new QMenuBar(this);
     createMenus();
-    this->setMenuBar(m_menu_main);
 
-    m_lineEdit_path = new QLineEdit(this);
+    QCompleter *completer = new QCompleter(this);
+    completer->setModel(m_model_filesystem);
+    m_lineEdit_path->setCompleter(completer);
     m_lineEdit_path->installEventFilter(this);
 
-
     /* Start comboBoxZoom */
-    m_comboBox_zoom = new QComboBox(this);
     m_comboBox_zoom->setEnabled(false);
     m_comboBox_zoom->setInsertPolicy(QComboBox::NoInsert);
     m_comboBox_zoom->setMaxVisibleItems(12);
@@ -81,126 +96,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     m_comboBox_zoom->setFocusPolicy(Qt::ClickFocus);
     m_comboBox_zoom->lineEdit()->setCompleter(0);
     m_comboBox_zoom->installEventFilter(this);
-    /* End comboBoxZoom */
-
-
-    /* Start toolbar */
-    m_toolbar = new QToolBar(this);
-    m_toolbar->setMovable(false);
-    m_toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
-    m_toolbar->layout()->setMargin(0);
-
-    m_toolbar->addAction(m_act_sidebar);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_act_dirUp);
-    m_toolbar->addAction(m_act_refreshPath);
-    m_toolbar->addWidget(m_lineEdit_path);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_act_pagePrevious);
-    m_toolbar->addAction(m_act_pageNext);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_act_zoomIn);
-    m_toolbar->addAction(m_act_zoomOut);
-    m_toolbar->addAction(m_act_fitToWindow);
-    m_toolbar->addWidget(m_comboBox_zoom);
-    m_toolbar->addSeparator();
-    m_toolbar->addAction(m_act_rotateLeft);
-    m_toolbar->addAction(m_act_rotateRight);
-    m_toolbar->addAction(m_act_fullscreen);
-    /* End toolbar */
-
-
-    /* Start contextMenu */
-    m_menu_context_picture = new QMenu(this);
-    m_menu_context_picture->addAction(m_act_pageNext);
-    m_menu_context_picture->addAction(m_act_pagePrevious);
-    m_menu_context_picture->addSeparator();
-    m_menu_context_picture->addAction(m_act_fullscreen);
-    m_menu_context_picture->addAction(m_act_sidebar);
-    m_menu_context_picture->addSeparator();
-
-    QMenu *menuZoom = m_menu_context_picture->addMenu(tr("Zoom"));
-    menuZoom->addAction(m_act_zoomIn);
-    menuZoom->addAction(m_act_zoomOut);
-    menuZoom->addAction(m_act_zoomReset);
-
-    QMenu *menuRotate = m_menu_context_picture->addMenu(tr("Rotate"));
-    menuRotate->addAction(m_act_rotateLeft);
-    menuRotate->addAction(m_act_rotateRight);
-    menuRotate->addAction(m_act_rotateReset);
-
-    QMenu *menuFit = m_menu_context_picture->addMenu(tr("Fit"));
-    menuFit->addAction(m_act_fitToHeight);
-    menuFit->addAction(m_act_fitToWidth);
-    menuFit->addAction(m_act_fitToWindow);
-
-    QMenu *menuLock = m_menu_context_picture->addMenu(tr("Lock"));
-    menuLock->addAction(m_act_lockNone);
-    menuLock->addAction(m_act_lockZoom);
-    menuLock->addAction(m_act_lockAutofit);
-    menuLock->addAction(m_act_lockFitWidth);
-    menuLock->addAction(m_act_lockFitHeight);
-
-    m_menu_context_picture->addSeparator();
-    m_menu_context_picture->addAction(m_act_exit);
-
-
-    /* End contextMenu */
-
-    m_menu_context_bookmark = new QMenu(this);
-    m_menu_context_bookmark->addAction(m_act_bookmark_delete);
-
-
-    vboxMain->addWidget(m_toolbar);
-
-    /* Start Panel */
-
-    m_splitter_sidebar = new QSplitter(Qt::Vertical, this);
-
-
-    /* Start filesystemView */
-    m_view_filesystem = new QTreeView(this);
-    m_view_filesystem->setUniformRowHeights(true);
-    m_view_filesystem->setHeaderHidden(true);
-
-    m_splitter_sidebar->addWidget(m_view_filesystem);
-    /* End filesystemView */
-
-
-    /* Start filesView */
-    m_view_files = new ViewFiles(this);
-    m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
-//    m_view_files->setModel(m_model_files);
-
-    m_splitter_sidebar->addWidget(m_view_files);
-    m_splitter_main->addWidget(m_splitter_sidebar);
-    m_splitter_main->setSizes(QList<int>() << 300);
-
-    /* End Panel */
-
-
-    /* Start imageDisplay */
-    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    policy.setHorizontalStretch(1);
-    policy.setVerticalStretch(0);
-
-    m_picture_item = new PictureItem(m_settings, this);
-    m_picture_item->setSizePolicy(policy);
-
-    m_splitter_main->addWidget(m_picture_item);
-    /* End imageDisplay */
-
-
-    vboxMain->addWidget(m_splitter_main);
-    this->setCentralWidget(content);
-
-
-
-    m_view_filesystem->setModel(m_model_filesystem);
-    for (int i = 1; i < m_view_filesystem->header()->count(); ++i)
-    {
-        m_view_filesystem->hideColumn(i);
-    }
 
     for (int i = 0; i < m_picture_item->getDefaultZoomSizes().size(); ++i)
     {
@@ -211,28 +106,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
             m_comboBox_zoom->setCurrentIndex(m_comboBox_zoom->count() - 1);
         }
     }
-
-    /* Now add the line to the splitter handle
-       Note: index 0 handle is always hidden, index 1 is between the two widgets */
-    QSplitterHandle *handleMain = m_splitter_main->handle(1);
-    QVBoxLayout *layoutMain = new QVBoxLayout(handleMain);
-    layoutMain->setSpacing(0);
-    layoutMain->setMargin(0);
-    QFrame *frameMain = new QFrame(handleMain);
-    frameMain->setFrameShape(QFrame::Panel);
-    frameMain->setFrameShadow(QFrame::Raised);
-    layoutMain->addWidget(frameMain);
-
-    /* Now add the line to the splitter handle
-       Note: index 0 handle is always hidden, index 1 is between the two widgets */
-    QSplitterHandle *handlePanel = m_splitter_sidebar->handle(1);
-    QVBoxLayout *layoutPanel = new QVBoxLayout(handlePanel);
-    layoutPanel->setSpacing(0);
-    layoutPanel->setMargin(0);
-    QFrame *framePanel = new QFrame(handlePanel);
-    framePanel->setFrameShape(QFrame::Panel);
-    framePanel->setFrameShadow(QFrame::Raised);
-    layoutPanel->addWidget(framePanel);
+    /* End comboBoxZoom */
 
 
     /* Large icons are On by default but I want small icons by default */
@@ -245,11 +119,34 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
         toggleLargeIcons(false);
     }
 
-    this->connectActions();
+    connectActions();
 
-    QCompleter *completer = new QCompleter(this);
-    completer->setModel(m_model_filesystem);
-    m_lineEdit_path->setCompleter(completer);
+    /* Start imageDisplay */
+    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    policy.setHorizontalStretch(1);
+    policy.setVerticalStretch(0);
+    m_picture_item->setSizePolicy(policy);
+    /* End imageDisplay */
+
+    this->setMenuBar(m_menu_main);
+
+    QWidget *content = new QWidget(this);
+    QVBoxLayout *vboxMain = new QVBoxLayout(content);
+    vboxMain->setSpacing(0);
+    vboxMain->setMargin(0);
+
+    m_splitter_sidebar->addWidget(m_view_filesystem);
+    m_splitter_sidebar->addWidget(m_view_files);
+
+    m_splitter_main->addWidget(m_splitter_sidebar);
+    m_splitter_main->setSizes(QList<int>() << 300);
+    m_splitter_main->addWidget(m_picture_item);
+
+    vboxMain->addWidget(m_toolbar);
+    vboxMain->addWidget(m_splitter_main);
+
+    this->setCentralWidget(content);
+
 
     if (QApplication::arguments().size() > 1)
     {
@@ -271,11 +168,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::keyPressEvent" << event->key();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::keyPressEvent" << event->key();
 #endif
     if (event->key() == Qt::Key_Escape)
     {
-
         if (m_lineEdit_path->hasFocus())
         {
             m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
@@ -303,9 +199,9 @@ void MainWindow::createActions()
     if (appdir.dirName() == "release" || appdir.dirName() == "debug")
     {
         appdir.cd("../../src/icons");
-        QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());
     }
 #endif
+    QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());
 
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
     static const char * FALLBACK_ICON_THEME = "default";
@@ -314,7 +210,6 @@ void MainWindow::createActions()
            use an icon theme that we provide via a icons folder
            This case happens under Windows and Mac OS X
            This does not happen under GNOME or KDE */
-//                QIcon::setThemeSearchPaths(QStringList() << QCoreApplication::applicationDirPath());
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
@@ -524,6 +419,71 @@ void MainWindow::createMenus()
     helpMenu->addAction(m_act_webSite);
     helpMenu->addAction(m_act_about);
 
+
+    /* Start toolbar */
+    m_toolbar->setMovable(false);
+    m_toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
+    m_toolbar->layout()->setMargin(0);
+
+    m_toolbar->addAction(m_act_sidebar);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_act_dirUp);
+    m_toolbar->addAction(m_act_refreshPath);
+    m_toolbar->addWidget(m_lineEdit_path);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_act_pagePrevious);
+    m_toolbar->addAction(m_act_pageNext);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_act_zoomIn);
+    m_toolbar->addAction(m_act_zoomOut);
+    m_toolbar->addAction(m_act_fitToWindow);
+    m_toolbar->addWidget(m_comboBox_zoom);
+    m_toolbar->addSeparator();
+    m_toolbar->addAction(m_act_rotateLeft);
+    m_toolbar->addAction(m_act_rotateRight);
+    m_toolbar->addAction(m_act_fullscreen);
+    /* End toolbar */
+
+
+    /* Start contextMenu */
+    m_menu_context_picture = new QMenu(this);
+    m_menu_context_picture->addAction(m_act_pageNext);
+    m_menu_context_picture->addAction(m_act_pagePrevious);
+    m_menu_context_picture->addSeparator();
+    m_menu_context_picture->addAction(m_act_fullscreen);
+    m_menu_context_picture->addAction(m_act_sidebar);
+    m_menu_context_picture->addSeparator();
+
+    QMenu *menuZoom = m_menu_context_picture->addMenu(tr("Zoom"));
+    menuZoom->addAction(m_act_zoomIn);
+    menuZoom->addAction(m_act_zoomOut);
+    menuZoom->addAction(m_act_zoomReset);
+
+    QMenu *menuRotate = m_menu_context_picture->addMenu(tr("Rotate"));
+    menuRotate->addAction(m_act_rotateLeft);
+    menuRotate->addAction(m_act_rotateRight);
+    menuRotate->addAction(m_act_rotateReset);
+
+    QMenu *menuFit = m_menu_context_picture->addMenu(tr("Fit"));
+    menuFit->addAction(m_act_fitToHeight);
+    menuFit->addAction(m_act_fitToWidth);
+    menuFit->addAction(m_act_fitToWindow);
+
+    QMenu *menuLock = m_menu_context_picture->addMenu(tr("Lock"));
+    menuLock->addAction(m_act_lockNone);
+    menuLock->addAction(m_act_lockZoom);
+    menuLock->addAction(m_act_lockAutofit);
+    menuLock->addAction(m_act_lockFitWidth);
+    menuLock->addAction(m_act_lockFitHeight);
+
+    m_menu_context_picture->addSeparator();
+    m_menu_context_picture->addAction(m_act_exit);
+
+
+    /* End contextMenu */
+
+    m_menu_context_bookmark = new QMenu(this);
+    m_menu_context_bookmark->addAction(m_act_bookmark_delete);
 }
 
 void MainWindow::connectActions()
@@ -600,7 +560,7 @@ void MainWindow::populateBookmarks()
         if (!oldActions.at(i)->data().toString().isEmpty())
         {
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime() << "MainWindow::populateBookmarks()" << "removed bookmark" << oldActions.at(i)->text() << oldActions.at(i)->data().toString();
+                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::populateBookmarks()" << "removed bookmark" << oldActions.at(i)->text() << oldActions.at(i)->data().toString();
 #endif
             oldActions.at(i)->deleteLater();
         }
@@ -614,7 +574,7 @@ void MainWindow::populateBookmarks()
         connect(bookmark, SIGNAL(triggered()), this, SLOT(on_bookmark_triggered()));
         m_menu_bookmarks->addAction(bookmark);
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime() << "MainWindow::populateBookmarks()" << "added bookmark" << bookmark->text() << bookmark->data().toString();
+                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::populateBookmarks()" << "added bookmark" << bookmark->text() << bookmark->data().toString();
 #endif
     }
 }
@@ -632,7 +592,7 @@ void MainWindow::on_bookmark_triggered()
             return;
         int bookmarkIndex = action->data().toInt();
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime() << "MainWindow::on_bookmark_triggered()";
+                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_bookmark_triggered()";
 #endif
         openFile(m_settings->getBookmarks().at(bookmarkIndex).getPath());
     }
@@ -659,11 +619,11 @@ void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 void MainWindow::openFile(const QString &source)
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile" << source;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::openFile" << source;
 #endif
     FileInfo info = FileInfo::fromPath(source);
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::openFile" << info.getDebugInfo();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::openFile" << info.getDebugInfo();
 #endif
 
     if (!info.isValidContainer())
@@ -770,7 +730,7 @@ void MainWindow::on_lineEditPath_editingFinished()
         m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
     }
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_editingFinished" << this->m_lineEdit_path->text() << "valid" << valid;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_editingFinished" << this->m_lineEdit_path->text() << "valid" << valid;
 #endif
 //    this->lineEditPath->clearFocus();
 }
@@ -778,7 +738,7 @@ void MainWindow::on_lineEditPath_editingFinished()
 void MainWindow::on_lineEditPath_focus_lost()
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_lineEditPath_focus_lost" << this->m_lineEdit_path->text();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_focus_lost" << this->m_lineEdit_path->text();
 #endif
     m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
     m_lineEdit_path->clearFocus();
@@ -800,7 +760,7 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
 
     QString currentFolder = m_model_filesystem->filePath(current);
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesystemView_currentRowChanged" << currentFolder;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesystemView_currentRowChanged" << currentFolder;
 #endif
     this->setWindowTitle(m_model_filesystem->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
@@ -829,7 +789,7 @@ void MainWindow::on_filesView_item_activated(const QString &path)
 {
 
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_filesView_item_activated" << path;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesView_item_activated" << path;
 #endif
 
     m_view_filesystem->setCurrentIndex(m_model_filesystem->index(path));
@@ -1097,7 +1057,7 @@ void MainWindow::on_comboBoxZoom_TextChanged()
 void MainWindow::on_comboBoxZoom_focus_lost()
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime() << "MainWindow::on_comboBoxZoom_focus_lost" << m_comboBox_zoom->lineEdit()->text();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_comboBoxZoom_focus_lost" << m_comboBox_zoom->lineEdit()->text();
 #endif
     on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
     m_comboBox_zoom->clearFocus();

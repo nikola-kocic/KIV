@@ -11,7 +11,7 @@ class ArchiveFilesModel : public QStandardItemModel
     Q_OBJECT
 
 public:
-    ArchiveFilesModel(QObject *parent = 0);
+    explicit ArchiveFilesModel(QObject *parent = 0);
     void setPath(const FileInfo &info);
     QModelIndex getDirectory(const QString &path);
     QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());

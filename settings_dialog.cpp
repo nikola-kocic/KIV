@@ -1,13 +1,12 @@
 #include "settings_dialog.h"
 #include "ui_settings_dialog.h"
 
-Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::Settings_Dialog)
+Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::Settings_Dialog)
+    , m_settings(settings)
 {
     ui->setupUi(this);
-
-    m_settings = settings;
 
     ui->ddMiddleClick->addItem(tr("<None>"),      MiddleClickAction::None);
     ui->ddMiddleClick->addItem(tr("Full Screen"), MiddleClickAction::Fullscreen);

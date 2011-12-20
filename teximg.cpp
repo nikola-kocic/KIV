@@ -4,20 +4,20 @@
 #include <QSize>
 
 TexImg::TexImg()
+    : hTile(0)
+    , vTile(0)
+    , m_texMaxSize(2048)
 {
-    this->m_texMaxSize = 2048;
-    this->hTile = 0;
-    this->vTile = 0;
 }
 
 int TexImg::getTexMaxSize() const
 {
-    return this->m_texMaxSize;
+    return m_texMaxSize;
 }
 
 void TexImg::setTexMaxSize(const int size)
 {
-    this->m_texMaxSize = qMin(8192, size);
+    m_texMaxSize = qMin(8192, size);
 }
 
 void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)

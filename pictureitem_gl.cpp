@@ -7,16 +7,17 @@
 #ifdef DEBUG_PICTUREITEM_GL
     #include <QDebug>
 #endif
-
-PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, Qt::WindowFlags f) : QGLWidget(parent)
+PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
+    : QGLWidget(parent, shareWidget, f)
+    , m_picItem(parent)
+    , m_scaleX(0)
+    , m_scaleY(0)
+    , m_offsetX(0)
+    , m_offsetY(0)
+    , m_textures(QVector < QVector < GLuint > >(0))
+    , m_old_textures(QVector < QVector < GLuint > >(0))
+    ,m_texImg(new TexImg())
 {
-    m_picItem = parent;
-
-    m_texImg = new TexImg();
-
-    m_offsetX = m_offsetY = 0;
-    m_scaleY = m_scaleX = 0;
-    m_textures = QVector < QVector < GLuint > >(0);
 }
 
 PictureItem::PictureItemGL::~PictureItemGL()
@@ -35,7 +36,7 @@ void PictureItem::PictureItemGL::clearTextures()
         {
             deleteTexture(m_old_textures.at(hIndex).at(vIndex));
 #ifdef DEBUG_PICTUREITEM_GL
-            qDebug() << QDateTime::currentDateTime() << "deleted texture" << this->old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
+            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "deleted texture" << this->old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
 #endif
         }
     }
@@ -89,7 +90,7 @@ void PictureItem::PictureItemGL::setTexture(const QImage &tex, const int num)
     m_textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << QDateTime::currentDateTime() << "bound texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "bound texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
 #endif
 }
 

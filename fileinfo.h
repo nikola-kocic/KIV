@@ -12,7 +12,7 @@ public:
     static QStringList getFiltersImage();
     static QStringList getFiltersArchive();
 
-    FileInfo();
+    explicit FileInfo();
 
     bool isArchive() const;
     bool fileExists() const;

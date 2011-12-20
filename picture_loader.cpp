@@ -17,7 +17,7 @@
 QImage PictureLoader::getImage(const FileInfo &info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime() << "PictureLoader::getImage" << info.getFilePath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImage" << info.getFilePath();
 #endif
     if (!info.fileExists())
     {
@@ -37,7 +37,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime() << "PictureLoader::getThumbnail" << thumb_info.info.getFilePath() << thumb_info.thumbSize;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getThumbnail" << thumb_info.info.getFilePath() << thumb_info.thumbSize;
 #endif
     if (!thumb_info.getFileInfo().fileExists())
     {
@@ -121,7 +121,7 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
     }
     out.close();
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime() << "PictureLoader::getImageFromZip" << "finished reading from zip";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip" << "finished reading from zip";
 #endif
     QImageReader image_reader(&out);
     if (!thumb_info.getThumbSize().isEmpty())
@@ -156,7 +156,7 @@ QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &th
 
     QSize result(new_width, new_height);
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime() << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result << "x_scale" << x_scale << "y_scale" << y_scale;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result << "x_scale" << x_scale << "y_scale" << y_scale;
 #endif
     return result;
 }

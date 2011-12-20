@@ -6,9 +6,12 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f) : QWidget(parent)
+PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
+    , m_picItem(parent)
+    , m_pixmap(QPixmap())
+    , m_pixmap_edited(m_pixmap)
 {
-    m_picItem = parent;
 }
 
 void PictureItem::PictureItemRaster::setImage(const QImage &img)

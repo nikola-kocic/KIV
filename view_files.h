@@ -22,32 +22,41 @@ class TreeViewFiles;
 class ListViewFiles : public QListView
 {
     Q_OBJECT
+
 public:
-    explicit ListViewFiles(QWidget *parent);
+    explicit ListViewFiles(QWidget *parent = 0);
+
     void setViewMode(const int mode);
+
 protected slots:
     void rowsInserted(const QModelIndex &parent, int start, int end);
+
 signals:
     void rowsInserted(const QModelIndexList &indexes);
 };
 
+
 class TreeViewFiles : public QTreeView
 {
     Q_OBJECT
+
 public:
-    explicit TreeViewFiles(QWidget *parent);
+    explicit TreeViewFiles(QWidget *parent = 0);
+
 protected slots:
     void rowsInserted(const QModelIndex &parent, int start, int end);
+
 signals:
     void rowsInserted(const QModelIndexList &indexes);
 };
+
 
 class ViewFiles : public QWidget
 {
     Q_OBJECT
 
 public:
-    ViewFiles(QWidget *parent);
+    explicit ViewFiles(QWidget *parent = 0);
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
@@ -63,6 +72,12 @@ private:
     void initViewItem();
     void showThumbnails();
 
+    FileInfo m_fileinfo_current;
+    int m_view_mode;
+    bool m_show_thumbnails;
+    bool m_in_archive;
+    QSize m_thumb_size;
+
     ViewArchiveDirs *m_view_archiveDirs;
 
     TreeViewFiles *m_treeView_files;
@@ -75,11 +90,6 @@ private:
     QSplitter *m_splitter;
     ThumbnailItemDelegate *m_thumbnail_delegate;
 
-    FileInfo m_fileinfo_current;
-    int m_view_mode;
-    QSize m_thumb_size;
-    bool m_show_thumbnails;
-    bool m_in_archive;
 
 private slots:
     void on_item_activated(const QModelIndex &index);

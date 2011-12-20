@@ -2,30 +2,38 @@
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f) : QWidget(parent)
+PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent)
+
+    , m_pixmapNull(true)
+    , m_flag_jumpToEnd(false)
+    , m_defaultZoomSizes(QList<qreal>() << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0)
+    , m_zoom_value(1.0)
+    , m_rotation_value(0.0)
+    , m_lockMode(LockMode::None)
+    , m_color_clear(Qt::lightGray)
+
+    , m_settings(settings)
+    , m_opengl(settings->getHardwareAcceleration())
+    , m_returnTexCount(0)
+    , m_imageDisplay_raster(0)
+    , m_imageDisplay_gl(0)
+    , m_loader_image(new QFutureWatcher<QImage>(this))
+    , m_loader_texture(new QFutureWatcher<QImage>(this))
+    , m_timer_scrollPage(new QTimer(this))
+
+    , m_dragging(false)
+    , m_boundingRect(QRectF())
+    , m_point_drag(QPoint())
+
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    m_settings = settings;
-    m_opengl = settings->getHardwareAcceleration();
-    m_imageDisplay_raster = 0;
-    m_imageDisplay_gl = 0;
-    m_defaultZoomSizes << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
-    m_zoom_value = 1.0;
-    m_rotation_value = 0.0;
-    m_dragging = false;
-    m_flag_jumpToEnd = false;
-    m_lockMode = LockMode::None;
-    m_color_clear = Qt::lightGray;
-
-    m_timer_scrollPage = new QTimer(this);
     connect(m_timer_scrollPage, SIGNAL(timeout()), m_timer_scrollPage, SLOT(stop()));
 
-    m_loader_texture = new QFutureWatcher<QImage>(this);
     connect(m_loader_texture, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
 
-    m_loader_image = new QFutureWatcher<QImage>(this);
     connect(m_loader_image, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
@@ -180,7 +188,7 @@ QList<qreal> PictureItem::getDefaultZoomSizes() const
 void PictureItem::setPixmap(const FileInfo &info)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime() << "PictureItem::setPixmap" << info.getFilePath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setPixmap" << info.getFilePath();
 #endif
     m_returnTexCount = 0;
     if (!info.fileExists())
@@ -209,7 +217,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 void PictureItem::imageFinished(int num)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime() << "PictureItem::imageFinished" << t.restart() << m_loader_image->resultAt(num).size();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::imageFinished" << t.restart() << m_loader_image->resultAt(num).size();
 #endif
     this->setPixmapNull(m_loader_image->resultAt(num).isNull());
     calculateAverageColor(m_loader_image->resultAt(num));
@@ -245,7 +253,7 @@ void PictureItem::textureFinished(int num)
             m_imageDisplay_gl->textureLoadFinished();
 
 #ifdef DEBUG_PICTUREITEM
-            qDebug() << QDateTime::currentDateTime() << "loaded textures" << t.elapsed();
+            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "loaded textures" << t.elapsed();
 #endif
             emit imageChanged();
         }

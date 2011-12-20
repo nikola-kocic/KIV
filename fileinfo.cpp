@@ -12,12 +12,12 @@
 QStringList FileInfo::m_filters_archive = QStringList() << "zip" << "cbz";
 QStringList FileInfo::m_filters_image = QStringList();
 
-FileInfo::FileInfo() :
-    zipPath(""),
-    zipImageFileName("")
+FileInfo::FileInfo()
+    : container(QFileInfo())
+    , image(QFileInfo())
+    , zipPath("")
+    , zipImageFileName("")
 {
-    container = QFileInfo();
-    image = QFileInfo();
 }
 
 QStringList FileInfo::getFiltersArchive()
@@ -57,7 +57,7 @@ bool FileInfo::fileExists() const
         }
     }
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fileExists()" << getFilePath() << "exists" << exists;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fileExists()" << getFilePath() << "exists" << exists;
 #endif
 
     return exists;
@@ -67,7 +67,7 @@ bool FileInfo::isValidContainer() const
 {
     bool valid = container.exists();
 #ifdef DEBUG_FILE_INFO
-            qDebug() << QDateTime::currentDateTime() << "FileInfo::isValidContainer()" << container.canonicalFilePath() << "valid" << valid;
+            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::isValidContainer()" << container.canonicalFilePath() << "valid" << valid;
 #endif
     return valid;
 }
@@ -125,14 +125,14 @@ FileInfo FileInfo::fromPath(const QString &path)
     if (fi.isDir())
     {
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "fi.isDir()";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "fi.isDir()";
 #endif
         info.container = fi.canonicalFilePath();
     }
     else if (isArchiveFile(fi))
     {
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "isArchive(fi)";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "isArchive(fi)";
 #endif
         info.container = fi.canonicalFilePath();
         info.zipPath = "/";
@@ -140,13 +140,13 @@ FileInfo FileInfo::fromPath(const QString &path)
     else
     {
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "not dir nor archive";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "not dir nor archive";
 #endif
         // If path is image
         if (fi.exists())
         {
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "fi.exists()";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "fi.exists()";
 #endif
             info.container = fi.canonicalPath();
             info.image.setFile(fi.canonicalFilePath());
@@ -155,17 +155,17 @@ FileInfo FileInfo::fromPath(const QString &path)
         else
         {
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "!fi.exists()";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "!fi.exists()";
 #endif
             QString temppath = path;
             int indexOfSlash = temppath.lastIndexOf('/');
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << path << indexOfSlash;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << path << indexOfSlash;
 #endif
             while (indexOfSlash != -1)
             {
 #ifdef DEBUG_FILE_INFO
-                qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "index of /" << indexOfSlash << "path" << temppath;
+                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "index of /" << indexOfSlash << "path" << temppath;
 #endif
                 temppath = temppath.left(indexOfSlash);
                 if (QFile::exists(temppath) && !QFileInfo(temppath).isDir())
@@ -194,8 +194,8 @@ FileInfo FileInfo::fromPath(const QString &path)
     }
 
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "path:" << path << "containerPath" << info.container.canonicalFilePath() << "imageFileName" << info.image.canonicalFilePath();
-    qDebug() << QDateTime::currentDateTime() << "zipPath" << info.zipPath << "zipImagePath" <<info.zipImageFileName;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "path:" << path << "containerPath" << info.container.canonicalFilePath() << "imageFileName" << info.image.canonicalFilePath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "zipPath" << info.zipPath << "zipImagePath" <<info.zipImageFileName;
 #endif
 
     return info;

@@ -2,28 +2,29 @@
 #include "helper.h"
 #include <QDebug>
 #include <QDateTime>
-ViewArchiveDirs::ViewArchiveDirs()
+ViewArchiveDirs::ViewArchiveDirs(QWidget *parent)
+    : QTreeView(parent)
+    , m_proxy(new MySortFilterProxyModel())
 {
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setUniformRowHeights(true);
     this->setHeaderHidden(true);
-    this->proxy = new MySortFilterProxyModel();
 }
 
 void ViewArchiveDirs::setModel(QAbstractItemModel *model)
 {
-    this->proxy->setSourceModel(model);
-    QTreeView::setModel(this->proxy);
+    m_proxy->setSourceModel(model);
+    QTreeView::setModel(m_proxy);
 }
 
 void ViewArchiveDirs::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    emit currentRowChanged(this->proxy->mapToSource(current));
+    emit currentRowChanged(m_proxy->mapToSource(current));
 }
 
 void ViewArchiveDirs::setCurrentIndexFromSource(const QModelIndex &index)
 {
-    QTreeView::setCurrentIndex(this->proxy->mapFromSource(index));
+    QTreeView::setCurrentIndex(m_proxy->mapFromSource(index));
 
     QModelIndex expandIndex = this->currentIndex();
     while (!this->isExpanded(expandIndex) && expandIndex.isValid())
