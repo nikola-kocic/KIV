@@ -24,7 +24,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
     {
         return QImage(0,0);
     }
-    else if (info.isZip())
+    else if (info.isArchive())
     {
         return PictureLoader::getImageFromZip(ThumbnailInfo(info, QSize(0, 0)));
     }
@@ -32,6 +32,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
     {
         return PictureLoader::getImageFromFile(ThumbnailInfo(info, QSize(0, 0)));
     }
+    return QImage(0,0);
 }
 
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
@@ -43,7 +44,7 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
     {
         return QImage(0,0);
     }
-    else if (thumb_info.info.isZip())
+    else if (thumb_info.info.isArchive())
     {
         return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info);
     }
@@ -51,6 +52,7 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
     {
         return PictureLoader::styleThumbnail(PictureLoader::getImageFromFile(thumb_info), thumb_info);
     }
+    return QImage(0,0);
 }
 
 QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thumb_info)

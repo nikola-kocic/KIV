@@ -14,7 +14,7 @@ ViewFiles::ViewFiles(QWidget *parent)
 {
 
 //    m_fileinfo_current = info;
-    m_model_archive_files = new FilesModel(this);
+    m_model_archive_files = new ArchiveFilesModel(this);
     m_show_thumbnails = false;
 
     m_thumb_size = QSize(100, 100);
@@ -108,7 +108,7 @@ void ViewFiles::initViewItem()
     m_view_current->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_view_current->setModel(m_model_current);
     connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
-    if (m_fileinfo_current.isZip())
+    if (m_fileinfo_current.isArchive())
     {
         m_view_current->setRootIndex(m_view_archiveDirs->currentIndex());
     }
@@ -155,7 +155,7 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 
     showThumbnails();
 
-    if (info.isZip())
+    if (info.isArchive())
     {
         m_model_archive_files->setPath(info);
         if (m_in_archive == false)
@@ -299,7 +299,7 @@ void ViewFiles::pageNext()
         for (int i = m_view_current->currentIndex().row() + 1; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
         {
             const QModelIndex &index = m_view_current->model()->index(i, 0, m_view_current->rootIndex());
-            if (isImage(m_model_filesystem->fileInfo(index)))
+            if (isImageFile(m_model_filesystem->fileInfo(index)))
             {
                 m_view_current->setCurrentIndex(index);
                 break;
@@ -329,7 +329,7 @@ void ViewFiles::pagePrevious()
         for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
         {
             const QModelIndex &index = m_view_current->model()->index(i, 0, m_view_current->rootIndex());
-            if (isImage(m_model_filesystem->fileInfo(index)))
+            if (isImageFile(m_model_filesystem->fileInfo(index)))
             {
                 m_view_current->setCurrentIndex(index);
                 break;
@@ -353,7 +353,7 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
     }
     else
     {
-        if (m_model_filesystem->isDir(index) || isArchive(m_model_filesystem->fileInfo(index)))
+        if (m_model_filesystem->isDir(index) || isArchiveFile(m_model_filesystem->fileInfo(index)))
         {
 
             m_fileinfo_current.container = m_model_filesystem->fileInfo(index);
@@ -438,7 +438,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
             FileInfo pli_info = m_fileinfo_current;
             QString name = indexes.at(i).data(Qt::DisplayRole).toString();
             QFileInfo fi = m_model_filesystem->fileInfo(indexes.at(i));
-            if (isImage(fi))
+            if (isImageFile(fi))
             {
                 pli_info.image.setFile(fi.canonicalFilePath());
             }

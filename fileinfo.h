@@ -11,7 +11,7 @@ public:
     FileInfo();
     static FileInfo fromPath(const QString &);
 
-    bool isZip() const;
+    bool isArchive() const;
 
     bool fileExists() const;
     bool isValidContainer() const;

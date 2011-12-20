@@ -37,9 +37,9 @@ QStringList FileInfo::getFiltersImage()
     return m_filters_image;
 }
 
-bool FileInfo::isZip() const
+bool FileInfo::isArchive() const
 {
-    return !zipPath.isEmpty();
+    return !container.isDir();
 }
 
 bool FileInfo::fileExists() const
@@ -47,7 +47,7 @@ bool FileInfo::fileExists() const
     bool exists = false;
     if (isValidContainer())
     {
-        if (isZip())
+        if (isArchive())
         {
             exists = !zipImageFileName.isEmpty();
         }
@@ -65,18 +65,16 @@ bool FileInfo::fileExists() const
 
 bool FileInfo::isValidContainer() const
 {
-    bool valid = false;
-    valid = container.exists();
+    bool valid = container.exists();
 #ifdef DEBUG_FILE_INFO
             qDebug() << QDateTime::currentDateTime() << "FileInfo::isValidContainer()" << container.canonicalFilePath() << "valid" << valid;
 #endif
-
     return valid;
 }
 
 QString FileInfo::getFilePath() const
 {
-    if (isZip())
+    if (isArchive())
     {
         return container.canonicalFilePath() + "/" + zipImagePath();
     }
@@ -97,7 +95,7 @@ QString FileInfo::zipImagePath() const
 
 QString FileInfo::getImageFileName() const
 {
-    if (isZip())
+    if (isArchive())
     {
         return zipImageFileName;
     }
@@ -131,7 +129,7 @@ FileInfo FileInfo::fromPath(const QString &path)
 #endif
         info.container = fi.canonicalFilePath();
     }
-    else if (isArchive(fi))
+    else if (isArchiveFile(fi))
     {
 #ifdef DEBUG_FILE_INFO
     qDebug() << QDateTime::currentDateTime() << "FileInfo::fromPath" << "isArchive(fi)";

@@ -11,14 +11,14 @@ namespace LockMode
     enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
 }
 
-const int ROLE_TYPE = Qt::UserRole + 1;
+const int ROLE_TYPE = Qt::UserRole + 1000;
 
 const int TYPE_ARCHIVE_DIR = 1004;
 const int TYPE_ARCHIVE_FILE = 1005;
 
 
-bool isImage(const QFileInfo &fi);
-bool isArchive(const QFileInfo &fi);
+bool isImageFile(const QFileInfo &fi);
+bool isArchiveFile(const QFileInfo &fi);
 bool checkFileExtension(const QFileInfo &fi);
 
 static inline bool FuzzyCompare(double p1, double p2)

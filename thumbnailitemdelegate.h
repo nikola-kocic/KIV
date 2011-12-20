@@ -24,7 +24,7 @@ protected:
 private:
     QSize m_thumb_size;
     QFutureWatcher<QImage> *m_watcherThumbnail;
-    QHash<QModelIndex, QIcon> m_thumbnails;
+    QHash<QByteArray, QIcon> m_thumbnails;
 //    QHash<QByteArray, ThumbImageDate> m_thumbnails;
 
 //    QList<ThumbnailInfo> m_files;

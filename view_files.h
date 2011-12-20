@@ -4,7 +4,7 @@
 #include "helper.h"
 #include "picture_loader.h"
 #include "thumbnailitemdelegate.h"
-#include "model_files.h"
+#include "model_archive.h"
 #include "view_archive_dirs.h"
 #include "settings.h"
 
@@ -64,7 +64,7 @@ private:
     ListViewFiles *m_listView_files;
     QAbstractItemView *m_view_current;
 
-    FilesModel *m_model_archive_files;
+    ArchiveFilesModel *m_model_archive_files;
     QFileSystemModel *m_model_filesystem;
     QAbstractItemModel *m_model_current;
 

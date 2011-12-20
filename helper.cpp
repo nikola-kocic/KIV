@@ -5,7 +5,7 @@
 
 bool checkFileExtension(const QFileInfo &info)
 {
-    if (isArchive(info) || info.isDir() || isImage(info))
+    if (isArchiveFile(info) || info.isDir() || isImageFile(info))
     {
        return true;
     }
@@ -15,12 +15,12 @@ bool checkFileExtension(const QFileInfo &info)
     }
 }
 
-bool isArchive(const QFileInfo &fi)
+bool isArchiveFile(const QFileInfo &fi)
 {
     return FileInfo::getFiltersArchive().contains(fi.suffix().toLower());
 }
 
-bool isImage(const QFileInfo &fi)
+bool isImageFile(const QFileInfo &fi)
 {
     return FileInfo::getFiltersImage().contains(fi.suffix().toLower());
 }

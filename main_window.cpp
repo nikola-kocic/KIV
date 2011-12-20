@@ -749,7 +749,7 @@ void MainWindow::on_lineEditPath_editingFinished()
     bool valid = false;
     if (info.isValidContainer())
     {
-        if (info.isZip())
+        if (info.isArchive())
         {
             valid = true;
         }
@@ -887,7 +887,7 @@ bool MainWindow::saveAs()
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if (info.isZip())
+    if (info.isArchive())
     {
         JlCompress::extractFile(info.container.canonicalFilePath(), info.zipImagePath(), fileName);
     }

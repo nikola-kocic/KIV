@@ -7,6 +7,7 @@
 #include <QtConcurrentMap>
 #include <QCryptographicHash>
 #include <QDir>
+#include <QFileSystemModel>
 
 //#define DEBUG_THUMBNAIL_ITEM_DELEGATE
 
@@ -32,10 +33,12 @@ QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const 
 
 void ThumbnailItemDelegate::updateThumbnail(FileInfo info, QModelIndex index)
 {
-//    QCryptographicHash::hash(info.getFilePath(), QCryptographicHash::Md4)
-    if (m_thumbnails.contains(index))
+    QByteArray filepath = index.data(QFileSystemModel::FilePathRole).toByteArray();
+    qDebug() << filepath;
+    QByteArray path_hash = QCryptographicHash::hash(filepath, QCryptographicHash::Md4);
+    if (m_thumbnails.contains(path_hash))
     {
-//        if (m_t
+        // TODO: check if modified date maches
         return;
     }
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
@@ -47,10 +50,9 @@ void ThumbnailItemDelegate::updateThumbnail(FileInfo info, QModelIndex index)
 //    int type = index.data(ROLE_TYPE).toInt();
     QString name = index.data(Qt::DisplayRole).toString();
     pli_info = info;
-//    QFileInfo fi(thumb_info.info.getFilePath());
     if (info.fileExists())
     {
-        if (!info.isZip())
+        if (!info.isArchive())
         {
             pli_info.image.setFile(pli_info.image.dir(), name);
         }
@@ -63,10 +65,8 @@ void ThumbnailItemDelegate::updateThumbnail(FileInfo info, QModelIndex index)
 #endif
         ThumbnailInfo(pli_info, m_thumb_size);
 
-        m_thumbnails.insert(index, QIcon(QPixmap::fromImage(PictureLoader::getThumbnail(ThumbnailInfo(pli_info, m_thumb_size)))));
+        m_thumbnails.insert(path_hash, QIcon(QPixmap::fromImage(PictureLoader::getThumbnail(ThumbnailInfo(pli_info, m_thumb_size)))));
         emit thumbnailFinished(index);
-
-
     }
     else
     {
@@ -74,11 +74,9 @@ void ThumbnailItemDelegate::updateThumbnail(FileInfo info, QModelIndex index)
         qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "insert to dirs"  <<  index.data().toString() << info.getFilePath();
 #endif
         QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-//        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "index.data(Qt::DecorationRole).value<QIcon>()" << icon.availableSizes();
         QImage thumb = PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), ThumbnailInfo(info, m_thumb_size));
-//        qDebug() << QDateTime::currentDateTime() << "ThumbnailItemDelegate::updateThumbnail" << "thumb = PictureLoader::styleThumbnail(...)";
         icon = QIcon(QPixmap::fromImage(thumb));
-        m_thumbnails.insert(index, icon);
+        m_thumbnails.insert(path_hash, icon);
     }
 }
 
@@ -91,12 +89,13 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
 {
     QStyledItemDelegate::initStyleOption(option, index);
 
+    QByteArray path_hash = QCryptographicHash::hash(index.data(QFileSystemModel::FilePathRole).toByteArray(), QCryptographicHash::Md4);
 //    qDebug() << index << index.data();
-    if (m_thumbnails.contains(index))
+    if (m_thumbnails.contains(path_hash))
     {
         if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
         {
-            v4->icon = m_thumbnails.value(index, QIcon());
+            v4->icon = m_thumbnails.value(path_hash, QIcon());
             v4->decorationSize = v4->icon.availableSizes().last();
         }
     }

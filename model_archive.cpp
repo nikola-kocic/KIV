@@ -1,4 +1,4 @@
-#include "model_files.h"
+#include "model_archive.h"
 #include "helper.h"
 #include "settings.h"
 #include "quazip/quazip.h"
@@ -7,13 +7,14 @@
 #include <QFile>
 #include <QDir>
 #include <QtGui/QStyle>
+#include <QFileSystemModel>
 
 //#define DEBUG_MODEL_FILES
 #ifdef DEBUG_MODEL_FILES
 #include <QDebug>
 #endif
 
-FilesModel::FilesModel(QObject *parent)
+ArchiveFilesModel::ArchiveFilesModel(QObject *parent)
     : QStandardItemModel(parent)
 {
     m_icon_dir = QApplication::style()->standardIcon(QStyle::SP_DirIcon);
@@ -50,7 +51,6 @@ QString bytesToSize(int bytes, int precision)
     else if (bytes >= terabyte)
     {
         return QString::number(((float)bytes / terabyte), 'f', precision) + " TiB";
-
     }
     else
     {
@@ -58,7 +58,7 @@ QString bytesToSize(int bytes, int precision)
     }
 }
 
-void FilesModel::setPath(const FileInfo &info)
+void ArchiveFilesModel::setPath(const FileInfo &info)
 {
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime() << "FilesModel::setPath" << path.getFilePath();
@@ -99,20 +99,25 @@ void FilesModel::setPath(const FileInfo &info)
     {
         node = root;
         QStringList file_path_parts = archive_files.at(i).split('/');
+        QString folderPath = info.container.canonicalFilePath() + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
             if (file_path_parts.at(j).size() > 0)
             {
+                folderPath.append(file_path_parts.at(j) + "/");
                 if (j < file_path_parts.size() - 1)
                 {
                     node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_DIR);
+                    node->setData(folderPath, QFileSystemModel::FilePathRole);
                 }
                 else
                 {
                     QFileInfo fi(archive_files.at(i));
-                    if (isImage(fi))
+                    if (isImageFile(fi))
                     {
+                        QString nodeFilePath = info.container.canonicalFilePath() + "/" + archive_files.at(i);
                         node = AddNode(node, file_path_parts.at(j), TYPE_ARCHIVE_FILE);
+                        node->setData(nodeFilePath, QFileSystemModel::FilePathRole);
                     }
                 }
             }
@@ -123,13 +128,13 @@ void FilesModel::setPath(const FileInfo &info)
 
 }
 
-QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int type)
+QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &name, int type)
 {
-    for (int i = 0; i < node->rowCount(); ++i)
+    for (int i = 0; i < parent->rowCount(); ++i)
     {
-        if (node->child(i)->text() == name)
+        if (parent->child(i)->text() == name)
         {
-            return node->child(i);
+            return parent->child(i);
         }
     }
 
@@ -139,18 +144,18 @@ QStandardItem* FilesModel::AddNode(QStandardItem *node, const QString &name, int
     if (type == TYPE_ARCHIVE_DIR)
     {
         ntvi->setIcon(m_icon_dir);
-        indexToInsertByName(node, name);
-        node->insertRow(indexToInsertByName(node, name), ntvi);
+        indexToInsertByName(parent, name);
+        parent->insertRow(indexToInsertByName(parent, name), ntvi);
     }
     else
     {
         ntvi->setIcon(m_icon_file);
-        node->appendRow(ntvi);
+        parent->appendRow(ntvi);
     }
     return ntvi;
 }
 
-int FilesModel::indexToInsertByName(QStandardItem *parent, const QString &name)
+int ArchiveFilesModel::indexToInsertByName(QStandardItem *parent, const QString &name)
 {
     int lastFolderIndex = 0;
     for (int i = 0; i < parent->rowCount(); ++i)
@@ -169,7 +174,7 @@ int FilesModel::indexToInsertByName(QStandardItem *parent, const QString &name)
     return lastFolderIndex;
 }
 
-QModelIndex FilesModel::getDirectory(const QString &path)
+QModelIndex ArchiveFilesModel::getDirectory(const QString &path)
 {
     QModelIndex cri = invisibleRootItem()->child(0)->index();
 
@@ -186,7 +191,7 @@ QModelIndex FilesModel::getDirectory(const QString &path)
     return cri;
 }
 
-QModelIndex FilesModel::findIndexChild(const QString &text, const QModelIndex &root)
+QModelIndex ArchiveFilesModel::findIndexChild(const QString &text, const QModelIndex &root)
 {
     if (!root.isValid()) return QModelIndex();
     for (int i = 0; root.child(i, 0).isValid(); ++i)
@@ -194,18 +199,6 @@ QModelIndex FilesModel::findIndexChild(const QString &text, const QModelIndex &r
         if (root.child(i, 0).data() == text)
         {
             return root.child(i, 0);
-        }
-    }
-    return QModelIndex();
-}
-
-QModelIndex FilesModel::findRootIndexChild(const QString &text)
-{
-    for (int i = 0; i < this->rowCount(); ++i)
-    {
-        if (index(i, 0).data() == text)
-        {
-            return index(i, 0);
         }
     }
     return QModelIndex();

@@ -4,7 +4,7 @@
 #include "view_files.h"
 #include "picture_loader.h"
 #include "pictureitem.h"
-#include "model_files.h"
+#include "model_archive.h"
 #include "view_archive_dirs.h"
 
 #include <QFileSystemModel>

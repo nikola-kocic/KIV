@@ -20,12 +20,12 @@ SOURCES += \
     view_files.cpp \
     teximg.cpp \
     picture_loader.cpp \
-    model_files.cpp \
     helper.cpp \
     fileinfo.cpp \
     view_files_list.cpp \
     thumbnailitemdelegate.cpp \
-    view_files_tree.cpp
+    view_files_tree.cpp \
+    model_archive.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -50,10 +50,10 @@ HEADERS += \
     tiledim.h \
     teximg.h \
     picture_loader.h \
-    model_files.h \
     helper.h \
     fileinfo.h \
-    thumbnailitemdelegate.h
+    thumbnailitemdelegate.h \
+    model_archive.h
 
 RESOURCES += \
     kiv.qrc
