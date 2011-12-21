@@ -53,16 +53,11 @@ private:
         const QDateTime m_date;
     };
 
-    int getArrayIndexOfModelIndex(const QModelIndex &index);
-
     QSize m_thumb_size;
     QFutureWatcher<QImage> *m_watcherThumbnail;
     QHash<QByteArray, ThumbImageDate> m_thumbnails;
 
     QList<ProcessInfo> m_files_to_process;
-
-    QModelIndex m_currentIndex;
-    QList<ProcessInfo> m_canceledFiles;
 
 signals:
     void thumbnailFinished(QModelIndex);

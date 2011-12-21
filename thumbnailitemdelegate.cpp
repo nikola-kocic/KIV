@@ -38,13 +38,11 @@ QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const 
 
 void ThumbnailItemDelegate::cancelThumbnailGeneration()
 {
-    if (m_watcherThumbnail->isRunning())
+    if (!m_files_to_process.isEmpty())
     {
-        m_canceledFiles.append(m_files_to_process.at(getArrayIndexOfModelIndex(m_currentIndex)));
-
-        m_currentIndex = QModelIndex();
+        const ProcessInfo oldIndex = m_files_to_process.at(0);
         m_files_to_process.clear();
-        m_watcherThumbnail->setFuture(QFuture<QImage>());
+        m_files_to_process.append(oldIndex);
     }
 }
 
@@ -62,12 +60,32 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     if (date.isValid())
     {
         currentDateTime = date.toDateTime();
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+        qDebug("Date from QVariant");
+#endif
     }
     else
     {
-        QFileInfo fi(filepath);
-        currentDateTime = fi.lastModified();
+        if (const QFileSystemModel *fsm = qobject_cast<const QFileSystemModel *>(index.model()))
+        {
+            currentDateTime = fsm->lastModified(index);
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+            qDebug("Date from QFileSystemModel"_;
+#endif
+        }
+        else
+        {
+            QFileInfo fi(filepath);
+            currentDateTime = fi.lastModified();
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+            qDebug("Date from QFileInfo");
+#endif
+        }
     }
+
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+    qDebug() << currentDateTime;
+#endif
 
     if (m_thumbnails.contains(path_hash))
     {
@@ -86,11 +104,9 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
 
     if (info.fileExists())
     {
-        ProcessInfo pi(index, info, path_hash, currentDateTime);
-        m_files_to_process.append(pi);
-        if (!m_currentIndex.isValid())
+        m_files_to_process.append(ProcessInfo(index, info, path_hash, currentDateTime));
+        if (m_files_to_process.size() == 1)
         {
-            m_currentIndex = index;
             m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(info, m_thumb_size)));
         }
     }
@@ -135,51 +151,28 @@ void ThumbnailItemDelegate::showThumbnail(int num)
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::showThumbnail" << m_currentIndex.data().toString();
 #endif
 
-    if (!m_currentIndex.isValid() && !m_canceledFiles.isEmpty())
+    if (m_files_to_process.isEmpty())
     {
-        ThumbImageDate tid;
-        tid.thumb = QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num)));
-        tid.date = m_canceledFiles.at(0).getDate();
-        m_thumbnails.insert(m_canceledFiles.at(0).getPathHash(), tid);
-
-        emit thumbnailFinished(m_canceledFiles.at(0).getIndex());
-        m_canceledFiles.clear();
         return;
     }
 
-    int currentIndex = getArrayIndexOfModelIndex(m_currentIndex);
-
     ThumbImageDate tid;
     tid.thumb = QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num)));
-    tid.date = m_files_to_process.at(currentIndex).getDate();
-    m_thumbnails.insert(m_files_to_process.at(currentIndex).getPathHash(), tid);
+    tid.date = m_files_to_process.at(0).getDate();
+    m_thumbnails.insert(m_files_to_process.at(0).getPathHash(), tid);
 
-    emit thumbnailFinished(m_currentIndex);
+    emit thumbnailFinished(m_files_to_process.at(0).getIndex());
 
-    m_files_to_process.removeAt(currentIndex);
+    m_files_to_process.removeFirst();
 
     if (m_files_to_process.size() > 0)
     {
-        m_currentIndex = m_files_to_process.at(0).getIndex();
         m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(m_files_to_process.at(0).getFileInfo(), m_thumb_size)));
     }
     else
     {
-        m_currentIndex = QModelIndex();
         m_files_to_process.clear();
         m_watcherThumbnail->setFuture(QFuture<QImage>());
     }
 
-}
-
-int ThumbnailItemDelegate::getArrayIndexOfModelIndex(const QModelIndex &index)
-{
-    for (int i = 0; i < m_files_to_process.size(); ++i)
-    {
-        if (m_files_to_process.at(i).getIndex() == index)
-        {
-            return i;
-        }
-    }
-    return 0;
 }
