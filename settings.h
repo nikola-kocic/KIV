@@ -38,13 +38,17 @@ public:
 class Bookmark
 {
 public:
-    Bookmark (const QString &name, const QString &path) : m_name(name), m_path(path) {}
+    Bookmark (const QString &name, const QString &path)
+        : m_name(name)
+        , m_path(path)
+    {}
+
     QString getName() const { return m_name; }
     QString getPath() const { return m_path; }
 
 private:
-    const QString m_name;
-    const QString m_path;
+    QString m_name;
+    QString m_path;
 };
 
 class Settings

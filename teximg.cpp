@@ -10,6 +10,12 @@ TexImg::TexImg()
 {
 }
 
+TexImg::~TexImg()
+{
+    delete hTile;
+    delete vTile;
+}
+
 int TexImg::getTexMaxSize() const
 {
     return m_texMaxSize;

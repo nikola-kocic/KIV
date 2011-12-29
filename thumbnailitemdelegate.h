@@ -47,10 +47,10 @@ private:
         QByteArray getPathHash() const { return m_path_hash; }
 
     private:
-        const QModelIndex m_index;
-        const FileInfo m_fileinfo;
-        const QByteArray m_path_hash;
-        const QDateTime m_date;
+        QModelIndex m_index;
+        FileInfo m_fileinfo;
+        QByteArray m_path_hash;
+        QDateTime m_date;
     };
 
     QSize m_thumb_size;

@@ -48,7 +48,14 @@ void PictureItem::initPictureItem()
 {
     if (m_opengl)
     {
-        m_imageDisplay_gl = new PictureItemGL(this);
+        QGLFormat glFmt;
+        glFmt.setSwapInterval(1); // 1= vsync on
+        glFmt.setAlpha(false);
+        glFmt.setDoubleBuffer(false);
+        glFmt.setOverlay(false);
+        glFmt.setSampleBuffers(false);
+
+        m_imageDisplay_gl = new PictureItemGL(glFmt, this);
         m_imageDisplay_raster = 0;
         this->layout()->addWidget(m_imageDisplay_gl);
     }
@@ -71,10 +78,16 @@ void PictureItem::setHardwareAcceleration(const bool b)
     {
         if (m_opengl)
         {
+#ifdef DEBUG_PICTUREITEM
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setHardwareAcceleration" << "Deleted m_imageDisplay_gl";
+#endif
             m_imageDisplay_gl->deleteLater();
         }
         else
         {
+#ifdef DEBUG_PICTUREITEM
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setHardwareAcceleration" << "Deleted m_imageDisplay_raster";
+#endif
             m_imageDisplay_raster->deleteLater();
         }
 

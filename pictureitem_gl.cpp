@@ -5,10 +5,11 @@
 //#define DEBUG_PICTUREITEM_GL
 
 #ifdef DEBUG_PICTUREITEM_GL
-    #include <QDebug>
+#include <QDebug>
+#include <QDateTime>
 #endif
-PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-    : QGLWidget(parent, shareWidget, f)
+PictureItem::PictureItemGL::PictureItemGL(const QGLFormat& format, PictureItem *parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
+    : QGLWidget(format, parent, shareWidget, f)
     , m_picItem(parent)
     , m_scaleX(0)
     , m_scaleY(0)
@@ -16,7 +17,7 @@ PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, const QGLWidget* 
     , m_offsetY(0)
     , m_textures(QVector < QVector < GLuint > >(0))
     , m_old_textures(QVector < QVector < GLuint > >(0))
-    ,m_texImg(new TexImg())
+    , m_texImg(new TexImg())
 {
 }
 
@@ -36,10 +37,12 @@ void PictureItem::PictureItemGL::clearTextures()
         {
             deleteTexture(m_old_textures.at(hIndex).at(vIndex));
 #ifdef DEBUG_PICTUREITEM_GL
-            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "deleted texture" << this->old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
+            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "deleted texture" << this->m_old_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
 #endif
         }
     }
+
+    m_old_textures = QVector < QVector < GLuint > >(0);
 }
 
 void PictureItem::PictureItemGL::setImage(const QImage &img)
@@ -90,7 +93,7 @@ void PictureItem::PictureItemGL::setTexture(const QImage &tex, const int num)
     m_textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "bound texture" << this->textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "bound texture" << this->m_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
 #endif
 }
 
@@ -127,24 +130,19 @@ void PictureItem::PictureItemGL::initializeGL()
 
     qglClearColor(m_picItem->m_color_clear);
 
-    uint _glFormat = GL_RGB;  // Better since QImage RGBA is BGRA
 
     QGL::setPreferredPaintEngine(QPaintEngine::OpenGL2);
 
-    QGLFormat glFmt;
-    glFmt.setSwapInterval(1); // 1= vsync on
-    glFmt.setAlpha(GL_RGBA==_glFormat);
-    glFmt.setRgba(GL_RGBA==_glFormat);
-    glFmt.setDoubleBuffer(true); // default
-    glFmt.setOverlay(false);
-    glFmt.setSampleBuffers(false);
-    QGLFormat::setDefaultFormat(glFmt);
-
-    setAttribute(Qt::WA_OpaquePaintEvent,true);
-    setAttribute(Qt::WA_PaintOnScreen,true);
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAttribute(Qt::WA_PaintOnScreen, true);
 
     GLint size = 0;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
+
+#ifdef DEBUG_PICTUREITEM_GL
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItemGL::initializeGL()" << "GL_MAX_TEXTURE_SIZE" << size;
+#endif
+
     m_texImg->setTexMaxSize(size);
 }
 

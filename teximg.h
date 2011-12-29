@@ -37,6 +37,7 @@ class TexImg
 {
 public:
     explicit TexImg();
+    ~TexImg();
 
     int getTexMaxSize() const;
     void setTexMaxSize(const int size);
