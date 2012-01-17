@@ -24,7 +24,7 @@ ViewFiles::ViewFiles(QWidget *parent)
     , m_view_current(0)
 
     , m_model_archive_files(new ArchiveFilesModel(this))
-    , m_model_filesystem(new QFileSystemModel(this))
+    , m_model_filesystem(new FileSystemModel(this))
 
     , m_splitter(new QSplitter(Qt::Vertical, this))
     , m_thumbnail_delegate(new ThumbnailItemDelegate(m_thumb_size, this))
@@ -427,7 +427,6 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
             FileInfo pli_info = m_fileinfo_current;
             QString name = indexes.at(i).data(Qt::DisplayRole).toString();
             int type = indexes.at(i).data(ROLE_TYPE).toInt();
-//            qDebug() << "\t" << name << type;
             if (type == TYPE_ARCHIVE_FILE)
             {
                 pli_info.zipImageFileName = name;
@@ -445,7 +444,6 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
         for (int i = 0; i < indexes.size(); ++i)
         {
             FileInfo pli_info = m_fileinfo_current;
-            QString name = indexes.at(i).data(Qt::DisplayRole).toString();
             QFileInfo fi = m_model_filesystem->fileInfo(indexes.at(i));
             if (isImageFile(fi))
             {
@@ -453,7 +451,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
             }
             else
             {
-                pli_info.container.setFile(pli_info.container.canonicalFilePath() + "/" + name + "/");
+                pli_info.container.setFile(pli_info.container.canonicalFilePath() + "/" + fi.fileName() + "/");
             }
 
             m_thumbnail_delegate->updateThumbnail(pli_info, indexes.at(i));
@@ -487,6 +485,25 @@ void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 #endif
 
     m_view_current->update(index);
+    m_view_current->updateGeometry();
+    m_view_current->doItemsLayout();
+}
+
+FileSystemModel::FileSystemModel(QObject *parent) : QFileSystemModel(parent)
+{
+}
+
+QVariant FileSystemModel::data(const QModelIndex &index, int role) const
+{
+    if (Qt::TextAlignmentRole == role)
+    {
+        if (index.column() == 1)
+        {
+            return int(Qt::AlignRight | Qt::AlignVCenter);
+        }
+    }
+
+    return QFileSystemModel::data(index, role);
 }
 
 /* End Thumbnails */

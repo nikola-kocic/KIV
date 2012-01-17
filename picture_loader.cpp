@@ -9,6 +9,7 @@
 
 //#define DEBUG_PICTURE_LOADER
 
+#include <QDebug>
 #ifdef DEBUG_PICTURE_LOADER
 #include <QDebug>
 //#include <QTime>
@@ -37,7 +38,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getThumbnail" << thumb_info.info.getFilePath() << thumb_info.thumbSize;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getThumbnail" << thumb_info.getFileInfo().getFilePath() << thumb_info.getThumbSize();
 #endif
     if (!thumb_info.getFileInfo().fileExists())
     {
@@ -57,12 +58,12 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thumb_info)
 {
     QImage thumb(thumb_info.getThumbSize().width() + 2, thumb_info.getThumbSize().height() + 2, QImage::Format_ARGB32);
-    thumb.fill(qRgba(0, 200, 0, 0));
+    thumb.fill(qRgba(255, 255, 255, 0));
     QPainter painter(&thumb);
     QPoint imgPoint((thumb.width() - img.width()) / 2, (thumb.height() - img.height()) / 2);
     painter.setPen(Qt::lightGray);
-    painter.drawRect(0, 0, thumb.width() - 1, thumb.height() - 1);
     painter.drawImage(imgPoint, img);
+    painter.drawRect(0, 0, thumb.width() - 1, thumb.height() - 1);
     painter.end();
     return thumb;
 }
@@ -136,27 +137,10 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
 
 QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &thumb_size)
 {
-
-    float x_scale = (float)thumb_size.width() / image_size.width();
-    float y_scale = (float)thumb_size.height() / image_size.height();
-
-    int new_width;
-    int new_height;
-
-    if (x_scale < y_scale)
-    {
-        new_height = image_size.height() * x_scale;
-        new_width = image_size.width() * x_scale;
-    }
-    else
-    {
-        new_height = image_size.height() * y_scale;
-        new_width = image_size.width() * y_scale;
-    }
-
-    QSize result(new_width, new_height);
+    QSize result = image_size;
+    result.scale(thumb_size, Qt::KeepAspectRatio);
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result << "x_scale" << x_scale << "y_scale" << y_scale;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result;
 #endif
     return result;
 }

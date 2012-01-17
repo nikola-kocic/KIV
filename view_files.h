@@ -18,6 +18,14 @@
 
 class ListViewFiles;
 class TreeViewFiles;
+class FileSystemModel;
+
+class FileSystemModel : public QFileSystemModel
+{
+public:
+    explicit FileSystemModel(QObject *parent = 0);
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+};
 
 class ListViewFiles : public QListView
 {
@@ -85,7 +93,7 @@ private:
     QAbstractItemView *m_view_current;
 
     ArchiveFilesModel *m_model_archive_files;
-    QFileSystemModel *m_model_filesystem;
+    FileSystemModel *m_model_filesystem;
 
     QSplitter *m_splitter;
     ThumbnailItemDelegate *m_thumbnail_delegate;

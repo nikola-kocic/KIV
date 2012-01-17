@@ -27,12 +27,16 @@ ThumbnailItemDelegate::ThumbnailItemDelegate(const QSize &thumbSize, QObject *pa
 
 void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
 {
-    m_thumb_size = size;
+    if (size != m_thumb_size)
+    {
+        m_thumb_size = size;
+        clearThumbnailsCache();
+    }
 }
 
 QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    const QSize &size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.fontMetrics.height() + 10);
+    const QSize &size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.decorationSize.height());
     return size_grid;
 }
 
@@ -145,6 +149,12 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
     }
 }
 
+void ThumbnailItemDelegate::clearThumbnailsCache()
+{
+    m_files_to_process.clear();
+    m_thumbnails.clear();
+}
+
 void ThumbnailItemDelegate::showThumbnail(int num)
 {
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
@@ -153,6 +163,7 @@ void ThumbnailItemDelegate::showThumbnail(int num)
 
     if (m_files_to_process.isEmpty())
     {
+        m_watcherThumbnail->setFuture(QFuture<QImage>());
         return;
     }
 

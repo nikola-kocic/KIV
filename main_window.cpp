@@ -252,7 +252,7 @@ void MainWindow::createActions()
     m_act_rotateReset = new QAction(tr("R&eset Rotation"), this);
     m_act_rotateReset->setEnabled(false);
 
-    m_act_thumbnails = new QAction(QIcon::fromTheme("view-list-icons"), tr("&Show Thumbnails"), this);
+    m_act_thumbnails = new QAction(QIcon::fromTheme("thumbnail"), tr("&Show Thumbnails"), this);
     m_act_thumbnails->setCheckable(true);
 
     m_act_mode_icons = new QAction(tr("&Icons"), this);
@@ -274,7 +274,7 @@ void MainWindow::createActions()
     m_act_sidebar->setCheckable(true);
     m_act_sidebar->setChecked(true);
 
-    m_act_largeIcons = new QAction(tr("Large &Icons"), this);
+    m_act_largeIcons = new QAction(tr("Large Toolbar &Icons"), this);
     m_act_largeIcons->setCheckable(true);
 
     m_act_settings = new QAction(QIcon::fromTheme("configure", QIcon::fromTheme("gtk-preferences")), tr("&Settings..."), this);

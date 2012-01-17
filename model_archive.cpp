@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QtGui/QStyle>
 #include <QFileSystemModel>
+#include <QLocale>
 
 //#define DEBUG_MODEL_FILES
 #ifdef DEBUG_MODEL_FILES
@@ -21,39 +22,23 @@ ArchiveFilesModel::ArchiveFilesModel(QObject *parent)
 {
 }
 
-QString bytesToSize(int bytes, int precision)
+QString ArchiveFilesModel::size(qint64 bytes)
 {
-    int kilobyte = 1024;
-    int megabyte = kilobyte * 1024;
-    int gigabyte = megabyte * 1024;
-    int terabyte = gigabyte * 1024;
-
-    if ((bytes >= 0) && (bytes < kilobyte))
-    {
-        return QString::number(bytes) + " B";
-    }
-    else if ((bytes >= kilobyte) && (bytes < megabyte))
-    {
-        return QString::number(((float)bytes / kilobyte), 'f', precision) + " KiB";
-    }
-    else if ((bytes >= megabyte) && (bytes < gigabyte))
-    {
-        return QString::number(((float)bytes / megabyte), 'f', precision) + " MiB";
-
-    }
-    else if ((bytes >= gigabyte) && (bytes < terabyte))
-    {
-        return QString::number(((float)bytes / gigabyte), 'f', precision) + " GiB";
-
-    }
-    else if (bytes >= terabyte)
-    {
-        return QString::number(((float)bytes / terabyte), 'f', precision) + " TiB";
-    }
-    else
-    {
-        return QString::number(bytes) + " B";
-    }
+    // According to the Si standard KB is 1000 bytes, KiB is 1024
+    // but on windows sizes are calculated by dividing by 1024 so we do what they do.
+    const qint64 kb = 1024;
+    const qint64 mb = 1024 * kb;
+    const qint64 gb = 1024 * mb;
+    const qint64 tb = 1024 * gb;
+    if (bytes >= tb)
+        return QFileSystemModel::tr("%1 TB").arg(QLocale().toString(qreal(bytes) / tb, 'f', 3));
+    if (bytes >= gb)
+        return QFileSystemModel::tr("%1 GB").arg(QLocale().toString(qreal(bytes) / gb, 'f', 2));
+    if (bytes >= mb)
+        return QFileSystemModel::tr("%1 MB").arg(QLocale().toString(qreal(bytes) / mb, 'f', 1));
+    if (bytes >= kb)
+        return QFileSystemModel::tr("%1 KB").arg(QLocale().toString(bytes / kb));
+    return QFileSystemModel::tr("%1 bytes").arg(QLocale().toString(bytes));
 }
 
 void ArchiveFilesModel::setPath(const FileInfo &info)
@@ -63,7 +48,7 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
 #endif
     this->clear();
 
-    this->setHorizontalHeaderLabels(QStringList() << tr("Name") << tr("Size") << tr("Date"));
+    this->setHorizontalHeaderLabels(QStringList() << QFileSystemModel::tr("Name") << QFileSystemModel::tr("Size") << QFileSystemModel::tr("Date Modified"));
     QFile zipFile(info.container.canonicalFilePath());
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
@@ -127,7 +112,7 @@ void ArchiveFilesModel::setPath(const FileInfo &info)
 
 }
 
-QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &name, const int type, const QDateTime &date, const quint64 size)
+QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &name, const int type, const QDateTime &date, const quint64 bytes)
 {
     for (int i = 0; i < parent->rowCount(); ++i)
     {
@@ -147,12 +132,8 @@ QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &
     ntvi->setData(date, ROLE_FILE_DATE);
 
 
-    QString tooltip = tr("Name: ") + ntvi->text() + "\n" +
-            tr("Date Modified: ") + date.toString(Qt::SystemLocaleShortDate);
-
-    ntvi->setToolTip(tooltip);
-    date_item->setToolTip(tooltip);
-
+    QString tooltip = QFileSystemModel::tr("Name") + ": " + ntvi->text() + "\n" +
+            QFileSystemModel::tr("Date Modified") + ": " + date.toString(Qt::SystemLocaleShortDate);
 
     if (type == TYPE_ARCHIVE_DIR)
     {
@@ -162,10 +143,10 @@ QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &
     }
     else
     {
-        QStandardItem *size_item = new QStandardItem(bytesToSize(size, 2));
+        QStandardItem *size_item = new QStandardItem(size(bytes));
         size_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-        tooltip += "\n" + (tr("Size: ") + size_item->text());
+        tooltip += "\n" + QFileSystemModel::tr("Size") + ": " + size_item->text();
 
         size_item->setToolTip(tooltip);
 
@@ -173,6 +154,9 @@ QStandardItem* ArchiveFilesModel::AddNode(QStandardItem *parent, const QString &
 
         parent->appendRow(QList<QStandardItem *>() << ntvi << size_item << date_item);
     }
+
+    ntvi->setToolTip(tooltip);
+    date_item->setToolTip(tooltip);
     return ntvi;
 }
 

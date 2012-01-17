@@ -17,8 +17,9 @@ public:
     QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());
 
 private:
-    QStandardItem* AddNode(QStandardItem *parent, const QString &name, const int type, const QDateTime &date, const quint64 size = 0);
+    QStandardItem* AddNode(QStandardItem *parent, const QString &name, const int type, const QDateTime &date, const quint64 bytes = 0);
     int indexToInsertByName(QStandardItem *parent, const QString &name);
+    QString size(qint64 bytes);
     QIcon m_icon_dir;
     QIcon m_icon_file;
 };

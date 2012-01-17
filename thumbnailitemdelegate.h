@@ -34,7 +34,7 @@ private:
     class ProcessInfo
     {
     public:
-        ProcessInfo(const QModelIndex &index, const FileInfo &fileinfo, const QByteArray &pathhash, const QDateTime &date )
+        ProcessInfo(const QModelIndex &index, const FileInfo &fileinfo, const QByteArray &pathhash, const QDateTime &date)
             : m_index(index)
             , m_fileinfo(fileinfo)
             , m_path_hash(pathhash)
@@ -52,6 +52,8 @@ private:
         QByteArray m_path_hash;
         QDateTime m_date;
     };
+
+    void clearThumbnailsCache();
 
     QSize m_thumb_size;
     QFutureWatcher<QImage> *m_watcherThumbnail;
