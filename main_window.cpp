@@ -646,12 +646,9 @@ bool MainWindow::acceptFileDrop(const QMimeData *mimeData)
 {
     if (mimeData->hasUrls())
     {
-        return checkFileExtension(QFileInfo(mimeData->urls().at(0).toLocalFile()));
+        return Helper::checkFileExtension(QFileInfo(mimeData->urls().at(0).toLocalFile()));
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -715,7 +712,7 @@ void MainWindow::on_lineEditPath_editingFinished()
         {
             QFileInfo fi(m_lineEdit_path->text());
 
-            if (checkFileExtension(fi))
+            if (Helper::checkFileExtension(fi))
             {
                 this->openFile(m_lineEdit_path->text());
                 valid = true;
@@ -1012,7 +1009,7 @@ void MainWindow::on_zoom_changed(qreal current, qreal previous)
 
         for (int existingIndex = 0; existingIndex < m_comboBox_zoom->count(); ++existingIndex)
         {
-            if (FuzzyCompare(m_comboBox_zoom->itemData(existingIndex).toReal(), current))
+            if (Helper::FuzzyCompare(m_comboBox_zoom->itemData(existingIndex).toReal(), current))
             {
                 m_comboBox_zoom->setCurrentIndex(existingIndex);
                 break;
@@ -1026,7 +1023,7 @@ void MainWindow::on_zoom_changed(qreal current, qreal previous)
 
         for (int existingIndex = 0; existingIndex < m_comboBox_zoom->count(); ++existingIndex)
         {
-            if (FuzzyCompare(m_comboBox_zoom->itemData(existingIndex).toReal(), previous))
+            if (Helper::FuzzyCompare(m_comboBox_zoom->itemData(existingIndex).toReal(), previous))
             {
                 m_comboBox_zoom->removeItem(existingIndex);
                 break;

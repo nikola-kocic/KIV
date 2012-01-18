@@ -247,8 +247,8 @@ void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &pr
 
     if (m_in_archive)
     {
-        int type = index.data(ROLE_TYPE).toInt();
-        if (type == TYPE_ARCHIVE_FILE)
+        int type = index.data(Helper::ROLE_TYPE).toInt();
+        if (type == Helper::TYPE_ARCHIVE_FILE)
         {
             m_fileinfo_current.zipImageFileName = filename;
         }
@@ -288,8 +288,8 @@ void ViewFiles::pageNext()
     {
         for (int i = m_view_current->currentIndex().row() + 1; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
         {
-            int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(ROLE_TYPE).toInt();
-            if (type == TYPE_ARCHIVE_FILE)
+            int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(Helper::ROLE_TYPE).toInt();
+            if (type == Helper::TYPE_ARCHIVE_FILE)
             {
                 m_view_current->setCurrentIndex(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
                 break;
@@ -301,7 +301,7 @@ void ViewFiles::pageNext()
         for (int i = m_view_current->currentIndex().row() + 1; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
         {
             const QModelIndex &index = m_view_current->model()->index(i, 0, m_view_current->rootIndex());
-            if (isImageFile(m_model_filesystem->fileInfo(index)))
+            if (Helper::isImageFile(m_model_filesystem->fileInfo(index)))
             {
                 m_view_current->setCurrentIndex(index);
                 break;
@@ -318,8 +318,8 @@ void ViewFiles::pagePrevious()
     {
         for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
         {
-            int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(ROLE_TYPE).toInt();
-            if (type == TYPE_ARCHIVE_FILE)
+            int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(Helper::ROLE_TYPE).toInt();
+            if (type == Helper::TYPE_ARCHIVE_FILE)
             {
                 m_view_current->setCurrentIndex(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
                 break;
@@ -331,7 +331,7 @@ void ViewFiles::pagePrevious()
         for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
         {
             const QModelIndex &index = m_view_current->model()->index(i, 0, m_view_current->rootIndex());
-            if (isImageFile(m_model_filesystem->fileInfo(index)))
+            if (Helper::isImageFile(m_model_filesystem->fileInfo(index)))
             {
                 m_view_current->setCurrentIndex(index);
                 break;
@@ -358,14 +358,14 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
 
     if (m_in_archive)
     {
-        if (fixed_index.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_DIR)
+        if (fixed_index.data(Helper::ROLE_TYPE).toInt() == Helper::TYPE_ARCHIVE_DIR)
         {
             m_view_archiveDirs->setCurrentIndexFromSource(fixed_index);
         }
     }
     else
     {
-        if (m_model_filesystem->isDir(fixed_index) || isArchiveFile(m_model_filesystem->fileInfo(fixed_index)))
+        if (m_model_filesystem->isDir(fixed_index) || Helper::isArchiveFile(m_model_filesystem->fileInfo(fixed_index)))
         {
             emit activated(m_model_filesystem->filePath(index));
         }
@@ -427,8 +427,8 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
         {
             FileInfo pli_info = m_fileinfo_current;
             QString name = indexes.at(i).data(Qt::DisplayRole).toString();
-            int type = indexes.at(i).data(ROLE_TYPE).toInt();
-            if (type == TYPE_ARCHIVE_FILE)
+            int type = indexes.at(i).data(Helper::ROLE_TYPE).toInt();
+            if (type == Helper::TYPE_ARCHIVE_FILE)
             {
                 pli_info.zipImageFileName = name;
             }
@@ -446,7 +446,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
         {
             FileInfo pli_info = m_fileinfo_current;
             QFileInfo fi = m_model_filesystem->fileInfo(indexes.at(i));
-            if (isImageFile(fi))
+            if (Helper::isImageFile(fi))
             {
                 pli_info.image.setFile(fi.canonicalFilePath());
             }

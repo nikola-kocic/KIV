@@ -129,7 +129,7 @@ FileInfo FileInfo::fromPath(const QString &path)
 #endif
         info.container = fi.canonicalFilePath();
     }
-    else if (isArchiveFile(fi))
+    else if (Helper::isArchiveFile(fi))
     {
 #ifdef DEBUG_FILE_INFO
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::fromPath" << "isArchive(fi)";

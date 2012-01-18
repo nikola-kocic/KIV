@@ -8,9 +8,11 @@
 
 namespace LockMode
 {
-    enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
+enum Mode { None, Autofit, FitWidth, FitHeight, Zoom };
 }
 
+namespace Helper
+{
 const int ROLE_TYPE = Qt::UserRole + 1000;
 const int ROLE_FILE_DATE = Qt::UserRole + 1001;
 
@@ -18,6 +20,8 @@ const int TYPE_ARCHIVE = 1003;
 const int TYPE_ARCHIVE_DIR = 1004;
 const int TYPE_ARCHIVE_FILE = 1005;
 
+
+QString size(qint64 bytes);
 
 inline bool isArchiveFile(const QFileInfo &fi)
 {
@@ -33,7 +37,7 @@ inline bool checkFileExtension(const QFileInfo &info)
 {
     if (isArchiveFile(info) || info.isDir() || isImageFile(info))
     {
-       return true;
+        return true;
     }
     else
     {
@@ -63,7 +67,7 @@ static inline bool FuzzyCompare(float p1, float p2)
         return (qAbs(p1 - p2) <= 0.00001f * qMin(qAbs(p1), qAbs(p2)));
     }
 }
-
+}
 
 #endif // HELPER_H
 

@@ -25,7 +25,6 @@ SOURCES += \
     view_files_list.cpp \
     thumbnailitemdelegate.cpp \
     view_files_tree.cpp \
-    model_archive.cpp \
     archive_item.cpp \
     archive_model.cpp
 
@@ -54,7 +53,6 @@ HEADERS += \
     helper.h \
     fileinfo.h \
     thumbnailitemdelegate.h \
-    model_archive.h \
     archive_item.h \
     archive_model.h
 

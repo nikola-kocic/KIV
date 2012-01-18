@@ -25,7 +25,6 @@ public:
     static const int col_date = 2;
 
 private:
-    QString size(qint64 bytes) const;
     QList<ArchiveItem*> childItems;
     ArchiveItem *parentItem;
 

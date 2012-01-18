@@ -13,8 +13,8 @@ ArchiveModel::ArchiveModel(QObject *parent)
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
     , m_icon_file(QApplication::style()->standardIcon(QStyle::SP_FileIcon))
 {
-    rootItem = new ArchiveItem("", QDateTime(), 0, "", TYPE_ARCHIVE);
-    rootArchiveItem = new ArchiveItem("", QDateTime(), 0, "", TYPE_ARCHIVE, QIcon(), rootItem);
+    rootItem = new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE);
+    rootArchiveItem = new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE, QIcon(), rootItem);
 }
 
 ArchiveModel::~ArchiveModel()
@@ -147,7 +147,7 @@ void ArchiveModel::setPath(const FileInfo &info)
 
     QFileInfo zip_info(zipFile);
     QFileIconProvider fip;
-    rootArchiveItem = new ArchiveItem(zip_info.fileName(), zip_info.lastModified(), zip_info.size(), zip_info.absoluteFilePath(), TYPE_ARCHIVE, fip.icon(zip_info), rootItem);
+    rootArchiveItem = new ArchiveItem(zip_info.fileName(), zip_info.lastModified(), zip_info.size(), zip_info.absoluteFilePath(), Helper::TYPE_ARCHIVE, fip.icon(zip_info), rootItem);
 
 
     for (int i = 0; i < archive_files.size(); ++i)
@@ -162,15 +162,15 @@ void ArchiveModel::setPath(const FileInfo &info)
                 folderPath.append(file_path_parts.at(j) + "/");
                 if (j < file_path_parts.size() - 1)
                 {
-                    node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, 0, folderPath, TYPE_ARCHIVE_DIR, node);
+                    node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, 0, folderPath, Helper::TYPE_ARCHIVE_DIR, node);
                 }
                 else
                 {
                     QFileInfo fi(archive_files.at(i).name);
-                    if (isImageFile(fi))
+                    if (Helper::isImageFile(fi))
                     {
                         QString nodeFilePath = info.container.canonicalFilePath() + "/" + archive_files.at(i).name;
-                        node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize, nodeFilePath, TYPE_ARCHIVE_FILE, node);
+                        node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize, nodeFilePath, Helper::TYPE_ARCHIVE_FILE, node);
                     }
                 }
             }
@@ -194,18 +194,9 @@ ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, c
         }
     }
 
-    ArchiveItem *ntvi = new ArchiveItem(name, date, bytes, path, type, (type == TYPE_ARCHIVE_DIR ? m_icon_dir : m_icon_file), parent);
+    ArchiveItem *ntvi = new ArchiveItem(name, date, bytes, path, type, (type == Helper::TYPE_ARCHIVE_FILE ? m_icon_file : m_icon_dir), parent);
 
-//    beginInsertRows(index(createIndex(, 0, 0);
-    if (type == TYPE_ARCHIVE_DIR)
-    {
-        parent->appendChild(ntvi);
-//        parent->insertRow(indexToInsertByName(parent, name), ntvi);
-    }
-    else
-    {
-        parent->appendChild(ntvi);
-    }
+    parent->appendChild(ntvi);
 
     return ntvi;
 }

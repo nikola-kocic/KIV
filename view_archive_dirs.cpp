@@ -37,7 +37,7 @@ void ViewArchiveDirs::setCurrentIndexFromSource(const QModelIndex &index)
 bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     QModelIndex index0 = this->sourceModel()->index(sourceRow, 0, sourceParent);
-    return !(index0.data(ROLE_TYPE).toInt() == TYPE_ARCHIVE_FILE);
+    return !(index0.data(Helper::ROLE_TYPE).toInt() == Helper::TYPE_ARCHIVE_FILE);
 }
 
 bool ViewArchiveDirs::MySortFilterProxyModel::filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const

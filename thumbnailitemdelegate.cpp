@@ -55,7 +55,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     QDateTime currentDateTime;
     const QByteArray &filepath = index.data(QFileSystemModel::FilePathRole).toByteArray();
     const QByteArray &path_hash = QCryptographicHash::hash(filepath, QCryptographicHash::Md4);
-    const QVariant &date = index.data(ROLE_FILE_DATE);
+    const QVariant &date = index.data(Helper::ROLE_FILE_DATE);
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
         qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::updateThumbnail" << filepath;

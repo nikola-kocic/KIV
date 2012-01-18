@@ -4,7 +4,6 @@
 #include "helper.h"
 #include "picture_loader.h"
 #include "thumbnailitemdelegate.h"
-//#include "model_archive.h"
 #include "view_archive_dirs.h"
 #include "settings.h"
 #include "archive_model.h"

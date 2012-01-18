@@ -16,9 +16,9 @@ ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint
     m_icon(icon),
     m_tooltip(QFileSystemModel::tr("Name") + ": " + m_name + "\n" + QFileSystemModel::tr("Date Modified") + ": " + m_date.toString(Qt::SystemLocaleShortDate))
 {
-    if (m_type == TYPE_ARCHIVE_FILE)
+    if (m_type == Helper::TYPE_ARCHIVE_FILE)
     {
-        m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + size(m_bytes));
+        m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(m_bytes));
     }
 
 }
@@ -86,7 +86,7 @@ QVariant ArchiveItem::data(int role, int column) const
             return m_name;
 
         case col_size:
-            return size(m_bytes);
+            return Helper::size(m_bytes);
 
         case col_date:
             return m_date.toString(Qt::SystemLocaleShortDate);
@@ -105,10 +105,10 @@ QVariant ArchiveItem::data(int role, int column) const
     case QFileSystemModel::FilePathRole:
         return m_path;
 
-    case ROLE_TYPE:
+    case Helper::ROLE_TYPE:
         return m_type;
 
-    case ROLE_FILE_DATE:
+    case Helper::ROLE_FILE_DATE:
         return m_date;
     }
 
@@ -126,23 +126,4 @@ int ArchiveItem::row() const
         return parentItem->childItems.indexOf(const_cast<ArchiveItem*>(this));
 
     return 0;
-}
-
-QString ArchiveItem::size(qint64 bytes) const
-{
-    // According to the Si standard KB is 1000 bytes, KiB is 1024
-    // but on windows sizes are calculated by dividing by 1024 so we do what they do.
-    const qint64 kb = 1024;
-    const qint64 mb = 1024 * kb;
-    const qint64 gb = 1024 * mb;
-    const qint64 tb = 1024 * gb;
-    if (bytes >= tb)
-        return QFileSystemModel::tr("%1 TB").arg(QLocale().toString(qreal(bytes) / tb, 'f', 3));
-    if (bytes >= gb)
-        return QFileSystemModel::tr("%1 GB").arg(QLocale().toString(qreal(bytes) / gb, 'f', 2));
-    if (bytes >= mb)
-        return QFileSystemModel::tr("%1 MB").arg(QLocale().toString(qreal(bytes) / mb, 'f', 1));
-    if (bytes >= kb)
-        return QFileSystemModel::tr("%1 KB").arg(QLocale().toString(bytes / kb));
-    return QFileSystemModel::tr("%1 bytes").arg(QLocale().toString(bytes));
 }
