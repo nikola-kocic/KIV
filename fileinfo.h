@@ -8,31 +8,31 @@
 class FileInfo
 {
 public:
-    static FileInfo fromPath(const QString &path);
-    static QStringList getFiltersImage();
-    static QStringList getFiltersArchive();
+    explicit FileInfo(const QString &path);
 
-    explicit FileInfo();
-
-    bool isArchive() const;
+    bool isInArchive() const;
     bool fileExists() const;
-    bool isValidContainer() const;
+    bool hasValidContainer() const;
 
-    QString getFilePath() const;
-    QString zipImagePath() const;
-    QString getImageFileName() const;
+    QString getPath() const; /* C:/Folder1/Folder2/image.png" or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */
+    QString zipImagePath() const;  /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
+    QString getImageFileName() const; /* image.png */
+    QString getContainerPath() const; /* C:/Folder1/Folder2" */
+    QString getZipPath() const; /* "ZipFolder1/ZipFolder2/" (ends with '/') */
+
 
     QString getDebugInfo() const;
 
-    QFileInfo container; /* Folder must end with "/" */
-    QFileInfo image;
-
-    QString zipPath; /* Ends with "/" */
-    QString zipImageFileName;
-
 private:
-    static QStringList m_filters_archive;
-    static QStringList m_filters_image;
+    QFileInfo m_container;
+    bool m_hasValidContainer;
+
+    QFileInfo m_image;
+    bool m_fileExists;
+
+    QString m_zipPath;
+    QString m_zipImageFileName;
+    bool m_isInArchive;
 };
 
 #endif // FILEINFO_H

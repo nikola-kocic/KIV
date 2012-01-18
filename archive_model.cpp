@@ -114,7 +114,7 @@ int ArchiveModel::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
-void ArchiveModel::setPath(const FileInfo &info)
+void ArchiveModel::setPath(const QString &path)
 {
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FilesModel::setPath" << path.getFilePath();
@@ -124,7 +124,7 @@ void ArchiveModel::setPath(const FileInfo &info)
 
     this->clear();
 
-    QFile zipFile(info.container.canonicalFilePath());
+    QFile zipFile(path);
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
     {
@@ -143,7 +143,7 @@ void ArchiveModel::setPath(const FileInfo &info)
     }
 
 
-    /* Populate treeViewFile */
+    /* Populate model */
 
     QFileInfo zip_info(zipFile);
     QFileIconProvider fip;
@@ -154,7 +154,7 @@ void ArchiveModel::setPath(const FileInfo &info)
     {
         ArchiveItem *node = rootArchiveItem;
         QStringList file_path_parts = archive_files.at(i).name.split('/');
-        QString folderPath = info.container.canonicalFilePath() + "/";
+        QString folderPath = path + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
             if (file_path_parts.at(j).size() > 0)
@@ -169,7 +169,7 @@ void ArchiveModel::setPath(const FileInfo &info)
                     QFileInfo fi(archive_files.at(i).name);
                     if (Helper::isImageFile(fi))
                     {
-                        QString nodeFilePath = info.container.canonicalFilePath() + "/" + archive_files.at(i).name;
+                        QString nodeFilePath = path + "/" + archive_files.at(i).name;
                         node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize, nodeFilePath, Helper::TYPE_ARCHIVE_FILE, node);
                     }
                 }

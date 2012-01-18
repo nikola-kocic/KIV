@@ -12,7 +12,7 @@
 ViewFiles::ViewFiles(QWidget *parent)
     : QWidget(parent)
 
-    , m_fileinfo_current(FileInfo())
+    , m_fileinfo_current(FileInfo(""))
     , m_view_mode(FileViewMode::List)
     , m_show_thumbnails(false)
     , m_in_archive(false)
@@ -32,12 +32,12 @@ ViewFiles::ViewFiles(QWidget *parent)
 {
     /* Start modelFilesystem */
     QStringList filters;
-    QStringList filtersArchive = FileInfo::getFiltersArchive();
+    QStringList filtersArchive = Helper::getFiltersArchive();
     for (int i = 0; i < filtersArchive.size(); ++i)
     {
         filters.append("*." + filtersArchive.at(i));
     }
-    QStringList filtersImage = FileInfo::getFiltersImage();
+    QStringList filtersImage = Helper::getFiltersImage();
     for (int i = 0; i < filtersImage.size(); ++i)
     {
         filters.append("*." + filtersImage.at(i));
@@ -112,7 +112,7 @@ void ViewFiles::initViewItem()
     connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
     connect(m_view_current, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
 
-    if (m_fileinfo_current.container.exists())
+    if (m_fileinfo_current.hasValidContainer())
     {
         setCurrentFile(m_fileinfo_current);
     }
@@ -156,9 +156,9 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 #endif
     m_fileinfo_current = info;
 
-    if (info.isArchive())
+    if (info.isInArchive())
     {
-        m_model_archive_files->setPath(info);
+        m_model_archive_files->setPath(info.getContainerPath());
         if (m_in_archive == false)
         {
             m_in_archive = true;
@@ -167,12 +167,12 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
             connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
             m_view_archiveDirs->show();
         }
-        QModelIndex dirIndex = m_model_archive_files->getDirectory(info.zipPath);
+        QModelIndex dirIndex = m_model_archive_files->getDirectory(info.getZipPath());
         m_view_archiveDirs->setCurrentIndexFromSource(dirIndex);
 
         if (info.fileExists())
         {
-            m_view_current->setCurrentIndex(m_model_archive_files->findIndexChild(info.zipImageFileName, dirIndex));
+            m_view_current->setCurrentIndex(m_model_archive_files->findIndexChild(info.getImageFileName(), dirIndex));
         }
     }
     else
@@ -186,15 +186,14 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
             connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
             m_view_archiveDirs->hide();
         }
-        m_view_current->setRootIndex(m_model_filesystem->index(info.container.canonicalFilePath()));
-        m_view_current->setCurrentIndex(m_model_filesystem->index(info.image.canonicalFilePath()));
+        m_view_current->setRootIndex(m_model_filesystem->index(info.getContainerPath()));
+        m_view_current->setCurrentIndex(m_model_filesystem->index(info.getPath()));
     }
 
     m_view_current->scrollTo(m_view_current->currentIndex());
 
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::setCurrentFile end" << info.getFilePath() << "archive?" << m_in_archive;
-//    qDebug() << m_fileinfo_current.getDebugInfo();
 #endif
     emit currentFileChanged(m_fileinfo_current);
 
@@ -208,73 +207,24 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &index)
     {
         return;
     }
+    m_fileinfo_current = FileInfo(index.data(QFileSystemModel::FilePathRole).toString());
 
-    QString pathToImage = "";
-    QModelIndex cindex = index;
-    while (cindex.parent().isValid())
-    {
-        pathToImage = cindex.data(Qt::DisplayRole).toString() + "/" + pathToImage;
-        cindex = cindex.parent();
-    }
-    if (pathToImage.isEmpty()) pathToImage = "/";
-#ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_archiveDirsView_currentRowChanged" << index.data().toString() << "pathToImage" << pathToImage;
-#endif
-    m_fileinfo_current.zipPath = pathToImage;
-    m_fileinfo_current.zipImageFileName.clear();
     m_view_current->setRootIndex(index);
     m_view_current->selectionModel()->clear();
     showThumbnails();
-//#ifdef DEBUG_VIEW_FILES
-//    qDebug() << m_fileinfo_current.getDebugInfo();
-//#endif
+
     emit currentFileChanged(m_fileinfo_current);
 }
 
 void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    QModelIndex index;
-    if (current.column() > 0)
-    {
-        index = current.sibling(current.row(), 0);
-    }
-    else
-    {
-        index = current;
-    }
-    m_view_current->scrollTo(index);
-    QString filename = index.data(Qt::DisplayRole).toString();
+    if (!current.isValid()) return;
+    m_view_current->scrollTo(current);
 
-    if (m_in_archive)
-    {
-        int type = index.data(Helper::ROLE_TYPE).toInt();
-        if (type == Helper::TYPE_ARCHIVE_FILE)
-        {
-            m_fileinfo_current.zipImageFileName = filename;
-        }
-        else
-        {
-            m_fileinfo_current.zipImageFileName.clear();
-        }
-        m_fileinfo_current.image = QFileInfo();
-    }
-    else
-    {
-        if (m_model_filesystem->isDir(current))
-        {
-            m_fileinfo_current.image = QFileInfo();
-        }
-        else
-        {
-            m_fileinfo_current.image.setFile(m_model_filesystem->filePath(current));
-        }
-        m_fileinfo_current.zipPath.clear();
-        m_fileinfo_current.zipImageFileName.clear();
-    }
+    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString());
 
 #ifdef DEBUG_VIEW_FILES
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::currentChanged" << m_fileinfo_current.getDebugInfo() << filename << "archive?" << m_in_archive;
-//    qDebug() << m_fileinfo_current.getDebugInfo();
 #endif
 
     emit currentFileChanged(m_fileinfo_current);
@@ -421,42 +371,9 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
         return;
     }
 
-    if (m_in_archive)
+    for (int i = 0; i < indexes.size(); ++i)
     {
-        for (int i = 0; i < indexes.size(); ++i)
-        {
-            FileInfo pli_info = m_fileinfo_current;
-            QString name = indexes.at(i).data(Qt::DisplayRole).toString();
-            int type = indexes.at(i).data(Helper::ROLE_TYPE).toInt();
-            if (type == Helper::TYPE_ARCHIVE_FILE)
-            {
-                pli_info.zipImageFileName = name;
-            }
-            else
-            {
-                pli_info.zipImageFileName = "";
-            }
-
-            m_thumbnail_delegate->updateThumbnail(pli_info, indexes.at(i));
-        }
-    }
-    else
-    {
-        for (int i = 0; i < indexes.size(); ++i)
-        {
-            FileInfo pli_info = m_fileinfo_current;
-            QFileInfo fi = m_model_filesystem->fileInfo(indexes.at(i));
-            if (Helper::isImageFile(fi))
-            {
-                pli_info.image.setFile(fi.canonicalFilePath());
-            }
-            else
-            {
-                pli_info.container.setFile(pli_info.container.canonicalFilePath() + "/" + fi.fileName() + "/");
-            }
-
-            m_thumbnail_delegate->updateThumbnail(pli_info, indexes.at(i));
-        }
+        m_thumbnail_delegate->updateThumbnail(FileInfo(indexes.at(i).data(QFileSystemModel::FilePathRole).toString()), indexes.at(i));
     }
 }
 

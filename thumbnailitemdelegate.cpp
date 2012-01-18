@@ -117,7 +117,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     else
     {
         icon = index.data(Qt::DecorationRole).value<QIcon>();
-        QImage thumb = PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), ThumbnailInfo(info, m_thumb_size));
+        QImage thumb = PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), m_thumb_size);
         icon = QIcon(QPixmap::fromImage(thumb));
 
         ThumbImageDate tid;

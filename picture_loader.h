@@ -27,7 +27,7 @@ class PictureLoader
 public:
     static QImage getImage(const FileInfo &info);
     static QImage getThumbnail(const ThumbnailInfo &thumb_info);
-    static QImage styleThumbnail(const QImage &img, const ThumbnailInfo &thumb_info);
+    static QImage styleThumbnail(const QImage &img, const QSize &thumb_size);
 
 private:
     static QSize ThumbnailImageSize(const QSize &image_size, const QSize &thumb_size);

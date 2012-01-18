@@ -3,7 +3,6 @@
 #include "archive_item.h"
 #include "helper.h"
 #include <QFileSystemModel>
-#include <QDebug>
 
 ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, const QIcon &icon, ArchiveItem *parent) :
     childItems(QList<ArchiveItem*>()),
@@ -26,18 +25,6 @@ ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint
 ArchiveItem::~ArchiveItem()
 {
     qDeleteAll(childItems);
-}
-
-void ArchiveItem::clear()
-{
-    while (childCount() > 0)
-    {
-        childItems.at(0)->clear();
-        delete childItems.at(0);
-        childItems.removeFirst();
-    }
-//    qDeleteAll(childItems);
-    childItems.clear();
 }
 
 void ArchiveItem::appendChild(ArchiveItem *item)
@@ -126,4 +113,16 @@ int ArchiveItem::row() const
         return parentItem->childItems.indexOf(const_cast<ArchiveItem*>(this));
 
     return 0;
+}
+
+void ArchiveItem::clear()
+{
+    while (childCount() > 0)
+    {
+        childItems.at(0)->clear();
+        delete childItems.at(0);
+        childItems.removeFirst();
+    }
+//    qDeleteAll(childItems);
+    childItems.clear();
 }

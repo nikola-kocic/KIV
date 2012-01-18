@@ -10,8 +10,6 @@ class ArchiveItem
 public:
     ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, const QIcon &icon = QIcon(), ArchiveItem *parent = 0);
     ~ArchiveItem();
-    void clear();
-
     void appendChild(ArchiveItem *child);
     ArchiveItem *child(int row);
     int childCount() const;
@@ -19,6 +17,8 @@ public:
     QVariant data(int role, int column) const;
     int row() const;
     ArchiveItem *parent();
+
+    void clear();
 
     static const int col_name = 0;
     static const int col_size = 1;
@@ -37,8 +37,6 @@ private:
     QString m_tooltip;
 
     static const int col_count = 3;
-
-
 };
 
 #endif // ARCHIVE_ITEM_H

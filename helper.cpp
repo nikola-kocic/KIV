@@ -2,6 +2,27 @@
 
 #include <QFileSystemModel>
 #include <QLocale>
+#include <QImageReader>
+
+QStringList Helper::m_filters_archive = QStringList() << "zip" << "cbz";
+QStringList Helper::m_filters_image = QStringList();
+
+QStringList Helper::getFiltersArchive()
+{
+    return m_filters_archive;
+}
+
+QStringList Helper::getFiltersImage()
+{
+    if (m_filters_image.isEmpty())
+    {
+        for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
+        {
+            m_filters_image.append(QImageReader::supportedImageFormats().at(i));
+        }
+    }
+    return m_filters_image;
+}
 
 QString Helper::size(qint64 bytes)
 {

@@ -47,14 +47,14 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
                  QApplication::desktop()->height() - 100);
     this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    if (FileInfo::getFiltersImage().contains("svg"))
+    if (Helper::getFiltersImage().contains("svg"))
     {
         this->setWindowIcon(QIcon(":/icons/kiv.svg"));
     }
 
     /* Start modelFilesystem */
     QStringList filters;
-    QStringList filtersArchive = FileInfo::getFiltersArchive();
+    QStringList filtersArchive = Helper::getFiltersArchive();
     for (int i = 0; i < filtersArchive.size(); ++i)
     {
         filters.append("*." + filtersArchive.at(i));
@@ -162,7 +162,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    m_settings->setLastPath(m_view_files->getCurrentFileInfo().getFilePath());
+    m_settings->setLastPath(m_view_files->getCurrentFileInfo().getPath());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -174,7 +174,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     {
         if (m_lineEdit_path->hasFocus())
         {
-            m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
+            m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
             m_lineEdit_path->clearFocus();
             event->accept();
         }
@@ -610,9 +610,10 @@ void MainWindow::deleteBookmark()
 
 void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 {
+    qDebug() << "MainWindow::on_filesView_currentChanged" << info.getDebugInfo();
     this->setCursor(Qt::BusyCursor);
 
-    m_lineEdit_path->setText(info.getFilePath());
+    m_lineEdit_path->setText(info.getPath());
     m_picture_item->setPixmap(info);
 }
 
@@ -621,18 +622,18 @@ void MainWindow::openFile(const QString &source)
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::openFile" << source;
 #endif
-    FileInfo info = FileInfo::fromPath(source);
+    FileInfo info = FileInfo(source);
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::openFile" << info.getDebugInfo();
 #endif
 
-    if (!info.isValidContainer())
+    if (!info.hasValidContainer())
     {
         return;
     }
 
     m_flag_opening = true;
-    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.container.canonicalFilePath()));
+    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.getContainerPath()));
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << info.getDebugInfo();
 #endif
@@ -700,11 +701,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 void MainWindow::on_lineEditPath_editingFinished()
 {
 
-    FileInfo info = FileInfo::fromPath(m_lineEdit_path->text());
+    FileInfo info = FileInfo(m_lineEdit_path->text());
     bool valid = false;
-    if (info.isValidContainer())
+    if (info.hasValidContainer())
     {
-        if (info.isArchive())
+        if (info.isInArchive())
         {
             valid = true;
         }
@@ -724,7 +725,7 @@ void MainWindow::on_lineEditPath_editingFinished()
 
     if (!valid)
     {
-        m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
+        m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
     }
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_editingFinished" << this->m_lineEdit_path->text() << "valid" << valid;
@@ -737,7 +738,7 @@ void MainWindow::on_lineEditPath_focus_lost()
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_focus_lost" << this->m_lineEdit_path->text();
 #endif
-    m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getFilePath());
+    m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
     m_lineEdit_path->clearFocus();
 }
 
@@ -761,24 +762,18 @@ void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current,
 #endif
     this->setWindowTitle(m_model_filesystem->filePath(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
-    FileInfo info;
-    info.container = currentFolder;
+    FileInfo info = FileInfo(currentFolder);
 
     if (m_model_filesystem->isDir(current))
     {
         m_model_filesystem->fetchMore(current);
     }
-    else
-    {
-        info.zipPath = "/";
-    }
+
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << info.getDebugInfo();
 #endif
     m_view_files->setCurrentFile(info);
-
-    m_lineEdit_path->setText(info.getFilePath());
-
+    m_lineEdit_path->setText(info.getPath());
     m_picture_item->setPixmap(info);
 }
 
@@ -832,7 +827,7 @@ void MainWindow::dirUp()
 
 void MainWindow::open()
 {
-    QString imageExtensions = "*." + FileInfo::getFiltersImage().join(" *.");
+    QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_model_filesystem->filePath(m_view_filesystem->currentIndex()),
                                                     tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
@@ -854,13 +849,13 @@ bool MainWindow::saveAs()
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if (info.isArchive())
+    if (info.isInArchive())
     {
-        JlCompress::extractFile(info.container.canonicalFilePath(), info.zipImagePath(), fileName);
+        JlCompress::extractFile(info.getContainerPath(), info.zipImagePath(), fileName);
     }
     else
     {
-        QFile::copy(info.getFilePath(), fileName);
+        QFile::copy(info.getPath(), fileName);
     }
 //    PictureLoader::getImage(info).save(fileName, "PNG");
 #ifndef QT_NO_CURSOR
@@ -874,12 +869,12 @@ void MainWindow::addBookmark()
 {
     QInputDialog dialog;
     dialog.setLabelText(tr("Bookmark Name:"));
-    dialog.setTextValue(m_view_files->getCurrentFileInfo().getFilePath());
+    dialog.setTextValue(m_view_files->getCurrentFileInfo().getPath());
     if(dialog.exec() != QDialog::Accepted)
     {
         return;
     }
-    m_settings->addBookmark(dialog.textValue(), m_view_files->getCurrentFileInfo().getFilePath());
+    m_settings->addBookmark(dialog.textValue(), m_view_files->getCurrentFileInfo().getPath());
     populateBookmarks();
 }
 

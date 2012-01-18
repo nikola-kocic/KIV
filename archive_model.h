@@ -26,7 +26,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    void setPath(const FileInfo &info);
+    void setPath(const QString &path);
     QModelIndex getDirectory(const QString &path);
     QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());
     void clear();

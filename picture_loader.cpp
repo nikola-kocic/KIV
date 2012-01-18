@@ -8,8 +8,6 @@
 #include <QPainter>
 
 //#define DEBUG_PICTURE_LOADER
-
-#include <QDebug>
 #ifdef DEBUG_PICTURE_LOADER
 #include <QDebug>
 //#include <QTime>
@@ -24,7 +22,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
     {
         return QImage(0,0);
     }
-    else if (info.isArchive())
+    else if (info.isInArchive())
     {
         return PictureLoader::getImageFromZip(ThumbnailInfo(info, QSize(0, 0)));
     }
@@ -44,20 +42,20 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
     {
         return QImage(0,0);
     }
-    else if (thumb_info.getFileInfo().isArchive())
+    else if (thumb_info.getFileInfo().isInArchive())
     {
-        return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info);
+        return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info.getThumbSize());
     }
     else
     {
-        return PictureLoader::styleThumbnail(PictureLoader::getImageFromFile(thumb_info), thumb_info);
+        return PictureLoader::styleThumbnail(PictureLoader::getImageFromFile(thumb_info), thumb_info.getThumbSize());
     }
     return QImage(0,0);
 }
 
-QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thumb_info)
+QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
 {
-    QImage thumb(thumb_info.getThumbSize().width() + 2, thumb_info.getThumbSize().height() + 2, QImage::Format_ARGB32);
+    QImage thumb(thumb_size.width() + 2, thumb_size.height() + 2, QImage::Format_ARGB32);
     thumb.fill(qRgba(255, 255, 255, 0));
     QPainter painter(&thumb);
     QPoint imgPoint((thumb.width() - img.width()) / 2, (thumb.height() - img.height()) / 2);
@@ -70,8 +68,8 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const ThumbnailInfo &thu
 
 QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 {
-    QImageReader image_reader(thumb_info.getFileInfo().getFilePath());
-//    qDebug() << image_reader.format();
+    QImageReader image_reader(thumb_info.getFileInfo().getPath());
+    //    qDebug() << image_reader.format();
     if (!thumb_info.getThumbSize().isEmpty())
     {
         if (image_reader.size().height() > thumb_info.getThumbSize().height() || image_reader.size().width() > thumb_info.getThumbSize().width())
@@ -84,7 +82,7 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 
 QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
 {
-    QFile zipFile(thumb_info.getFileInfo().container.canonicalFilePath());
+    QFile zipFile(thumb_info.getFileInfo().getContainerPath());
     QuaZip zip(&zipFile);
     if (!zip.open(QuaZip::mdUnzip))
     {
@@ -93,7 +91,13 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
     }
     zip.setFileNameCodec("UTF-8");
 
-    zip.setCurrentFile(thumb_info.getFileInfo().zipImagePath());
+    if (!zip.setCurrentFile(thumb_info.getFileInfo().zipImagePath()))
+    {
+        return QImage(0, 0);
+#ifdef DEBUG_PICTURE_LOADER
+        qDebug() << "PictureLoader::getImageFromZip setCurrentFile failed" << thumb_info.getFileInfo().zipImagePath();
+#endif
+    }
 
     QuaZipFile file(&zip);
     char c;
