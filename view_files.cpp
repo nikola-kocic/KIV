@@ -23,7 +23,7 @@ ViewFiles::ViewFiles(QWidget *parent)
     , m_listView_files(0)
     , m_view_current(0)
 
-    , m_model_archive_files(new ArchiveFilesModel(this))
+    , m_model_archive_files(new ArchiveModel(this))
     , m_model_filesystem(new FileSystemModel(this))
 
     , m_splitter(new QSplitter(Qt::Vertical, this))
@@ -177,6 +177,7 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
     }
     else
     {
+        m_model_archive_files->clear();
         if (m_in_archive == true)
         {
             m_in_archive = false;

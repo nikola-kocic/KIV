@@ -4,10 +4,10 @@
 #include "helper.h"
 #include "picture_loader.h"
 #include "thumbnailitemdelegate.h"
-#include "model_archive.h"
+//#include "model_archive.h"
 #include "view_archive_dirs.h"
 #include "settings.h"
-
+#include "archive_model.h"
 
 #include <QListView>
 #include <QTreeView>
@@ -92,7 +92,7 @@ private:
     ListViewFiles *m_listView_files;
     QAbstractItemView *m_view_current;
 
-    ArchiveFilesModel *m_model_archive_files;
+    ArchiveModel *m_model_archive_files;
     FileSystemModel *m_model_filesystem;
 
     QSplitter *m_splitter;
