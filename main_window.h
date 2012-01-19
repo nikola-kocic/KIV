@@ -26,8 +26,8 @@ private:
     void createMenus();
     void connectActions();
     void populateBookmarks();
-    bool acceptFileDrop(const QMimeData *mimeData);
-    void openFile(const QString &source);
+    void openFile(const FileInfo &info);
+    inline void openFile(const QString &path) { openFile(FileInfo(path)); }
 
     bool m_flag_opening;
 

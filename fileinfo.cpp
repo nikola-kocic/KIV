@@ -56,6 +56,9 @@ FileInfo::FileInfo(const QString &path)
 
     if (fi.exists())
     {
+        if (!Helper::isImageFile(fi))
+            return;
+
         // If path is image
         m_container = QFileInfo(fi.canonicalPath());
         m_hasValidContainer = true;
@@ -73,7 +76,9 @@ FileInfo::FileInfo(const QString &path)
 
     // If path is image in archive
 
-    QString tempContainerPath = path;
+    QString editedPath = path;
+    editedPath.replace('\\', '/');
+    QString tempContainerPath = editedPath;
     int indexOfContainerSlash = -1;
     do
     {
@@ -90,7 +95,7 @@ FileInfo::FileInfo(const QString &path)
             m_hasValidContainer = true;
             m_isInArchive = true;
 
-            QString zipAbsoluteFilePath = path.right(path.size() - tempContainerPath.size() - 1);
+            QString zipAbsoluteFilePath = editedPath.right(editedPath.size() - tempContainerPath.size() - 1);
 
             if (!zipAbsoluteFilePath.isEmpty())
             {
@@ -117,6 +122,21 @@ FileInfo::FileInfo(const QString &path)
     while (indexOfContainerSlash != -1);
 }
 
+bool FileInfo::isValid() const
+{
+    if (this->fileExists())
+    {
+        return true;
+    }
+
+    if (this->isContainerValid())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 bool FileInfo::isInArchive() const
 {
     return m_isInArchive;
@@ -127,7 +147,7 @@ bool FileInfo::fileExists() const
     return m_fileExists;
 }
 
-bool FileInfo::hasValidContainer() const
+bool FileInfo::isContainerValid() const
 {
     return m_hasValidContainer;
 }

@@ -112,7 +112,7 @@ void ViewFiles::initViewItem()
     connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
     connect(m_view_current, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
 
-    if (m_fileinfo_current.hasValidContainer())
+    if (m_fileinfo_current.isValid())
     {
         setCurrentFile(m_fileinfo_current);
     }
