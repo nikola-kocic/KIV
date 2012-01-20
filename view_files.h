@@ -14,6 +14,7 @@
 #include <QtConcurrentMap>
 #include <QSplitter>
 #include <QFileSystemModel>
+#include <QPointer>
 
 class ListViewFiles;
 class TreeViewFiles;
@@ -99,7 +100,7 @@ private:
     ListViewFiles *m_listView_files;
     QAbstractItemView *m_view_current;
 
-    ArchiveModel *m_model_archive_files;
+    QPointer<ArchiveModel> m_model_archive_files;
     FileSystemModel *m_model_filesystem;
     MySortFilterProxyModel *m_proxy_sort;
 

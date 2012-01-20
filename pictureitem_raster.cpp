@@ -23,7 +23,7 @@ void PictureItem::PictureItemRaster::setImage(const QImage &img)
     m_pixmap_edited = m_pixmap;
 
     m_picItem->m_boundingRect = QRect(0, 0, m_pixmap.width(), m_pixmap.height());
-    if (m_picItem->getLockMode() != LockMode::Zoom)
+    if (m_picItem->getLockMode() == LockMode::None)
     {
         m_picItem->setZoom(1);
     }

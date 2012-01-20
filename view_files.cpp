@@ -23,7 +23,7 @@ ViewFiles::ViewFiles(QWidget *parent)
     , m_listView_files(0)
     , m_view_current(0)
 
-    , m_model_archive_files(new ArchiveModel(this))
+    , m_model_archive_files(0)
     , m_model_filesystem(new FileSystemModel(this))
     , m_proxy_sort(new MySortFilterProxyModel(this))
 
@@ -152,30 +152,34 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 
     if (info.isInArchive())
     {
-        m_model_archive_files->setPath(info.getContainerPath());
+        m_proxy_sort->setSourceModel(0);
+        delete m_model_archive_files;
+        m_model_archive_files = new ArchiveModel(info.getContainerPath());
+        m_proxy_sort->setSourceModel(m_model_archive_files);
+
         if (!m_fileinfo_current.isInArchive() || !m_fileinfo_current.isValid())
         {
-            m_proxy_sort->setSourceModel(0); // crashes without this
-            m_proxy_sort->setSourceModel(m_model_archive_files);
             m_view_archiveDirs->setModel(m_proxy_sort);
             m_view_archiveDirs->show();
         }
-        QModelIndex dirIndex = m_model_archive_files->getDirectory(info.getZipPath());
+        QModelIndex dirIndex = ((ArchiveModel)m_model_archive_files)->getDirectory(info.getZipPath());
         m_view_archiveDirs->setCurrentIndexFromSource(m_proxy_sort->mapFromSource(dirIndex));
 
         if (info.fileExists())
         {
-            m_view_current->setCurrentIndex(m_proxy_sort->mapFromSource(m_model_archive_files->findIndexChild(info.getImageFileName(), dirIndex)));
+            m_view_current->setCurrentIndex(m_proxy_sort->mapFromSource(((ArchiveModel)m_model_archive_files)->findIndexChild(info.getImageFileName(), dirIndex)));
         }
     }
     else
     {
         if (m_fileinfo_current.isInArchive() || !m_fileinfo_current.isValid())
         {
-            m_model_archive_files->clear();
-            m_proxy_sort->setSourceModel(m_model_filesystem);
+            m_proxy_sort->setSourceModel(0);
             m_view_archiveDirs->setModel(0);
             m_view_archiveDirs->hide();
+            delete m_model_archive_files;
+
+            m_proxy_sort->setSourceModel(m_model_filesystem);
         }
         m_view_current->setRootIndex(m_proxy_sort->mapFromSource(m_model_filesystem->index(info.getContainerPath())));
         m_view_current->setCurrentIndex(m_proxy_sort->mapFromSource(m_model_filesystem->index(info.getPath())));

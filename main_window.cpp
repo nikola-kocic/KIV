@@ -248,7 +248,7 @@ void MainWindow::createActions()
     m_act_rotateReset = new QAction(tr("R&eset Rotation"), this);
     m_act_rotateReset->setEnabled(false);
 
-    m_act_thumbnails = new QAction(QIcon::fromTheme("thumbnail"), tr("&Show Thumbnails"), this);
+    m_act_thumbnails = new QAction(QIcon::fromTheme("image-x-generic"), tr("&Show Thumbnails"), this);
     m_act_thumbnails->setCheckable(true);
 
     m_act_mode_icons = new QAction(tr("&Icons"), this);

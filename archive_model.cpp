@@ -8,12 +8,74 @@
 #include "quazip/quazipfile.h"
 #include <QFileIconProvider>
 
-ArchiveModel::ArchiveModel(QObject *parent)
+//#define DEBUG_MODEL_FILES
+#ifdef DEBUG_MODEL_FILES
+#include <QDebug>
+#endif
+
+
+ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     : QAbstractItemModel(parent)
+    , rootItem(new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE))
+    , rootArchiveItem(new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE, QIcon(), rootItem))
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
-    , m_icon_file(QApplication::style()->standardIcon(QStyle::SP_FileIcon))
+    , m_icon_file(QIcon::fromTheme("image-x-generic"))
 {
-    rootItem = new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE);
+#ifdef DEBUG_MODEL_FILES
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FilesModel::setPath" << path.getFilePath();
+#endif
+
+    QFile zipFile(path);
+    QuaZip zip(&zipFile);
+    if (!zip.open(QuaZip::mdUnzip))
+    {
+        qWarning("testRead(): zip.open(): %d", zip.getZipError());
+        return;
+    }
+    zip.setFileNameCodec("UTF-8");
+
+    QList<QuaZipFileInfo> archive_files = zip.getFileInfoList();
+    //    QStringList archive_files = zip.getFileNameList();
+
+    zip.close();
+    if (zip.getZipError() != UNZ_OK) {
+        qWarning("testRead(): zip.close(): %d", zip.getZipError());
+        return;
+    }
+
+    /* Populate model */
+
+    QFileInfo zip_info(zipFile);
+    QFileIconProvider fip;
+    rootArchiveItem = new ArchiveItem(zip_info.fileName(), zip_info.lastModified(), zip_info.size(), zip_info.absoluteFilePath(), Helper::TYPE_ARCHIVE, fip.icon(zip_info), rootItem);
+    rootItem->appendChild(rootArchiveItem);
+
+    for (int i = 0; i < archive_files.size(); ++i)
+    {
+        ArchiveItem *node = rootArchiveItem;
+        QStringList file_path_parts = archive_files.at(i).name.split('/');
+        QString folderPath = path + "/";
+        for (int j = 0; j < file_path_parts.size(); ++j)
+        {
+            if (file_path_parts.at(j).size() > 0)
+            {
+                folderPath.append(file_path_parts.at(j) + "/");
+                if (j < file_path_parts.size() - 1)
+                {
+                    node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, 0, folderPath, Helper::TYPE_ARCHIVE_DIR, node);
+                }
+                else
+                {
+                    QFileInfo fi(archive_files.at(i).name);
+                    if (Helper::isImageFile(fi))
+                    {
+                        QString nodeFilePath = path + "/" + archive_files.at(i).name;
+                        node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize, nodeFilePath, Helper::TYPE_ARCHIVE_FILE, node);
+                    }
+                }
+            }
+        }
+    }
 }
 
 ArchiveModel::~ArchiveModel()
@@ -74,6 +136,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int 
 
 QModelIndex ArchiveModel::index(int row, int column, const QModelIndex &parent) const
 {
+    if (column < 0 || row < 0)
+        return QModelIndex();
+
     if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
 
@@ -91,6 +156,9 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
+    if (rowCount() == 0)
+        return QModelIndex();
+
     ArchiveItem *childItem = getItem(index);
     ArchiveItem *parentItem = childItem->parent();
 
@@ -102,79 +170,12 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
 
 int ArchiveModel::rowCount(const QModelIndex &parent) const
 {
+    if (parent.column() > 0)
+        return 0;
+
     ArchiveItem *parentItem = getItem(parent);
 
     return parentItem->childCount();
-}
-
-void ArchiveModel::setPath(const QString &path)
-{
-#ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FilesModel::setPath" << path.getFilePath();
-#endif
-
-//    emit layoutAboutToBeChanged();
-
-    this->clear();
-
-    QFile zipFile(path);
-    QuaZip zip(&zipFile);
-    if (!zip.open(QuaZip::mdUnzip))
-    {
-        qWarning("testRead(): zip.open(): %d", zip.getZipError());
-        return;
-    }
-    zip.setFileNameCodec("UTF-8");
-
-    QList<QuaZipFileInfo> archive_files = zip.getFileInfoList();
-//    QStringList archive_files = zip.getFileNameList();
-
-    zip.close();
-    if (zip.getZipError() != UNZ_OK) {
-        qWarning("testRead(): zip.close(): %d", zip.getZipError());
-        return;
-    }
-
-
-    /* Populate model */
-
-    QFileInfo zip_info(zipFile);
-    QFileIconProvider fip;
-    rootArchiveItem = new ArchiveItem(zip_info.fileName(), zip_info.lastModified(), zip_info.size(), zip_info.absoluteFilePath(), Helper::TYPE_ARCHIVE, fip.icon(zip_info), rootItem);
-
-
-    for (int i = 0; i < archive_files.size(); ++i)
-    {
-        ArchiveItem *node = rootArchiveItem;
-        QStringList file_path_parts = archive_files.at(i).name.split('/');
-        QString folderPath = path + "/";
-        for (int j = 0; j < file_path_parts.size(); ++j)
-        {
-            if (file_path_parts.at(j).size() > 0)
-            {
-                folderPath.append(file_path_parts.at(j) + "/");
-                if (j < file_path_parts.size() - 1)
-                {
-                    node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, 0, folderPath, Helper::TYPE_ARCHIVE_DIR, node);
-                }
-                else
-                {
-                    QFileInfo fi(archive_files.at(i).name);
-                    if (Helper::isImageFile(fi))
-                    {
-                        QString nodeFilePath = path + "/" + archive_files.at(i).name;
-                        node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize, nodeFilePath, Helper::TYPE_ARCHIVE_FILE, node);
-                    }
-                }
-            }
-        }
-    }
-
-    beginInsertRows(index(0, 0), rootItem->childCount(), rootItem->childCount());
-    rootItem->appendChild(rootArchiveItem);
-    endInsertRows();
-
-//    emit layoutChanged();
 }
 
 ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, ArchiveItem *parent)
@@ -188,7 +189,6 @@ ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, c
     }
 
     ArchiveItem *ntvi = new ArchiveItem(name, date, bytes, path, type, (type == Helper::TYPE_ARCHIVE_FILE ? m_icon_file : m_icon_dir), parent);
-
     parent->appendChild(ntvi);
 
     return ntvi;
@@ -216,17 +216,10 @@ QModelIndex ArchiveModel::findIndexChild(const QString &text, const QModelIndex 
     if (!root.isValid()) return QModelIndex();
     for (int i = 0; root.child(i, 0).isValid(); ++i)
     {
-        if (root.child(i, 0).data() == text)
+        if (root.child(i, 0).data(Qt::EditRole) == text)
         {
             return root.child(i, 0);
         }
     }
     return QModelIndex();
-}
-
-void ArchiveModel::clear()
-{
-    beginResetModel();
-    rootItem->clear();
-    endResetModel();
 }

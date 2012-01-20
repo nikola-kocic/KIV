@@ -15,7 +15,7 @@ class ArchiveModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit ArchiveModel(QObject *parent = 0);
+    explicit ArchiveModel(const QString &path, QObject *parent = 0);
     ~ArchiveModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -26,10 +26,8 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    void setPath(const QString &path);
-    QModelIndex getDirectory(const QString &path);
+    QModelIndex getDirectory(const QString &path); // Use with info.getZipPath()
     QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());
-    void clear();
 
 private:
     ArchiveItem *getItem(const QModelIndex &index) const;
