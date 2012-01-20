@@ -21,6 +21,8 @@ class FileSystemModel;
 
 class FileSystemModel : public QFileSystemModel
 {
+    Q_OBJECT
+
 public:
     explicit FileSystemModel(QObject *parent = 0);
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -76,13 +78,19 @@ public slots:
     void pagePrevious();
 
 private:
+    class MySortFilterProxyModel : public QSortFilterProxyModel
+    {
+    public:
+        explicit MySortFilterProxyModel(QObject *parent = 0);
+    protected:
+        bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    };
     void initViewItem();
     void showThumbnails();
 
     FileInfo m_fileinfo_current;
     int m_view_mode;
     bool m_show_thumbnails;
-    bool m_in_archive;
     QSize m_thumb_size;
 
     ViewArchiveDirs *m_view_archiveDirs;
@@ -93,6 +101,7 @@ private:
 
     ArchiveModel *m_model_archive_files;
     FileSystemModel *m_model_filesystem;
+    MySortFilterProxyModel *m_proxy_sort;
 
     QSplitter *m_splitter;
     ThumbnailItemDelegate *m_thumbnail_delegate;

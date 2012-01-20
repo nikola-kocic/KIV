@@ -7,6 +7,7 @@ TreeViewFiles::TreeViewFiles(QWidget *parent)
     this->setUniformRowHeights(true);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setRootIsDecorated(false);
+    this->setItemsExpandable(false);
 }
 
 void TreeViewFiles::rowsInserted(const QModelIndex &parent, int start, int end)

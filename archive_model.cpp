@@ -14,7 +14,6 @@ ArchiveModel::ArchiveModel(QObject *parent)
     , m_icon_file(QApplication::style()->standardIcon(QStyle::SP_FileIcon))
 {
     rootItem = new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE);
-    rootArchiveItem = new ArchiveItem("", QDateTime(), 0, "", Helper::TYPE_ARCHIVE, QIcon(), rootItem);
 }
 
 ArchiveModel::~ArchiveModel()
@@ -22,12 +21,9 @@ ArchiveModel::~ArchiveModel()
     delete rootItem;
 }
 
-int ArchiveModel::columnCount(const QModelIndex &parent) const
+int ArchiveModel::columnCount(const QModelIndex & /* parent */) const
 {
-    if (parent.isValid())
-        return static_cast<ArchiveItem*>(parent.internalPointer())->columnCount();
-    else
-        return rootItem->columnCount();
+    return rootItem->columnCount();
 }
 
 
@@ -36,7 +32,7 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    ArchiveItem *item = static_cast<ArchiveItem*>(index.internalPointer());
+    ArchiveItem *item = getItem(index);
 
     return item->data(role, index.column());
 }
@@ -47,6 +43,15 @@ Qt::ItemFlags ArchiveModel::flags(const QModelIndex &index) const
         return 0;
 
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+ArchiveItem *ArchiveModel::getItem(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        ArchiveItem *item = static_cast<ArchiveItem*>(index.internalPointer());
+        if (item) return item;
+    }
+    return rootItem;
 }
 
 QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -69,15 +74,10 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int 
 
 QModelIndex ArchiveModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (!hasIndex(row, column, parent))
+    if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
 
-    ArchiveItem *parentItem;
-
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<ArchiveItem*>(parent.internalPointer());
+    ArchiveItem *parentItem = getItem(parent);
 
     ArchiveItem *childItem = parentItem->child(row);
     if (childItem)
@@ -91,7 +91,7 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
-    ArchiveItem *childItem = static_cast<ArchiveItem*>(index.internalPointer());
+    ArchiveItem *childItem = getItem(index);
     ArchiveItem *parentItem = childItem->parent();
 
     if (parentItem == rootItem)
@@ -102,14 +102,7 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
 
 int ArchiveModel::rowCount(const QModelIndex &parent) const
 {
-    ArchiveItem *parentItem;
-    if (parent.column() > 0)
-        return 0;
-
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<ArchiveItem*>(parent.internalPointer());
+    ArchiveItem *parentItem = getItem(parent);
 
     return parentItem->childCount();
 }

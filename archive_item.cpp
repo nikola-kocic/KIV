@@ -4,8 +4,12 @@
 #include "helper.h"
 #include <QFileSystemModel>
 
+//#define DEBUG_ARCHIVE_ITEM
+#ifdef DEBUG_ARCHIVE_ITEM
+#include <QDebug>
+#endif
+
 ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, const QIcon &icon, ArchiveItem *parent) :
-    childItems(QList<ArchiveItem*>()),
     parentItem(parent),
     m_name(name),
     m_date(date),
@@ -20,10 +24,16 @@ ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint
         m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(m_bytes));
     }
 
+#ifdef DEBUG_ARCHIVE_ITEM
+    qDebug() << "created ArchiveItem" << name << "handle" << this << "parent:" << parent;
+#endif
 }
 
 ArchiveItem::~ArchiveItem()
 {
+#ifdef DEBUG_ARCHIVE_ITEM
+    qDebug() << "deleted" << m_name << "handle" << this;
+#endif
     qDeleteAll(childItems);
 }
 
@@ -117,12 +127,8 @@ int ArchiveItem::row() const
 
 void ArchiveItem::clear()
 {
-    while (childCount() > 0)
+    for (int row = 0; row < this->childCount(); ++row)
     {
-        childItems.at(0)->clear();
-        delete childItems.at(0);
-        childItems.removeFirst();
+        delete childItems.takeAt(0);
     }
-//    qDeleteAll(childItems);
-    childItems.clear();
 }

@@ -1,7 +1,6 @@
 #include "main_window.h"
 #include "settings_dialog.h"
 #include "settings.h"
-#include "teximg.h"
 #include "quazip/JlCompress.h"
 
 #include <QUrl>
@@ -43,9 +42,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_comboBox_zoom(new QComboBox(this))
 {
     this->setAcceptDrops(true);
-    this->resize(QApplication::desktop()->width() - 100,
-                 QApplication::desktop()->height() - 100);
-    this->setWindowTitle(QApplication::applicationName() + " " + QApplication::applicationVersion());
 
     if (Helper::getFiltersImage().contains("svg"))
     {
@@ -720,6 +716,7 @@ void MainWindow::refreshPath()
 
 void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
 {
+    Q_UNUSED(previous);
     if (m_model_filesystem->isDir(current))
     {
         m_model_filesystem->fetchMore(current);

@@ -8,7 +8,7 @@
 class FileInfo
 {
 public:
-    explicit FileInfo(const QString &path);
+    explicit FileInfo(const QString &path, const bool isContainer = true);
 
     bool isValid() const;
     bool isInArchive() const;

@@ -18,9 +18,11 @@ private:
 
     class MySortFilterProxyModel : public QSortFilterProxyModel
     {
+    public:
+        explicit MySortFilterProxyModel(QObject *parent = 0);
+
     protected:
         bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
-        bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
     };
 
 

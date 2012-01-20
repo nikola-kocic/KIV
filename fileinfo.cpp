@@ -8,7 +8,7 @@
 #include <QDateTime>
 #endif
 
-FileInfo::FileInfo(const QString &path)
+FileInfo::FileInfo(const QString &path, const bool isContainer)
     : m_container(QFileInfo())
     , m_hasValidContainer(false)
     , m_image(QFileInfo())
@@ -43,9 +43,10 @@ FileInfo::FileInfo(const QString &path)
         m_container = fi;
         m_hasValidContainer = true;
 
-        m_zipPath = "";
-        m_isInArchive = true;
-
+        if (isContainer)
+        {
+            m_isInArchive = true;
+        }
 #ifdef DEBUG_FILE_INFO
         qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo"
                  << "path is path to zip file\n" << getDebugInfo() << "\n\n";
@@ -197,6 +198,6 @@ QString FileInfo::getZipPath() const
 
 QString FileInfo::getDebugInfo() const
 {
-    QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath() + "\nImageFileName: " + getImageFileName() + "\nZipPath: " + getZipPath() + "\n***";
+    QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath() + "\nImageFileName: " + getImageFileName() + "\nZipPath: " + getZipPath() + "\nIsInArchive: " + (isInArchive() ? "true" : "false") + "\n***";
     return str;
 }

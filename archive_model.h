@@ -15,7 +15,7 @@ class ArchiveModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    ArchiveModel(QObject *parent);
+    explicit ArchiveModel(QObject *parent = 0);
     ~ArchiveModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -32,6 +32,7 @@ public:
     void clear();
 
 private:
+    ArchiveItem *getItem(const QModelIndex &index) const;
     ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, ArchiveItem *parent = 0);
 
     ArchiveItem *rootItem;
