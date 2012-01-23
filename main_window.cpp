@@ -7,7 +7,6 @@
 #include <QAction>
 #include <QBoxLayout>
 #include <QFileDialog>
-#include <QHeaderView>
 #include <QDesktopWidget>
 #include <QCompleter>
 #include <QMessageBox>
@@ -24,16 +23,12 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
-    , m_flag_opening(false)
 
     , m_settings(new Settings())
 
-    , m_model_filesystem(new QFileSystemModel(this))
-    , m_view_filesystem(new QTreeView(this))
     , m_view_files(new ViewFiles(this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))
-    , m_splitter_sidebar(new QSplitter(Qt::Vertical, this))
     , m_picture_item(new PictureItem(m_settings, this))
 
     , m_menu_main(new QMenuBar(this))
@@ -48,30 +43,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
         this->setWindowIcon(QIcon(":/icons/kiv.svg"));
     }
 
-    /* Start modelFilesystem */
-    QStringList filters;
-    QStringList filtersArchive = Helper::getFiltersArchive();
-    for (int i = 0; i < filtersArchive.size(); ++i)
-    {
-        filters.append("*." + filtersArchive.at(i));
-    }
-
-    m_model_filesystem->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
-    m_model_filesystem->setNameFilterDisables(false);
-    m_model_filesystem->setNameFilters(filters);
-    m_model_filesystem->setRootPath("");
-    /* End modelFilesystem */
-
-    /* Start filesystemView */
-    m_view_filesystem->setUniformRowHeights(true);
-    m_view_filesystem->setHeaderHidden(true);
-    m_view_filesystem->setModel(m_model_filesystem);
-    for (int i = 1; i < m_view_filesystem->header()->count(); ++i)
-    {
-        m_view_filesystem->hideColumn(i);
-    }
-    /* End filesystemView */
-
     m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
 
 
@@ -79,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     createMenus();
 
     QCompleter *completer = new QCompleter(this);
-    completer->setModel(m_model_filesystem);
+    completer->setModel(m_view_files->getFilesystemModel());
     m_lineEdit_path->setCompleter(completer);
     m_lineEdit_path->installEventFilter(this);
 
@@ -105,24 +76,16 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     /* End comboBoxZoom */
 
 
-    /* Large icons are On by default but I want small icons by default */
-    if (m_settings->getLargeIcons())
-    {
-        m_act_largeIcons->setChecked(true);
-    }
-    else
-    {
-        toggleLargeIcons(false);
-    }
 
     connectActions();
 
-    /* Start imageDisplay */
+
+    /* Start Layout */
+
     QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     policy.setHorizontalStretch(1);
     policy.setVerticalStretch(0);
     m_picture_item->setSizePolicy(policy);
-    /* End imageDisplay */
 
     this->setMenuBar(m_menu_main);
 
@@ -131,10 +94,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     vboxMain->setSpacing(0);
     vboxMain->setMargin(0);
 
-    m_splitter_sidebar->addWidget(m_view_filesystem);
-    m_splitter_sidebar->addWidget(m_view_files);
-
-    m_splitter_main->addWidget(m_splitter_sidebar);
+    m_splitter_main->addWidget(m_view_files);
     m_splitter_main->setSizes(QList<int>() << 300);
     m_splitter_main->addWidget(m_picture_item);
 
@@ -142,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     vboxMain->addWidget(m_splitter_main);
 
     this->setCentralWidget(content);
+
+    /* End Layout */
 
 
     if (QApplication::arguments().size() > 1)
@@ -152,8 +114,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     {
         this->openFile(m_settings->getLastPath());
     }
-
-    m_picture_item->setFocus();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -272,6 +232,16 @@ void MainWindow::createActions()
 
     m_act_largeIcons = new QAction(tr("Large Toolbar &Icons"), this);
     m_act_largeIcons->setCheckable(true);
+
+    /* Large icons are On by default but I want small icons by default */
+    if (m_settings->getLargeIcons())
+    {
+        m_act_largeIcons->setChecked(true);
+    }
+    else
+    {
+        toggleLargeIcons(false);
+    }
 
     m_act_settings = new QAction(QIcon::fromTheme("configure", QIcon::fromTheme("gtk-preferences")), tr("&Settings..."), this);
     m_act_settings->setMenuRole(QAction::PreferencesRole);
@@ -522,9 +492,7 @@ void MainWindow::connectActions()
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
-    connect(m_view_files, SIGNAL(activated(QString)), this, SLOT(on_filesView_item_activated(QString)));
     connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
-    connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
     connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
 
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
@@ -541,7 +509,7 @@ void MainWindow::connectActions()
     connect(m_comboBox_zoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_comboBoxZoom_TextChanged()));
 
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
-    connect(m_act_dirUp, SIGNAL(triggered()), this, SLOT(dirUp()));
+    connect(m_act_dirUp, SIGNAL(triggered()), m_view_files, SLOT(dirUp()));
 
     connect(m_act_bookmark_delete, SIGNAL(triggered()), this, SLOT(deleteBookmark()));
 
@@ -609,6 +577,9 @@ void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << "MainWindow::on_filesView_currentChanged" << info.getDebugInfo();
 #endif
+    m_act_dirUp->setEnabled(!info.isContainerRoot());
+    this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName() + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
+
     this->setCursor(Qt::BusyCursor);
 
     m_lineEdit_path->setText(info.getPath());
@@ -626,11 +597,8 @@ void MainWindow::openFile(const FileInfo &info)
         return;
     }
 
-    m_flag_opening = true;
-    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(info.getContainerPath()));
     m_view_files->setCurrentFile(info);
     m_picture_item->setFocus();
-    m_flag_opening = false;
 }
 
 
@@ -714,46 +682,10 @@ void MainWindow::refreshPath()
     this->openFile(m_view_files->getCurrentFileInfo());
 }
 
-void MainWindow::on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
-{
-    Q_UNUSED(previous);
-    if (m_model_filesystem->isDir(current))
-    {
-        m_model_filesystem->fetchMore(current);
-    }
-    m_act_dirUp->setEnabled(current.parent().isValid());
-    m_view_filesystem->scrollTo(current);
-
-    this->setWindowTitle(m_model_filesystem->fileName(current) + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
-
-
-    if (m_flag_opening)
-        return;
-
-    QString currentContainer = m_model_filesystem->filePath(current);
-    FileInfo info = FileInfo(currentContainer);
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesystemView_currentRowChanged" << info.getDebugInfo();
-#endif
-
-    m_view_files->setCurrentFile(info);
-    m_lineEdit_path->setText(info.getPath());
-    m_picture_item->setPixmap(info);
-}
-
-void MainWindow::on_filesView_item_activated(const QString &path)
-{
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesView_item_activated" << path;
-#endif
-
-    m_view_filesystem->setCurrentIndex(m_model_filesystem->index(path));
-    m_view_filesystem->expand(m_view_filesystem->currentIndex());
-}
 
 void MainWindow::toggleSidebar(bool value)
 {
-    m_splitter_sidebar->setVisible(value);
+    m_view_files->setVisible(value);
     if (m_act_fullscreen->isChecked())
     {
         m_menu_main->setVisible(value);
@@ -779,18 +711,10 @@ void MainWindow::toggleFullscreen(bool value)
     }
 }
 
-void MainWindow::dirUp()
-{
-    if (m_view_filesystem->currentIndex().parent().isValid())
-    {
-        m_view_filesystem->setCurrentIndex(m_view_filesystem->currentIndex().parent());
-    }
-}
-
 void MainWindow::open()
 {
     QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_model_filesystem->filePath(m_view_filesystem->currentIndex()),
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_view_files->getCurrentFileInfo().getContainerPath(),
                                                     tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
     {
@@ -832,7 +756,7 @@ void MainWindow::addBookmark()
     QInputDialog dialog(this);
     dialog.setWindowTitle(tr("Bookmark Page"));
     dialog.setLabelText(tr("Bookmark Name:"));
-    dialog.setTextValue(m_model_filesystem->fileName(m_view_filesystem->currentIndex()) + " /" + m_view_files->getCurrentFileInfo().getImageFileName());
+    dialog.setTextValue(m_view_files->getCurrentFileInfo().getContainerName() + " /" + m_view_files->getCurrentFileInfo().getImageFileName());
     if(dialog.exec() != QDialog::Accepted)
     {
         return;
@@ -903,16 +827,15 @@ void MainWindow::settingsDialog()
 
 void MainWindow::about()
 {
-    QMessageBox *aboutBox = new QMessageBox(this);
-    aboutBox->setWindowTitle("About " + QApplication::applicationName());
-    aboutBox->setTextFormat(Qt::RichText);
-    aboutBox->setText(
-                QApplication::applicationName() + tr(" version ") + QApplication::applicationVersion() + "<br><br>" +
+    QMessageBox aboutBox(this);
+    aboutBox.setWindowTitle("About " + QApplication::applicationName());
+    aboutBox.setTextFormat(Qt::RichText);
+    aboutBox.setText(
+                QApplication::applicationName() + " " + tr("version") + " " + QApplication::applicationVersion() + "<br><br>" +
                 tr("Author") + QString::fromUtf8(": Nikola Kocić") + "<br><br>" +
-                tr("email") + ": <a href = \"mailto:nikolakocic@gmail.com\">nikolakocic@gmail.com</a><br><br>"+
                 tr("Website") + ": <a href = \"http://nikola-kocic.github.com/KIV/\">http://nikola-kocic.github.com/KIV/</a>"
                 );
-    aboutBox->exec();
+    aboutBox.exec();
 }
 
 void MainWindow::website()
@@ -920,26 +843,20 @@ void MainWindow::website()
     QDesktopServices::openUrl(QUrl("http://nikola-kocic.github.com/KIV/"));
 }
 
-void MainWindow::toggleLargeIcons(bool value)
+void MainWindow::toggleLargeIcons(bool b)
 {
-    int e;
-    if (value)
+    int size;
+    if (b)
     {
-
-        //        e = QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize);
-        e = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
+        size = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
     }
     else
     {
-        e = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+        size = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     }
 
-    QSize iconSize = QSize(e, e);
-    m_toolbar->setIconSize(iconSize);
-    //    this->toolbarDirectory->setIconSize(iconSize);
-
-
-    m_settings->setLargeIcons(value);
+    m_toolbar->setIconSize(QSize(size, size));
+    m_settings->setLargeIcons(b);
 }
 
 void MainWindow::on_zoom_changed(qreal current, qreal previous)

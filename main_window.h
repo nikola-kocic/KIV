@@ -5,12 +5,10 @@
 #include "picture_loader.h"
 #include "pictureitem.h"
 
-#include <QFileSystemModel>
 #include <QSplitter>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QComboBox>
-#include <QTreeView>
 #include <QMainWindow>
 #include <QLineEdit>
 
@@ -29,16 +27,12 @@ private:
     void openFile(const FileInfo &info);
     inline void openFile(const QString &path) { openFile(FileInfo(path)); }
 
-    bool m_flag_opening;
 
     Settings *m_settings;
-    QFileSystemModel *m_model_filesystem;
 
-    QTreeView *m_view_filesystem;
     ViewFiles *m_view_files;
 
     QSplitter *m_splitter_main;
-    QSplitter *m_splitter_sidebar;
     PictureItem *m_picture_item;
 
     QMenuBar *m_menu_main;
@@ -127,7 +121,7 @@ private slots:
     /* Options Menu Actions Slots */
     void toggleFullscreen(bool);
     void toggleSidebar(bool);
-    void toggleLargeIcons(bool);
+    void toggleLargeIcons(bool b);
     void settingsDialog();
     void toggleShowThumbnails(bool);
 
@@ -137,7 +131,6 @@ private slots:
 
     /* Directory Toolbar Actions Slots */
     void refreshPath();
-    void dirUp();
 
     void on_lineEditPath_editingFinished();
     void on_lineEditPath_focus_lost();
@@ -145,8 +138,6 @@ private slots:
     void on_comboBoxZoom_activated(const int &index);
     void on_comboBoxZoom_TextChanged();
     void on_comboBoxZoom_focus_lost();
-    void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
-    void on_filesView_item_activated(const QString &path);
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);

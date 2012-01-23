@@ -16,7 +16,6 @@ SOURCES += \
     pictureitem_gl.cpp \
     pictureitem_raster.cpp \
     main_window.cpp \
-    view_archive_dirs.cpp \
     view_files.cpp \
     teximg.cpp \
     picture_loader.cpp \
@@ -46,7 +45,6 @@ HEADERS += \
     settings.h \
     pictureitem.h \
     main_window.h \
-    view_archive_dirs.h \
     view_files.h \
     teximg.h \
     picture_loader.h \

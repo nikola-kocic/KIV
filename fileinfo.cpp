@@ -196,6 +196,16 @@ QString FileInfo::getZipPath() const
     return m_zipPath;
 }
 
+QString FileInfo::getContainerName() const
+{
+    return m_container.fileName();
+}
+
+bool FileInfo::isContainerRoot() const
+{
+    return m_container.isRoot();
+}
+
 QString FileInfo::getDebugInfo() const
 {
     QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath() + "\nImageFileName: " + getImageFileName() + "\nZipPath: " + getZipPath() + "\nIsInArchive: " + (isInArchive() ? "true" : "false") + "\n***";

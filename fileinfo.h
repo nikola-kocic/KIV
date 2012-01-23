@@ -20,6 +20,8 @@ public:
     QString getImageFileName() const; /* image.png */
     QString getContainerPath() const; /* C:/Folder1/Folder2" */
     QString getZipPath() const; /* "ZipFolder1/ZipFolder2/" (ends with '/') */
+    QString getContainerName() const;
+    bool isContainerRoot() const;
 
 
     QString getDebugInfo() const;
