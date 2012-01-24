@@ -150,7 +150,7 @@ public slots:
 
 private slots:
     void on_item_activated(const QModelIndex &index);
-    void currentChanged(const QModelIndex &current, const QModelIndex &previous);
+    void on_FilesView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
     void on_thumbnail_finished(const QModelIndex &index);
     void on_rows_inserted(const QModelIndexList &indexes);
 

@@ -699,7 +699,7 @@ void MainWindow::toggleFullscreen(bool value)
     else
     {
 #ifdef linux
-        /* Workaround for bug https://bugreports.qt.nokia.com//browse/QTBUG-10594 */
+        /* Workaround for bug https://bugreports.qt-project.org/browse/QTBUG-10594 */
         showNormal();
 #endif
         showMaximized();

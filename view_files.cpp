@@ -101,6 +101,12 @@ ViewFiles::ViewFiles(QWidget *parent)
     QWidget *widget_files_list = new QWidget(this);
     widget_files_list->setLayout(m_layout_files_list);
 
+    QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    policy.setHorizontalStretch(0);
+    policy.setVerticalStretch(1);
+    widget_files_list->setSizePolicy(policy);
+
+
     QSplitter *m_splitter = new QSplitter(Qt::Vertical, this);
     m_splitter->addWidget(m_view_archiveDirs);
     m_splitter->setSizes(QList<int>() << 100);
@@ -110,6 +116,7 @@ ViewFiles::ViewFiles(QWidget *parent)
 
     m_splitter_sidebar->addWidget(m_view_filesystem);
     m_splitter_sidebar->addWidget(m_splitter);
+    m_splitter_sidebar->setSizes(QList<int>() << 400 << 400);
 
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
     layoutMain->setSpacing(0);
@@ -155,7 +162,7 @@ void ViewFiles::initViewItem()
 
     m_view_current->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_view_current->setModel(m_proxy_file_list);
-    connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(currentChanged(QModelIndex,QModelIndex)));
+    connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_FilesView_currentRowChanged(QModelIndex,QModelIndex)));
     connect(m_view_current, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
 
     if (m_fileinfo_current.isValid())
@@ -371,7 +378,7 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
     emit currentFileChanged(m_fileinfo_current);
 }
 
-void ViewFiles::currentChanged(const QModelIndex &current, const QModelIndex &previous)
+void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     Q_UNUSED(previous);
     if (!current.isValid()) return;
