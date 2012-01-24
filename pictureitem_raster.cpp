@@ -47,7 +47,7 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
     p.fillRect(event->region().boundingRect(), m_picItem->m_color_clear);
-    qreal zoom = m_picItem->getZoom();
+    const qreal zoom = m_picItem->getZoom();
     QRectF sourceRect = QRectF(-m_picItem->m_boundingRect.x() / zoom,
                                -m_picItem->m_boundingRect.y() / zoom,
                                event->region().boundingRect().width() / zoom,
@@ -79,8 +79,7 @@ void PictureItem::PictureItemRaster::setRotation(const qreal r)
         QTransform tRot;
         tRot.rotate(r);
 
-        Qt::TransformationMode rotateMode;
-        rotateMode = Qt::SmoothTransformation;
+        const Qt::TransformationMode rotateMode = Qt::SmoothTransformation;
     //    rotateMode = Qt::FastTransformation;
 
         m_pixmap_edited = m_pixmap.transformed(tRot, rotateMode);
@@ -94,7 +93,7 @@ void PictureItem::PictureItemRaster::setRotation(const qreal r)
 
 void PictureItem::PictureItemRaster::setZoom(const qreal current, const qreal previous)
 {
-    QPointF p = m_picItem->pointToOrigin((m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));
+    const QPointF p = m_picItem->pointToOrigin((m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));
 
     m_picItem->m_boundingRect = QRectF(p.x(), p.y(), (m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));
 

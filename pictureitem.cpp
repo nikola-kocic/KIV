@@ -629,19 +629,19 @@ void PictureItem::start_timerScrollPage()
 
 QPoint PictureItem::pointToOrigin(const int width, const int height)
 {
-    qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
-    qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
+    const qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
+    const qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
 
     if (width > this->size().width())
     {
-        qreal oldX = (m_boundingRect.x() - (m_boundingRect.x() * 2)) + (this->size().width() / 2);
-        qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
+        const qreal oldX = (m_boundingRect.x() - (m_boundingRect.x() * 2)) + (this->size().width() / 2);
+        const qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
 
-        qreal newX = oldX * zoomX;
-        qreal newY = oldY * zoomY;
+        const qreal newX = oldX * zoomX;
+        const qreal newY = oldY * zoomY;
 
-        qreal originX = newX - (this->size().width() / 2) - ((newX - (this->size().width() / 2)) * 2);
-        qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
+        const qreal originX = newX - (this->size().width() / 2) - ((newX - (this->size().width() / 2)) * 2);
+        const qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
 
         return QPoint(originX, originY);
     }
@@ -649,11 +649,11 @@ QPoint PictureItem::pointToOrigin(const int width, const int height)
     {
         if (height > this->size().height())
         {
-            qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
+            const qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
 
-            qreal newY = oldY * zoomY;
+            const qreal newY = oldY * zoomY;
 
-            qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
+            const qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
 
             return QPoint(0, originY);
         }
@@ -707,10 +707,10 @@ void PictureItem::fitToScreen()
         return;
     }
 
-    QRect orig_size = QRect(m_boundingRect.x(), m_boundingRect.y(), m_boundingRect.width() / m_zoom_value, m_boundingRect.height() / m_zoom_value);
+    const QRect orig_size = QRect(m_boundingRect.x(), m_boundingRect.y(), m_boundingRect.width() / m_zoom_value, m_boundingRect.height() / m_zoom_value);
 
-    qreal x_ratio = (qreal)this->size().width() / orig_size.width();
-    qreal y_ratio = (qreal)this->size().height() / orig_size.height();
+    const qreal x_ratio = (qreal)this->size().width() / orig_size.width();
+    const qreal y_ratio = (qreal)this->size().height() / orig_size.height();
 
     if ((orig_size.width() <= this->size().width()) && (orig_size.height() <= this->size().height()))
     {
@@ -733,9 +733,9 @@ void PictureItem::fitWidth()
         return;
     }
 
-    qreal tw = m_boundingRect.width() / m_zoom_value;
+    const qreal tw = m_boundingRect.width() / m_zoom_value;
 
-    qreal x_ratio = (qreal)this->size().width() / tw;
+    const qreal x_ratio = (qreal)this->size().width() / tw;
 
     if (tw <= this->size().width())
     {
@@ -754,9 +754,9 @@ void PictureItem::fitHeight()
         return;
     }
 
-    qreal th = m_boundingRect.height() / m_zoom_value;
+    const qreal th = m_boundingRect.height() / m_zoom_value;
 
-    qreal y_ratio = (qreal)this->size().height() / th;
+    const qreal y_ratio = (qreal)this->size().height() / th;
 
     if (th <= this->size().height())
     {
@@ -946,7 +946,7 @@ void PictureItem::calculateAverageColor(const QImage &img)
 {
     if (m_settings->getCalculateAverageColor() && !img.isNull())
     {
-        QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        const QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         m_color_clear = QColor::fromRgb(averageColorImage.pixel(0,0));
     }
     else

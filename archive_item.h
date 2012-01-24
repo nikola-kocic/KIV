@@ -8,7 +8,7 @@
 class ArchiveItem
 {
 public:
-    explicit ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, const QIcon &icon = QIcon(), ArchiveItem *parent = 0);
+    explicit ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, const QIcon &icon = QIcon(), ArchiveItem *parent = 0);
     ~ArchiveItem();
     void appendChild(ArchiveItem *child);
     ArchiveItem *child(int row);
@@ -25,6 +25,7 @@ public:
     static const int col_date = 2;
 
 private:
+    int indexToInsertByName(ArchiveItem *item);
     QList<ArchiveItem*> childItems;
     ArchiveItem *parentItem;
 

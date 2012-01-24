@@ -31,7 +31,7 @@ public:
 
 private:
     ArchiveItem *getItem(const QModelIndex &index) const;
-    ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, ArchiveItem *parent = 0);
+    ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent = 0);
 
     ArchiveItem *rootItem;
     ArchiveItem *rootArchiveItem;

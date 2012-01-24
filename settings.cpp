@@ -176,7 +176,7 @@ void Settings::setCalculateAverageColor(const bool b)
 
 void Settings::addBookmark(const QString &name, const QString &path)
 {
-    int oldcount = m_bookmarks.size();
+    const int oldcount = m_bookmarks.size();
     m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Name", name);
     m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Path", path);
 

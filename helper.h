@@ -27,7 +27,7 @@ public:
     static QStringList getFiltersArchive();
 
 
-    static QString size(qint64 bytes);
+    static QString size(const qint64 bytes);
 
     static inline bool isArchiveFile(const QFileInfo &fi)
     {
@@ -52,7 +52,7 @@ public:
     }
 
 
-    static inline bool FuzzyCompare(double p1, double p2)
+    static inline bool FuzzyCompare(const double p1, const double p2)
     {
         if (qFuzzyIsNull(p1)) {
             return qFuzzyIsNull(p2);
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    static inline bool FuzzyCompare(float p1, float p2)
+    static inline bool FuzzyCompare(const float p1, const float p2)
     {
         if (qFuzzyIsNull(p1)) {
             return qFuzzyIsNull(p2);

@@ -125,7 +125,7 @@ private:
 
     // FileListSortFilterProxyModel source model is FileSystemModel or ArchiveModel
     // ContainersSortFilterProxyModel source model is FileSystemModel
-    // ArchiveDirsSortFilterProxyModel source model is FileListSortFilterProxyModel
+    // ArchiveDirsSortFilterProxyModel source model is ArchiveModel
     FileListSortFilterProxyModel *m_proxy_file_list;
     ContainersSortFilterProxyModel *m_proxy_containers;
     ArchiveDirsSortFilterProxyModel *m_proxy_archive_dirs;

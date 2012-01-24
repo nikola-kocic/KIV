@@ -61,10 +61,10 @@ void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
 
     if (tileDim->doTiling)
     {
-        int minTileSize = TexImg::MinTileSize;
-        int num = tileDim->pow2BaseSize - minTileSize;
+        const int minTileSize = TexImg::MinTileSize;
+        const int num = tileDim->pow2BaseSize - minTileSize;
         tileDim->pow2BaseCount = tileDim->bmpSize / num;
-        int num2 = tileDim->bmpSize % num;
+        const int num2 = tileDim->bmpSize % num;
         if (num2 == 0)
         {
             tileDim->pow2BaseCount--;
@@ -88,7 +88,7 @@ void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
 void TexImg::InitTiles(TileDim *tileDim)
 {
     int minTileSize = TexImg::MinTileSize;
-    int num = tileDim->pow2BaseSize - minTileSize;
+    const int num = tileDim->pow2BaseSize - minTileSize;
     tileDim->tileCount = tileDim->pow2BaseCount + 1;
     tileDim->tileSize = QVector<int>(tileDim->tileCount);
     tileDim->offsetBorder = QVector<int>(tileDim->tileCount + 1);
@@ -104,7 +104,7 @@ void TexImg::InitTiles(TileDim *tileDim)
         tileDim->offsetBorder[i] = i * num;
         tileDim->switchBorder[i] = i * num + (minTileSize >> 1);
     }
-    int pow2BaseCount = tileDim->pow2BaseCount;
+    const int pow2BaseCount = tileDim->pow2BaseCount;
     tileDim->tileSize[pow2BaseCount] = tileDim->pow2LastSize;
     tileDim->switchBorder[pow2BaseCount] = qMin(tileDim->bmpSize, tileDim->switchBorder.at(pow2BaseCount));
     tileDim->offsetBorder[tileDim->tileCount] = tileDim->bmpSize;
@@ -131,7 +131,7 @@ void TexImg::setImage(const QImage &img)
     }
     this->hTile = new TileDim();
     this->vTile = new TileDim();
-    QSize bmpSize = img.size();
+    const QSize bmpSize = img.size();
     this->hTile->bmpSize = bmpSize.width();
     this->vTile->bmpSize = bmpSize.height();
 
@@ -188,13 +188,13 @@ bool ClipTextureVertex(double texCrd1, double texCrd2, double vertexCrd1, double
         vertexCrd1 = vertexCrd2;
         vertexCrd2 = num;
     }
-    double coord1 = qMax(texCrd1, texBorder1);
-    double coord2 = qMin(texCrd2, texBorder2);
-    bool result = coord1 < coord2;
-    double num4 = 1.0 / (texCrd2 - texCrd1);
-    double num5 = (coord1 - texCrd1) * num4;
-    double num6 = (coord2 - texCrd1) * num4;
-    double num7 = vertexCrd2 - vertexCrd1;
+    const double coord1 = qMax(texCrd1, texBorder1);
+    const double coord2 = qMin(texCrd2, texBorder2);
+    const bool result = coord1 < coord2;
+    const double num4 = 1.0 / (texCrd2 - texCrd1);
+    const double num5 = (coord1 - texCrd1) * num4;
+    const double num6 = (coord2 - texCrd1) * num4;
+    const double num7 = vertexCrd2 - vertexCrd1;
     vertexClip1 = vertexCrd1 + num5 * num7;
     vertexClip2 = vertexCrd2 - (1.0 - num6) * num7;
     texClip1 = (coord1 - texOffsetMin) * texScale;

@@ -87,8 +87,8 @@ void PictureItem::PictureItemGL::setImage(const QImage &img)
 
 void PictureItem::PictureItemGL::setTexture(const QImage &tex, const int num)
 {
-    int hIndex = num / m_texImg->vTile->tileCount;
-    int vIndex = num % m_texImg->vTile->tileCount;
+    const int hIndex = num / m_texImg->vTile->tileCount;
+    const int vIndex = num % m_texImg->vTile->tileCount;
 
     m_textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
@@ -176,8 +176,8 @@ void PictureItem::PictureItemGL::paintGL()
     glRotated(m_picItem->getRotation(), 0 , 0, 1);
     glScaled(m_scaleX, m_scaleY, 1);
 
-    QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
-    QRectF vertImage = QRectF(QPointF(-this->width() * 0.5, -this->height() * 0.5), QPointF (this->width() * 0.5, this->height() * 0.5));
+    const QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
+    const QRectF vertImage = QRectF(QPointF(-this->width() * 0.5, -this->height() * 0.5), QPointF (this->width() * 0.5, this->height() * 0.5));
 
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
@@ -245,7 +245,7 @@ void PictureItem::PictureItemGL::setRotation(const qreal r)
     tRot.translate((m_texImg->vTile->bmpSize / 2), (m_texImg->hTile->bmpSize / 2));
     tRot.rotate(m_picItem->getRotation());
     tRot.translate((-m_texImg->vTile->bmpSize / 2), (-m_texImg->hTile->bmpSize / 2));
-    QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(m_texImg->hTile->bmpSize, m_texImg->vTile->bmpSize)));
+    const QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(m_texImg->hTile->bmpSize, m_texImg->vTile->bmpSize)));
 
     m_picItem->m_boundingRect.setWidth(transformedRot.width());
     m_picItem->m_boundingRect.setHeight(transformedRot.height());
@@ -266,9 +266,9 @@ void PictureItem::PictureItemGL::setRotation(const qreal r)
 
 void PictureItem::PictureItemGL::setZoom(const qreal current, const qreal previous)
 {
-    qreal scaledW = (m_picItem->m_boundingRect.width() / previous) * current;
-    qreal scaledH = (m_picItem->m_boundingRect.height() / previous) * current;
-    QPointF p = m_picItem->pointToOrigin(scaledW, scaledH);
+    const qreal scaledW = (m_picItem->m_boundingRect.width() / previous) * current;
+    const qreal scaledH = (m_picItem->m_boundingRect.height() / previous) * current;
+    const QPointF p = m_picItem->pointToOrigin(scaledW, scaledH);
     m_picItem->m_boundingRect = QRectF(p.x(), p.y(), scaledW, scaledH);
 
     m_picItem->avoidOutOfScreen();

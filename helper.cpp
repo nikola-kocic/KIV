@@ -24,7 +24,7 @@ QStringList Helper::getFiltersImage()
     return m_filters_image;
 }
 
-QString Helper::size(qint64 bytes)
+QString Helper::size(const qint64 bytes)
 {
     // According to the Si standard KB is 1000 bytes, KiB is 1024
     // but on windows sizes are calculated by dividing by 1024 so we do what they do.

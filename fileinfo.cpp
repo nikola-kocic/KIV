@@ -208,6 +208,6 @@ bool FileInfo::isContainerRoot() const
 
 QString FileInfo::getDebugInfo() const
 {
-    QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath() + "\nImageFileName: " + getImageFileName() + "\nZipPath: " + getZipPath() + "\nIsInArchive: " + (isInArchive() ? "true" : "false") + "\n***";
+    const QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath() + "\nImageFileName: " + getImageFileName() + "\nZipPath: " + getZipPath() + "\nIsInArchive: " + (isInArchive() ? "true" : "false") + "\n***";
     return str;
 }

@@ -9,7 +9,7 @@
 #include <QDebug>
 #endif
 
-ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, int type, const QIcon &icon, ArchiveItem *parent) :
+ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, const QIcon &icon, ArchiveItem *parent) :
     parentItem(parent),
     m_name(name),
     m_date(date),
@@ -39,7 +39,45 @@ ArchiveItem::~ArchiveItem()
 
 void ArchiveItem::appendChild(ArchiveItem *item)
 {
-    childItems.append(item);
+    childItems.insert(indexToInsertByName(item), item);
+}
+
+int ArchiveItem::indexToInsertByName(ArchiveItem *item)
+{
+    const int type = item->data(Helper::ROLE_TYPE, 0).toInt();
+    const QString name = item->data(Qt::EditRole, col_name).toString();
+    int i = 0;
+
+    for (; i < this->childCount(); ++i)
+    {
+        int currentItemType = this->child(i)->data(Helper::ROLE_TYPE, 0).toInt();
+        if (type == Helper::TYPE_ARCHIVE_DIR)
+        {
+            if (currentItemType == type)
+            {
+                if (this->child(i)->data(Qt::EditRole, col_name).toString().compare(name) > 0)
+                {
+                    return i;
+                }
+            }
+            else
+            {
+                return i;
+            }
+        }
+        else if (type == Helper::TYPE_ARCHIVE_FILE)
+        {
+            if (currentItemType == type)
+            {
+                if (this->child(i)->data(Qt::EditRole, col_name).toString().compare(name) > 0)
+                {
+                    return i;
+                }
+            }
+        }
+    }
+
+    return i;
 }
 
 ArchiveItem *ArchiveItem::child(int row)

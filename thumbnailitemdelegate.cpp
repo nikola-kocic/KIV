@@ -93,7 +93,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
 
     if (m_thumbnails.contains(path_hash))
     {
-        ThumbImageDate ti = m_thumbnails.value(path_hash);
+        const ThumbImageDate ti = m_thumbnails.value(path_hash);
         if (ti.date == currentDateTime)
         {
             return;
@@ -138,7 +138,7 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
     {
         if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
         {
-            ThumbImageDate tid = m_thumbnails.value(path_hash);
+            const ThumbImageDate tid = m_thumbnails.value(path_hash);
             if (tid.thumb.availableSizes().isEmpty())
             {
                 return;

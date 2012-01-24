@@ -179,11 +179,6 @@ void MainWindow::createActions()
     m_act_save->setShortcut(tr("Ctrl+S"));
     m_act_save->setEnabled(false);
 
-    //    printAct = new QAction(tr("&Print..."), this);
-    //    printAct->setShortcut(tr("Ctrl+P"));
-    //    printAct->setEnabled(false);
-    //    connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
-
     m_act_exit = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
     m_act_exit->setShortcut(tr("Ctrl+Q"));
 
@@ -517,7 +512,7 @@ void MainWindow::connectActions()
 
 void MainWindow::populateBookmarks()
 {
-    QList<QAction*> oldActions = m_menu_bookmarks->actions();
+    const QList<QAction*> oldActions = m_menu_bookmarks->actions();
 
     for (int i = 0; i < oldActions.size(); ++i)
     {
@@ -530,7 +525,7 @@ void MainWindow::populateBookmarks()
         }
     }
 
-    QList<Bookmark> bookmarks = m_settings->getBookmarks();
+    const QList<Bookmark> bookmarks = m_settings->getBookmarks();
     for (int i = 0; i < bookmarks.size(); ++i)
     {
         QAction *bookmark = new QAction(bookmarks.at(i).getName(), this);
@@ -550,7 +545,7 @@ void MainWindow::on_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::on_bookmark_triggered()
 {
-    if (QAction *action = qobject_cast<QAction *>(sender()))
+    if (const QAction *action = qobject_cast<const QAction *>(sender()))
     {
         if (action->data().isNull())
             return;
@@ -656,7 +651,7 @@ void MainWindow::on_lineEditPath_editingFinished()
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_editingFinished" << this->m_lineEdit_path->text();
 #endif
-    FileInfo info = FileInfo(m_lineEdit_path->text());
+    const FileInfo info = FileInfo(m_lineEdit_path->text());
     if (info.isValid())
     {
         this->openFile(m_lineEdit_path->text());
@@ -713,8 +708,8 @@ void MainWindow::toggleFullscreen(bool value)
 
 void MainWindow::open()
 {
-    QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_view_files->getCurrentFileInfo().getContainerPath(),
+    const QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
+    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_view_files->getCurrentFileInfo().getContainerPath(),
                                                     tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
     {
@@ -724,8 +719,8 @@ void MainWindow::open()
 
 bool MainWindow::saveAs()
 {
-    FileInfo info = m_view_files->getCurrentFileInfo();
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), info.getImageFileName());
+    const FileInfo info = m_view_files->getCurrentFileInfo();
+    const QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), info.getImageFileName());
     if (fileName.isEmpty())
     {
         return false;
@@ -865,7 +860,7 @@ void MainWindow::on_zoom_changed(qreal current, qreal previous)
     {
         /* Add current Zoom value to comboBox */
 
-        QString zoomText = QString::number((current * 100), 'f', 0) + "%";
+        const QString zoomText = QString::number((current * 100), 'f', 0) + "%";
         int insertIndex = 0;
         for (; insertIndex < m_comboBox_zoom->count(); ++insertIndex)
         {
@@ -910,14 +905,14 @@ void MainWindow::on_zoom_changed(qreal current, qreal previous)
 void MainWindow::on_comboBoxZoom_TextChanged()
 {
     QString zoomvalue = m_comboBox_zoom->lineEdit()->text();
-    zoomvalue = zoomvalue.remove('%');
+    zoomvalue.remove('%');
 
     bool ok;
-    int dec = zoomvalue.toInt(&ok, 10);
+    const int dec = zoomvalue.toInt(&ok, 10);
 
     if (ok)
     {
-        qreal z = (qreal)dec / 100;
+        const qreal z = (qreal)dec / 100;
         m_picture_item->setZoom(z);
     }
     else
@@ -966,7 +961,7 @@ void MainWindow::updateActions()
 
 void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
 {
-    if (QAction *action = m_menu_bookmarks->actionAt(pos))
+    if (const QAction *action = m_menu_bookmarks->actionAt(pos))
     {
         if (action->data().isNull())
             return;
