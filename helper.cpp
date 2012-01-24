@@ -40,5 +40,7 @@ QString Helper::size(const qint64 bytes)
         return QFileSystemModel::tr("%1 MB").arg(QLocale().toString(qreal(bytes) / mb, 'f', 1));
     if (bytes >= kb)
         return QFileSystemModel::tr("%1 KB").arg(QLocale().toString(bytes / kb));
+    if (bytes == 0)
+        return "";
     return QFileSystemModel::tr("%1 bytes").arg(QLocale().toString(bytes));
 }

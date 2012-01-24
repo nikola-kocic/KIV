@@ -1,8 +1,8 @@
 #include "view_files.h"
 #include "archive_item.h"
 
-#include <QLayout>
 #include <QHeaderView>
+#include <QLabel>
 
 //#define DEBUG_VIEW_FILES
 
@@ -32,8 +32,9 @@ ViewFiles::ViewFiles(QWidget *parent)
     , m_proxy_containers(new ContainersSortFilterProxyModel(this))
     , m_proxy_archive_dirs(new ArchiveDirsSortFilterProxyModel(this))
 
-    , m_splitter(new QSplitter(Qt::Vertical, this))
     , m_thumbnail_delegate(new ThumbnailItemDelegate(m_thumb_size, this))
+    , m_layout_files_list(new QVBoxLayout())
+    , m_combobox_sort(new QComboBox(this))
 
 {
     /* Start modelFilesystem */
@@ -63,14 +64,8 @@ ViewFiles::ViewFiles(QWidget *parent)
     m_view_archiveDirs->setUniformRowHeights(true);
     m_view_archiveDirs->header()->setResizeMode(QHeaderView::Stretch);
     m_view_archiveDirs->setHeaderHidden(true);
-
     m_view_archiveDirs->hide();
-
-//    m_proxy_file_list->setSortRole(Qt::EditRole);
     m_view_archiveDirs->setModel(m_proxy_archive_dirs);
-
-
-
     /* End archiveDirsView */
 
     /* Start filesystemView */
@@ -80,8 +75,36 @@ ViewFiles::ViewFiles(QWidget *parent)
     m_view_filesystem->setModel(m_proxy_containers);
     /* End filesystemView */
 
+    m_combobox_sort->addItem(tr("Name Ascending"), SortDirection::NameAsc);
+    m_combobox_sort->addItem(tr("Name Descending"), SortDirection::NameDesc);
+    m_combobox_sort->addItem(tr("Date Ascending"), SortDirection::DateAsc);
+    m_combobox_sort->addItem(tr("Date Descending"), SortDirection::DateDesc);
+    m_combobox_sort->addItem(tr("Size Ascending"), SortDirection::SizeAsc);
+    m_combobox_sort->addItem(tr("Size Descending"), SortDirection::SizeDesc);
+
+    m_combobox_sort->setCurrentIndex(m_combobox_sort->findData(SortDirection::NameAsc));
+
+
+    /* Start Layout */
+
+    QHBoxLayout *layout_sort = new QHBoxLayout();
+    layout_sort->setSpacing(5);
+    QLabel *label_sort = new QLabel(tr("Sort:"), this);
+    label_sort->setIndent(5);
+    layout_sort->addWidget(label_sort);
+    layout_sort->addWidget(m_combobox_sort, 1);
+
+    m_layout_files_list->setMargin(0);
+    m_layout_files_list->setSpacing(0);
+    m_layout_files_list->addLayout(layout_sort);
+
+    QWidget *widget_files_list = new QWidget(this);
+    widget_files_list->setLayout(m_layout_files_list);
+
+    QSplitter *m_splitter = new QSplitter(Qt::Vertical, this);
     m_splitter->addWidget(m_view_archiveDirs);
     m_splitter->setSizes(QList<int>() << 100);
+    m_splitter->addWidget(widget_files_list);
 
     QSplitter *m_splitter_sidebar = new QSplitter(Qt::Vertical, this);
 
@@ -94,8 +117,11 @@ ViewFiles::ViewFiles(QWidget *parent)
     layoutMain->addWidget(m_splitter_sidebar);
     this->setLayout(layoutMain);
 
+    /* End Layout */
+
     connect(m_view_archiveDirs->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), this, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex, QModelIndex)));
     connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
+    connect(m_combobox_sort, SIGNAL(currentIndexChanged(int)), this, SLOT(on_combobox_sort_currentIndexChanged(int)));
 
     initViewItem();
 }
@@ -136,7 +162,7 @@ void ViewFiles::initViewItem()
     {
         setCurrentFile(m_fileinfo_current);
     }
-    m_splitter->addWidget(m_view_current);
+    m_layout_files_list->addWidget(m_view_current);
 
     QSizePolicy policyV(QSizePolicy::Preferred, QSizePolicy::Expanding);
     policyV.setHorizontalStretch(0);
@@ -219,7 +245,6 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         m_view_current->setCurrentIndex(m_proxy_file_list->mapFromSource(m_model_filesystem->index(info.getPath())));
     }
 
-//    m_proxy_file_list->sort(0);
     m_view_current->scrollTo(m_view_current->currentIndex());
 
 #ifdef DEBUG_VIEW_FILES
@@ -253,6 +278,68 @@ void ViewFiles::on_filesystemView_currentRowChanged(const QModelIndex &current, 
 #endif
 
     this->setCurrentFile(info);
+}
+
+void ViewFiles::on_combobox_sort_currentIndexChanged(int index)
+{
+    const int sort = m_combobox_sort->itemData(index).toInt();
+
+    switch (sort)
+    {
+    case SortDirection::NameAsc:
+        m_proxy_file_list->sort(-1);
+        break;
+    case SortDirection::NameDesc:
+        if (m_fileinfo_current.isInArchive())
+        {
+            m_proxy_file_list->sort(ArchiveItem::col_name, Qt::DescendingOrder);
+        }
+        else
+        {
+            m_proxy_file_list->sort(0, Qt::DescendingOrder);
+        }
+        break;
+    case SortDirection::DateAsc:
+        if (m_fileinfo_current.isInArchive())
+        {
+            m_proxy_file_list->sort(ArchiveItem::col_date, Qt::AscendingOrder);
+        }
+        else
+        {
+            m_proxy_file_list->sort(3, Qt::AscendingOrder);
+        }
+        break;
+    case SortDirection::DateDesc:
+        if (m_fileinfo_current.isInArchive())
+        {
+            m_proxy_file_list->sort(ArchiveItem::col_date, Qt::DescendingOrder);
+        }
+        else
+        {
+            m_proxy_file_list->sort(3, Qt::DescendingOrder);
+        }
+        break;
+    case SortDirection::SizeAsc:
+        if (m_fileinfo_current.isInArchive())
+        {
+            m_proxy_file_list->sort(ArchiveItem::col_size, Qt::AscendingOrder);
+        }
+        else
+        {
+            m_proxy_file_list->sort(1, Qt::AscendingOrder);
+        }
+        break;
+    case SortDirection::SizeDesc:
+        if (m_fileinfo_current.isInArchive())
+        {
+            m_proxy_file_list->sort(ArchiveItem::col_size, Qt::DescendingOrder);
+        }
+        else
+        {
+            m_proxy_file_list->sort(1, Qt::DescendingOrder);
+        }
+        break;
+    }
 }
 
 void ViewFiles::dirUp()
@@ -486,12 +573,24 @@ void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 
 QVariant ViewFiles::FileSystemModel::data(const QModelIndex &index, int role) const
 {
-    if (Qt::TextAlignmentRole == role)
+    switch (role)
+    {
+
+    case Qt::TextAlignmentRole:
     {
         if (index.column() == 1)
         {
             return int(Qt::AlignRight | Qt::AlignVCenter);
         }
+    }
+    case Qt::ToolTipRole:
+        const QFileInfo fi = this->fileInfo(index);
+        QString tooltip = (QFileSystemModel::tr("Name") + ": " + fi.fileName() + "\n" + QFileSystemModel::tr("Date Modified") + ": " + fi.lastModified().toString(Qt::SystemLocaleShortDate));
+        if (!this->isDir(index))
+        {
+            tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(fi.size()));
+        }
+        return tooltip;
     }
 
     return QFileSystemModel::data(index, role);
@@ -499,49 +598,164 @@ QVariant ViewFiles::FileSystemModel::data(const QModelIndex &index, int role) co
 
 bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-//    if (qobject_cast<const ArchiveModel*>(left.model()))
-//    {
-//        int left_type = left.data(Helper::ROLE_TYPE).toInt();
-//        int right_type = right.data(Helper::ROLE_TYPE).toInt();
+    if (qobject_cast<const ArchiveModel*>(left.model()))
+    {
+        const int left_type = left.data(Helper::ROLE_TYPE).toInt();
+        const int right_type = right.data(Helper::ROLE_TYPE).toInt();
 
-//        if (left_type == right_type)  // if both indexes are same type, compare by name
-//        {
-//            QString left_name = left.sibling(left.row(), ArchiveItem::col_name).data(Qt::EditRole).toString();
-//            QString right_name = right.sibling(right.row(), ArchiveItem::col_name).data(Qt::EditRole).toString();
+        const QString left_name = left.sibling(left.row(), ArchiveItem::col_name).data(Qt::EditRole).toString();
+        const QString right_name = right.sibling(right.row(), ArchiveItem::col_name).data(Qt::EditRole).toString();
 
-//            return (left_name.compare(right_name, Qt::CaseInsensitive) < 0);
-//        }
+        if (left_type == right_type)  // if both indexes are same type, compare them
+        {
+            switch (this->sortColumn())
+            {
+            case ArchiveItem::col_name:
+            {
+                return (left_name.compare(right_name, Qt::CaseInsensitive) < 0);
+            }
 
-//        if (left_type == Helper::TYPE_ARCHIVE_DIR)
-//        {
-//            return true;
-//        }
-//        else if (right_type == Helper::TYPE_ARCHIVE_DIR)
-//        {
-//            return false;
-//        }
+            case ArchiveItem::col_date:
+            {
+                const QDateTime left_date = left.data(Qt::EditRole).toDateTime();
+                const QDateTime right_date = right.data(Qt::EditRole).toDateTime();
 
-//        return true;
-//    }
-//    else if (const QFileSystemModel *fsm = qobject_cast<const QFileSystemModel*>(left.model()))
-//    {
-//        QFileInfo left_fileinfo = fsm->fileInfo(left);
-//        QFileInfo right_fileinfo = fsm->fileInfo(right);
-//        if (left_fileinfo.isDir())
-//        {
-//            if (Helper::isImageFile(right_fileinfo) || Helper::isArchiveFile(right_fileinfo))
-//            {
-//                return true;
-//            }
-//        }
-//        else if (right_fileinfo.isDir())
-//        {
-//            return false;
-//        }
+                if (left_date < right_date)
+                {
+                    return true;
+                }
 
-//        return (left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+                else if (left_date > right_date)
+                {
+                    return false;
+                }
+                else
+                {
+                    return (left_name.compare(right_name, Qt::CaseInsensitive) < 0);
+                }
+            }
 
-//    }
+
+            case ArchiveItem::col_size:
+            {
+                const qint64 left_size = left.data(Qt::EditRole).toLongLong();
+                const qint64 right_size = right.data(Qt::EditRole).toLongLong();
+                if (left_size < right_size)
+                {
+                    return true;
+                }
+
+                else if (left_size > right_size)
+                {
+                    return false;
+                }
+                else
+                {
+                    // If same size, sort by Name Ascending
+                    const int name_comparison = left_name.compare(right_name, Qt::CaseInsensitive);
+                    if (this->sortOrder() == Qt::AscendingOrder)
+                        return (name_comparison  < 0);
+                    else
+                        return (name_comparison > 0);
+                }
+            }
+            }
+        }
+
+        if (left_type == Helper::TYPE_ARCHIVE_DIR)
+        {
+            if (this->sortOrder() == Qt::AscendingOrder)
+                return true;
+            else
+                return false;
+        }
+        else if (right_type == Helper::TYPE_ARCHIVE_DIR)
+        {
+            if (this->sortOrder() == Qt::AscendingOrder)
+                return false;
+            else
+                return true;
+        }
+
+        return true;
+
+
+    }
+    else if (const QFileSystemModel *fsm = qobject_cast<const QFileSystemModel*>(left.model()))
+    {
+        QFileInfo left_fileinfo = fsm->fileInfo(left);
+        QFileInfo right_fileinfo = fsm->fileInfo(right);
+
+        const bool sametype = ((left_fileinfo.isDir() && right_fileinfo.isDir()) || (!left_fileinfo.isDir() && !right_fileinfo.isDir()));
+
+        if (sametype)  // if both indexes are same type, compare them
+        {
+            switch (this->sortColumn()) // 0:displayName, 1:size, 2:type, 3:time
+            {
+            case 0:
+            {
+                return (left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+            }
+
+            case 3:
+            {
+                if (left_fileinfo.lastModified() < right_fileinfo.lastModified())
+                {
+                    return true;
+                }
+
+                else if (left_fileinfo.lastModified() > right_fileinfo.lastModified())
+                {
+                    return false;
+                }
+                else
+                {
+                    return (left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+                }
+            }
+
+            case 1:
+            {
+                if (left_fileinfo.size() < right_fileinfo.size())
+                {
+                    return true;
+                }
+
+                else if (left_fileinfo.size() > right_fileinfo.size())
+                {
+                    return false;
+                }
+                else
+                {
+                    // If same size, sort by Name Ascending
+                    const int name_comparison = left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive);
+                    if (this->sortOrder() == Qt::AscendingOrder)
+                        return (name_comparison  < 0);
+                    else
+                        return (name_comparison > 0);
+                }
+            }
+            }
+        }
+
+        if (left_fileinfo.isDir())
+        {
+            if (this->sortOrder() == Qt::AscendingOrder)
+                return true;
+            else
+                return false;
+        }
+        else if (right_fileinfo.isDir())
+        {
+            if (this->sortOrder() == Qt::AscendingOrder)
+                return false;
+            else
+                return true;
+        }
+
+        return true;
+
+    }
 
     return QSortFilterProxyModel::lessThan(left, right);
 

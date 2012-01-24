@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "archive_model.h"
 
+#include <QLayout>
 #include <QListView>
 #include <QTreeView>
 #include <QFutureWatcher>
@@ -15,9 +16,21 @@
 #include <QFileSystemModel>
 #include <QPointer>
 #include <QSortFilterProxyModel>
+#include <QComboBox>
 
 class ListViewFiles;
 class TreeViewFiles;
+
+class SortDirection
+{
+public:
+    static const int NameAsc = 0;
+    static const int NameDesc = 1;
+    static const int DateAsc = 2;
+    static const int DateDesc = 3;
+    static const int SizeAsc = 4;
+    static const int SizeDesc = 5;
+};
 
 class ListViewFiles : public QListView
 {
@@ -123,16 +136,14 @@ private:
     QPointer<ArchiveModel> m_model_archive_files;
     FileSystemModel *m_model_filesystem;
 
-    // FileListSortFilterProxyModel source model is FileSystemModel or ArchiveModel
-    // ContainersSortFilterProxyModel source model is FileSystemModel
-    // ArchiveDirsSortFilterProxyModel source model is ArchiveModel
-    FileListSortFilterProxyModel *m_proxy_file_list;
-    ContainersSortFilterProxyModel *m_proxy_containers;
-    ArchiveDirsSortFilterProxyModel *m_proxy_archive_dirs;
+    FileListSortFilterProxyModel *m_proxy_file_list; // source model is FileSystemModel or ArchiveModel
+    ContainersSortFilterProxyModel *m_proxy_containers; // source model is FileSystemModel
+    ArchiveDirsSortFilterProxyModel *m_proxy_archive_dirs; // source model is ArchiveModel
 
-
-    QSplitter *m_splitter;
     ThumbnailItemDelegate *m_thumbnail_delegate;
+
+    QVBoxLayout *m_layout_files_list;
+    QComboBox *m_combobox_sort;
 
 public slots:
     void dirUp();
@@ -145,6 +156,7 @@ private slots:
 
     void on_archiveDirsView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
     void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void on_combobox_sort_currentIndexChanged(int index);
 
 signals:
     void currentFileChanged(const FileInfo &info);
