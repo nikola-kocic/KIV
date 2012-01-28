@@ -153,8 +153,37 @@ void PictureItem::PictureItemGL::updateSize()
         return;
     }
 
-    m_offsetX = (m_picItem->m_boundingRect.width() - this->width()) / 2;
-    m_offsetY = (m_picItem->m_boundingRect.height() - this->height()) / 2;
+    if (this->width() > m_picItem->m_boundingRect.width())
+    {
+        if (m_picItem->getZoom() == 1)
+        {
+            m_offsetX = qRound((this->width() - m_picItem->m_boundingRect.width()) / 2);
+        }
+        else
+        {
+            m_offsetX = (this->width() - m_picItem->m_boundingRect.width()) / 2;
+        }
+    }
+    else
+    {
+        m_offsetX = 0;
+    }
+
+    if (this->height() > m_picItem->m_boundingRect.height())
+    {
+        if (m_picItem->getZoom() == 1)
+        {
+            m_offsetY = qRound((this->height() - m_picItem->m_boundingRect.height()) / 2);
+        }
+        else
+        {
+            m_offsetY = (this->height() - m_picItem->m_boundingRect.height()) / 2;
+        }
+    }
+    else
+    {
+        m_offsetY = 0;
+    }
 
     m_scaleX = (m_texImg->hTile->bmpSize * m_picItem->getZoom()) / this->width();
     m_scaleY = (m_texImg->vTile->bmpSize * m_picItem->getZoom()) / this->height();
@@ -172,12 +201,12 @@ void PictureItem::PictureItemGL::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslated((m_picItem->m_boundingRect.x() + (m_offsetX > 0 ? m_offsetX : 0)), (m_picItem->m_boundingRect.y() + (m_offsetY > 0 ? m_offsetY : 0)), 0);
+    glTranslated(m_picItem->m_boundingRect.x() + m_offsetX, m_picItem->m_boundingRect.y() + m_offsetY, 0);
     glRotated(m_picItem->getRotation(), 0 , 0, 1);
     glScaled(m_scaleX, m_scaleY, 1);
 
     const QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
-    const QRectF vertImage = QRectF(QPointF(-this->width() * 0.5, -this->height() * 0.5), QPointF (this->width() * 0.5, this->height() * 0.5));
+    const QRectF vertImage = QRectF(QPointF(0, 0), QPointF (this->width(), this->height()));
 
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
@@ -231,7 +260,7 @@ void PictureItem::PictureItemGL::resizeGL(int width, int height)
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho((-width / 2), (width / 2), (height / 2), (-height / 2), 0, 1);
+    glOrtho(0, width, height, 0, 0, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
@@ -243,7 +272,7 @@ void PictureItem::PictureItemGL::setRotation(const qreal r)
     tRot.translate(m_picItem->m_boundingRect.x(), m_picItem->m_boundingRect.y());
     tRot.scale(m_picItem->getZoom(), m_picItem->getZoom());
     tRot.translate((m_texImg->vTile->bmpSize / 2), (m_texImg->hTile->bmpSize / 2));
-    tRot.rotate(m_picItem->getRotation());
+    tRot.rotate(r);
     tRot.translate((-m_texImg->vTile->bmpSize / 2), (-m_texImg->hTile->bmpSize / 2));
     const QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(m_texImg->hTile->bmpSize, m_texImg->vTile->bmpSize)));
 

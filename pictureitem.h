@@ -81,8 +81,8 @@ private:
 
         qreal m_scaleX;
         qreal m_scaleY;
-        int m_offsetX;
-        int m_offsetY;
+        qreal m_offsetX;
+        qreal m_offsetY;
         QVector < QVector <GLuint> > m_textures;
         QVector < QVector <GLuint> > m_old_textures;
         TexImg *m_texImg;
