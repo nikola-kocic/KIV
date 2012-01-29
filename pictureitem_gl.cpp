@@ -238,43 +238,31 @@ void PictureItem::PictureItemGL::resizeGL(int width, int height)
     glLoadIdentity();
 }
 
-
-void PictureItem::PictureItemGL::setRotation(const qreal r)
+void PictureItem::PictureItemGL::setRotation(const qreal current, const qreal previous)
 {
-    QTransform tRot;
-    tRot.translate(m_picItem->m_boundingRect.x(), m_picItem->m_boundingRect.y());
-    tRot.scale(m_picItem->getZoom(), m_picItem->getZoom());
-    tRot.translate((m_texImg->vTile->bmpSize / 2), (m_texImg->hTile->bmpSize / 2));
-    tRot.rotate(r);
-    tRot.translate((-m_texImg->vTile->bmpSize / 2), (-m_texImg->hTile->bmpSize / 2));
-    const QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(m_texImg->hTile->bmpSize, m_texImg->vTile->bmpSize)));
-
-    m_picItem->m_boundingRect.setWidth(transformedRot.width());
-    m_picItem->m_boundingRect.setHeight(transformedRot.height());
-
-    if ((m_picItem->m_boundingRect.height() + m_picItem->m_boundingRect.y()) < this->height())
+    Q_UNUSED(previous);
+    if (qRound(current) % 360 == 0)
     {
-        m_picItem->m_boundingRect.translate(0, (this->height() - (m_picItem->m_boundingRect.height() + m_picItem->m_boundingRect.y())));
+        const qreal newWidth = m_texImg->hTile->bmpSize * m_picItem->getZoom();
+        const qreal newHeight = m_texImg->vTile->bmpSize * m_picItem->getZoom();
+        const QPointF p = m_picItem->pointToOrigin(newWidth, newHeight);
+        m_picItem->m_boundingRect = QRectF(p.x(), p.y(), newWidth, newHeight);
     }
-
-    if (m_picItem->m_boundingRect.height() < this->height())
+    else
     {
-        m_picItem->m_boundingRect.moveTop(0);
+        QTransform tRot;
+        tRot.translate(m_picItem->m_boundingRect.x(), m_picItem->m_boundingRect.y());
+        tRot.scale(m_picItem->getZoom(), m_picItem->getZoom());
+        tRot.translate((m_texImg->vTile->bmpSize / 2), (m_texImg->hTile->bmpSize / 2));
+        tRot.rotate(current);
+        tRot.translate((-m_texImg->vTile->bmpSize / 2), (-m_texImg->hTile->bmpSize / 2));
+        const QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(m_texImg->hTile->bmpSize, m_texImg->vTile->bmpSize)));
+
+        const QPointF p = m_picItem->pointToOrigin(transformedRot.width(), transformedRot.height());
+        m_picItem->m_boundingRect = QRectF(p.x(), p.y(), transformedRot.width(), transformedRot.height());
     }
 
     m_picItem->avoidOutOfScreen();
     this->updateSize();
-    this->updateGL();
-}
-
-void PictureItem::PictureItemGL::setZoom(const qreal current, const qreal previous)
-{
-    const qreal scaledW = (m_picItem->m_boundingRect.width() / previous) * current;
-    const qreal scaledH = (m_picItem->m_boundingRect.height() / previous) * current;
-    const QPointF p = m_picItem->pointToOrigin(scaledW, scaledH);
-    m_picItem->m_boundingRect = QRectF(p.x(), p.y(), scaledW, scaledH);
-
-    this->setRotation(m_picItem->getRotation());
-
     this->updateGL();
 }

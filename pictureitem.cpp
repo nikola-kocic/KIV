@@ -52,10 +52,9 @@ void PictureItem::initPictureItem()
     {
         QGLFormat glFmt;
         glFmt.setSwapInterval(1); // 1= vsync on
-        glFmt.setAlpha(false);
-        glFmt.setDoubleBuffer(false);
-        glFmt.setOverlay(false);
-        glFmt.setSampleBuffers(false);
+        glFmt.setAlpha(false); // default
+        glFmt.setOverlay(false); // default
+        glFmt.setSampleBuffers(false); // default
 
         m_imageDisplay_gl = new PictureItemGL(glFmt, this);
         m_imageDisplay_raster = 0;
@@ -122,15 +121,16 @@ void PictureItem::setRotation(const qreal r)
         return;
     }
 
+    const qreal previous = m_rotation_value;
     m_rotation_value = r;
 
     if (m_opengl)
     {
-        m_imageDisplay_gl->setRotation(r);
+        m_imageDisplay_gl->setRotation(r, previous);
     }
     else
     {
-        m_imageDisplay_raster->setRotation(r);
+        m_imageDisplay_raster->setRotation(r, previous);
     }
 }
 
@@ -164,7 +164,7 @@ void PictureItem::setZoom(const qreal z)
 
     if (m_opengl)
     {
-        m_imageDisplay_gl->setZoom(m_zoom_value, previous);
+        m_imageDisplay_gl->setRotation(m_rotation_value, m_rotation_value); // not a mistake, we need to recalculate rotated bounding rectangle
     }
     else
     {

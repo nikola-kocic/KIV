@@ -46,7 +46,7 @@ private:
     {
     public:
         explicit PictureItemRaster(PictureItem* parent, Qt::WindowFlags f = 0);
-        void setRotation(const qreal r);
+        void setRotation(const qreal current, const qreal previous);
         void setFile(const FileInfo &info);
         void setZoom(const qreal current, const qreal previous);
         void setImage(const QImage &img);
@@ -67,9 +67,8 @@ private:
 
         explicit PictureItemGL(const QGLFormat& format, PictureItem* parent, const QGLWidget* shareWidget = 0, Qt::WindowFlags f=0);
         ~PictureItemGL();
-        void setRotation(const qreal r);
+        void setRotation(const qreal current, const qreal previous);
         void updateClearColor();
-        void setZoom(const qreal current, const qreal previous);
         void setImage(const QImage &img);
         void setTexture(const QImage &tex, const int num);
         void textureLoadFinished();
