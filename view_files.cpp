@@ -369,27 +369,34 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
     {
         return;
     }
-    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString());
 
     m_view_current->setRootIndex(m_proxy_file_list->mapFromSource(m_proxy_archive_dirs->mapToSource(current)));
     m_view_current->selectionModel()->clear();
     showThumbnails();
 
+    if (m_flag_opening)
+        return;
+
+    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString());
     emit currentFileChanged(m_fileinfo_current);
 }
 
 void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     Q_UNUSED(previous);
-    if (!current.isValid()) return;
+    if (!current.isValid())
+        return;
+
     m_view_current->scrollTo(current);
 
-    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString(), false); // Pass 'false' for 'IsContainer' because item is only selected
+    if (m_flag_opening)
+        return;
 
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::currentChanged" << m_fileinfo_current.getDebugInfo();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_FilesView_currentRowChanged" << m_fileinfo_current.getDebugInfo();
 #endif
 
+    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString(), false); // Pass 'false' for 'IsContainer' because item is only selected
     emit currentFileChanged(m_fileinfo_current);
 }
 
@@ -525,7 +532,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
 {
 
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_rows_inserted" << m_show_thumbnails;
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_rows_inserted" << "thumbnails?" << m_show_thumbnails;
 #endif
     if (!m_show_thumbnails)
     {

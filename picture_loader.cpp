@@ -69,7 +69,9 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
 QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 {
     QImageReader image_reader(thumb_info.getFileInfo().getPath());
-    //    qDebug() << image_reader.format();
+#ifdef DEBUG_PICTURE_LOADER
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << thumb_info.getFileInfo().getPath() << image_reader.format() << image_reader.supportedImageFormats();
+#endif
     if (!thumb_info.getThumbSize().isEmpty())
     {
         if (image_reader.size().height() > thumb_info.getThumbSize().height() || image_reader.size().width() > thumb_info.getThumbSize().width())
@@ -95,7 +97,7 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
     {
         return QImage(0, 0);
 #ifdef DEBUG_PICTURE_LOADER
-        qDebug() << "PictureLoader::getImageFromZip setCurrentFile failed" << thumb_info.getFileInfo().zipImagePath();
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip setCurrentFile failed" << thumb_info.getFileInfo().zipImagePath();
 #endif
     }
 
@@ -126,9 +128,12 @@ QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
     }
     out.close();
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip" << "finished reading from zip";
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip" << "finished reading from zip" << thumb_info.getFileInfo().getPath();
 #endif
     QImageReader image_reader(&out);
+#ifdef DEBUG_PICTURE_LOADER
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << image_reader.format() << image_reader.supportedImageFormats();
+#endif
     if (!thumb_info.getThumbSize().isEmpty())
     {
         if (image_reader.size().height() > thumb_info.getThumbSize().height() || image_reader.size().width() > thumb_info.getThumbSize().width())

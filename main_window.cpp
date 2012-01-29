@@ -570,7 +570,7 @@ void MainWindow::deleteBookmark()
 void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << "MainWindow::on_filesView_currentChanged" << info.getDebugInfo();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesView_currentChanged" << info.getDebugInfo();
 #endif
     m_act_dirUp->setEnabled(!info.isContainerRoot());
     this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName() + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
