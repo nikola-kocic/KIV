@@ -81,8 +81,6 @@ private:
 
         qreal m_scaleX;
         qreal m_scaleY;
-        qreal m_offsetX;
-        qreal m_offsetY;
         QVector < QVector <GLuint> > m_textures;
         QVector < QVector <GLuint> > m_old_textures;
         TexImg *m_texImg;
@@ -130,6 +128,8 @@ private:
 
     bool m_dragging;
     QRectF m_boundingRect;
+    qreal m_offsetX;
+    qreal m_offsetY;
     QPoint m_point_drag;
 
 #ifdef DEBUG_PICTUREITEM
@@ -145,7 +145,6 @@ signals:
     void setFullscreen(bool);
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
-    void updateCursor(Qt::CursorShape);
     void quit();
     void boss();
 
@@ -155,6 +154,7 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
+    void updateSize();
 
 private slots:
     void textureFinished(int num);

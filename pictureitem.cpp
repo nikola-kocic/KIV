@@ -24,6 +24,8 @@ PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
 
     , m_dragging(false)
     , m_boundingRect(QRectF())
+    , m_offsetX(0)
+    , m_offsetY(0)
     , m_point_drag(QPoint())
 
 {
@@ -406,10 +408,52 @@ void PictureItem::resizeEvent(QResizeEvent *)
         return;
     }
 
+    this->updateSize();
+
     this->avoidOutOfScreen();
     this->updateLockMode();
 }
 
+
+void PictureItem::updateSize()
+{
+    if (this->isPixmapNull())
+    {
+        return;
+    }
+
+    if (this->width() > m_boundingRect.width())
+    {
+        if (m_zoom_value == 1)
+        {
+            m_offsetX = qRound((this->width() - m_boundingRect.width()) / 2);
+        }
+        else
+        {
+            m_offsetX = (this->width() - m_boundingRect.width()) / 2;
+        }
+    }
+    else
+    {
+        m_offsetX = 0;
+    }
+
+    if (this->height() > m_boundingRect.height())
+    {
+        if (m_zoom_value == 1)
+        {
+            m_offsetY = qRound((this->height() - m_boundingRect.height()) / 2);
+        }
+        else
+        {
+            m_offsetY = (this->height() - m_boundingRect.height()) / 2;
+        }
+    }
+    else
+    {
+        m_offsetY = 0;
+    }
+}
 
 void PictureItem::keyPressEvent(QKeyEvent *ev)
 {

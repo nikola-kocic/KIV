@@ -30,6 +30,7 @@ void PictureItem::PictureItemRaster::setImage(const QImage &img)
     m_picItem->setRotation(0);
 
     m_picItem->afterPixmapLoad();
+    m_picItem->updateSize();
 
     this->setUpdatesEnabled(true);
     this->update();
@@ -52,18 +53,7 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
                                -m_picItem->m_boundingRect.y() / zoom,
                                event->region().boundingRect().width() / zoom,
                                event->region().boundingRect().height() / zoom);
-
-    QRectF drawRect = (QRectF)event->region().boundingRect();
-
-    if (drawRect.width() > (m_pixmap_edited.width() * m_picItem->getZoom()))
-    {
-        drawRect.moveLeft((drawRect.width() - (m_pixmap_edited.width() * zoom)) / 2);
-    }
-    if (drawRect.height() > (m_pixmap_edited.height() * m_picItem->getZoom()))
-    {
-        drawRect.moveTop((drawRect.height() - (m_pixmap_edited.height() * zoom)) / 2);
-    }
-
+    QRectF drawRect = QRectF(QPointF(m_picItem->m_offsetX, m_picItem->m_offsetY), event->region().boundingRect().size());
     p.drawPixmap(drawRect, m_pixmap_edited, sourceRect);
     p.end();
 }
@@ -88,6 +78,7 @@ void PictureItem::PictureItemRaster::setRotation(const qreal r)
     m_picItem->m_boundingRect.setWidth(m_pixmap_edited.width() * m_picItem->getZoom());
     m_picItem->m_boundingRect.setHeight(m_pixmap_edited.height() * m_picItem->getZoom());
     m_picItem->avoidOutOfScreen();
+    m_picItem->updateSize();
     this->update();
 }
 
@@ -98,5 +89,6 @@ void PictureItem::PictureItemRaster::setZoom(const qreal current, const qreal pr
     m_picItem->m_boundingRect = QRectF(p.x(), p.y(), (m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));
 
     m_picItem->avoidOutOfScreen();
+    m_picItem->updateSize();
     this->update();
 }
