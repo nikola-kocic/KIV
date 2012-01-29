@@ -50,13 +50,7 @@ void PictureItem::initPictureItem()
 {
     if (m_opengl)
     {
-        QGLFormat glFmt;
-        glFmt.setSwapInterval(1); // 1= vsync on
-        glFmt.setAlpha(false); // default
-        glFmt.setOverlay(false); // default
-        glFmt.setSampleBuffers(false); // default
-
-        m_imageDisplay_gl = new PictureItemGL(glFmt, this);
+        m_imageDisplay_gl = new PictureItemGL(this);
         m_imageDisplay_raster = 0;
         this->layout()->addWidget(m_imageDisplay_gl);
     }

@@ -65,7 +65,7 @@ private:
     {
     public:
 
-        explicit PictureItemGL(const QGLFormat& format, PictureItem* parent, const QGLWidget* shareWidget = 0, Qt::WindowFlags f=0);
+        explicit PictureItemGL(PictureItem* parent, const QGLWidget* shareWidget = 0, Qt::WindowFlags f=0);
         ~PictureItemGL();
         void setRotation(const qreal current, const qreal previous);
         void updateClearColor();

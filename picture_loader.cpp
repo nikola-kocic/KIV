@@ -16,7 +16,7 @@
 QImage PictureLoader::getImage(const FileInfo &info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImage" << info.getFilePath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImage" << info.getPath();
 #endif
     if (!info.fileExists())
     {
@@ -36,7 +36,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getThumbnail" << thumb_info.getFileInfo().getFilePath() << thumb_info.getThumbSize();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getThumbnail" << thumb_info.getFileInfo().getPath() << thumb_info.getThumbSize();
 #endif
     if (!thumb_info.getFileInfo().fileExists())
     {

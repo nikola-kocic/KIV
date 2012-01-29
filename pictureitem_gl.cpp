@@ -8,8 +8,8 @@
 #include <QDebug>
 #include <QDateTime>
 #endif
-PictureItem::PictureItemGL::PictureItemGL(const QGLFormat& format, PictureItem *parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-    : QGLWidget(format, parent, shareWidget, f)
+PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, const QGLWidget *shareWidget, Qt::WindowFlags f)
+    : QGLWidget(parent, shareWidget, f)
     , m_picItem(parent)
     , m_scaleX(0)
     , m_scaleY(0)
