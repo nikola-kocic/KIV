@@ -117,7 +117,7 @@ private:
 
     QTimer *m_timer_scrollPage;
 
-    QPoint pointToOrigin(const int width, const int height);
+    QPointF pointToOrigin(const qreal width, const qreal height);
     void avoidOutOfScreen();
     void drag(const QPoint &pt);
     void beginDrag(const QPoint &pt);

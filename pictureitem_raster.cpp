@@ -44,16 +44,16 @@ void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
     }
 
     QPainter p(this);
-    p.setClipRect(event->region().boundingRect());
+    p.setClipRect(event->rect());
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    p.fillRect(event->region().boundingRect(), m_picItem->m_color_clear);
+    p.fillRect(event->rect(), m_picItem->m_color_clear);
     const qreal zoom = m_picItem->getZoom();
     QRectF sourceRect = QRectF(-m_picItem->m_boundingRect.x() / zoom,
                                -m_picItem->m_boundingRect.y() / zoom,
-                               event->region().boundingRect().width() / zoom,
-                               event->region().boundingRect().height() / zoom);
-    QRectF drawRect = QRectF(QPointF(m_picItem->m_offsetX, m_picItem->m_offsetY), event->region().boundingRect().size());
+                               event->rect().width() / zoom,
+                               event->rect().height() / zoom);
+    QRectF drawRect = QRectF(QPointF(m_picItem->m_offsetX, m_picItem->m_offsetY), event->rect().size());
     p.drawPixmap(drawRect, m_pixmap_edited, sourceRect);
     p.end();
 }

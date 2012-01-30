@@ -665,7 +665,7 @@ void PictureItem::start_timerScrollPage()
 
 
 
-QPoint PictureItem::pointToOrigin(const int width, const int height)
+QPointF PictureItem::pointToOrigin(const qreal width, const qreal height)
 {
     const qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
     const qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
@@ -681,7 +681,7 @@ QPoint PictureItem::pointToOrigin(const int width, const int height)
         const qreal originX = newX - (this->size().width() / 2) - ((newX - (this->size().width() / 2)) * 2);
         const qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
 
-        return QPoint(originX, originY);
+        return QPointF(originX, originY);
     }
     else
     {
@@ -693,11 +693,11 @@ QPoint PictureItem::pointToOrigin(const int width, const int height)
 
             const qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
 
-            return QPoint(0, originY);
+            return QPointF(0, originY);
         }
         else
         {
-            return QPoint(0, 0);
+            return QPointF(0, 0);
         }
     }
 }
