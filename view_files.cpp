@@ -421,7 +421,7 @@ void ViewFiles::pageNext()
         for (int i = m_view_current->currentIndex().row() + 1; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
         {
             const QModelIndex index = m_view_current->model()->index(i, 0, m_view_current->rootIndex());
-            if (Helper::isImageFile(m_model_filesystem->fileInfo(index)))
+            if (Helper::isImageFile(m_model_filesystem->fileInfo(m_proxy_file_list->mapToSource(index))))
             {
                 m_view_current->setCurrentIndex(index);
                 break;
@@ -451,7 +451,7 @@ void ViewFiles::pagePrevious()
         for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
         {
             const QModelIndex index = m_view_current->model()->index(i, 0, m_view_current->rootIndex());
-            if (Helper::isImageFile(m_model_filesystem->fileInfo(index)))
+            if (Helper::isImageFile(m_model_filesystem->fileInfo(m_proxy_file_list->mapToSource(index))))
             {
                 m_view_current->setCurrentIndex(index);
                 break;
