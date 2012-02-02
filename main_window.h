@@ -23,6 +23,7 @@ private:
     void createActions();
     void createMenus();
     void connectActions();
+    void updateSettings();
     void populateBookmarks();
     void openFile(const FileInfo &info);
     inline void openFile(const QString &path) { openFile(FileInfo(path)); }

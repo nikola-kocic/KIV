@@ -52,7 +52,10 @@ HEADERS += \
     fileinfo.h \
     thumbnailitemdelegate.h \
     archive_item.h \
-    archive_model.h
+    archive_model.h \
+    pictureitem_gl.h \
+    pictureitem_raster.h \
+    enums.h
 
 RESOURCES += \
     kiv.qrc

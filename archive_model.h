@@ -29,6 +29,7 @@ public:
     QModelIndex getDirectory(const QString &path); // Use with info.getZipPath()
     QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());
 
+
 private:
     ArchiveItem *getItem(const QModelIndex &index) const;
     ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent = 0);
@@ -36,8 +37,8 @@ private:
     ArchiveItem *rootItem;
     ArchiveItem *rootArchiveItem;
 
-    QIcon m_icon_dir;
-    QIcon m_icon_file;
+    const QIcon m_icon_dir;
+    const QIcon m_icon_file;
 };
 
 #endif // ARCHIVE_MODEL_H

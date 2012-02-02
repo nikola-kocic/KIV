@@ -1,13 +1,11 @@
 #include "pictureitem.h"
-
 #include <QMouseEvent>
 
 PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent)
+    : QWidget(parent, f)
 
     , m_pixmapNull(true)
     , m_flag_jumpToEnd(false)
-    , m_defaultZoomSizes(QList<qreal>() << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0)
     , m_zoom_value(1.0)
     , m_rotation_value(0.0)
     , m_lockMode(LockMode::None)
@@ -15,11 +13,9 @@ PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
 
     , m_settings(settings)
     , m_opengl(settings->getHardwareAcceleration())
-    , m_returnTexCount(0)
     , m_imageDisplay_raster(0)
     , m_imageDisplay_gl(0)
     , m_loader_image(new QFutureWatcher<QImage>(this))
-    , m_loader_texture(new QFutureWatcher<QImage>(this))
     , m_timer_scrollPage(new QTimer(this))
 
     , m_dragging(false)
@@ -27,14 +23,11 @@ PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
     , m_offsetX(0)
     , m_offsetY(0)
     , m_point_drag(QPoint())
-
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(m_timer_scrollPage, SIGNAL(timeout()), m_timer_scrollPage, SLOT(stop()));
-
-    connect(m_loader_texture, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
+    m_timer_scrollPage->setSingleShot(true);
 
     connect(m_loader_image, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
@@ -169,21 +162,15 @@ void PictureItem::setZoom(const qreal z)
 }
 
 
-LockMode::Mode PictureItem::getLockMode() const
+int PictureItem::getLockMode() const
 {
     return m_lockMode;
 }
 
-void PictureItem::setLockMode(const LockMode::Mode &mode)
+void PictureItem::setLockMode(const int mode)
 {
     m_lockMode = mode;
     this->updateLockMode();
-}
-
-
-QList<qreal> PictureItem::getDefaultZoomSizes() const
-{
-    return m_defaultZoomSizes;
 }
 
 
@@ -197,9 +184,8 @@ QList<qreal> PictureItem::getDefaultZoomSizes() const
 void PictureItem::setPixmap(const FileInfo &info)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setPixmap" << info.getFilePath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setPixmap" << info.getPath();
 #endif
-    m_returnTexCount = 0;
     if (!info.fileExists())
     {
         calculateAverageColor(QImage());
@@ -242,31 +228,6 @@ void PictureItem::imageFinished(int num)
 
     /* Free result memory */
     m_loader_image->setFuture(QFuture<QImage>());
-}
-
-void PictureItem::loadTextures(QList<TexIndex> indexes)
-{
-    m_returnTexCount = indexes.size();
-    m_loader_texture->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
-}
-
-void PictureItem::textureFinished(int num)
-{
-    if (m_opengl)
-    {
-        m_imageDisplay_gl->setTexture(m_loader_texture->resultAt(num), num);
-        if (--m_returnTexCount == 0)
-        {
-            this->setPixmapNull(false);
-            m_loader_texture->setFuture(QFuture<QImage>());
-            m_imageDisplay_gl->textureLoadFinished();
-
-#ifdef DEBUG_PICTUREITEM
-            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "loaded textures" << t.elapsed();
-#endif
-            emit imageChanged();
-        }
-    }
 }
 
 void PictureItem::afterPixmapLoad()
@@ -705,11 +666,11 @@ QPointF PictureItem::pointToOrigin(const qreal width, const qreal height)
 
 void PictureItem::zoomIn()
 {
-    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
     {
-        if (m_defaultZoomSizes.at(i) > m_zoom_value)
+        if (Helper::defaultZoomSizes.at(i) > m_zoom_value)
         {
-            this->setZoom(m_defaultZoomSizes.at(i));
+            this->setZoom(Helper::defaultZoomSizes.at(i));
             return;
         }
     }
@@ -719,13 +680,13 @@ void PictureItem::zoomIn()
 
 void PictureItem::zoomOut()
 {
-    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
     {
-        if (m_defaultZoomSizes.at(i) >= m_zoom_value)
+        if (Helper::defaultZoomSizes.at(i) >= m_zoom_value)
         {
             if (i != 0)
             {
-                this->setZoom(m_defaultZoomSizes.at(i - 1));
+                this->setZoom(Helper::defaultZoomSizes.at(i - 1));
             }
             else
             {
@@ -989,10 +950,7 @@ void PictureItem::calculateAverageColor(const QImage &img)
     }
     else
     {
-        if (m_color_clear != Qt::lightGray)
-        {
-            m_color_clear = Qt::lightGray;
-        }
+        m_color_clear = Qt::lightGray;
     }
 
     if (m_opengl)

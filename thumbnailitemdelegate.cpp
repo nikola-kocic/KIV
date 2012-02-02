@@ -36,6 +36,7 @@ void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
 
 QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    Q_UNUSED(index);
     const QSize &size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.decorationSize.height());
     return size_grid;
 }
@@ -74,7 +75,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
         {
             currentDateTime = fsm->lastModified(index);
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-            qDebug("Date from QFileSystemModel"_;
+            qDebug("Date from QFileSystemModel");
 #endif
         }
         else
@@ -157,15 +158,14 @@ void ThumbnailItemDelegate::clearThumbnailsCache()
 
 void ThumbnailItemDelegate::showThumbnail(int num)
 {
-#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::showThumbnail" << m_currentIndex.data().toString();
-#endif
-
     if (m_files_to_process.isEmpty())
     {
         m_watcherThumbnail->setFuture(QFuture<QImage>());
         return;
     }
+#ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::showThumbnail" << m_files_to_process.at(0).getFileInfo().getPath();
+#endif
 
     ThumbImageDate tid;
     tid.thumb = QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num)));

@@ -21,17 +21,6 @@
 class ListViewFiles;
 class TreeViewFiles;
 
-class SortDirection
-{
-public:
-    static const int NameAsc = 0;
-    static const int NameDesc = 1;
-    static const int DateAsc = 2;
-    static const int DateDesc = 3;
-    static const int SizeAsc = 4;
-    static const int SizeDesc = 5;
-};
-
 class ListViewFiles : public QListView
 {
     Q_OBJECT

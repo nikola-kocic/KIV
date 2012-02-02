@@ -14,8 +14,8 @@ public:
         , m_thumbSize(thumbSize)
     {}
 
-    FileInfo getFileInfo() const { return m_info; }
-    QSize getThumbSize() const { return m_thumbSize; }
+    inline FileInfo getFileInfo() const { return m_info; }
+    inline QSize getThumbSize() const { return m_thumbSize; }
 
 private:
     const FileInfo m_info;

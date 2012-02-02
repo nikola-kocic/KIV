@@ -8,25 +8,29 @@
 #include <QDebug>
 #include <QDateTime>
 #endif
-PictureItem::PictureItemGL::PictureItemGL(PictureItem *parent, const QGLWidget *shareWidget, Qt::WindowFlags f)
+PictureItemGL::PictureItemGL(PictureItem *parent, const QGLWidget *shareWidget, Qt::WindowFlags f)
     : QGLWidget(parent, shareWidget, f)
     , m_picItem(parent)
+    , m_returnTexCount(0)
+    , m_loader_texture(new QFutureWatcher<QImage>(this))
     , m_scaleX(0)
     , m_scaleY(0)
     , m_textures(QVector < QVector < GLuint > >(0))
     , m_old_textures(QVector < QVector < GLuint > >(0))
     , m_texImg(new TexImg())
 {
+    QGLContext::setTextureCacheLimit(0);
+    connect(m_loader_texture, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
 }
 
-PictureItem::PictureItemGL::~PictureItemGL()
+PictureItemGL::~PictureItemGL()
 {
     m_old_textures = m_textures;
     clearTextures();
     delete m_texImg;
 }
 
-void PictureItem::PictureItemGL::clearTextures()
+void PictureItemGL::clearTextures()
 {
     /* Delete old textures */
     for (int hIndex = 0; hIndex < m_old_textures.size(); ++hIndex)
@@ -43,8 +47,9 @@ void PictureItem::PictureItemGL::clearTextures()
     m_old_textures = QVector < QVector < GLuint > >(0);
 }
 
-void PictureItem::PictureItemGL::setImage(const QImage &img)
+void PictureItemGL::setImage(const QImage &img)
 {
+    m_returnTexCount = 0;
     m_old_textures = m_textures;
     if (img.isNull())
     {
@@ -79,11 +84,48 @@ void PictureItem::PictureItemGL::setImage(const QImage &img)
         }
     }
 
-    m_picItem->loadTextures(indexes);
+    this->loadTextures(indexes);
     clearTextures();
 }
 
-void PictureItem::PictureItemGL::setTexture(const QImage &tex, const int num)
+void PictureItemGL::loadTextures(QList<TexIndex> indexes)
+{
+    m_returnTexCount = indexes.size();
+    m_loader_texture->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
+}
+
+void PictureItemGL::textureFinished(int num)
+{
+    this->setTexture(m_loader_texture->resultAt(num), num);
+    if (--m_returnTexCount == 0)
+    {
+        m_picItem->setPixmapNull(false);
+        m_loader_texture->setFuture(QFuture<QImage>());
+
+        /* Update view */
+
+        m_picItem->setRotation(0);
+        if (m_picItem->getLockMode() != LockMode::Zoom)
+        {
+            m_picItem->setZoom(1);
+        }
+
+        m_picItem->m_boundingRect = QRect(0, 0, (m_texImg->hTile->bmpSize * m_picItem->getZoom()), (m_texImg->vTile->bmpSize * m_picItem->getZoom()));
+        m_picItem->afterPixmapLoad();
+
+        this->updateSize();
+
+        this->setUpdatesEnabled(true);
+        this->updateGL();
+
+#ifdef DEBUG_PICTUREITEM
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "loaded textures" << t.elapsed();
+#endif
+        emit m_picItem->imageChanged();
+    }
+}
+
+void PictureItemGL::setTexture(const QImage &tex, const int num)
 {
     const int hIndex = num / m_texImg->vTile->tileCount;
     const int vIndex = num % m_texImg->vTile->tileCount;
@@ -95,33 +137,14 @@ void PictureItem::PictureItemGL::setTexture(const QImage &tex, const int num)
 #endif
 }
 
-void PictureItem::PictureItemGL::textureLoadFinished()
-{
-    /* Update view */
 
-    m_picItem->setRotation(0);
-    if (m_picItem->getLockMode() != LockMode::Zoom)
-    {
-        m_picItem->setZoom(1);
-    }
-
-    m_picItem->m_boundingRect = QRect(0, 0, (m_texImg->hTile->bmpSize * m_picItem->getZoom()), (m_texImg->vTile->bmpSize * m_picItem->getZoom()));
-    m_picItem->afterPixmapLoad();
-
-    this->updateSize();
-
-    this->setUpdatesEnabled(true);
-    this->updateGL();
-}
-
-
-void PictureItem::PictureItemGL::updateClearColor()
+void PictureItemGL::updateClearColor()
 {
     qglClearColor(m_picItem->m_color_clear);
     this->updateGL();
 }
 
-void PictureItem::PictureItemGL::initializeGL()
+void PictureItemGL::initializeGL()
 {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -144,7 +167,7 @@ void PictureItem::PictureItemGL::initializeGL()
     m_texImg->setTexMaxSize(size);
 }
 
-void PictureItem::PictureItemGL::updateSize()
+void PictureItemGL::updateSize()
 {
     if (m_textures.size() == 0)
     {
@@ -157,7 +180,7 @@ void PictureItem::PictureItemGL::updateSize()
     m_scaleY = (m_texImg->vTile->bmpSize * m_picItem->getZoom()) / this->height();
 }
 
-void PictureItem::PictureItemGL::paintGL()
+void PictureItemGL::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -227,7 +250,7 @@ void PictureItem::PictureItemGL::paintGL()
     }
 }
 
-void PictureItem::PictureItemGL::resizeGL(int width, int height)
+void PictureItemGL::resizeGL(int width, int height)
 {
     this->updateSize();
     glViewport(0, 0, width, height);
@@ -238,7 +261,7 @@ void PictureItem::PictureItemGL::resizeGL(int width, int height)
     glLoadIdentity();
 }
 
-void PictureItem::PictureItemGL::setRotation(const qreal current, const qreal previous)
+void PictureItemGL::setRotation(const qreal current, const qreal previous)
 {
     Q_UNUSED(previous);
     if (qRound(current) % 360 == 0)

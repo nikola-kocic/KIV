@@ -16,9 +16,8 @@ struct TexIndex
     QColor background;
 };
 
-class TileDim
+struct TileDim
 {
-public:
     int bmpSize;
     int pow2Size;
     int pow2BaseSize;

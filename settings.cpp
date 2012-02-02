@@ -4,25 +4,23 @@
 #include <QDebug>
 
 Settings::Settings()
+    : m_settings(new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName()))
+
+    , m_middleClick(m_settings->value("Mouse/MiddleClick", 1).toInt())
+    , m_wheel(m_settings->value("Mouse/Wheel", 1).toInt())
+
+    , m_scrollPageByWidth(m_settings->value("Behavior/ScrollPageByWidth", false).toBool())
+    , m_rightToLeft(m_settings->value("Behavior/RightToLeft", false).toBool())
+    , m_scrollChangesPage(m_settings->value("Behavior/ScrollChangesPage", true).toBool())
+    , m_pageChangeTimeout(m_settings->value("Behavior/PageChangeTimeout", 300).toInt())
+    , m_jumpToEnd(m_settings->value("Behavior/JumpToBottom", false).toBool())
+
+    , m_calculateAverageColor(m_settings->value("Interface/CalculateAverageColor", false).toBool())
+    , m_hardwareAcceleration(m_settings->value("Interface/HardwareAcceleration", false).toBool())
+    , m_thumbSize(m_settings->value("Interface/ThumbnailSize", QSize(100, 100)).toSize())
+    , m_largeIcons(m_settings->value("Interface/LargeIcons", false).toBool())
+    , m_lastPath(m_settings->value("Interface/LastPath", "").toString())
 {
-    m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName());
-
-    m_middleClick = m_settings->value("Mouse/MiddleClick", 1).toInt();
-    m_wheel = m_settings->value("Mouse/Wheel", 1).toInt();
-
-    m_jumpToEnd           = m_settings->value("Behavior/JumpToBottom", false).toBool();
-    m_scrollPageByWidth   = m_settings->value("Behavior/ScrollPageByWidth", false).toBool();
-    m_rightToLeft         = m_settings->value("Behavior/RightToLeft", false).toBool();
-    m_pageChangeTimeout   = m_settings->value("Behavior/PageChangeTimeout", 300).toInt();
-    m_scrollChangesPage   = m_settings->value("Behavior/ScrollChangesPage", true).toBool();
-
-    m_largeIcons          = m_settings->value("Interface/LargeIcons", false).toBool();
-    m_lastPath            = m_settings->value("Interface/LastPath", "").toString();
-    m_hardwareAcceleration= m_settings->value("Interface/HardwareAcceleration", false).toBool();
-    m_thumbSize           = m_settings->value("Interface/ThumbnailSize", QSize(100, 100)).toSize();
-
-    m_calculateAverageColor = m_settings->value("Interface/CalculateAverageColor", false).toBool();
-
     for (int i = 0; ; ++i)
     {
         QVariant varName = m_settings->value("Bookmarks/" + QString::number(i) + "/Name");
@@ -36,143 +34,8 @@ Settings::Settings()
             break;
         }
     }
-
 }
 
-int Settings::getMiddleClick() const
-{
-    return m_middleClick;
-}
-
-void Settings::setMiddleClick(const int v)
-{
-    m_middleClick = v;
-    m_settings->setValue("Mouse/MiddleClick", v);
-}
-
-
-int Settings::getWheel() const
-{
-    return m_wheel;
-}
-
-void Settings::setWheel(const int v)
-{
-    m_wheel = v;
-    m_settings->setValue("Mouse/Wheel", v);
-}
-
-bool Settings::getScrollPageByWidth() const
-{
-    return m_scrollPageByWidth;
-}
-
-void Settings::setScrollPageByWidth(const bool b)
-{
-    m_scrollPageByWidth = b;
-    m_settings->setValue("Behavior/ScrollPageByWidth", m_scrollPageByWidth);
-}
-
-bool Settings::getRightToLeft() const
-{
-    return m_rightToLeft;
-}
-
-void Settings::setRightToLeft(const bool b)
-{
-    m_rightToLeft = b;
-    m_settings->setValue("Behavior/RightToLeft", m_rightToLeft);
-}
-
-int Settings::getPageChangeTimeout() const
-{
-    return m_pageChangeTimeout;
-}
-
-void Settings::setPageChangeTimeout(const int v)
-{
-    m_pageChangeTimeout = v;
-    m_settings->setValue("Behavior/PageChangeTimeout", m_pageChangeTimeout);
-}
-
-bool Settings::getLargeIcons() const
-{
-    return m_largeIcons;
-}
-
-void Settings::setLargeIcons(const bool b)
-{
-    m_largeIcons = b;
-    m_settings->setValue("Interface/LargeIcons", m_largeIcons);
-}
-
-QString Settings::getLastPath() const
-{
-    return m_lastPath;
-}
-
-void Settings::setLastPath(const QString &path)
-{
-    m_lastPath = path;
-    m_settings->setValue("Interface/LastPath", m_lastPath);
-}
-
-bool Settings::getJumpToEnd() const
-{
-    return m_jumpToEnd;
-}
-
-void Settings::setJumpToEnd(const bool b)
-{
-    m_jumpToEnd = b;
-    m_settings->setValue("Behavior/JumpToBottom", m_jumpToEnd);
-}
-
-bool Settings::getHardwareAcceleration() const
-{
-    return m_hardwareAcceleration;
-}
-
-void Settings::setHardwareAcceleration(const bool b)
-{
-    m_hardwareAcceleration = b;
-    m_settings->setValue("Interface/HardwareAcceleration", m_hardwareAcceleration);
-}
-
-
-QSize Settings::getThumbnailSize() const
-{
-    return m_thumbSize;
-}
-
-void Settings::setThumbnailSize(const QSize &size)
-{
-    m_thumbSize = size;
-    m_settings->setValue("Interface/ThumbnailSize", m_thumbSize);
-}
-
-bool Settings::getScrollChangesPage() const
-{
-    return m_scrollChangesPage;
-}
-
-void Settings::setScrollChangesPage(const bool b)
-{
-    m_scrollChangesPage = b;
-    m_settings->setValue("Behavior/ScrollChangesPage", m_scrollChangesPage);
-
-}
-
-bool Settings::getCalculateAverageColor() const
-{
-    return m_calculateAverageColor;
-}
-
-void Settings::setCalculateAverageColor(const bool b)
-{
-    m_calculateAverageColor = b;
-    m_settings->setValue("Interface/CalculateAverageColor", m_calculateAverageColor);
-}
 
 void Settings::addBookmark(const QString &name, const QString &path)
 {
@@ -187,16 +50,6 @@ void Settings::deleteBookmark(const int index)
 {
     m_bookmarks.removeAt(index);
     refreshBookmarks();
-}
-
-int Settings::getBookmarkCount()
-{
-    return m_bookmarks.size();
-}
-
-QList<Bookmark> Settings::getBookmarks()
-{
-    return m_bookmarks;
 }
 
 void Settings::refreshBookmarks()

@@ -24,9 +24,8 @@ protected:
     void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const;
 
 private:
-    class ThumbImageDate
+    struct ThumbImageDate
     {
-    public:
         QIcon thumb;
         QDateTime date;
     };
@@ -41,10 +40,10 @@ private:
             , m_date(date)
         {}
 
-        QDateTime getDate() const { return m_date; }
-        QModelIndex getIndex() const { return m_index; }
-        FileInfo getFileInfo() const { return m_fileinfo; }
-        QByteArray getPathHash() const { return m_path_hash; }
+        inline QDateTime getDate() const { return m_date; }
+        inline QModelIndex getIndex() const { return m_index; }
+        inline FileInfo getFileInfo() const { return m_fileinfo; }
+        inline QByteArray getPathHash() const { return m_path_hash; }
 
     private:
         QModelIndex m_index;

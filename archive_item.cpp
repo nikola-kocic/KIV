@@ -19,7 +19,7 @@ ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint
     m_icon(icon),
     m_tooltip(QFileSystemModel::tr("Name") + ": " + m_name + "\n" + QFileSystemModel::tr("Date Modified") + ": " + m_date.toString(Qt::SystemLocaleShortDate))
 {
-    if (m_type == Helper::TYPE_ARCHIVE_FILE)
+    if (m_type == TYPE_ARCHIVE_FILE)
     {
         m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(m_bytes));
     }
@@ -51,7 +51,7 @@ int ArchiveItem::indexToInsertByName(ArchiveItem *item)
     for (; i < this->childCount(); ++i)
     {
         int currentItemType = this->child(i)->data(Helper::ROLE_TYPE, 0).toInt();
-        if (type == Helper::TYPE_ARCHIVE_DIR)
+        if (type == TYPE_ARCHIVE_DIR)
         {
             if (currentItemType == type)
             {
@@ -65,7 +65,7 @@ int ArchiveItem::indexToInsertByName(ArchiveItem *item)
                 return i;
             }
         }
-        else if (type == Helper::TYPE_ARCHIVE_FILE)
+        else if (type == TYPE_ARCHIVE_FILE)
         {
             if (currentItemType == type)
             {
@@ -161,12 +161,4 @@ int ArchiveItem::row() const
         return parentItem->childItems.indexOf(const_cast<ArchiveItem*>(this));
 
     return 0;
-}
-
-void ArchiveItem::clear()
-{
-    for (int row = 0; row < this->childCount(); ++row)
-    {
-        delete childItems.takeAt(0);
-    }
 }

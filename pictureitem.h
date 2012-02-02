@@ -1,16 +1,22 @@
 #ifndef PICTUREITEM_H
 #define PICTUREITEM_H
 
-#include "picture_loader.h"
-#include "teximg.h"
+#include "enums.h"
 #include "settings.h"
+#include "picture_loader.h"
+#include "pictureitem_gl.h"
+#include "pictureitem_raster.h"
+#include "teximg.h"
 
-#include <QGLWidget>
 #include <QBoxLayout>
 #include <QFutureWatcher>
 #include <QTimer>
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
+
+#include <QMouseEvent>
+#include <QWheelEvent>
+#include <QKeyEvent>
 
 //#define DEBUG_PICTUREITEM
 
@@ -18,21 +24,27 @@
     #include <QDateTime>
 #endif
 
+class PictureItemRaster;
+class PictureItemGL;
+
 class PictureItem : public QWidget
 {
     Q_OBJECT
+
+    friend class PictureItemRaster;
+    friend class PictureItemGL;
+
 public:
     explicit PictureItem(Settings *settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
 
     void setZoom(const qreal z);
     qreal getZoom() const;
-    QList<qreal> getDefaultZoomSizes() const;
 
     void setRotation(const qreal r);
     qreal getRotation() const;
 
-    void setLockMode(const LockMode::Mode &mode);
-    LockMode::Mode getLockMode() const;
+    void setLockMode(const int mode);
+    int getLockMode() const;
 
     void setHardwareAcceleration(const bool b);
     bool getHardwareAcceleration() const;
@@ -42,55 +54,6 @@ public:
 
 
 private:
-    class PictureItemRaster : public QWidget
-    {
-    public:
-        explicit PictureItemRaster(PictureItem* parent, Qt::WindowFlags f = 0);
-        void setRotation(const qreal current, const qreal previous);
-        void setFile(const FileInfo &info);
-        void setZoom(const qreal current, const qreal previous);
-        void setImage(const QImage &img);
-
-    private:
-        PictureItem *m_picItem;
-        QPixmap m_pixmap;
-        QPixmap m_pixmap_edited;
-
-    protected:
-        void paintEvent(QPaintEvent *event);
-
-    };
-
-    class PictureItemGL : public QGLWidget
-    {
-    public:
-
-        explicit PictureItemGL(PictureItem* parent, const QGLWidget* shareWidget = 0, Qt::WindowFlags f=0);
-        ~PictureItemGL();
-        void setRotation(const qreal current, const qreal previous);
-        void updateClearColor();
-        void setImage(const QImage &img);
-        void setTexture(const QImage &tex, const int num);
-        void textureLoadFinished();
-
-    private:
-        void updateSize();
-        void clearTextures();
-        PictureItem *m_picItem;
-
-        qreal m_scaleX;
-        qreal m_scaleY;
-        QVector < QVector <GLuint> > m_textures;
-        QVector < QVector <GLuint> > m_old_textures;
-        TexImg *m_texImg;
-
-    protected:
-        void initializeGL();
-        void paintGL();
-        void resizeGL(int width, int height);
-
-    };
-
     void initPictureItem();
     void start_timerScrollPage();
     void afterPixmapLoad();
@@ -101,19 +64,16 @@ private:
     bool m_pixmapNull;
     bool m_flag_jumpToEnd;
 
-    QList<qreal> m_defaultZoomSizes;
     qreal m_zoom_value;
     qreal m_rotation_value;
-    LockMode::Mode m_lockMode;
+    int m_lockMode;
     QColor m_color_clear;
 
     Settings *m_settings;
     bool m_opengl;
-    int m_returnTexCount;
     PictureItemRaster *m_imageDisplay_raster;
     PictureItemGL *m_imageDisplay_gl;
     QFutureWatcher< QImage > *m_loader_image;
-    QFutureWatcher< QImage > *m_loader_texture;
 
     QTimer *m_timer_scrollPage;
 
@@ -156,11 +116,9 @@ public slots:
     void updateSize();
 
 private slots:
-    void textureFinished(int num);
     void imageFinished(int num);
 
 protected:
-    void loadTextures(QList<TexIndex> indexes);
     void wheelEvent(QWheelEvent *);
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *ev);

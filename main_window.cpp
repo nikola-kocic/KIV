@@ -43,9 +43,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
         this->setWindowIcon(QIcon(":/icons/kiv.svg"));
     }
 
-    m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
-
-
+    updateSettings();
     createActions();
     createMenus();
 
@@ -64,9 +62,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     m_comboBox_zoom->lineEdit()->setCompleter(0);
     m_comboBox_zoom->installEventFilter(this);
 
-    for (int i = 0; i < m_picture_item->getDefaultZoomSizes().size(); ++i)
+    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
     {
-        const qreal &z = m_picture_item->getDefaultZoomSizes().at(i);
+        const qreal &z = Helper::defaultZoomSizes.at(i);
         m_comboBox_zoom->addItem(QString::number((z * 100), 'f', 0) + "%", z);
         if (z == 1)
         {
@@ -118,6 +116,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event);
     m_settings->setLastPath(m_view_files->getCurrentFileInfo().getPath());
 }
 
@@ -814,10 +813,16 @@ void MainWindow::settingsDialog()
         if (m_settings->getHardwareAcceleration() != m_picture_item->getHardwareAcceleration())
         {
             m_picture_item->setHardwareAcceleration(m_settings->getHardwareAcceleration());
+            m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
         }
-        m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
-        m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
+
+        updateSettings();
     }
+}
+
+void MainWindow::updateSettings()
+{
+    m_view_files->setThumbnailsSize(m_settings->getThumbnailSize());
 }
 
 void MainWindow::about()
@@ -856,7 +861,7 @@ void MainWindow::toggleLargeIcons(bool b)
 
 void MainWindow::on_zoom_changed(qreal current, qreal previous)
 {
-    if (!m_picture_item->getDefaultZoomSizes().contains(current))
+    if (!Helper::defaultZoomSizes.contains(current))
     {
         /* Add current Zoom value to comboBox */
 
@@ -887,7 +892,7 @@ void MainWindow::on_zoom_changed(qreal current, qreal previous)
         }
     }
 
-    if (!m_picture_item->getDefaultZoomSizes().contains(previous))
+    if (!Helper::defaultZoomSizes.contains(previous))
     {
         /* Remove previous Zoom value if it's not in default zoom sizes */
 

@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f)
+PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
     , m_picItem(parent)
     , m_pixmap(QPixmap())
@@ -14,7 +14,7 @@ PictureItem::PictureItemRaster::PictureItemRaster(PictureItem *parent, Qt::Windo
 {
 }
 
-void PictureItem::PictureItemRaster::setImage(const QImage &img)
+void PictureItemRaster::setImage(const QImage &img)
 {
     this->setUpdatesEnabled(false);
 
@@ -36,29 +36,30 @@ void PictureItem::PictureItemRaster::setImage(const QImage &img)
     this->update();
 }
 
-void PictureItem::PictureItemRaster::paintEvent(QPaintEvent *event)
+void PictureItemRaster::paintEvent(QPaintEvent *event)
 {
     if (m_picItem->isPixmapNull())
     {
         return;
     }
 
+    const QRect boundingRect = event->rect();
     QPainter p(this);
-    p.setClipRect(event->rect());
+    p.setClipRect(boundingRect);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    p.fillRect(event->rect(), m_picItem->m_color_clear);
+    p.fillRect(boundingRect, m_picItem->m_color_clear);
     const qreal zoom = m_picItem->getZoom();
-    QRectF sourceRect = QRectF(-m_picItem->m_boundingRect.x() / zoom,
+    const QRectF sourceRect = QRectF(-m_picItem->m_boundingRect.x() / zoom,
                                -m_picItem->m_boundingRect.y() / zoom,
-                               event->rect().width() / zoom,
-                               event->rect().height() / zoom);
-    QRectF drawRect = QRectF(QPointF(m_picItem->m_offsetX, m_picItem->m_offsetY), event->rect().size());
+                               boundingRect.width() / zoom,
+                               boundingRect.height() / zoom);
+    const QRectF drawRect = QRectF(QPointF(m_picItem->m_offsetX, m_picItem->m_offsetY), boundingRect.size());
     p.drawPixmap(drawRect, m_pixmap_edited, sourceRect);
     p.end();
 }
 
-void PictureItem::PictureItemRaster::setRotation(const qreal current, const qreal previous)
+void PictureItemRaster::setRotation(const qreal current, const qreal previous)
 {
     if (qRound(current) % 360 == 0)
     {
@@ -83,8 +84,9 @@ void PictureItem::PictureItemRaster::setRotation(const qreal current, const qrea
     this->update();
 }
 
-void PictureItem::PictureItemRaster::setZoom(const qreal current, const qreal previous)
+void PictureItemRaster::setZoom(const qreal current, const qreal previous)
 {
+    Q_UNUSED(previous);
     const QPointF p = m_picItem->pointToOrigin((m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));
 
     m_picItem->m_boundingRect = QRectF(p.x(), p.y(), (m_pixmap_edited.width() * current), (m_pixmap_edited.height() * current));

@@ -39,7 +39,7 @@ ViewFiles::ViewFiles(QWidget *parent)
 {
     /* Start modelFilesystem */
     QStringList filters;
-    const QStringList filtersArchive = Helper::getFiltersArchive();
+    const QStringList filtersArchive = Helper::filtersArchive;
     for (int i = 0; i < filtersArchive.size(); ++i)
     {
         filters.append("*." + filtersArchive.at(i));
@@ -409,7 +409,7 @@ void ViewFiles::pageNext()
         for (int i = m_view_current->currentIndex().row() + 1; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
         {
             const int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(Helper::ROLE_TYPE).toInt();
-            if (type == Helper::TYPE_ARCHIVE_FILE)
+            if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
             {
                 m_view_current->setCurrentIndex(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
                 break;
@@ -439,7 +439,7 @@ void ViewFiles::pagePrevious()
         for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
         {
             const int type = m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data(Helper::ROLE_TYPE).toInt();
-            if (type == Helper::TYPE_ARCHIVE_FILE)
+            if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
             {
                 m_view_current->setCurrentIndex(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
                 break;
@@ -473,7 +473,7 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
 
     if (m_fileinfo_current.isInArchive())
     {
-        if (fixed_index.data(Helper::ROLE_TYPE).toInt() == Helper::TYPE_ARCHIVE_DIR)
+        if (fixed_index.data(Helper::ROLE_TYPE).toInt() == ArchiveItem::TYPE_ARCHIVE_DIR)
         {
             m_view_archiveDirs->setCurrentIndex(m_proxy_archive_dirs->mapFromSource(m_proxy_file_list->mapToSource(fixed_index)));
             m_view_archiveDirs->expand(m_view_archiveDirs->currentIndex());
@@ -596,6 +596,7 @@ QVariant ViewFiles::FileSystemModel::data(const QModelIndex &index, int role) co
         {
             return int(Qt::AlignRight | Qt::AlignVCenter);
         }
+        break;
     }
     case Qt::ToolTipRole:
         const QFileInfo fi = this->fileInfo(index);
@@ -676,14 +677,14 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
             }
         }
 
-        if (left_type == Helper::TYPE_ARCHIVE_DIR)
+        if (left_type == ArchiveItem::TYPE_ARCHIVE_DIR)
         {
             if (this->sortOrder() == Qt::AscendingOrder)
                 return true;
             else
                 return false;
         }
-        else if (right_type == Helper::TYPE_ARCHIVE_DIR)
+        else if (right_type == ArchiveItem::TYPE_ARCHIVE_DIR)
         {
             if (this->sortOrder() == Qt::AscendingOrder)
                 return false;
@@ -804,5 +805,5 @@ bool ViewFiles::ArchiveDirsSortFilterProxyModel::filterAcceptsColumn(int source_
 bool ViewFiles::ArchiveDirsSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     const QModelIndex index0 = this->sourceModel()->index(sourceRow, 0, sourceParent);
-    return !(index0.data(Helper::ROLE_TYPE).toInt() == Helper::TYPE_ARCHIVE_FILE);
+    return !(index0.data(Helper::ROLE_TYPE).toInt() == ArchiveItem::TYPE_ARCHIVE_FILE);
 }

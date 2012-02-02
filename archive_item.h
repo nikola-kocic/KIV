@@ -18,11 +18,13 @@ public:
     int row() const;
     ArchiveItem *parent();
 
-    void clear();
-
     static const int col_name = 0;
     static const int col_size = 1;
     static const int col_date = 2;
+
+    static const int TYPE_ARCHIVE = 1;
+    static const int TYPE_ARCHIVE_DIR = 2;
+    static const int TYPE_ARCHIVE_FILE = 3;
 
 private:
     int indexToInsertByName(ArchiveItem *item);
