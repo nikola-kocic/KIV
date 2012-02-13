@@ -9,8 +9,8 @@
 
 #ifdef WIN32
 #include "windows.h"
-#include "unrar/unrar.h"
 #endif
+#include "unrar/unrar.h"
 
 //#define DEBUG_PICTURE_LOADER
 #ifdef DEBUG_PICTURE_LOADER
@@ -87,7 +87,6 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
     return image_reader.read();
 }
 
-#ifdef WIN32
 int CALLBACK CallbackProc(unsigned int msg, long myBufferPtr, long rarBuffer, long bytesProcessed)
 {
     switch(msg)
@@ -106,7 +105,6 @@ int CALLBACK CallbackProc(unsigned int msg, long myBufferPtr, long rarBuffer, lo
 
     return 0;
 }
-#endif
 
 QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 {
@@ -155,21 +153,20 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
         }
     }
 
-#ifdef WIN32
     if (!passed)
     {
         const QString rarImagePath = thumb_info.getFileInfo().rarImagePath();
 
 
-        wchar_t* ArcName = new wchar_t[thumb_info.getFileInfo().getContainerPath().length() + 1];
-        int sl = thumb_info.getFileInfo().getContainerPath().toWCharArray(ArcName);
-        ArcName[sl] = 0;
+        wchar_t* ArcNameW = new wchar_t[thumb_info.getFileInfo().getContainerPath().length() + 1];
+        int sl = thumb_info.getFileInfo().getContainerPath().toWCharArray(ArcNameW);
+        ArcNameW[sl] = 0;
 
         char *callBackBuffer;
 
         struct RAROpenArchiveDataEx OpenArchiveData;
         memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-        OpenArchiveData.ArcNameW = ArcName;
+        OpenArchiveData.ArcNameW = ArcNameW;
         OpenArchiveData.CmtBufSize = 0;
         OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
         OpenArchiveData.Callback = CallbackProc;
@@ -196,9 +193,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 
                     PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
 
-                    out.open(QIODevice::WriteOnly);
-                    out.write(buffer, UnpSize);
-                    out.close();
+                    out.setData(buffer, UnpSize);
                     delete[] buffer;
                     break;
                 }
@@ -221,8 +216,10 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 
             passed = true;
         }
+
+        delete ArcNameW;
     }
-#endif
+
     if (!passed)
         return QImage(0, 0);
 

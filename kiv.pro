@@ -55,16 +55,17 @@ HEADERS += \
     archive_model.h \
     pictureitem_gl.h \
     pictureitem_raster.h \
-    enums.h
+    enums.h \
+    unrar/unrar.h
 
 RESOURCES += \
     kiv.qrc
 
-win32{
-    LIBS += -L$$PWD/unrar/ -lunrar
-    DEPENDPATH += $$PWD/unrar
-    INCLUDEPATH += $$PWD/unrar
+LIBS += -L$$PWD/unrar/ -lunrar
+DEPENDPATH += $$PWD/unrar
+INCLUDEPATH += $$PWD/unrar
 
+win32{
     INCLUDEPATH += $$PWD/zlib
     RC_FILE = kiv.rc
 }

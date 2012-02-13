@@ -1,6 +1,7 @@
 #include "fileinfo.h"
 #include "helper.h"
 #include <QFileInfo>
+#include <QDir>
 
 //#define DEBUG_FILE_INFO
 #ifdef DEBUG_FILE_INFO
@@ -174,14 +175,13 @@ QString FileInfo::zipImagePath() const
     return m_zipPath + m_zipImageFileName;
 }
 
-#ifdef WIN32
 QString FileInfo::rarImagePath() const
 {
     QString rarImagePath = m_zipPath + m_zipImageFileName;
-    rarImagePath.replace('/', '\\');
+
+    rarImagePath.replace('/', QDir::separator());
     return rarImagePath;
 }
-#endif
 
 QString FileInfo::getImageFileName() const
 {

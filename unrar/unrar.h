@@ -30,7 +30,7 @@
 
 #define RAR_DLL_VERSION       5
 
-#ifdef _UNIX
+#ifdef Q_OS_UNIX
 #define CALLBACK
 #define PASCAL
 #define LONG long

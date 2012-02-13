@@ -15,6 +15,7 @@
 
 #ifdef WIN32
 #include "windows.h"
+#endif
 #include "unrar/unrar.h"
 
 QDateTime dateFromDos(const uint dosTime)
@@ -29,7 +30,6 @@ QDateTime dateFromDos(const uint dosTime)
     const uint second = (loWord & 0x1F) << 1;
     return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
-#endif
 
 ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     : QAbstractItemModel(parent)
@@ -63,7 +63,13 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
 
         /* Populate model */
 
-        ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(), archive_info.lastModified(), archive_info.size(), archive_info.absoluteFilePath(), ArchiveItem::TYPE_ARCHIVE, fip.icon(archive_info), rootItem);
+        ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(),
+                                                       archive_info.lastModified(),
+                                                       archive_info.size(),
+                                                       archive_info.absoluteFilePath(),
+                                                       ArchiveItem::TYPE_ARCHIVE,
+                                                       fip.icon(archive_info),
+                                                       rootItem);
         rootItem->appendChild(rootArchiveItem);
 
         for (int i = 0; i < archive_files.size(); ++i)
@@ -78,7 +84,12 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
                     folderPath.append(file_path_parts.at(j) + "/");
                     if (j < file_path_parts.size() - 1)
                     {
-                        node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, 0, folderPath, ArchiveItem::TYPE_ARCHIVE_DIR, node);
+                        node = AddNode(file_path_parts.at(j),
+                                       archive_files.at(i).dateTime,
+                                       0,
+                                       folderPath,
+                                       ArchiveItem::TYPE_ARCHIVE_DIR,
+                                       node);
                     }
                     else
                     {
@@ -86,32 +97,33 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
                         if (Helper::isImageFile(fi))
                         {
                             const QString nodeFilePath = path + "/" + archive_files.at(i).name;
-                            node = AddNode(file_path_parts.at(j), archive_files.at(i).dateTime, archive_files.at(i).uncompressedSize, nodeFilePath, ArchiveItem::TYPE_ARCHIVE_FILE, node);
+                            node = AddNode(file_path_parts.at(j),
+                                           archive_files.at(i).dateTime,
+                                           archive_files.at(i).uncompressedSize,
+                                           nodeFilePath,
+                                           ArchiveItem::TYPE_ARCHIVE_FILE,
+                                           node);
                         }
                     }
                 }
             }
         }
 #ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "ZIP";
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "ZIP";
 #endif
         return;
     }
 
-#ifdef WIN32
     // Try to open as RAR
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
 
-    wchar_t* ArcName = new wchar_t[path.length() + 1];
-    int sl = path.toWCharArray(ArcName);
-    ArcName[sl] = 0;
-//    qDebug() << QString::fromWCharArray(ArcName) << path << l;
-    OpenArchiveData.ArcNameW = ArcName;
+    wchar_t* ArcNameW = new wchar_t[path.length() + 1];
+    int sl = path.toWCharArray(ArcNameW);
+    ArcNameW[sl] = 0;
 
-//    QByteArray ba = path.toLocal8Bit();
-//    OpenArchiveData.ArcName = ba.data();
+    OpenArchiveData.ArcNameW = ArcNameW;
     OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_LIST;
     OpenArchiveData.Callback = NULL;
@@ -126,7 +138,13 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
         HeaderData.CmtBuf = NULL;
         memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
-        ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(), archive_info.lastModified(), archive_info.size(), archive_info.absoluteFilePath(), ArchiveItem::TYPE_ARCHIVE, fip.icon(archive_info), rootItem);
+        ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(),
+                                                       archive_info.lastModified(),
+                                                       archive_info.size(),
+                                                       archive_info.absoluteFilePath(),
+                                                       ArchiveItem::TYPE_ARCHIVE,
+                                                       fip.icon(archive_info),
+                                                       rootItem);
         rootItem->appendChild(rootArchiveItem);
 
         while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
@@ -136,7 +154,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
             ArchiveItem *node = rootArchiveItem;
             const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
 
-            const QStringList file_path_parts = fileName.split('\\');
+            const QStringList file_path_parts = fileName.split(QDir::separator());
             QString folderPath = path + "/";
             for (int j = 0; j < file_path_parts.size(); ++j)
             {
@@ -145,7 +163,12 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
                     folderPath.append(file_path_parts.at(j) + "/");
                     if (j < file_path_parts.size() - 1)
                     {
-                        node = AddNode(file_path_parts.at(j), dateFromDos(HeaderData.FileTime), 0, folderPath, ArchiveItem::TYPE_ARCHIVE_DIR, node);
+                        node = AddNode(file_path_parts.at(j),
+                                       dateFromDos(HeaderData.FileTime),
+                                       0,
+                                       folderPath,
+                                       ArchiveItem::TYPE_ARCHIVE_DIR,
+                                       node);
                     }
                     else
                     {
@@ -153,7 +176,12 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
                         if (Helper::isImageFile(fi))
                         {
                             const QString nodeFilePath = path + "/" + fileName;
-                            node = AddNode(file_path_parts.at(j), dateFromDos(HeaderData.FileTime), UnpSize, nodeFilePath, ArchiveItem::TYPE_ARCHIVE_FILE, node);
+                            node = AddNode(file_path_parts.at(j),
+                                           dateFromDos(HeaderData.FileTime),
+                                           UnpSize,
+                                           nodeFilePath,
+                                           ArchiveItem::TYPE_ARCHIVE_FILE,
+                                           node);
                         }
                     }
                 }
@@ -174,11 +202,12 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
         RARCloseArchive(hArcData);
 
 #ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
 #endif
+        delete ArcNameW;
         return;
     }
-#endif
+    delete ArcNameW;
 }
 
 ArchiveModel::~ArchiveModel()
@@ -291,7 +320,13 @@ ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, c
         }
     }
 
-    ArchiveItem *ntvi = new ArchiveItem(name, date, bytes, path, type, (type == ArchiveItem::TYPE_ARCHIVE_FILE ? m_icon_file : m_icon_dir), parent);
+    ArchiveItem *ntvi = new ArchiveItem(name,
+                                        date,
+                                        bytes,
+                                        path,
+                                        type,
+                                        (type == ArchiveItem::TYPE_ARCHIVE_FILE ? m_icon_file : m_icon_dir),
+                                        parent);
     parent->appendChild(ntvi);
 
     return ntvi;
