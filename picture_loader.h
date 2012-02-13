@@ -31,7 +31,7 @@ public:
 
 private:
     static QSize ThumbnailImageSize(const QSize &image_size, const QSize &thumb_size);
-    static QImage getImageFromZip(const ThumbnailInfo &thumb_info);
+    static QImage getImageFromArchive(const ThumbnailInfo &thumb_info);
     static QImage getImageFromFile(const ThumbnailInfo &thumb_info);
 };
 

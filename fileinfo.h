@@ -17,6 +17,9 @@ public:
 
     QString getPath() const; /* C:/Folder1/Folder2/image.png" or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */
     QString zipImagePath() const;  /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
+#ifdef WIN32
+    QString rarImagePath() const;  /* "ZipFolder1\ZipFolder2\image.png" or "image.png" */
+#endif
     QString getImageFileName() const; /* image.png */
     QString getContainerPath() const; /* C:/Folder1/Folder2" */
     QString getZipPath() const; /* "ZipFolder1/ZipFolder2/" (ends with '/') */

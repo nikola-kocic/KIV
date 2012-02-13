@@ -7,6 +7,11 @@
 #include <QImageReader>
 #include <QPainter>
 
+#ifdef WIN32
+#include "windows.h"
+#include "unrar/unrar.h"
+#endif
+
 //#define DEBUG_PICTURE_LOADER
 #ifdef DEBUG_PICTURE_LOADER
 #include <QDebug>
@@ -24,7 +29,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
     }
     else if (info.isInArchive())
     {
-        return PictureLoader::getImageFromZip(ThumbnailInfo(info, QSize(0, 0)));
+        return PictureLoader::getImageFromArchive(ThumbnailInfo(info, QSize(0, 0)));
     }
     else
     {
@@ -44,7 +49,7 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
     }
     else if (thumb_info.getFileInfo().isInArchive())
     {
-        return PictureLoader::styleThumbnail(PictureLoader::getImageFromZip(thumb_info), thumb_info.getThumbSize());
+        return PictureLoader::styleThumbnail(PictureLoader::getImageFromArchive(thumb_info), thumb_info.getThumbSize());
     }
     else
     {
@@ -82,51 +87,146 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
     return image_reader.read();
 }
 
-QImage PictureLoader::getImageFromZip(const ThumbnailInfo &thumb_info)
+#ifdef WIN32
+int CALLBACK CallbackProc(unsigned int msg, long myBufferPtr, long rarBuffer, long bytesProcessed)
 {
+    switch(msg)
+    {
+    case UCM_CHANGEVOLUME:
+        return -1;
+
+    case UCM_PROCESSDATA:
+        memcpy(*(char**)myBufferPtr, (char*)rarBuffer, bytesProcessed);
+        *(char**)myBufferPtr += bytesProcessed;
+        return 1;
+
+    case UCM_NEEDPASSWORD:
+        return -1;
+    }
+
+    return 0;
+}
+#endif
+
+QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
+{
+    bool passed = false;
+    QBuffer out;
+    char c;
+
     QFile zipFile(thumb_info.getFileInfo().getContainerPath());
     QuaZip zip(&zipFile);
-    if (!zip.open(QuaZip::mdUnzip))
+    if (zip.open(QuaZip::mdUnzip))
     {
-        qWarning("testRead(): zip.open(): %d", zip.getZipError());
-        return QImage(0, 0);
-    }
-    zip.setFileNameCodec("UTF-8");
+        zip.setFileNameCodec("UTF-8");
 
-    if (!zip.setCurrentFile(thumb_info.getFileInfo().zipImagePath()))
-    {
-        return QImage(0, 0);
-#ifdef DEBUG_PICTURE_LOADER
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip setCurrentFile failed" << thumb_info.getFileInfo().zipImagePath();
-#endif
-    }
-
-    QuaZipFile file(&zip);
-    char c;
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qWarning("testRead(): file.open(): %d", file.getZipError());
-        return QImage(0, 0);
-    }
-
-    QBuffer out;
-    out.open(QIODevice::WriteOnly);
-    char buf[4096];
-    int len = 0;
-    while (file.getChar(&c))
-    {
-        buf[len++] = c;
-        if (len >= 4096)
+        if (zip.setCurrentFile(thumb_info.getFileInfo().zipImagePath()))
         {
-            out.write(buf, len);
-            len = 0;
+            QuaZipFile file(&zip);
+            if (file.open(QIODevice::ReadOnly))
+            {
+                out.open(QIODevice::WriteOnly);
+                char buf[4096];
+                int len = 0;
+                while (file.getChar(&c))
+                {
+                    buf[len++] = c;
+                    if (len >= 4096)
+                    {
+                        out.write(buf, len);
+                        len = 0;
+                    }
+                }
+                if (len > 0)
+                {
+                    out.write(buf, len);
+                }
+                out.close();
+                passed = true;
+            }
+            else
+            {
+                return QImage(0, 0);
+            }
+        }
+        else
+        {
+            return QImage(0, 0);
         }
     }
-    if (len > 0)
+
+#ifdef WIN32
+    if (!passed)
     {
-        out.write(buf, len);
+        const QString rarImagePath = thumb_info.getFileInfo().rarImagePath();
+
+
+        wchar_t* ArcName = new wchar_t[thumb_info.getFileInfo().getContainerPath().length() + 1];
+        int sl = thumb_info.getFileInfo().getContainerPath().toWCharArray(ArcName);
+        ArcName[sl] = 0;
+
+        char *callBackBuffer;
+
+        struct RAROpenArchiveDataEx OpenArchiveData;
+        memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
+        OpenArchiveData.ArcNameW = ArcName;
+        OpenArchiveData.CmtBufSize = 0;
+        OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
+        OpenArchiveData.Callback = CallbackProc;
+        OpenArchiveData.UserData = (long) &callBackBuffer;
+
+        HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
+
+        if (OpenArchiveData.OpenResult == 0)
+        {
+            int RHCode, PFCode;
+            struct RARHeaderDataEx HeaderData;
+
+            HeaderData.CmtBuf = NULL;
+            memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
+
+            while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+            {
+                const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
+                if (fileName == rarImagePath)
+                {
+                    qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
+                    char *buffer = new char[UnpSize];
+                    callBackBuffer = buffer;
+
+                    PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
+
+                    out.open(QIODevice::WriteOnly);
+                    out.write(buffer, UnpSize);
+                    out.close();
+                    delete[] buffer;
+                    break;
+                }
+                else
+                {
+                    if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+                    {
+                        qWarning("%d", PFCode);
+                        break;
+                    }
+                }
+            }
+
+            if (RHCode == ERAR_BAD_DATA)
+            {
+                qDebug("\nFile header broken");
+            }
+
+            RARCloseArchive(hArcData);
+
+            passed = true;
+        }
     }
-    out.close();
+#endif
+    if (!passed)
+        return QImage(0, 0);
+
+
 #ifdef DEBUG_PICTURE_LOADER
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip" << "finished reading from zip" << thumb_info.getFileInfo().getPath();
 #endif

@@ -61,7 +61,11 @@ RESOURCES += \
     kiv.qrc
 
 win32{
-    INCLUDEPATH   += zlib
+    LIBS += -L$$PWD/unrar/ -lunrar
+    DEPENDPATH += $$PWD/unrar
+    INCLUDEPATH += $$PWD/unrar
+
+    INCLUDEPATH += $$PWD/zlib
     RC_FILE = kiv.rc
 }
 
@@ -77,7 +81,3 @@ FORMS += \
     settings_dialog.ui
 
 QT += opengl
-
-
-
-

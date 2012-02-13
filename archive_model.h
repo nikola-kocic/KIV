@@ -35,7 +35,6 @@ private:
     ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent = 0);
 
     ArchiveItem *rootItem;
-    ArchiveItem *rootArchiveItem;
 
     const QIcon m_icon_dir;
     const QIcon m_icon_file;

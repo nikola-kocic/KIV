@@ -31,10 +31,10 @@ ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint
 
 ArchiveItem::~ArchiveItem()
 {
+    qDeleteAll(childItems);
 #ifdef DEBUG_ARCHIVE_ITEM
     qDebug() << "deleted" << m_name << "handle" << this;
 #endif
-    qDeleteAll(childItems);
 }
 
 void ArchiveItem::appendChild(ArchiveItem *item)
