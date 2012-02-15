@@ -30,13 +30,16 @@
 
 #define RAR_DLL_VERSION       5
 
-#ifdef Q_OS_UNIX
+#include <qnamespace.h>
+
+#ifdef __unix__
 #define CALLBACK
 #define PASCAL
-#define LONG long
-#define HANDLE void *
 #define LPARAM long
-#define UINT unsigned int
+#endif
+
+#ifdef __WIN32__
+#include "windef.h"
 #endif
 
 struct RARHeaderData
@@ -95,7 +98,7 @@ struct RAROpenArchiveData
   unsigned int CmtState;
 };
 
-typedef int (CALLBACK *UNRARCALLBACK)(UINT msg,LPARAM UserData,LPARAM P1,LPARAM P2);
+typedef int (CALLBACK *UNRARCALLBACK)(unsigned int msg, LPARAM UserData, LPARAM P1, LPARAM P2);
 
 struct RAROpenArchiveDataEx
 {
@@ -124,18 +127,33 @@ typedef int (PASCAL *PROCESSDATAPROC)(unsigned char *Addr,int Size);
 extern "C" {
 #endif
 
-HANDLE PASCAL RAROpenArchive(struct RAROpenArchiveData *ArchiveData);
-HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *ArchiveData);
-int    PASCAL RARCloseArchive(HANDLE hArcData);
-int    PASCAL RARReadHeader(HANDLE hArcData,struct RARHeaderData *HeaderData);
-int    PASCAL RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *HeaderData);
-int    PASCAL RARProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestName);
-int    PASCAL RARProcessFileW(HANDLE hArcData,int Operation,wchar_t *DestPath,wchar_t *DestName);
-void   PASCAL RARSetCallback(HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserData);
-void   PASCAL RARSetChangeVolProc(HANDLE hArcData,CHANGEVOLPROC ChangeVolProc);
-void   PASCAL RARSetProcessDataProc(HANDLE hArcData,PROCESSDATAPROC ProcessDataProc);
-void   PASCAL RARSetPassword(HANDLE hArcData,char *Password);
-int    PASCAL RARGetDllVersion();
+typedef Qt::HANDLE (PASCAL *RAROpenArchiveT)(struct RAROpenArchiveData *ArchiveData);
+typedef Qt::HANDLE (PASCAL *RAROpenArchiveExT)(struct RAROpenArchiveDataEx *ArchiveData);
+typedef int    (PASCAL *RARCloseArchiveT)(Qt::HANDLE hArcData);
+typedef int    (PASCAL *RARReadHeaderT)(Qt::HANDLE hArcData,struct RARHeaderData *HeaderData);
+typedef int    (PASCAL *RARReadHeaderExT)(Qt::HANDLE hArcData,struct RARHeaderDataEx *HeaderData);
+typedef int    (PASCAL *RARProcessFileT)(Qt::HANDLE hArcData,int Operation,char *DestPath,char *DestName);
+typedef int    (PASCAL *RARProcessFileWT)(Qt::HANDLE hArcData,int Operation,wchar_t *DestPath,wchar_t *DestName);
+typedef void   (PASCAL *RARSetCallbackT)(Qt::HANDLE hArcData,UNRARCALLBACK Callback,long UserData);
+typedef void   (PASCAL *RARSetChangeVolProcT)(Qt::HANDLE hArcData,CHANGEVOLPROC ChangeVolProc);
+typedef void   (PASCAL *RARSetProcessDataProcT)(Qt::HANDLE hArcData,PROCESSDATAPROC ProcessDataProc);
+typedef void   (PASCAL *RARSetPasswordT)(Qt::HANDLE hArcData,char *Password);
+typedef int    (PASCAL *RARGetDllVersionT)();
+
+extern RAROpenArchiveT        RAROpenArchive;
+extern RAROpenArchiveExT      RAROpenArchiveEx;
+extern RARCloseArchiveT       RARCloseArchive;
+extern RARReadHeaderT         RARReadHeader;
+extern RARReadHeaderExT       RARReadHeaderEx;
+extern RARProcessFileT        RARProcessFile;
+extern RARProcessFileWT       RARProcessFileW;
+extern RARSetCallbackT        RARSetCallback;
+extern RARSetChangeVolProcT   RARSetChangeVolProc;
+extern RARSetProcessDataProcT RARSetProcessDataProc;
+extern RARSetPasswordT        RARSetPassword;
+extern RARGetDllVersionT      RARGetDllVersion;
+
+
 
 #ifdef __cplusplus
 }

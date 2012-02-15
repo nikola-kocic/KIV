@@ -25,7 +25,9 @@ SOURCES += \
     thumbnailitemdelegate.cpp \
     view_files_tree.cpp \
     archive_item.cpp \
-    archive_model.cpp
+    archive_model.cpp \
+    unrar/unrar.cpp \
+    unrar/archive_rar.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -56,14 +58,11 @@ HEADERS += \
     pictureitem_gl.h \
     pictureitem_raster.h \
     enums.h \
-    unrar/unrar.h
+    unrar/unrar.h \
+    unrar/archive_rar.h
 
 RESOURCES += \
     kiv.qrc
-
-LIBS += -L$$PWD/unrar/ -lunrar
-DEPENDPATH += $$PWD/unrar
-INCLUDEPATH += $$PWD/unrar
 
 win32{
     INCLUDEPATH += $$PWD/zlib
@@ -71,6 +70,7 @@ win32{
 }
 
 unix {
+    LIBS += -lz
     #documentation.path = $(DESTDIR)
     #documentation.files = icons/*
     #INSTALLS += documentation

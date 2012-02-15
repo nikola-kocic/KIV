@@ -7,10 +7,7 @@
 #include <QImageReader>
 #include <QPainter>
 
-#ifdef WIN32
-#include "windows.h"
-#endif
-#include "unrar/unrar.h"
+#include "unrar/archive_rar.h"
 
 //#define DEBUG_PICTURE_LOADER
 #ifdef DEBUG_PICTURE_LOADER
@@ -155,69 +152,71 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 
     if (!passed)
     {
-        const QString rarImagePath = thumb_info.getFileInfo().rarImagePath();
-
-
-        wchar_t* ArcNameW = new wchar_t[thumb_info.getFileInfo().getContainerPath().length() + 1];
-        int sl = thumb_info.getFileInfo().getContainerPath().toWCharArray(ArcNameW);
-        ArcNameW[sl] = 0;
-
-        char *callBackBuffer;
-
-        struct RAROpenArchiveDataEx OpenArchiveData;
-        memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-        OpenArchiveData.ArcNameW = ArcNameW;
-        OpenArchiveData.CmtBufSize = 0;
-        OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
-        OpenArchiveData.Callback = CallbackProc;
-        OpenArchiveData.UserData = (long) &callBackBuffer;
-
-        HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
-
-        if (OpenArchiveData.OpenResult == 0)
+        if (ArchiveRar::loadlib())
         {
-            int RHCode, PFCode;
-            struct RARHeaderDataEx HeaderData;
+            const QString rarImagePath = thumb_info.getFileInfo().rarImagePath();
 
-            HeaderData.CmtBuf = NULL;
-            memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
+            wchar_t* ArcNameW = new wchar_t[thumb_info.getFileInfo().getContainerPath().length() + 1];
+            int sl = thumb_info.getFileInfo().getContainerPath().toWCharArray(ArcNameW);
+            ArcNameW[sl] = 0;
 
-            while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+            char *callBackBuffer;
+
+            struct RAROpenArchiveDataEx OpenArchiveData;
+            memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
+            OpenArchiveData.ArcNameW = ArcNameW;
+            OpenArchiveData.CmtBufSize = 0;
+            OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
+            OpenArchiveData.Callback = CallbackProc;
+            OpenArchiveData.UserData = (long) &callBackBuffer;
+
+            Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
+
+            if (OpenArchiveData.OpenResult == 0)
             {
-                const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
-                if (fileName == rarImagePath)
-                {
-                    qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
-                    char *buffer = new char[UnpSize];
-                    callBackBuffer = buffer;
+                int RHCode, PFCode;
+                struct RARHeaderDataEx HeaderData;
 
-                    PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
+                HeaderData.CmtBuf = NULL;
+                memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
-                    out.setData(buffer, UnpSize);
-                    delete[] buffer;
-                    break;
-                }
-                else
+                while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
                 {
-                    if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+                    const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
+                    if (fileName == rarImagePath)
                     {
-                        qWarning("%d", PFCode);
+                        qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
+                        char *buffer = new char[UnpSize];
+                        callBackBuffer = buffer;
+
+                        PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
+
+                        out.setData(buffer, UnpSize);
+                        delete[] buffer;
                         break;
                     }
+                    else
+                    {
+                        if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+                        {
+                            qWarning("%d", PFCode);
+                            break;
+                        }
+                    }
                 }
+
+                if (RHCode == ERAR_BAD_DATA)
+                {
+                    qDebug("\nFile header broken");
+                }
+
+                RARCloseArchive(hArcData);
+
+                passed = true;
             }
 
-            if (RHCode == ERAR_BAD_DATA)
-            {
-                qDebug("\nFile header broken");
-            }
-
-            RARCloseArchive(hArcData);
-
-            passed = true;
+            delete ArcNameW;
         }
-
-        delete ArcNameW;
     }
 
     if (!passed)
