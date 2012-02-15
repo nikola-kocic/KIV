@@ -1,7 +1,6 @@
 #include "main_window.h"
 #include "settings_dialog.h"
 #include "settings.h"
-#include "quazip/JlCompress.h"
 
 #include <QUrl>
 #include <QAction>
@@ -716,33 +715,26 @@ void MainWindow::open()
     }
 }
 
-bool MainWindow::saveAs()
+void MainWindow::saveAs()
 {
     const FileInfo info = m_view_files->getCurrentFileInfo();
     const QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), info.getImageFileName());
     if (fileName.isEmpty())
     {
-        return false;
+        return;
     }
 
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    if (info.isInArchive())
-    {
-        JlCompress::extractFile(info.getContainerPath(), info.zipImagePath(), fileName);
-    }
-    else
-    {
-        QFile::copy(info.getPath(), fileName);
-    }
-//    PictureLoader::getImage(info).save(fileName, "PNG");
+    m_view_files->saveCurrentFile(fileName);
+
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
 #endif
 
-    return true;
+    return;
 }
 
 void MainWindow::addBookmark()

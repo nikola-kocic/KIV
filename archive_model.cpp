@@ -15,24 +15,12 @@
 
 #include "unrar/archive_rar.h"
 
-QDateTime dateFromDos(const uint dosTime)
-{
-    const ushort hiWord = (ushort)((dosTime & 0xFFFF0000) >> 16);
-    const ushort loWord = (ushort)(dosTime & 0xFFFF);
-    const uint year = ((hiWord & 0xFE00) >> 9) + 1980;
-    const uint month = (hiWord & 0x01E0) >> 5;
-    const uint day = hiWord & 0x1F;
-    const uint hour = (loWord & 0xF800) >> 11;
-    const uint minute = (loWord & 0x07E0) >> 5;
-    const uint second = (loWord & 0x1F) << 1;
-    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
-}
-
 ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     : QAbstractItemModel(parent)
     , rootItem(new ArchiveItem("", QDateTime(), 0, "", ArchiveItem::TYPE_ARCHIVE))
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
     , m_icon_file(QIcon::fromTheme("image-x-generic"))
+    , m_type(ArchiveType::None)
 {
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << path;
@@ -108,6 +96,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
 #ifdef DEBUG_MODEL_FILES
         qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "ZIP";
 #endif
+        m_type = ArchiveType::Zip;
         return;
     }
 
@@ -203,6 +192,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
 #ifdef DEBUG_MODEL_FILES
             qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
 #endif
+            m_type = ArchiveType::Rar;
             delete ArcNameW;
             return;
         }
@@ -360,4 +350,17 @@ QModelIndex ArchiveModel::findIndexChild(const QString &text, const QModelIndex 
         }
     }
     return QModelIndex();
+}
+
+QDateTime ArchiveModel::dateFromDos(const uint dosTime)
+{
+    const ushort hiWord = (ushort)((dosTime & 0xFFFF0000) >> 16);
+    const ushort loWord = (ushort)(dosTime & 0xFFFF);
+    const uint year = ((hiWord & 0xFE00) >> 9) + 1980;
+    const uint month = (hiWord & 0x01E0) >> 5;
+    const uint day = hiWord & 0x1F;
+    const uint hour = (loWord & 0xF800) >> 11;
+    const uint minute = (loWord & 0x07E0) >> 5;
+    const uint second = (loWord & 0x1F) << 1;
+    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }

@@ -1,5 +1,7 @@
 #include "view_files.h"
 #include "archive_item.h"
+#include "quazip/JlCompress.h"
+#include "unrar/archive_rar.h"
 
 #include <QHeaderView>
 #include <QLabel>
@@ -568,6 +570,93 @@ void ViewFiles::setShowThumbnails(const bool b)
 QFileSystemModel *ViewFiles::getFilesystemModel() const
 {
     return m_model_filesystem;
+}
+
+void ViewFiles::saveCurrentFile(const QString &fileName) const
+{
+    if (m_fileinfo_current.isInArchive())
+    {
+        switch (m_model_archive_files->getType())
+        {
+        case ArchiveType::Zip:
+            JlCompress::extractFile(m_fileinfo_current.getContainerPath(), m_fileinfo_current.zipImagePath(), fileName);
+            break;
+
+        case ArchiveType::Rar:
+        {
+            if (ArchiveRar::loadlib())
+            {
+                const QString rarImagePath = m_fileinfo_current.rarImagePath();
+
+                wchar_t* ArcNameW = new wchar_t[m_fileinfo_current.getContainerPath().length() + 1];
+                int sl = m_fileinfo_current.getContainerPath().toWCharArray(ArcNameW);
+                ArcNameW[sl] = 0;
+
+                QString newfilename = fileName;
+                newfilename.replace('/', QDir::separator());
+                wchar_t* NewFileNameW = new wchar_t[newfilename.length() + 1];
+                sl = newfilename.toWCharArray(NewFileNameW);
+                NewFileNameW[sl] = 0;
+
+                struct RAROpenArchiveDataEx OpenArchiveData;
+                memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
+                OpenArchiveData.ArcNameW = ArcNameW;
+                OpenArchiveData.CmtBufSize = 0;
+                OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
+                OpenArchiveData.Callback = 0;
+                OpenArchiveData.UserData = 0;
+
+                Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
+
+                if (OpenArchiveData.OpenResult == 0)
+                {
+                    int RHCode, PFCode;
+                    struct RARHeaderDataEx HeaderData;
+
+                    HeaderData.CmtBuf = NULL;
+                    memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
+
+                    while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+                    {
+                        const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
+                        if (fileName == rarImagePath)
+                        {
+                            RARProcessFileW(hArcData, RAR_EXTRACT, NULL, NewFileNameW);
+                            break;
+                        }
+                        else
+                        {
+                            if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+                            {
+                                qWarning("%d", PFCode);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (RHCode == ERAR_BAD_DATA)
+                    {
+                        qDebug("\nFile header broken");
+                    }
+
+                    RARCloseArchive(hArcData);
+                }
+
+                delete ArcNameW;
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    else
+    {
+        QFile::copy(m_fileinfo_current.getPath(), fileName);
+    }
+//    PictureLoader::getImage(info).save(fileName, "PNG");
+
+    return;
 }
 
 void ViewFiles::on_thumbnail_finished(const QModelIndex &index)

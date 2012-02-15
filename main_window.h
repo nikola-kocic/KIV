@@ -101,7 +101,7 @@ private slots:
 
     /* File Menu Actions Slots */
     void open();
-    bool saveAs();
+    void saveAs();
 
     /* Bookmark Menu Action Slots */
     void addBookmark();

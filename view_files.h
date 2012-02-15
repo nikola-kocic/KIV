@@ -66,6 +66,7 @@ public:
     void setModel(QAbstractItemModel *model);
     void setShowThumbnails(const bool b);
     QFileSystemModel* getFilesystemModel() const;
+    void saveCurrentFile(const QString &fileName) const;
 
 public slots:
     void pageNext();

@@ -10,6 +10,13 @@
 
 class ArchiveItem;
 
+struct ArchiveType
+{
+    static const int None = 0;
+    static const int Zip = 1;
+    static const int Rar = 2;
+};
+
 class ArchiveModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -28,16 +35,22 @@ public:
 
     QModelIndex getDirectory(const QString &path); // Use with info.getZipPath()
     QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex());
+    int getType() const;
 
 
 private:
     ArchiveItem *getItem(const QModelIndex &index) const;
     ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent = 0);
+    QDateTime dateFromDos(const uint dosTime);
 
     ArchiveItem *rootItem;
 
     const QIcon m_icon_dir;
     const QIcon m_icon_file;
+    int m_type;
 };
+
+inline int ArchiveModel::getType() const
+{ return m_type; }
 
 #endif // ARCHIVE_MODEL_H

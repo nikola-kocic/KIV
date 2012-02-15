@@ -1,10 +1,9 @@
 #include "settings.h"
 
 #include <QApplication>
-#include <QDebug>
 
 Settings::Settings()
-    : m_settings(new QSettings(QSettings::IniFormat, QSettings::UserScope,  QApplication::organizationName(), QApplication::applicationName()))
+    : m_settings(new QSettings(QSettings::IniFormat, QSettings::UserScope, QApplication::organizationName(), QApplication::applicationName()))
 
     , m_middleClick(m_settings->value("Mouse/MiddleClick", 1).toInt())
     , m_wheel(m_settings->value("Mouse/Wheel", 1).toInt())
