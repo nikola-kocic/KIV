@@ -586,66 +586,11 @@ void ViewFiles::saveCurrentFile(const QString &fileName) const
         {
             if (ArchiveRar::loadlib())
             {
-                const QString rarImagePath = m_fileinfo_current.rarImagePath();
-
-                wchar_t* ArcNameW = new wchar_t[m_fileinfo_current.getContainerPath().length() + 1];
-                int sl = m_fileinfo_current.getContainerPath().toWCharArray(ArcNameW);
-                ArcNameW[sl] = 0;
-
-                QString newfilename = fileName;
-                newfilename.replace('/', QDir::separator());
-                wchar_t* NewFileNameW = new wchar_t[newfilename.length() + 1];
-                sl = newfilename.toWCharArray(NewFileNameW);
-                NewFileNameW[sl] = 0;
-
-                struct RAROpenArchiveDataEx OpenArchiveData;
-                memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-                OpenArchiveData.ArcNameW = ArcNameW;
-                OpenArchiveData.CmtBufSize = 0;
-                OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
-                OpenArchiveData.Callback = 0;
-                OpenArchiveData.UserData = 0;
-
-                Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
-
-                if (OpenArchiveData.OpenResult == 0)
-                {
-                    int RHCode, PFCode;
-                    struct RARHeaderDataEx HeaderData;
-
-                    HeaderData.CmtBuf = NULL;
-                    memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
-
-                    while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
-                    {
-                        const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
-                        if (fileName == rarImagePath)
-                        {
-                            RARProcessFileW(hArcData, RAR_EXTRACT, NULL, NewFileNameW);
-                            break;
-                        }
-                        else
-                        {
-                            if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
-                            {
-                                qWarning("%d", PFCode);
-                                break;
-                            }
-                        }
-                    }
-
-                    if (RHCode == ERAR_BAD_DATA)
-                    {
-                        qDebug("\nFile header broken");
-                    }
-
-                    RARCloseArchive(hArcData);
-                }
-
-                delete ArcNameW;
+                ArchiveRar::extract(m_fileinfo_current.getContainerPath(), m_fileinfo_current.rarImagePath(), fileName);
             }
             break;
         }
+
         default:
             break;
         }

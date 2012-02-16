@@ -1,13 +1,12 @@
 #include "picture_loader.h"
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
+#include "unrar/archive_rar.h"
 
 #include <QFile>
 #include <QBuffer>
 #include <QImageReader>
 #include <QPainter>
-
-#include "unrar/archive_rar.h"
 
 //#define DEBUG_PICTURE_LOADER
 #ifdef DEBUG_PICTURE_LOADER
@@ -84,30 +83,10 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
     return image_reader.read();
 }
 
-int CALLBACK CallbackProc(unsigned int msg, long myBufferPtr, long rarBuffer, long bytesProcessed)
-{
-    switch(msg)
-    {
-    case UCM_CHANGEVOLUME:
-        return -1;
-
-    case UCM_PROCESSDATA:
-        memcpy(*(char**)myBufferPtr, (char*)rarBuffer, bytesProcessed);
-        *(char**)myBufferPtr += bytesProcessed;
-        return 1;
-
-    case UCM_NEEDPASSWORD:
-        return -1;
-    }
-
-    return 0;
-}
 
 QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 {
-    bool passed = false;
-    QBuffer out;
-    char c;
+    QByteArray *buff = 0;
 
     QFile zipFile(thumb_info.getFileInfo().getContainerPath());
     QuaZip zip(&zipFile);
@@ -120,24 +99,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
             QuaZipFile file(&zip);
             if (file.open(QIODevice::ReadOnly))
             {
-                out.open(QIODevice::WriteOnly);
-                char buf[4096];
-                int len = 0;
-                while (file.getChar(&c))
-                {
-                    buf[len++] = c;
-                    if (len >= 4096)
-                    {
-                        out.write(buf, len);
-                        len = 0;
-                    }
-                }
-                if (len > 0)
-                {
-                    out.write(buf, len);
-                }
-                out.close();
-                passed = true;
+                buff = new QByteArray(file.readAll());
             }
             else
             {
@@ -150,83 +112,23 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
         }
     }
 
-    if (!passed)
+    if (buff == 0)
     {
         if (ArchiveRar::loadlib())
         {
-            const QString rarImagePath = thumb_info.getFileInfo().rarImagePath();
-
-            wchar_t* ArcNameW = new wchar_t[thumb_info.getFileInfo().getContainerPath().length() + 1];
-            int sl = thumb_info.getFileInfo().getContainerPath().toWCharArray(ArcNameW);
-            ArcNameW[sl] = 0;
-
-            char *callBackBuffer;
-
-            struct RAROpenArchiveDataEx OpenArchiveData;
-            memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-            OpenArchiveData.ArcNameW = ArcNameW;
-            OpenArchiveData.CmtBufSize = 0;
-            OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
-            OpenArchiveData.Callback = CallbackProc;
-            OpenArchiveData.UserData = (long) &callBackBuffer;
-
-            Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
-
-            if (OpenArchiveData.OpenResult == 0)
-            {
-                int RHCode, PFCode;
-                struct RARHeaderDataEx HeaderData;
-
-                HeaderData.CmtBuf = NULL;
-                memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
-
-                while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
-                {
-                    const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
-                    if (fileName == rarImagePath)
-                    {
-                        qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
-                        char *buffer = new char[UnpSize];
-                        callBackBuffer = buffer;
-
-                        PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
-
-                        out.setData(buffer, UnpSize);
-                        delete[] buffer;
-                        break;
-                    }
-                    else
-                    {
-                        if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
-                        {
-                            qWarning("%d", PFCode);
-                            break;
-                        }
-                    }
-                }
-
-                if (RHCode == ERAR_BAD_DATA)
-                {
-                    qDebug("\nFile header broken");
-                }
-
-                RARCloseArchive(hArcData);
-
-                passed = true;
-            }
-
-            delete ArcNameW;
+            buff = ArchiveRar::readFile(thumb_info.getFileInfo().getContainerPath(), thumb_info.getFileInfo().rarImagePath());
         }
     }
 
-    if (!passed)
+    if (buff == 0)
         return QImage(0, 0);
 
-
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromZip" << "finished reading from zip" << thumb_info.getFileInfo().getPath();
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromArchive" << "finished reading from archive" << thumb_info.getFileInfo().getPath();
 #endif
+    QBuffer out(buff);
     QImageReader image_reader(&out);
+
 #ifdef DEBUG_PICTURE_LOADER
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << image_reader.format() << image_reader.supportedImageFormats();
 #endif
@@ -237,7 +139,11 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
             image_reader.setScaledSize(PictureLoader::ThumbnailImageSize(image_reader.size(), thumb_info.getThumbSize()));
         }
     }
-    return image_reader.read();
+    const QImage img = image_reader.read();
+
+    delete buff;
+
+    return img;
 }
 
 QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &thumb_size)
