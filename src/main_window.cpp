@@ -39,7 +39,11 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     if (Helper::getFiltersImage().contains("svg"))
     {
-        this->setWindowIcon(QIcon(":/icons/kiv.svg"));
+#ifdef DEBUG_MAIN_WINDOW_ICONS
+        this->setWindowIcon(QIcon("../files/icons/kiv.svg"));
+#else
+        this->setWindowIcon(QIcon("icons/kiv.svg"));
+#endif
     }
 
     updateSettings();
@@ -152,7 +156,7 @@ void MainWindow::createActions()
 #ifdef DEBUG_MAIN_WINDOW_ICONS
     if (appdir.dirName() == "release" || appdir.dirName() == "debug")
     {
-        appdir.cd("../../src/icons");
+        appdir.cd("../../files/icons");
     }
 #endif
     QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());

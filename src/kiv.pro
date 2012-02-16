@@ -61,9 +61,6 @@ HEADERS += \
     unrar/unrar.h \
     unrar/archive_rar.h
 
-RESOURCES += \
-    kiv.qrc
-
 win32{
     INCLUDEPATH += $$PWD/zlib
     RC_FILE = kiv.rc
