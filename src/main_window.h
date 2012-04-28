@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ~MainWindow();
 
 private:
     void createActions();
@@ -155,7 +156,5 @@ protected:
     void dropEvent(QDropEvent *event);
     bool eventFilter(QObject *, QEvent *);
 };
-
-const int LV_COLNAME = 0;
 
 #endif // MAINWINDOW_H

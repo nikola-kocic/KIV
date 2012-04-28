@@ -46,7 +46,7 @@ public:
     TileDim *hTile;
     TileDim *vTile;
 
-    static QImage CreatePow2Bitmap(const TexIndex &index);
+    static QImage CreatePow2Bitmap(const TexIndex *const index);
 
 private:
     static const int TexMinSize = 16;

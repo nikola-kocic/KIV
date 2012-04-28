@@ -66,20 +66,20 @@ void PictureItemGL::setImage(const QImage &img)
     m_texImg->setImage(img);
 
     m_textures = QVector < QVector < GLuint > >(m_texImg->hTile->tileCount);
-    QList<TexIndex> indexes;
+    QList<TexIndex *> indexes;
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
         m_textures[hIndex].resize(m_texImg->vTile->tileCount);
 
         for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
         {
-            TexIndex tex;
-            tex.bitmapData = img;
-            tex.background = m_picItem->m_color_clear;
-            tex.currentTileWidth = m_texImg->hTile->tileSize.at(hIndex);
-            tex.currentTileHeight = m_texImg->vTile->tileSize.at(vIndex);
-            tex.hBorderOffset = m_texImg->hTile->offsetBorder.at(hIndex);
-            tex.vBorderOffset = m_texImg->vTile->offsetBorder.at(vIndex);
+            TexIndex *tex = new TexIndex();
+            tex->bitmapData = img;
+            tex->background = m_picItem->m_color_clear;
+            tex->currentTileWidth = m_texImg->hTile->tileSize.at(hIndex);
+            tex->currentTileHeight = m_texImg->vTile->tileSize.at(vIndex);
+            tex->hBorderOffset = m_texImg->hTile->offsetBorder.at(hIndex);
+            tex->vBorderOffset = m_texImg->vTile->offsetBorder.at(vIndex);
             indexes.append(tex);
         }
     }
@@ -88,7 +88,7 @@ void PictureItemGL::setImage(const QImage &img)
     clearTextures();
 }
 
-void PictureItemGL::loadTextures(QList<TexIndex> indexes)
+void PictureItemGL::loadTextures(QList<TexIndex *> indexes)
 {
     m_returnTexCount = indexes.size();
     m_loader_texture->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));

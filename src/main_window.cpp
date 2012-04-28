@@ -13,7 +13,7 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 
-#define DEBUG_MAIN_WINDOW_ICONS
+//#define DEBUG_MAIN_WINDOW_ICONS
 
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
@@ -115,6 +115,11 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     {
         this->openFile(m_settings->getLastPath());
     }
+}
+
+MainWindow::~MainWindow()
+{
+    delete m_settings;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -527,10 +532,10 @@ void MainWindow::populateBookmarks()
         }
     }
 
-    const QList<Bookmark> bookmarks = m_settings->getBookmarks();
+    const QList<Bookmark *> bookmarks = m_settings->getBookmarks();
     for (int i = 0; i < bookmarks.size(); ++i)
     {
-        QAction *bookmark = new QAction(bookmarks.at(i).getName(), this);
+        QAction *bookmark = new QAction(bookmarks.at(i)->getName(), this);
         bookmark->setData(i);
         connect(bookmark, SIGNAL(triggered()), this, SLOT(on_bookmark_triggered()));
         m_menu_bookmarks->addAction(bookmark);
@@ -555,7 +560,7 @@ void MainWindow::on_bookmark_triggered()
 #ifdef DEBUG_MAIN_WINDOW
                 qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_bookmark_triggered()";
 #endif
-        this->openFile(m_settings->getBookmarks().at(bookmarkIndex).getPath());
+        this->openFile(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
     }
 }
 

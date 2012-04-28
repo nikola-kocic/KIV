@@ -19,8 +19,8 @@ public:
     inline QString getPath() const { return m_path; }
 
 private:
-    QString m_name;
-    QString m_path;
+    const QString m_name;
+    const QString m_path;
 };
 
 class Settings
@@ -28,6 +28,7 @@ class Settings
 
 public:
     explicit Settings();
+    ~Settings();
 
     /* Behaviour */
 
@@ -70,7 +71,7 @@ public:
     void setLastPath(const QString &path);
 
     int getBookmarkCount() const;
-    QList<Bookmark> getBookmarks() const;
+    QList<Bookmark *> getBookmarks() const;
 
     void addBookmark(const QString &name, const QString &path);
     void deleteBookmark(const int index);
@@ -96,7 +97,7 @@ private:
     bool m_largeIcons;
     QString m_lastPath;
 
-    QList<Bookmark> m_bookmarks;
+    QList<Bookmark *> m_bookmarks;
 };
 
 
@@ -223,7 +224,7 @@ inline void Settings::setLastPath(const QString &path)
 inline int Settings::getBookmarkCount() const
 { return m_bookmarks.size(); }
 
-inline QList<Bookmark> Settings::getBookmarks() const
+inline QList<Bookmark *> Settings::getBookmarks() const
 { return m_bookmarks; }
 
 #endif // SETTINGS_H

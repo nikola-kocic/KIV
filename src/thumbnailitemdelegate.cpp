@@ -25,6 +25,11 @@ ThumbnailItemDelegate::ThumbnailItemDelegate(const QSize &thumbSize, QObject *pa
     connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
 }
 
+ThumbnailItemDelegate::~ThumbnailItemDelegate()
+{
+    clearThumbnailsCache();
+}
+
 void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
 {
     if (size != m_thumb_size)
@@ -45,7 +50,7 @@ void ThumbnailItemDelegate::cancelThumbnailGeneration()
 {
     if (!m_files_to_process.isEmpty())
     {
-        const ProcessInfo oldIndex = m_files_to_process.at(0);
+        ProcessInfo *oldIndex = m_files_to_process.at(0);
         m_files_to_process.clear();
         m_files_to_process.append(oldIndex);
     }
@@ -94,8 +99,8 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
 
     if (m_thumbnails.contains(path_hash))
     {
-        const ThumbImageDate ti = m_thumbnails.value(path_hash);
-        if (ti.date == currentDateTime)
+        const ThumbImageDate *ti = m_thumbnails.value(path_hash);
+        if (ti->getDate() == currentDateTime)
         {
             return;
         }
@@ -105,11 +110,9 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
         qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::updateThumbnail" << "generating for" << filepath;
 #endif
 
-    QIcon icon;
-
     if (info.fileExists())
     {
-        m_files_to_process.append(ProcessInfo(index, info, path_hash, currentDateTime));
+        m_files_to_process.append(new ProcessInfo(index, info, path_hash, currentDateTime));
         if (m_files_to_process.size() == 1)
         {
             m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(info, m_thumb_size)));
@@ -117,14 +120,11 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     }
     else
     {
-        icon = index.data(Qt::DecorationRole).value<QIcon>();
+        QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
         QImage thumb = PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), m_thumb_size);
         icon = QIcon(QPixmap::fromImage(thumb));
 
-        ThumbImageDate tid;
-        tid.thumb = icon;
-        tid.date = currentDateTime;
-        m_thumbnails.insert(path_hash, tid);
+        m_thumbnails.insert(path_hash, new ThumbImageDate(icon, currentDateTime));
         emit thumbnailFinished(index);
     }
 }
@@ -139,12 +139,12 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
     {
         if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
         {
-            const ThumbImageDate tid = m_thumbnails.value(path_hash);
-            if (tid.thumb.availableSizes().isEmpty())
+            const ThumbImageDate *tid = m_thumbnails.value(path_hash);
+            if (tid->getThumb().availableSizes().isEmpty())
             {
                 return;
             }
-            v4->icon = tid.thumb;
+            v4->icon = tid->getThumb();
             v4->decorationSize = v4->icon.availableSizes().last();
         }
     }
@@ -152,7 +152,9 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const 
 
 void ThumbnailItemDelegate::clearThumbnailsCache()
 {
+    qDeleteAll(m_files_to_process);
     m_files_to_process.clear();
+    qDeleteAll(m_thumbnails);
     m_thumbnails.clear();
 }
 
@@ -167,18 +169,18 @@ void ThumbnailItemDelegate::showThumbnail(int num)
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::showThumbnail" << m_files_to_process.at(0).getFileInfo().getPath();
 #endif
 
-    ThumbImageDate tid;
-    tid.thumb = QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num)));
-    tid.date = m_files_to_process.at(0).getDate();
-    m_thumbnails.insert(m_files_to_process.at(0).getPathHash(), tid);
+    ThumbImageDate *tid = new ThumbImageDate(QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num))), m_files_to_process.first()->getDate());
+    m_thumbnails.insert(m_files_to_process.first()->getPathHash(), tid);
 
-    emit thumbnailFinished(m_files_to_process.at(0).getIndex());
+    emit thumbnailFinished(m_files_to_process.first()->getIndex());
 
+
+    delete m_files_to_process.first();
     m_files_to_process.removeFirst();
 
-    if (m_files_to_process.size() > 0)
+    if (!m_files_to_process.isEmpty())
     {
-        m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(m_files_to_process.at(0).getFileInfo(), m_thumb_size)));
+        m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(m_files_to_process.at(0)->getFileInfo(), m_thumb_size)));
     }
     else
     {

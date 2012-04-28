@@ -26,13 +26,20 @@ Settings::Settings()
         QVariant varPath = m_settings->value("Bookmarks/" + QString::number(i) + "/Path");
         if (varName.isValid() && varPath.isValid())
         {
-            m_bookmarks.append(Bookmark(varName.toString(), varPath.toString()));
+            m_bookmarks.append(new Bookmark(varName.toString(), varPath.toString()));
         }
         else
         {
             break;
         }
     }
+}
+
+Settings::~Settings()
+{
+    qDeleteAll(m_bookmarks);
+    m_bookmarks.clear();
+    delete m_settings;
 }
 
 
@@ -42,11 +49,12 @@ void Settings::addBookmark(const QString &name, const QString &path)
     m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Name", name);
     m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Path", path);
 
-    m_bookmarks.append(Bookmark(name, path));
+    m_bookmarks.append(new Bookmark(name, path));
 }
 
 void Settings::deleteBookmark(const int index)
 {
+    delete m_bookmarks.at(index);
     m_bookmarks.removeAt(index);
     refreshBookmarks();
 }
@@ -69,7 +77,7 @@ void Settings::refreshBookmarks()
 
     for (int i = 0; i < m_bookmarks.size(); ++i)
     {
-        m_settings->setValue("Bookmarks/" + QString::number(i) + "/Name", m_bookmarks.at(i).getName());
-        m_settings->setValue("Bookmarks/" + QString::number(i) + "/Path", m_bookmarks.at(i).getPath());
+        m_settings->setValue("Bookmarks/" + QString::number(i) + "/Name", m_bookmarks.at(i)->getName());
+        m_settings->setValue("Bookmarks/" + QString::number(i) + "/Path", m_bookmarks.at(i)->getPath());
     }
 }

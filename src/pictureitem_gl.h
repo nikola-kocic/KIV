@@ -22,7 +22,7 @@ public:
     void setTexture(const QImage &tex, const int num);
 
 private:
-    void loadTextures(QList<TexIndex> indexes);
+    void loadTextures(QList<TexIndex *> indexes);
     void updateSize();
     void clearTextures();
     PictureItem *m_picItem;

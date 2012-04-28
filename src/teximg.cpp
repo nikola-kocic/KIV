@@ -141,34 +141,34 @@ void TexImg::setImage(const QImage &img)
     this->InitTiles(this->vTile);
 }
 
-QImage TexImg::CreatePow2Bitmap(const TexIndex &index)
+QImage TexImg::CreatePow2Bitmap(const TexIndex *const index)
 {
-    QImage texImage = QImage(index.currentTileWidth, index.currentTileHeight, QImage::Format_RGB32);
+    QImage texImage = QImage(index->currentTileWidth, index->currentTileHeight, QImage::Format_RGB32);
 
     int vLimit;
-    if (index.vBorderOffset + index.currentTileHeight >= index.bitmapData.height())
+    if (index->vBorderOffset + index->currentTileHeight >= index->bitmapData.height())
     {
-        vLimit = index.bitmapData.height() - index.vBorderOffset;
+        vLimit = index->bitmapData.height() - index->vBorderOffset;
     }
     else
     {
-        vLimit = index.currentTileHeight;
+        vLimit = index->currentTileHeight;
     }
 
     int hLimit;
-    if (index.hBorderOffset + index.currentTileWidth >= index.bitmapData.width())
+    if (index->hBorderOffset + index->currentTileWidth >= index->bitmapData.width())
     {
-        hLimit = index.bitmapData.width() - index.hBorderOffset;
+        hLimit = index->bitmapData.width() - index->hBorderOffset;
     }
     else
     {
-        hLimit = index.currentTileWidth;
+        hLimit = index->currentTileWidth;
     }
 
     QPainter p(&texImage);
-    QBrush b(index.background);
+    QBrush b(index->background);
     p.fillRect(texImage.rect(), b);
-    p.drawImage(QRectF(0, 0, hLimit, vLimit), index.bitmapData, QRectF(index.hBorderOffset, index.vBorderOffset, hLimit, vLimit));
+    p.drawImage(QRectF(0, 0, hLimit, vLimit), index->bitmapData, QRectF(index->hBorderOffset, index->vBorderOffset, hLimit, vLimit));
     p.end();
 
     return texImage;
