@@ -1,38 +1,38 @@
 #ifndef PICTUREITEM_GL_H
 #define PICTUREITEM_GL_H
 
-#include "pictureitem.h"
+#include "pictureitem_interface.h"
 #include "teximg.h"
 
 #include <QGLWidget>
 #include <QFutureWatcher>
+#include <QtConcurrentMap>
 
-class PictureItem;
-
-class PictureItemGL : public QGLWidget
+class PictureItemGL : public QGLWidget, public PictureItemInterface
 {
     Q_OBJECT
 
 public:
-    explicit PictureItemGL(PictureItem* parent, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
+    explicit PictureItemGL(PictureItemData *data, QWidget *parent);
     ~PictureItemGL();
     void setRotation(const qreal current, const qreal previous);
-    void updateClearColor();
+    void setBackgroundColor(const QColor &color);
     void setImage(const QImage &img);
+    void setNullImage();
     void setTexture(const QImage &tex, const int num);
+    void setZoom(const qreal current, const qreal previous);
+    QWidget *getWidget();
 
 private:
     void loadTextures(QList<TexIndex *> indexes);
     void updateSize();
     void clearTextures();
-    PictureItem *m_picItem;
 
     int m_returnTexCount;
     QFutureWatcher< QImage > *m_loader_texture;
     qreal m_scaleX;
     qreal m_scaleY;
     QVector < QVector <GLuint> > m_textures;
-    QVector < QVector <GLuint> > m_old_textures;
     TexImg *m_texImg;
 
 protected:
@@ -43,5 +43,8 @@ protected:
 private slots:
     void textureFinished(int num);
 };
+
+inline void PictureItemGL::setZoom(const qreal current, const qreal previous)
+{ setRotation(m_data->getRotation(), m_data->getRotation()); }
 
 #endif // PICTUREITEM_GL_H

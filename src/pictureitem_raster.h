@@ -1,25 +1,23 @@
 #ifndef PICTUREITEM_RASTER_H
 #define PICTUREITEM_RASTER_H
 
-#include "pictureitem.h"
-
+#include "pictureitem_interface.h"
 #include <QWidget>
 
-class PictureItem;
-
-class PictureItemRaster : public QWidget
+class PictureItemRaster : public QWidget, public PictureItemInterface
 {
     Q_OBJECT
 
 public:
-    explicit PictureItemRaster(PictureItem* parent, Qt::WindowFlags f = 0);
+    explicit PictureItemRaster(PictureItemData *data, QWidget* parent);
+    ~PictureItemRaster();
     void setRotation(const qreal current, const qreal previous);
-    void setFile(const FileInfo &info);
     void setZoom(const qreal current, const qreal previous);
     void setImage(const QImage &img);
+    void setNullImage() {}
+    QWidget* getWidget();
 
 private:
-    PictureItem *m_picItem;
     QSizeF m_img_size;
     QPixmap m_pixmap;
     QPixmap m_pixmap_edited;
@@ -28,4 +26,5 @@ protected:
     void paintEvent(QPaintEvent *event);
 
 };
+
 #endif // PICTUREITEM_RASTER_H

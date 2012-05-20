@@ -27,7 +27,8 @@ SOURCES += \
     archive_item.cpp \
     archive_model.cpp \
     unrar/unrar.cpp \
-    unrar/archive_rar.cpp
+    unrar/archive_rar.cpp \
+    pictureitem_data.cpp
 
 HEADERS += \
     quazip/zip.h \
@@ -59,7 +60,9 @@ HEADERS += \
     pictureitem_raster.h \
     enums.h \
     unrar/unrar.h \
-    unrar/archive_rar.h
+    unrar/archive_rar.h \
+    pictureitem_interface.h \
+    pictureitem_data.h
 
 win32{
     INCLUDEPATH += $$PWD/zlib

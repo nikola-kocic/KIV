@@ -4,24 +4,15 @@
 PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 
-    , m_pixmapNull(true)
-    , m_flag_jumpToEnd(false)
-    , m_zoom_value(1.0)
-    , m_rotation_value(0.0)
-    , m_lockMode(LockMode::None)
-    , m_color_clear(Qt::lightGray)
+    , m_data(new PictureItemData())
 
     , m_settings(settings)
     , m_opengl(settings->getHardwareAcceleration())
-    , m_imageDisplay_raster(0)
-    , m_imageDisplay_gl(0)
+    , m_imageDisplay(0)
     , m_loader_image(new QFutureWatcher<QImage>(this))
     , m_timer_scrollPage(new QTimer(this))
 
     , m_dragging(false)
-    , m_boundingRect(QRectF())
-    , m_offsetX(0)
-    , m_offsetY(0)
     , m_point_drag(QPoint())
 {
     this->setCursor(Qt::OpenHandCursor);
@@ -39,45 +30,34 @@ PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
     initPictureItem();
 }
 
+PictureItem::~PictureItem()
+{
+    delete m_data;
+}
+
 void PictureItem::initPictureItem()
 {
     if (m_opengl)
     {
-        m_imageDisplay_gl = new PictureItemGL(this);
-        m_imageDisplay_raster = 0;
-        this->layout()->addWidget(m_imageDisplay_gl);
+        m_imageDisplay = new PictureItemGL(m_data, this);
     }
     else
     {
-        m_imageDisplay_raster = new PictureItemRaster(this);
-        m_imageDisplay_gl = 0;
-        this->layout()->addWidget(m_imageDisplay_raster);
+        m_imageDisplay = new PictureItemRaster(m_data, this);
     }
-}
-
-bool PictureItem::getHardwareAcceleration() const
-{
-    return m_opengl;
+    this->layout()->addWidget(m_imageDisplay->getWidget());
 }
 
 void PictureItem::setHardwareAcceleration(const bool b)
 {
     if (m_opengl != b)
     {
-        if (m_opengl)
-        {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setHardwareAcceleration" << "Deleted m_imageDisplay_gl";
+        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setHardwareAcceleration" << "Deleted m_imageDisplay";
 #endif
-            m_imageDisplay_gl->deleteLater();
-        }
-        else
-        {
-#ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setHardwareAcceleration" << "Deleted m_imageDisplay_raster";
-#endif
-            m_imageDisplay_raster->deleteLater();
-        }
+        this->layout()->removeWidget(m_imageDisplay->getWidget());
+//        m_imageDisplay->getWidget()->deleteLater();
+        delete m_imageDisplay;
 
         m_opengl = b;
         initPictureItem();
@@ -85,119 +65,24 @@ void PictureItem::setHardwareAcceleration(const bool b)
 }
 
 
-bool PictureItem::isPixmapNull() const
-{
-    return m_pixmapNull;
-}
 
-void PictureItem::setPixmapNull(const bool value)
-{
-    m_pixmapNull = value;
-}
-
-
-qreal PictureItem::getRotation() const
-{
-    return m_rotation_value;
-}
-
-void PictureItem::setRotation(const qreal r)
-{
-    if (isPixmapNull())
-    {
-        return;
-    }
-
-    const qreal previous = m_rotation_value;
-    m_rotation_value = r;
-
-    if (m_opengl)
-    {
-        m_imageDisplay_gl->setRotation(r, previous);
-    }
-    else
-    {
-        m_imageDisplay_raster->setRotation(r, previous);
-    }
-}
-
-
-qreal PictureItem::getZoom() const
-{
-    return m_zoom_value;
-}
-
-void PictureItem::setZoom(const qreal z)
-{
-    if (isPixmapNull())
-    {
-        return;
-    }
-
-    const qreal previous = m_zoom_value;
-
-    if (z < 0.001)
-    {
-        m_zoom_value = 0.001;
-    }
-    else if (z > 1000)
-    {
-        m_zoom_value = 1000;
-    }
-    else
-    {
-        m_zoom_value = z;
-    }
-
-    if (m_opengl)
-    {
-        m_imageDisplay_gl->setRotation(m_rotation_value, m_rotation_value); // not a mistake, we need to recalculate rotated bounding rectangle
-    }
-    else
-    {
-        m_imageDisplay_raster->setZoom(m_zoom_value, previous);
-    }
-
-    emit zoomChanged(z, previous);
-}
-
-
-int PictureItem::getLockMode() const
-{
-    return m_lockMode;
-}
-
-void PictureItem::setLockMode(const int mode)
-{
-    m_lockMode = mode;
-    this->updateLockMode();
-}
-
-
-
-
-
-
-
-
+/* Region Image loading */
 
 void PictureItem::setPixmap(const FileInfo &info)
 {
 #ifdef DEBUG_PICTUREITEM
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setPixmap" << info.getPath();
 #endif
+    m_imageDisplay->getWidget()->setUpdatesEnabled(false);
+    m_imageDisplay->setNullImage();
     if (!info.fileExists())
     {
-        calculateAverageColor(QImage());
-        if (m_opengl)
-        {
-            m_imageDisplay_gl->setImage(QImage());
-        }
-        else
-        {
-            m_imageDisplay_raster->setImage(QImage());
-        }
-        this->setPixmapNull(true);
+//        calculateAverageColor(QImage());
+
+//        m_imageDisplay->setNullImage();
+
+        m_imageDisplay->getWidget()->setUpdatesEnabled(true);
+        m_data->setPixmapNull(true);
         emit imageChanged();
     }
     else
@@ -214,17 +99,19 @@ void PictureItem::imageFinished(int num)
 #ifdef DEBUG_PICTUREITEM
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::imageFinished" << t.restart() << m_loader_image->resultAt(num).size();
 #endif
-    this->setPixmapNull(m_loader_image->resultAt(num).isNull());
+    m_data->setPixmapNull(m_loader_image->resultAt(num).isNull());
     calculateAverageColor(m_loader_image->resultAt(num));
-    if (m_opengl)
-    {
-        m_imageDisplay_gl->setImage(m_loader_image->resultAt(num));
-    }
-    else
-    {
-        m_imageDisplay_raster->setImage(m_loader_image->resultAt(num));
-        emit imageChanged();
-    }
+
+    m_imageDisplay->setImage(m_loader_image->resultAt(num));
+
+    m_data->m_boundingRect = QRect(0, 0, m_loader_image->resultAt(num).width(), m_loader_image->resultAt(num).height());
+
+    this->afterPixmapLoad();
+
+    m_data->updateSize(m_imageDisplay->getWidget()->size());
+
+//    m_imageDisplay->getWidget()->setUpdatesEnabled(true);
+    emit imageChanged();
 
     /* Free result memory */
     m_loader_image->setFuture(QFuture<QImage>());
@@ -232,30 +119,51 @@ void PictureItem::imageFinished(int num)
 
 void PictureItem::afterPixmapLoad()
 {
-    this->updateLockMode();
-
-    if (m_boundingRect.width() > this->size().width())
+    if (m_data->getLockMode() == LockMode::None)
     {
-        if ((m_settings->getRightToLeft() && !m_flag_jumpToEnd)
-                || (!m_settings->getRightToLeft() && m_flag_jumpToEnd)
+        this->setZoom(1);
+    }
+    this->setRotation(0);
+
+    this->updateLockMode();
+    if (m_data->m_boundingRect.width() > m_imageDisplay->getWidget()->width())
+    {
+        if ((m_settings->getRightToLeft() && !m_data->m_flag_jumpToEnd)
+                || (!m_settings->getRightToLeft() && m_data->m_flag_jumpToEnd)
 
                 )
         {
-            m_boundingRect.moveLeft(-(m_boundingRect.width() - this->size().width()));
+            m_data->m_boundingRect.moveLeft(-(m_data->m_boundingRect.width() - m_imageDisplay->getWidget()->width()));
         }
     }
 
-    if (m_flag_jumpToEnd)
+    if (m_data->m_flag_jumpToEnd)
     {
-        if (m_boundingRect.height() > this->size().height())
+        if (m_data->m_boundingRect.height() > m_imageDisplay->getWidget()->height())
         {
-            m_boundingRect.moveTop(-(m_boundingRect.height() - this->size().height()));
+            m_data->m_boundingRect.moveTop(-(m_data->m_boundingRect.height() - m_imageDisplay->getWidget()->height()));
         }
-        m_flag_jumpToEnd = false;
+        m_data->m_flag_jumpToEnd = false;
     }
 }
 
+void PictureItem::calculateAverageColor(const QImage &img)
+{
+    if (m_settings->getCalculateAverageColor() && !img.isNull())
+    {
+        const QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        m_imageDisplay->setBackgroundColor(QColor::fromRgb(averageColorImage.pixel(0,0)));
+    }
+    else
+    {
+        if (m_data->m_color_clear != Qt::lightGray)
+        {
+            m_imageDisplay->setBackgroundColor(Qt::lightGray);
+        }
+    }
+}
 
+/* End Region Image loading */
 
 
 
@@ -331,18 +239,6 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
     }
 }
 
-void PictureItem::mouseMoveEvent(QMouseEvent *ev)
-{
-    this->drag(ev->pos());
-}
-
-void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
-{
-    if (m_dragging && ev->button() == Qt::LeftButton)
-    {
-        this->endDrag();
-    }
-}
 
 /* End Region Drag */
 
@@ -363,52 +259,13 @@ void PictureItem::resizeEvent(QResizeEvent *)
         return;
     }
 
-    this->updateSize();
+    m_data->updateSize(m_imageDisplay->getWidget()->size());
 
-    this->avoidOutOfScreen();
+    m_data->avoidOutOfScreen(m_imageDisplay->getWidget()->size());
     this->updateLockMode();
 }
 
 
-void PictureItem::updateSize()
-{
-    if (this->isPixmapNull())
-    {
-        return;
-    }
-
-    if (this->width() > m_boundingRect.width())
-    {
-        if (m_zoom_value == 1)
-        {
-            m_offsetX = qRound((this->width() - m_boundingRect.width()) / 2);
-        }
-        else
-        {
-            m_offsetX = (this->width() - m_boundingRect.width()) / 2;
-        }
-    }
-    else
-    {
-        m_offsetX = 0;
-    }
-
-    if (this->height() > m_boundingRect.height())
-    {
-        if (m_zoom_value == 1)
-        {
-            m_offsetY = qRound((this->height() - m_boundingRect.height()) / 2);
-        }
-        else
-        {
-            m_offsetY = (this->height() - m_boundingRect.height()) / 2;
-        }
-    }
-    else
-    {
-        m_offsetY = 0;
-    }
-}
 
 void PictureItem::keyPressEvent(QKeyEvent *ev)
 {
@@ -491,9 +348,9 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                     (WheelAction::Scroll == m_settings->getWheel()) &&
                     (m_settings->getScrollChangesPage()) &&
                     (
-                        (LockMode::Autofit == m_lockMode) ||
-                        (LockMode::FitHeight == m_lockMode) ||
-                        (m_boundingRect.height() <= this->size().height() && m_boundingRect.width() <= this->size().width())
+                        (LockMode::Autofit == m_data->getLockMode()) ||
+                        (LockMode::FitHeight == m_data->getLockMode()) ||
+                        (m_data->m_boundingRect.height() <= m_imageDisplay->getWidget()->height() && m_data->m_boundingRect.width() <= m_imageDisplay->getWidget()->width())
                         )
                     )
                 )
@@ -505,7 +362,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
             else
             {
-                m_flag_jumpToEnd = m_settings->getJumpToEnd();
+                m_data->m_flag_jumpToEnd = m_settings->getJumpToEnd();
                 emit pagePrevious();
                 event->accept();
             }
@@ -517,7 +374,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             if (
                     (event->delta() < 0) &&
                     (!m_timer_scrollPage->isActive()) &&
-                    ((-m_boundingRect.y() + this->size().height()) >= m_boundingRect.height())
+                    ((-m_data->m_boundingRect.y() + m_imageDisplay->getWidget()->height()) >= m_data->m_boundingRect.height())
                     )
             {
                 /* Scroll horizontally; If page is scrolled to end, start timer */
@@ -525,11 +382,11 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                 {
                     if (m_settings->getRightToLeft())
                     {
-                        if (m_boundingRect.x() < 0)
+                        if (m_data->m_boundingRect.x() < 0)
                         {
                             this->ScrollPageHorizontal(-event->delta());
 
-                            if (0 == m_boundingRect.x())
+                            if (0 == m_data->m_boundingRect.x())
                             {
                                 this->start_timerScrollPage();
                             }
@@ -538,12 +395,12 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                     }
                     else
                     {
-                        if ((m_boundingRect.width() + m_boundingRect.x()) > this->size().width())
+                        if ((m_data->m_boundingRect.width() + m_data->m_boundingRect.x()) > m_imageDisplay->getWidget()->width())
                         {
                             this->ScrollPageHorizontal(event->delta());
 
 
-                            if ((m_boundingRect.width() + m_boundingRect.x()) == this->size().width())
+                            if ((m_data->m_boundingRect.width() + m_data->m_boundingRect.x()) == m_imageDisplay->getWidget()->width())
                             {
                                 this->start_timerScrollPage();
                             }
@@ -565,12 +422,12 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             else if (
                      (m_settings->getScrollChangesPage()) &&
                      (event->delta() > 0) &&
-                     (m_boundingRect.y() == 0) &&
+                     (0 == m_data->m_boundingRect.y()) &&
                      (!m_timer_scrollPage->isActive())
                      )
             {
                 this->start_timerScrollPage();
-                m_flag_jumpToEnd = m_settings->getJumpToEnd();
+                m_data->m_flag_jumpToEnd = m_settings->getJumpToEnd();
                 emit pagePrevious();
             }
             /* Scroll vertically; If page is scrolled to top or bottom, start timer */
@@ -580,8 +437,8 @@ void PictureItem::wheelEvent(QWheelEvent *event)
 
                 if (
                         (
-                            ((m_boundingRect.height() + m_boundingRect.y()) == this->size().height()) ||
-                            (0 == m_boundingRect.y())
+                            ((m_data->m_boundingRect.height() + m_data->m_boundingRect.y()) == m_imageDisplay->getWidget()->height()) ||
+                            (0 == m_data->m_boundingRect.y())
                             ) &&
                         (!m_timer_scrollPage->isActive())
                         )
@@ -594,7 +451,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
     {
-        this->setZoom(m_zoom_value * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
+        this->setZoom(m_data->getZoom() * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
         event->accept();
     }
     else if (Qt::ShiftModifier == event->modifiers())
@@ -618,71 +475,60 @@ void PictureItem::start_timerScrollPage()
     }
 }
 
-/* End Region Rotation */
 
+/* Region Rotation */
+
+void PictureItem::setRotation(const qreal value)
+{
+    if (isPixmapNull())
+    {
+        return;
+    }
+
+    const qreal previous = m_data->getRotation();
+    m_data->setRotation(value);
+
+    m_imageDisplay->setRotation(m_data->getRotation(), previous);
+}
+
+/* End Region Rotation */
 
 
 /* Region Zoom */
 
-
-
-QPointF PictureItem::pointToOrigin(const qreal width, const qreal height)
+void PictureItem::setZoom(const qreal value)
 {
-    const qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
-    const qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
-
-    if (width > this->size().width())
+    if (m_data->isPixmapNull())
     {
-        const qreal oldX = (m_boundingRect.x() - (m_boundingRect.x() * 2)) + (this->size().width() / 2);
-        const qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
-
-        const qreal newX = oldX * zoomX;
-        const qreal newY = oldY * zoomY;
-
-        const qreal originX = newX - (this->size().width() / 2) - ((newX - (this->size().width() / 2)) * 2);
-        const qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
-
-        return QPointF(originX, originY);
+        return;
     }
-    else
-    {
-        if (height > this->size().height())
-        {
-            const qreal oldY = (m_boundingRect.y() - (m_boundingRect.y() * 2)) + (this->size().height() / 2);
 
-            const qreal newY = oldY * zoomY;
+    const qreal previous = m_data->getZoom();
+    m_data->setZoom(value);
+    m_imageDisplay->setZoom(m_data->getZoom(), previous);
 
-            const qreal originY = newY - (this->size().height() / 2) - ((newY - (this->size().height() / 2)) * 2);
-
-            return QPointF(0, originY);
-        }
-        else
-        {
-            return QPointF(0, 0);
-        }
-    }
+    emit zoomChanged(m_data->getZoom(), previous);
 }
-
 
 void PictureItem::zoomIn()
 {
     for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
     {
-        if (Helper::defaultZoomSizes.at(i) > m_zoom_value)
+        if (Helper::defaultZoomSizes.at(i) > m_data->getZoom())
         {
             this->setZoom(Helper::defaultZoomSizes.at(i));
             return;
         }
     }
 
-    this->setZoom(m_zoom_value * 1.25);
+    this->setZoom(m_data->getZoom() * 1.25);
 }
 
 void PictureItem::zoomOut()
 {
     for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
     {
-        if (Helper::defaultZoomSizes.at(i) >= m_zoom_value)
+        if (Helper::defaultZoomSizes.at(i) >= m_data->getZoom())
         {
             if (i != 0)
             {
@@ -690,13 +536,13 @@ void PictureItem::zoomOut()
             }
             else
             {
-                this->setZoom(m_zoom_value / 1.25);
+                this->setZoom(m_data->getZoom() / 1.25);
             }
             return;
         }
     }
 
-    setZoom(m_zoom_value / 1.25);
+    setZoom(m_data->getZoom() / 1.25);
 }
 
 void PictureItem::fitToScreen()
@@ -706,16 +552,19 @@ void PictureItem::fitToScreen()
         return;
     }
 
-    const QRect orig_size = QRect(m_boundingRect.x(), m_boundingRect.y(), m_boundingRect.width() / m_zoom_value, m_boundingRect.height() / m_zoom_value);
+    const QRect orig_size = QRect(m_data->m_boundingRect.x(),
+                                  m_data->m_boundingRect.y(),
+                                  m_data->m_boundingRect.width() / m_data->getZoom(),
+                                  m_data->m_boundingRect.height() / m_data->getZoom());
 
-    const qreal x_ratio = (qreal)this->size().width() / orig_size.width();
-    const qreal y_ratio = (qreal)this->size().height() / orig_size.height();
+    const qreal x_ratio = (qreal)m_imageDisplay->getWidget()->width() / orig_size.width();
+    const qreal y_ratio = (qreal)m_imageDisplay->getWidget()->height() / orig_size.height();
 
-    if ((orig_size.width() <= this->size().width()) && (orig_size.height() <= this->size().height()))
+    if ((orig_size.width() <= m_imageDisplay->getWidget()->width()) && (orig_size.height() <= m_imageDisplay->getWidget()->height()))
     {
         this->setZoom(1);
     }
-    else if ((x_ratio * orig_size.height()) < this->size().height())
+    else if ((x_ratio * orig_size.height()) < m_imageDisplay->getWidget()->height())
     {
         this->setZoom(x_ratio);
     }
@@ -732,11 +581,11 @@ void PictureItem::fitWidth()
         return;
     }
 
-    const qreal tw = m_boundingRect.width() / m_zoom_value;
+    const qreal tw = m_data->m_boundingRect.width() / m_data->getZoom();
 
-    const qreal x_ratio = (qreal)this->size().width() / tw;
+    const qreal x_ratio = (qreal)m_imageDisplay->getWidget()->width() / tw;
 
-    if (tw <= this->size().width())
+    if (tw <= m_imageDisplay->getWidget()->width())
     {
         this->setZoom(1);
     }
@@ -753,11 +602,11 @@ void PictureItem::fitHeight()
         return;
     }
 
-    const qreal th = m_boundingRect.height() / m_zoom_value;
+    const qreal th = m_data->m_boundingRect.height() / m_data->getZoom();
 
-    const qreal y_ratio = (qreal)this->size().height() / th;
+    const qreal y_ratio = (qreal)m_imageDisplay->getWidget()->height() / th;
 
-    if (th <= this->size().height())
+    if (th <= m_imageDisplay->getWidget()->height())
     {
         this->setZoom(1);
     }
@@ -768,6 +617,12 @@ void PictureItem::fitHeight()
 
 }
 
+void PictureItem::setLockMode(const int mode)
+{
+    m_data->setLockMode(mode);
+    this->updateLockMode();
+}
+
 /* Use in setpixmap and resize events */
 void PictureItem::updateLockMode()
 {
@@ -776,7 +631,7 @@ void PictureItem::updateLockMode()
         return;
     }
 
-    switch (m_lockMode)
+    switch (m_data->getLockMode())
     {
     case LockMode::Autofit:
         this->fitToScreen();
@@ -792,58 +647,24 @@ void PictureItem::updateLockMode()
     }
 }
 
-
-void PictureItem::avoidOutOfScreen()
-{
-    if (this->isPixmapNull())
-    {
-        return;
-    }
-
-    /* Am I lined out to the left? */
-    if (m_boundingRect.x() >= 0)
-    {
-        m_boundingRect.moveLeft(0);
-    }
-    else if ((m_boundingRect.x() <= (m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2)))
-    {
-        if ((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2) <= 0)
-        {
-            /* I am too far to the left! */
-            m_boundingRect.moveLeft((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2));
-        }
-        else
-        {
-            /* I am too far to the right! */
-            m_boundingRect.moveLeft(0);
-        }
-    }
-
-    /* Am I lined out to the top? */
-    if (m_boundingRect.y() >= 0)
-    {
-        m_boundingRect.moveTop(0);
-    }
-    else if ((m_boundingRect.y() <= (m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2)))
-    {
-        if ((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2) <= 0)
-        {
-            /* I am too far to the top! */
-            m_boundingRect.moveTop((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2));
-        }
-        else
-        {
-            /* I am too far to the bottom! */
-            m_boundingRect.moveTop(0);
-        }
-    }
-}
-
 /* End Region Zoom */
 
 
 
 /* Region Drag */
+
+void PictureItem::mouseMoveEvent(QMouseEvent *ev)
+{
+    this->drag(ev->pos());
+}
+
+void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
+{
+    if (m_dragging && (ev->button() == Qt::LeftButton))
+    {
+        this->endDrag();
+    }
+}
 
 void PictureItem::drag(const QPoint &pt)
 {
@@ -854,56 +675,51 @@ void PictureItem::drag(const QPoint &pt)
 
     if (m_dragging)
     {
+        const QSize widgetSize = m_imageDisplay->getWidget()->size();
         /* Am I dragging it outside of the panel? */
-        if ((pt.x() - m_point_drag.x() >= (m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2)) && (pt.x() - m_point_drag.x() <= 0))
+        if ((pt.x() - m_point_drag.x() >= (m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2)) && (pt.x() - m_point_drag.x() <= 0))
         {
             /* No, everything is just fine */
-            m_boundingRect.moveLeft(pt.x() - m_point_drag.x());
+            m_data->m_boundingRect.moveLeft(pt.x() - m_point_drag.x());
         }
         else if ((pt.x() - m_point_drag.x() > 0))
         {
             /* Now don't drag it out of the panel please */
-            m_boundingRect.moveLeft(0);
+            m_data->m_boundingRect.moveLeft(0);
         }
-        else if ((pt.x() - m_point_drag.x() < (m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2)))
+        else if ((pt.x() - m_point_drag.x() < (m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2)))
         {
             /* I am dragging it out of my panel. How many pixels do I have left? */
-            if ((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2) <= 0)
+            if ((m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2) <= 0)
             {
                 /* Make it fit perfectly */
-                m_boundingRect.moveLeft((m_boundingRect.width() - this->size().width()) - ((m_boundingRect.width() - this->size().width()) * 2));
+                m_data->m_boundingRect.moveLeft((m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2));
             }
         }
 
         /* Am I dragging it outside of the panel? */
-        if (pt.y() - m_point_drag.y() >= (m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2) && (pt.y() - m_point_drag.y() <= 0))
+        if (pt.y() - m_point_drag.y() >= (m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height() - widgetSize.height()) * 2) && (pt.y() - m_point_drag.y() <= 0))
         {
             /* No, everything is just fine */
-            m_boundingRect.moveTop(pt.y() - m_point_drag.y());
+            m_data->m_boundingRect.moveTop(pt.y() - m_point_drag.y());
         }
         else if ((pt.y() - m_point_drag.y() > 0))
         {
             /* Now don't drag it out of the panel please */
-            m_boundingRect.moveTop(0);
+            m_data->m_boundingRect.moveTop(0);
         }
-        else if (pt.y() - m_point_drag.y() < (m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2))
+        else if (pt.y() - m_point_drag.y() < (m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height() - widgetSize.height()) * 2))
         {
             /* I am dragging it out of my panel. How many pixels do I have left? */
-            if ((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height() - this->size().height()) * 2) <= 0)
+            if ((m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height() - widgetSize.height()) * 2) <= 0)
             {
                 /* Make it fit perfectly */
-                m_boundingRect.moveTop((m_boundingRect.height() - this->size().height()) - ((m_boundingRect.height()- this->size().height()) * 2));
+                m_data->m_boundingRect.moveTop((m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height()- widgetSize.height()) * 2));
             }
         }
 
-        if (m_opengl)
-        {
-            m_imageDisplay_gl->update();
-        }
-        else
-        {
-            m_imageDisplay_raster->update();
-        }
+        m_imageDisplay->getWidget()->update();
+
     }
 }
 
@@ -915,8 +731,8 @@ void PictureItem::beginDrag(const QPoint &pt)
     }
 
     /* Initial drag position */
-    m_point_drag.setX(pt.x() - m_boundingRect.x());
-    m_point_drag.setY(pt.y() - m_boundingRect.y());
+    m_point_drag.setX(pt.x() - m_data->m_boundingRect.x());
+    m_point_drag.setY(pt.y() - m_data->m_boundingRect.y());
     m_dragging = true;
     this->setCursor(Qt::ClosedHandCursor);
 }
@@ -932,31 +748,11 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
-/* End Region Drag */
-
 void PictureItem::ScrollPageVertical(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(0,value));
     this->endDrag();
-}
-
-void PictureItem::calculateAverageColor(const QImage &img)
-{
-    if (m_settings->getCalculateAverageColor() && !img.isNull())
-    {
-        const QImage averageColorImage = img.scaled(1,1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        m_color_clear = QColor::fromRgb(averageColorImage.pixel(0,0));
-    }
-    else
-    {
-        m_color_clear = Qt::lightGray;
-    }
-
-    if (m_opengl)
-    {
-        m_imageDisplay_gl->updateClearColor();
-    }
 }
 
 void PictureItem::ScrollPageHorizontal(const int value)
@@ -965,3 +761,5 @@ void PictureItem::ScrollPageHorizontal(const int value)
     this->drag(QPoint(value,0));
     this->endDrag();
 }
+
+/* End Region Drag */
