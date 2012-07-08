@@ -17,6 +17,8 @@ public:
     QVariant data(int role, int column) const;
     int row() const;
     ArchiveItem *parent();
+    void setDate(const QDateTime &date);
+    void setSize(const quint64 &bytes);
 
     static const int col_name = 0;
     static const int col_size = 1;

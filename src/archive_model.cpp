@@ -163,16 +163,29 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
                         }
                         else
                         {
-                            const QFileInfo fi(fileName);
-                            if (Helper::isImageFile(fi))
+                            if (ArchiveRar::isDir(HeaderData))
                             {
-                                const QString nodeFilePath = path + "/" + fileName;
                                 node = AddNode(file_path_parts.at(j),
                                                dateFromDos(HeaderData.FileTime),
-                                               UnpSize,
-                                               nodeFilePath,
-                                               ArchiveItem::TYPE_ARCHIVE_FILE,
-                                               node);
+                                               0,
+                                               folderPath,
+                                               ArchiveItem::TYPE_ARCHIVE_DIR,
+                                               node,
+                                               true);
+                            }
+                            else
+                            {
+                                const QFileInfo fi(fileName);
+                                if (Helper::isImageFile(fi))
+                                {
+                                    const QString nodeFilePath = path + "/" + fileName;
+                                    node = AddNode(file_path_parts.at(j),
+                                                   dateFromDos(HeaderData.FileTime),
+                                                   UnpSize,
+                                                   nodeFilePath,
+                                                   ArchiveItem::TYPE_ARCHIVE_FILE,
+                                                   node);
+                                }
                             }
                         }
                     }
@@ -303,12 +316,16 @@ int ArchiveModel::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
-ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent)
+ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent, bool updateDate)
 {
     for (int i = 0; i < parent->childCount(); ++i)
     {
         if (parent->child(i)->data(Qt::EditRole, ArchiveItem::col_name) == name)
         {
+            if (updateDate == true)
+            {
+                parent->child(i)->setDate(date);
+            }
             return parent->child(i);
         }
     }

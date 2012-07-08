@@ -3,6 +3,8 @@
 #include <QBuffer>
 
 QLibrary *ArchiveRar::Lib = 0;
+unsigned int ArchiveRar::LHD_DIRECTORY = 0x00e0U;
+unsigned int ArchiveRar::LHD_WINDOWMASK = 0x00e0U;
 
 bool ArchiveRar::loadlib()
 {
@@ -184,4 +186,9 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
         return new QByteArray();
     }
     return out;
+}
+
+bool ArchiveRar::isDir(const RARHeaderDataEx headerData)
+{
+    return((headerData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY);
 }

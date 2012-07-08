@@ -40,7 +40,7 @@ public:
 
 private:
     ArchiveItem *getItem(const QModelIndex &index) const;
-    ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent = 0);
+    ArchiveItem* AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent = 0, bool updateData = false);
     QDateTime dateFromDos(const uint dosTime);
 
     ArchiveItem *rootItem;
