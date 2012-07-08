@@ -363,7 +363,10 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
             else
             {
-                m_data->m_flag_jumpToEnd = m_settings->getJumpToEnd();
+                if (WheelAction::Scroll == m_settings->getWheel())
+                {
+                    m_data->m_flag_jumpToEnd = m_settings->getJumpToEnd();
+                }
                 emit pagePrevious();
                 event->accept();
             }
