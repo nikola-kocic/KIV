@@ -189,7 +189,10 @@ void ViewFiles::setViewMode(const int mode)
     if (m_view_mode != mode)
     {
         /* Check if View from previous View Mode can be reused */
-        if ((mode + m_view_mode) == (FileViewMode::Icons + FileViewMode::List))
+        if (
+                (mode == FileViewMode::Icons || mode == FileViewMode::List) &&
+                (m_view_mode == FileViewMode::Icons || m_view_mode == FileViewMode::List)
+                )
         {
             m_listView_files->setViewMode(mode);
             m_view_mode = mode;
@@ -353,9 +356,16 @@ void ViewFiles::on_combobox_sort_currentIndexChanged(int index)
 
 void ViewFiles::dirUp()
 {
-    if (m_view_filesystem->currentIndex().parent().isValid())
+    if (m_fileinfo_current.isInArchive() && m_view_archiveDirs->currentIndex().parent().isValid())
     {
-        m_view_filesystem->setCurrentIndex(m_view_filesystem->currentIndex().parent());
+         m_view_archiveDirs->setCurrentIndex(m_view_archiveDirs->currentIndex().parent());
+    }
+    else
+    {
+        if (m_view_filesystem->currentIndex().parent().isValid())
+        {
+            m_view_filesystem->setCurrentIndex(m_view_filesystem->currentIndex().parent());
+        }
     }
 }
 
