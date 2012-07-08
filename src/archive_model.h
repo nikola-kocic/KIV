@@ -46,7 +46,7 @@ private:
     ArchiveItem *rootItem;
 
     const QIcon m_icon_dir;
-    const QIcon m_icon_file;
+    QIcon m_icon_file;
     int m_type;
 };
 

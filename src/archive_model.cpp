@@ -25,7 +25,10 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
 #ifdef DEBUG_MODEL_FILES
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << path;
 #endif
-
+    if (m_icon_file.isNull())
+    {
+        m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+    }
     QFile archiveFile(path);
     QFileInfo archive_info(archiveFile);
     QFileIconProvider fip;
