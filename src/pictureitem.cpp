@@ -33,6 +33,7 @@ PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
 PictureItem::~PictureItem()
 {
     delete m_data;
+    delete m_imageDisplay;
 }
 
 void PictureItem::initPictureItem()

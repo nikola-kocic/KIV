@@ -154,10 +154,9 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
                 callBackBuffer = buffer;
 
                 PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
-
+                callBackBuffer = 0;
                 out = new QByteArray(buffer, UnpSize);
                 delete[] buffer;
-                delete[] callBackBuffer;
 
                 break;
             }
@@ -180,5 +179,9 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
     }
 
     delete ArcNameW;
+    if (out == 0)
+    {
+        return new QByteArray();
+    }
     return out;
 }
