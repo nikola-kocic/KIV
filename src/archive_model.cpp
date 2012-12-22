@@ -6,7 +6,10 @@
 
 #include "quazip/quazip.h"
 #include "quazip/quazipfile.h"
+
 #include <QFileIconProvider>
+#include <QFileSystemModel>
+#include <QStyle>
 
 //#define DEBUG_MODEL_FILES
 #ifdef DEBUG_MODEL_FILES

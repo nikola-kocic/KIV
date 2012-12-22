@@ -4,7 +4,7 @@
 #include <QLibrary>
 #include <QBuffer>
 
-#include "unrar/unrar.h"
+#include "unrar.h"
 
 class ArchiveRar
 {

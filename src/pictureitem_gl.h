@@ -44,7 +44,7 @@ private slots:
     void textureFinished(int num);
 };
 
-inline void PictureItemGL::setZoom(const qreal current, const qreal previous)
+inline void PictureItemGL::setZoom(const qreal, const qreal)
 { setRotation(m_data->getRotation(), m_data->getRotation()); }
 
 #endif // PICTUREITEM_GL_H

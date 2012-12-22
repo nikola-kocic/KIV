@@ -12,6 +12,7 @@
 #include <QDesktopServices>
 #include <QKeyEvent>
 #include <QInputDialog>
+#include <QMimeData>
 
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
