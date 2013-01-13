@@ -38,14 +38,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     if (Helper::getFiltersImage().contains("svg"))
     {
-        if (QFile::exists("icons/kiv.svg"))
-        {
-            this->setWindowIcon(QIcon("icons/kiv.svg"));
-        }
-        else if (QFile::exists("../files/icons/kiv.svg"))
-        {
-            this->setWindowIcon(QIcon("../files/icons/kiv.svg"));
-        }
+        this->setWindowIcon(QIcon("icons/kiv.svg"));
     }
 
     updateSettings();
@@ -160,14 +153,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::createActions()
 {
     QDir appdir(QApplication::applicationDirPath());
-
-    if (!QFile::exists("icons"))
-    {
-        if (appdir.dirName() == "release" || appdir.dirName() == "debug")
-        {
-            appdir.cd("../../files/icons");
-        }
-    }
     QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());
 
     static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";

@@ -64,6 +64,21 @@ HEADERS += \
     pictureitem_interface.h \
     pictureitem_data.h
 
+
+CONFIG(debug, debug|release) {
+    DESTDIR = $$OUT_PWD/debug
+} else {
+    DESTDIR = $$OUT_PWD/release
+}
+
+KIV_FILES += $$PWD/../files/icons
+
+extra_libs.files = $$KIV_FILES
+extra_libs.path = $$DESTDIR
+
+## Tell qmake to add the moving of them to the 'install' target
+INSTALLS += extra_libs
+
 win32{
     INCLUDEPATH += $$PWD/zlib
     RC_FILE = kiv.rc
