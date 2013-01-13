@@ -4,8 +4,8 @@
 #include "archive_model.h"
 #include "helper.h"
 
-#include "quazip/quazip.h"
-#include "quazip/quazipfile.h"
+#include "quazip/quazip/quazip.h"
+#include "quazip/quazip/quazipfile.h"
 
 #include <QFileIconProvider>
 #include <QFileSystemModel>

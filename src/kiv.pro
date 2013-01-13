@@ -1,15 +1,6 @@
 
 SOURCES += \
     main.cpp \
-    quazip/zip.c \
-    quazip/unzip.c \
-    quazip/quazipnewinfo.cpp \
-    quazip/quazipfile.cpp \
-    quazip/quazip.cpp \
-    quazip/quacrc32.cpp \
-    quazip/quaadler32.cpp \
-    quazip/qioapi.cpp \
-    quazip/JlCompress.cpp \
     settings_dialog.cpp \
     settings.cpp \
     pictureitem.cpp \
@@ -28,22 +19,21 @@ SOURCES += \
     archive_model.cpp \
     unrar/unrar.cpp \
     unrar/archive_rar.cpp \
-    pictureitem_data.cpp
+    pictureitem_data.cpp \
+    quazip/quazip/quazipnewinfo.cpp \
+    quazip/quazip/quazipfile.cpp \
+    quazip/quazip/quazipdir.cpp \
+    quazip/quazip/quazip.cpp \
+    quazip/quazip/quaziodevice.cpp \
+    quazip/quazip/quagzipfile.cpp \
+    quazip/quazip/quacrc32.cpp \
+    quazip/quazip/quaadler32.cpp \
+    quazip/quazip/qioapi.cpp \
+    quazip/quazip/JlCompress.cpp \
+    quazip/quazip/zip.c \
+    quazip/quazip/unzip.c
 
 HEADERS += \
-    quazip/zip.h \
-    quazip/unzip.h \
-    quazip/quazipnewinfo.h \
-    quazip/quazipfileinfo.h \
-    quazip/quazipfile.h \
-    quazip/quazip_global.h \
-    quazip/quazip.h \
-    quazip/quacrc32.h \
-    quazip/quachecksum32.h \
-    quazip/quaadler32.h \
-    quazip/JlCompress.h \
-    quazip/ioapi.h \
-    quazip/crypt.h \
     settings_dialog.h \
     settings.h \
     pictureitem.h \
@@ -62,7 +52,23 @@ HEADERS += \
     unrar/unrar.h \
     unrar/archive_rar.h \
     pictureitem_interface.h \
-    pictureitem_data.h
+    pictureitem_data.h \
+    quazip/quazip/zip.h \
+    quazip/quazip/unzip.h \
+    quazip/quazip/quazipnewinfo.h \
+    quazip/quazip/quazipfileinfo.h \
+    quazip/quazip/quazipfile.h \
+    quazip/quazip/quazipdir.h \
+    quazip/quazip/quazip_global.h \
+    quazip/quazip/quazip.h \
+    quazip/quazip/quaziodevice.h \
+    quazip/quazip/quagzipfile.h \
+    quazip/quazip/quacrc32.h \
+    quazip/quazip/quachecksum32.h \
+    quazip/quazip/quaadler32.h \
+    quazip/quazip/JlCompress.h \
+    quazip/quazip/ioapi.h \
+    quazip/quazip/crypt.h
 
 
 CONFIG(debug, debug|release) {

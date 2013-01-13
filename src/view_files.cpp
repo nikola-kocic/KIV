@@ -1,6 +1,6 @@
 #include "view_files.h"
 #include "archive_item.h"
-#include "quazip/JlCompress.h"
+#include "quazip/quazip/JlCompress.h"
 #include "unrar/archive_rar.h"
 
 #include <QHeaderView>

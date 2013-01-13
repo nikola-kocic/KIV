@@ -1,6 +1,6 @@
 #include "picture_loader.h"
-#include "quazip/quazip.h"
-#include "quazip/quazipfile.h"
+#include "quazip/quazip/quazip.h"
+#include "quazip/quazip/quazipfile.h"
 #include "unrar/archive_rar.h"
 
 #include <QFile>
