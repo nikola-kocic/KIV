@@ -9,7 +9,7 @@
 class PictureItemInterface
 {
 public:
-    explicit PictureItemInterface(PictureItemData *data, QWidget*) { m_data = data; }
+    explicit PictureItemInterface(PictureItemData *data, QWidget*) : m_data(data), m_widget(NULL) {}
     virtual ~PictureItemInterface() {}
     virtual void setRotation(const qreal current, const qreal previous) = 0;
     virtual void setZoom(const qreal current, const qreal previous) = 0;

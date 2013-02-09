@@ -212,10 +212,10 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
             qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
 #endif
             m_type = ArchiveType::Rar;
-            delete ArcNameW;
+            delete[] ArcNameW;
             return;
         }
-        delete ArcNameW;
+        delete[] ArcNameW;
     }
 }
 

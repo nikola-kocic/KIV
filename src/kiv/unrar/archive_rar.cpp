@@ -94,7 +94,7 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
         RARCloseArchive(hArcData);
     }
 
-    delete ArcNameW;
+    delete[] ArcNameW;
 
     return success;
 }
@@ -180,7 +180,7 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
         RARCloseArchive(hArcData);
     }
 
-    delete ArcNameW;
+    delete[] ArcNameW;
     if (out == 0)
     {
         return new QByteArray();
@@ -188,7 +188,7 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
     return out;
 }
 
-bool ArchiveRar::isDir(const RARHeaderDataEx headerData)
+bool ArchiveRar::isDir(const RARHeaderDataEx &headerData)
 {
     return((headerData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY);
 }
