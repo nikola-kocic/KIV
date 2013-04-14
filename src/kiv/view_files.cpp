@@ -384,6 +384,7 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
 
     m_view_current->setRootIndex(m_proxy_file_list->mapFromSource(m_proxy_archive_dirs->mapToSource(current)));
     m_view_current->selectionModel()->clear();
+    m_view_current->scrollToTop();
     showThumbnails();
 
     if (m_flag_opening)
