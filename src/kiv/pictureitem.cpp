@@ -146,6 +146,10 @@ void PictureItem::afterPixmapLoad()
         }
         m_data->m_flag_jumpToEnd = false;
     }
+    else
+    {
+        m_data->m_boundingRect.moveTop(0);
+    }
 }
 
 void PictureItem::calculateAverageColor(const QImage &img)
