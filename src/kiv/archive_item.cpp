@@ -55,7 +55,8 @@ int ArchiveItem::indexToInsertByName(ArchiveItem *item)
         {
             if (currentItemType == type)
             {
-                if (this->child(i)->data(Qt::EditRole, col_name).toString().compare(name, Qt::CaseInsensitive) > 0)
+                if (Helper::naturalCompare(
+                            this->child(i)->data(Qt::EditRole, col_name).toString(), name, Qt::CaseInsensitive) > 0)
                 {
                     return i;
                 }
@@ -69,7 +70,8 @@ int ArchiveItem::indexToInsertByName(ArchiveItem *item)
         {
             if (currentItemType == type)
             {
-                if (this->child(i)->data(Qt::EditRole, col_name).toString().compare(name, Qt::CaseInsensitive) > 0)
+                if (Helper::naturalCompare(
+                            this->child(i)->data(Qt::EditRole, col_name).toString(), name, Qt::CaseInsensitive) > 0)
                 {
                     return i;
                 }

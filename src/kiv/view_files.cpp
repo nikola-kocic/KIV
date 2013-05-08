@@ -672,7 +672,7 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
             {
             case ArchiveItem::col_name:
             {
-                return (left_name.compare(right_name, Qt::CaseInsensitive) < 0);
+                return (Helper::naturalCompare(left_name, right_name, Qt::CaseInsensitive) < 0);
             }
 
             case ArchiveItem::col_date:
@@ -691,7 +691,7 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 }
                 else
                 {
-                    return (left_name.compare(right_name, Qt::CaseInsensitive) < 0);
+                    return (Helper::naturalCompare(left_name, right_name, Qt::CaseInsensitive) < 0);
                 }
             }
 
@@ -712,7 +712,7 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 else
                 {
                     // If same size, sort by Name Ascending
-                    const int name_comparison = left_name.compare(right_name, Qt::CaseInsensitive);
+                    const int name_comparison = Helper::naturalCompare(left_name, right_name, Qt::CaseInsensitive);
                     if (this->sortOrder() == Qt::AscendingOrder)
                         return (name_comparison  < 0);
                     else
@@ -754,7 +754,7 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
             {
             case 0:
             {
-                return (left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+                return (Helper::naturalCompare(left_fileinfo.fileName(), right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
             }
 
             case 3:
@@ -770,7 +770,7 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 }
                 else
                 {
-                    return (left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+                    return (Helper::naturalCompare(left_fileinfo.fileName(), right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
                 }
             }
 
@@ -788,7 +788,7 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 else
                 {
                     // If same size, sort by Name Ascending
-                    const int name_comparison = left_fileinfo.fileName().compare(right_fileinfo.fileName(), Qt::CaseInsensitive);
+                    const int name_comparison = Helper::naturalCompare(left_fileinfo.fileName(), right_fileinfo.fileName(), Qt::CaseInsensitive);
                     if (this->sortOrder() == Qt::AscendingOrder)
                         return (name_comparison  < 0);
                     else

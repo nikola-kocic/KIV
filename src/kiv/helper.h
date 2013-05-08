@@ -27,6 +27,8 @@ public:
     static bool FuzzyCompare(const double p1, const double p2);
     static bool FuzzyCompare(const float p1, const float p2);
 
+    static int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs);
+
 private:
     static QStringList m_filters_image;
 };
