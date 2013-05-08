@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     if (Helper::getFiltersImage().contains("svg"))
     {
-        this->setWindowIcon(QIcon("icons/kiv.svg"));
+        this->setWindowIcon(QIcon(QApplication::applicationDirPath() + "/icons/kiv.svg"));
     }
 
     updateSettings();

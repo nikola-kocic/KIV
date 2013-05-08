@@ -43,20 +43,6 @@ HEADERS += \
     pictureitem_data.h
 
 
-CONFIG(debug, debug|release) {
-    DESTDIR = $$OUT_PWD/debug
-} else {
-    DESTDIR = $$OUT_PWD/release
-}
-
-KIV_FILES += $$PWD/../../files/icons
-
-extra_libs.files = $$KIV_FILES
-extra_libs.path = $$DESTDIR
-
-## Tell qmake to add the moving of them to the 'install' target
-INSTALLS += extra_libs
-
 win32{
     RC_FILE = kiv.rc
 }
@@ -74,3 +60,20 @@ else:unix: LIBS += -L$$OUT_PWD/../quazip/quazip/ -lquazip1
 
 INCLUDEPATH += $$PWD/../quazip/quazip
 DEPENDPATH += $$PWD/../quazip/quazip
+
+
+CONFIG(debug, debug|release) {
+    ICONS_DEST = $$OUT_PWD/debug/icons
+} else {
+    ICONS_DEST = $$OUT_PWD/release/icons
+}
+
+ICONS_DIR += $$PWD/../../files/icons
+
+windows {
+    *-g++* {
+        QMAKE_COPY_DIR = cp -r
+    }
+}
+
+QMAKE_POST_LINK = $$QMAKE_COPY_DIR \"$$ICONS_DIR\" \"$$ICONS_DEST\"
