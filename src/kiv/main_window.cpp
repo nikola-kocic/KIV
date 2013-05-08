@@ -823,7 +823,7 @@ void MainWindow::about()
     aboutBox.setText(
                 QApplication::applicationName() + " " + tr("version") + " " + QApplication::applicationVersion() + "<br><br>" +
                 tr("Author") + QString::fromUtf8(": Nikola Kocić") + "<br><br>" +
-                tr("Website") + ": <a href = \"http://nikola-kocic.github.com/KIV/\">http://nikola-kocic.github.com/KIV/</a>"
+                tr("Website") + ": <a href = \"https://github.com/nikola-kocic/KIV\">https://github.com/nikola-kocic/KIV</a>"
                 );
     aboutBox.exec();
 }
