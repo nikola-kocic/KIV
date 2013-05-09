@@ -830,7 +830,7 @@ void MainWindow::about()
 
 void MainWindow::website()
 {
-    QDesktopServices::openUrl(QUrl("http://nikola-kocic.github.com/KIV/"));
+    QDesktopServices::openUrl(QUrl("https://github.com/nikola-kocic/KIV"));
 }
 
 void MainWindow::toggleLargeIcons(bool b)
