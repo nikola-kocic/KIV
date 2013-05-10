@@ -42,8 +42,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     {
         zip.setFileNameCodec("UTF-8");
 
-        QList<QuaZipFileInfo> archive_files = zip.getFileInfoList();
-        //    QStringList archive_files = zip.getFileNameList();
+        const QList<QuaZipFileInfo> archive_files = zip.getFileInfoList();
 
         zip.close();
         if (zip.getZipError() != UNZ_OK)
@@ -226,7 +225,9 @@ int ArchiveModel::columnCount(const QModelIndex & /* parent */) const
 QVariant ArchiveModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
+    {
         return QVariant();
+    }
 
     ArchiveItem *item = getItem(index);
 
@@ -236,16 +237,22 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags ArchiveModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
+    {
         return 0;
+    }
 
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 ArchiveItem *ArchiveModel::getItem(const QModelIndex &index) const
 {
-    if (index.isValid()) {
+    if (index.isValid())
+    {
         ArchiveItem *item = static_cast<ArchiveItem*>(index.internalPointer());
-        if (item) return item;
+        if (item)
+        {
+            return item;
+        }
     }
     return rootItem;
 }
@@ -271,33 +278,42 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int 
 QModelIndex ArchiveModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (column < 0 || row < 0)
+    {
         return QModelIndex();
+    }
 
     if (parent.isValid() && parent.column() != 0)
+    {
         return QModelIndex();
+    }
 
     ArchiveItem *parentItem = getItem(parent);
 
     ArchiveItem *childItem = parentItem->child(row);
     if (childItem)
+    {
         return createIndex(row, column, childItem);
+    }
     else
+    {
         return QModelIndex();
+    }
 }
 
 QModelIndex ArchiveModel::parent(const QModelIndex &index) const
 {
-    if (!index.isValid())
+    if (!index.isValid() || rowCount() == 0)
+    {
         return QModelIndex();
-
-    if (rowCount() == 0)
-        return QModelIndex();
+    }
 
     ArchiveItem *childItem = getItem(index);
     ArchiveItem *parentItem = childItem->parent();
 
     if (parentItem == rootItem)
+    {
         return QModelIndex();
+    }
 
     return createIndex(parentItem->row(), 0, parentItem);
 }
@@ -305,14 +321,23 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
 int ArchiveModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.column() > 0)
+    {
         return 0;
+    }
 
     ArchiveItem *parentItem = getItem(parent);
 
     return parentItem->childCount();
 }
 
-ArchiveItem *ArchiveModel::AddNode(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, ArchiveItem *parent, bool updateDate)
+ArchiveItem *ArchiveModel::AddNode(
+        const QString &name,
+        const QDateTime &date,
+        const quint64 &bytes,
+        const QString &path,
+        const int type,
+        ArchiveItem *parent,
+        const bool updateDate)
 {
     for (int i = 0; i < parent->childCount(); ++i)
     {
@@ -342,7 +367,7 @@ QModelIndex ArchiveModel::getDirectory(const QString &path)
 {
     QModelIndex cri = this->index(0, 0);
 
-    QStringList file_path_parts = path.split('/', QString::SkipEmptyParts);
+    const QStringList file_path_parts = path.split('/', QString::SkipEmptyParts);
     for (int j = 0; j < file_path_parts.size(); ++j)
     {
         cri = findIndexChild(file_path_parts.at(j), cri);

@@ -55,7 +55,6 @@ private:
 
     void ComputeBitmapPow2Size(TileDim *tileDim);
     void InitTiles(TileDim *tileDim);
-    int Pad4(const int yBytes) const;
 
 };
 

@@ -13,7 +13,7 @@ public:
     void appendChild(ArchiveItem *child);
     ArchiveItem *child(int row);
     int childCount() const;
-    int columnCount() const;
+    static int columnCount();
     QVariant data(int role, int column) const;
     int row() const;
     ArchiveItem *parent();
@@ -29,7 +29,7 @@ public:
     static const int TYPE_ARCHIVE_FILE = 3;
 
 private:
-    int indexToInsertByName(ArchiveItem *item);
+    int indexToInsertByName(const ArchiveItem* const item);
     QList<ArchiveItem*> childItems;
     ArchiveItem *parentItem;
 

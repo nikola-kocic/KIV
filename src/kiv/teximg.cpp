@@ -116,12 +116,6 @@ void TexImg::InitTiles(TileDim *tileDim)
     }
 }
 
-int TexImg::Pad4(const int yBytes) const
-{
-    int num = yBytes % 4;
-    return (num == 0) ? yBytes : (yBytes + (4 - num));
-}
-
 void TexImg::setImage(const QImage &img)
 {
     if (this->hTile != 0)

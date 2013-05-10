@@ -23,7 +23,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         return;
     }
 
-    QFileInfo fi(path);
+    const QFileInfo fi(path);
 
     if (fi.isDir())
     {
@@ -78,8 +78,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 
     // If path is image in archive
 
-    QString editedPath = path;
-    editedPath.replace('\\', '/');
+    const QString editedPath = QDir::fromNativeSeparators(path);
     QString tempContainerPath = editedPath;
     int indexOfContainerSlash = -1;
     do
@@ -90,14 +89,14 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 //        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo" << "index of /" << indexOfContainerSlash << "path" << temppath;
 //#endif
         tempContainerPath.truncate(indexOfContainerSlash);
-        QFileInfo tempFileInfo = QFileInfo(tempContainerPath);
+        const QFileInfo tempFileInfo = QFileInfo(tempContainerPath);
         if (tempFileInfo.exists() && !tempFileInfo.isDir())
         {
             m_container = tempFileInfo;
             m_hasValidContainer = true;
             m_isInArchive = true;
 
-            QString zipAbsoluteFilePath = editedPath.right(editedPath.size() - tempContainerPath.size() - 1);
+            const QString zipAbsoluteFilePath = editedPath.right(editedPath.size() - tempContainerPath.size() - 1);
 
             if (!zipAbsoluteFilePath.isEmpty())
             {
@@ -126,17 +125,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 
 bool FileInfo::isValid() const
 {
-    if (this->fileExists())
-    {
-        return true;
-    }
-
-    if (this->isContainerValid())
-    {
-        return true;
-    }
-
-    return false;
+    return (this->fileExists() || this->isContainerValid());
 }
 
 bool FileInfo::isInArchive() const
@@ -177,9 +166,7 @@ QString FileInfo::zipImagePath() const
 
 QString FileInfo::rarImagePath() const
 {
-    QString rarImagePath = m_zipPath + m_zipImageFileName;
-
-    rarImagePath.replace('/', QDir::separator());
+    const QString rarImagePath = QDir::toNativeSeparators(m_zipPath + m_zipImageFileName);
     return rarImagePath;
 }
 

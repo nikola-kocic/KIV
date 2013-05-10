@@ -42,40 +42,32 @@ void ArchiveItem::appendChild(ArchiveItem *item)
     childItems.insert(indexToInsertByName(item), item);
 }
 
-int ArchiveItem::indexToInsertByName(ArchiveItem *item)
+int ArchiveItem::indexToInsertByName(const ArchiveItem* const item)
 {
     const int type = item->data(Helper::ROLE_TYPE, 0).toInt();
-    const QString name = item->data(Qt::EditRole, col_name).toString();
+    const QString itemName = item->data(Qt::EditRole, col_name).toString();
     int i = 0;
 
     for (; i < this->childCount(); ++i)
     {
         int currentItemType = this->child(i)->data(Helper::ROLE_TYPE, 0).toInt();
-        if (type == TYPE_ARCHIVE_DIR)
+        if (type == TYPE_ARCHIVE)
         {
-            if (currentItemType == type)
-            {
-                if (Helper::naturalCompare(
-                            this->child(i)->data(Qt::EditRole, col_name).toString(), name, Qt::CaseInsensitive) > 0)
-                {
-                    return i;
-                }
-            }
-            else
+            // TODO: Allow archive in archive
+            continue;
+        }
+        if (currentItemType == type)
+        {
+            const QString currentItemName = this->child(i)->data(Qt::EditRole, col_name).toString();
+            if (Helper::naturalCompare(currentItemName, itemName, Qt::CaseInsensitive) > 0)
             {
                 return i;
             }
         }
-        else if (type == TYPE_ARCHIVE_FILE)
+        else if (type == TYPE_ARCHIVE_DIR)
+            // Directories go above files
         {
-            if (currentItemType == type)
-            {
-                if (Helper::naturalCompare(
-                            this->child(i)->data(Qt::EditRole, col_name).toString(), name, Qt::CaseInsensitive) > 0)
-                {
-                    return i;
-                }
-            }
+            return i;
         }
     }
 
@@ -92,7 +84,7 @@ int ArchiveItem::childCount() const
     return childItems.size();
 }
 
-int ArchiveItem::columnCount() const
+int ArchiveItem::columnCount()
 {
     return col_count;
 }
@@ -133,7 +125,9 @@ QVariant ArchiveItem::data(int role, int column) const
     case Qt::DecorationRole:
     {
         if (column == col_name)
+        {
             return m_icon;
+        }
     }
 
     case Qt::ToolTipRole:
@@ -170,7 +164,9 @@ void ArchiveItem::setSize(const quint64 &bytes)
 int ArchiveItem::row() const
 {
     if (parentItem)
+    {
         return parentItem->childItems.indexOf(const_cast<ArchiveItem*>(this));
+    }
 
     return 0;
 }

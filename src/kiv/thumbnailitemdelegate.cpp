@@ -39,9 +39,9 @@ void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
     }
 }
 
-QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option,
+                                      const QModelIndex &/*index*/) const
 {
-    Q_UNUSED(index);
     const QSize &size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.decorationSize.height());
     return size_grid;
 }

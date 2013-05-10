@@ -251,9 +251,8 @@ void PictureItemGL::resizeGL(int width, int height)
     glLoadIdentity();
 }
 
-void PictureItemGL::setRotation(const qreal current, const qreal previous)
+void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 {
-    Q_UNUSED(previous);
     if (qRound(current) % 360 == 0)
     {
         const qreal newWidth = m_texImg->hTile->bmpSize * m_data->getZoom();

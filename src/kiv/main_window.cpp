@@ -117,9 +117,8 @@ MainWindow::~MainWindow()
     delete m_settings;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent * /*event*/)
 {
-    Q_UNUSED(event);
     m_settings->setLastPath(m_view_files->getCurrentFileInfo().getPath());
 }
 
