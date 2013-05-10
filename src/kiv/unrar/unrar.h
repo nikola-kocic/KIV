@@ -123,7 +123,9 @@ struct RAROpenArchiveDataEx
 };
 
 enum UNRARCALLBACK_MESSAGES {
-  UCM_CHANGEVOLUME,UCM_PROCESSDATA,UCM_NEEDPASSWORD
+  UCM_CHANGEVOLUME,UCM_PROCESSDATA,UCM_NEEDPASSWORD,UCM_CHANGEVOLUMEW,
+  UCM_NEEDPASSWORDW
+
 };
 
 typedef int (PASCAL *CHANGEVOLPROC)(char *ArcName,int Mode);
@@ -140,7 +142,7 @@ typedef int    (PASCAL *RARReadHeaderT)(Qt::HANDLE hArcData,struct RARHeaderData
 typedef int    (PASCAL *RARReadHeaderExT)(Qt::HANDLE hArcData,struct RARHeaderDataEx *HeaderData);
 typedef int    (PASCAL *RARProcessFileT)(Qt::HANDLE hArcData,int Operation,char *DestPath,char *DestName);
 typedef int    (PASCAL *RARProcessFileWT)(Qt::HANDLE hArcData,int Operation,wchar_t *DestPath,wchar_t *DestName);
-typedef void   (PASCAL *RARSetCallbackT)(Qt::HANDLE hArcData,UNRARCALLBACK Callback,long UserData);
+typedef void   (PASCAL *RARSetCallbackT)(Qt::HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserData);
 typedef void   (PASCAL *RARSetChangeVolProcT)(Qt::HANDLE hArcData,CHANGEVOLPROC ChangeVolProc);
 typedef void   (PASCAL *RARSetProcessDataProcT)(Qt::HANDLE hArcData,PROCESSDATAPROC ProcessDataProc);
 typedef void   (PASCAL *RARSetPasswordT)(Qt::HANDLE hArcData,char *Password);

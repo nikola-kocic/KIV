@@ -99,7 +99,7 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
     return success;
 }
 
-int CALLBACK CallbackProc(unsigned int msg, long myBufferPtr, long rarBuffer, long bytesProcessed)
+static int CALLBACK CallbackProc(unsigned int msg, LPARAM myBufferPtr, LPARAM rarBuffer, LPARAM bytesProcessed)
 {
     switch(msg)
     {
@@ -133,13 +133,12 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
     OpenArchiveData.ArcNameW = ArcNameW;
     OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
-    OpenArchiveData.Callback = CallbackProc;
-    OpenArchiveData.UserData = (long) &callBackBuffer;
 
     Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
 
     if (OpenArchiveData.OpenResult == 0)
     {
+        RARSetCallback(hArcData, CallbackProc, (LPARAM)&callBackBuffer);
         int RHCode, PFCode;
         struct RARHeaderDataEx HeaderData;
 
