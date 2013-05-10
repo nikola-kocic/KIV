@@ -64,7 +64,11 @@ ViewFiles::ViewFiles(QWidget *parent)
     /* Start archiveDirsView */
     m_view_archiveDirs->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_view_archiveDirs->setUniformRowHeights(true);
+#ifdef QT5
+    m_view_archiveDirs->header()->setSectionResizeMode(QHeaderView::Stretch);
+#else
     m_view_archiveDirs->header()->setResizeMode(QHeaderView::Stretch);
+#endif
     m_view_archiveDirs->setHeaderHidden(true);
     m_view_archiveDirs->hide();
     m_view_archiveDirs->setModel(m_proxy_archive_dirs);

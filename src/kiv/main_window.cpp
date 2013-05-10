@@ -1,7 +1,7 @@
 #include "main_window.h"
 #include "settings_dialog.h"
 #include "settings.h"
-
+#include <qglobal.h>
 #include <QUrl>
 #include <QAction>
 #include <QBoxLayout>
@@ -36,10 +36,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 {
     this->setAcceptDrops(true);
 
+#ifndef QT5
     if (Helper::getFiltersImage().contains("svg"))
     {
         this->setWindowIcon(QIcon(QApplication::applicationDirPath() + "/icons/kiv.svg"));
     }
+#endif
 
     updateSettings();
     createActions();

@@ -1,3 +1,4 @@
+#ifndef QT5
 #ifndef PICTUREITEM_GL_H
 #define PICTUREITEM_GL_H
 
@@ -48,3 +49,4 @@ inline void PictureItemGL::setZoom(const qreal, const qreal)
 { setRotation(m_data->getRotation(), m_data->getRotation()); }
 
 #endif // PICTUREITEM_GL_H
+#endif // QT5

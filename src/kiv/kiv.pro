@@ -52,6 +52,7 @@ win32{
     INCLUDEPATH += $$PWD/../zlib
 }
 
+greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
 win32:CONFIG(release, debug|release) {
     LIBS += -L$$OUT_PWD/../quazip/quazip/release/ -lquazip1

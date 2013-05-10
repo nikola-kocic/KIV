@@ -1,3 +1,4 @@
+#ifndef QT5
 #include "pictureitem_gl.h"
 #include "settings.h"
 #include "picture_loader.h"
@@ -278,3 +279,4 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
     this->updateSize();
     this->updateGL();
 }
+#endif // QT5

@@ -11,7 +11,11 @@
 #include <QListView>
 #include <QTreeView>
 #include <QFutureWatcher>
+#ifdef QT5
+#include <QtConcurrent/QtConcurrentMap>
+#else
 #include <QtConcurrentMap>
+#endif
 #include <QSplitter>
 #include <QFileSystemModel>
 #include <QPointer>

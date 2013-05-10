@@ -11,8 +11,13 @@
 #include <QBoxLayout>
 #include <QFutureWatcher>
 #include <QTimer>
+#ifdef QT5
+#include <QtConcurrent/QtConcurrentMap>
+#include <QtConcurrent/QtConcurrentRun>
+#else
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
+#endif
 
 #include <QMouseEvent>
 #include <QWheelEvent>

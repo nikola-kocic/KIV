@@ -1,10 +1,15 @@
 #include "thumbnailitemdelegate.h"
 
-#include <QtConcurrentRun>
 #include <QFileIconProvider>
 #include <QPixmap>
 #include <QAbstractItemView>
+#ifdef QT5
+#include <QtConcurrent/QtConcurrentMap>
+#include <QtConcurrent/QtConcurrentRun>
+#else
 #include <QtConcurrentMap>
+#include <QtConcurrentRun>
+#endif
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFileSystemModel>
