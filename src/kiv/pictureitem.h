@@ -37,7 +37,6 @@ public:
     explicit PictureItem(Settings *settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~PictureItem();
 
-    void setZoom(const qreal value);
     qreal getZoom() const;
 
     void setRotation(const qreal value);
@@ -93,6 +92,7 @@ signals:
     void boss();
 
 public slots:
+    void setZoom(const qreal value);
     void zoomIn();
     void zoomOut();
     void fitToScreen();

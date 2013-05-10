@@ -19,7 +19,8 @@ SOURCES += \
     archive_model.cpp \
     unrar/unrar.cpp \
     unrar/archive_rar.cpp \
-    pictureitem_data.cpp
+    pictureitem_data.cpp \
+    widgets/zoomwidget.cpp
 
 HEADERS += \
     settings_dialog.h \
@@ -40,7 +41,8 @@ HEADERS += \
     unrar/unrar.h \
     unrar/archive_rar.h \
     pictureitem_interface.h \
-    pictureitem_data.h
+    pictureitem_data.h \
+    widgets/zoomwidget.h
 
 FORMS += \
     settings_dialog.ui
@@ -67,7 +69,7 @@ DEPENDPATH += $$PWD/../quazip/quazip
 
 
 win32:CONFIG(release, debug|release) {
-    ICONS_DEST = $$OUT_PWD/release
+    ICONS_DEST = $$OUT_PWD/release/icons
 } else:win32:CONFIG(debug, debug|release) {
     ICONS_DEST = $$OUT_PWD/debug/icons
 } else {

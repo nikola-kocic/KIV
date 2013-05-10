@@ -12,6 +12,8 @@
 #include <QMainWindow>
 #include <QLineEdit>
 
+#include "widgets/zoomwidget.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -41,7 +43,7 @@ private:
 
     QToolBar *m_toolbar;
     QLineEdit *m_lineEdit_path;
-    QComboBox *m_comboBox_zoom;
+    ZoomWidget *m_comboBox_zoom;
 
     /* File Menu Actions */
     QAction *m_act_open;
@@ -136,10 +138,7 @@ private slots:
 
     void on_lineEditPath_editingFinished();
     void on_lineEditPath_focus_lost();
-    void on_zoom_changed(qreal current, qreal previous);
     void on_comboBoxZoom_activated(const int &index);
-    void on_comboBoxZoom_TextChanged();
-    void on_comboBoxZoom_focus_lost();
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);

@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
     , m_lineEdit_path(new QLineEdit(this))
-    , m_comboBox_zoom(new QComboBox(this))
+    , m_comboBox_zoom(new ZoomWidget(this))
 {
     this->setAcceptDrops(true);
 
@@ -51,29 +51,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     completer->setModel(m_view_files->getFilesystemModel());
     m_lineEdit_path->setCompleter(completer);
     m_lineEdit_path->installEventFilter(this);
-
-    /* Start comboBoxZoom */
-    m_comboBox_zoom->setEnabled(false);
-    m_comboBox_zoom->setInsertPolicy(QComboBox::NoInsert);
-    m_comboBox_zoom->setMaxVisibleItems(12);
-    m_comboBox_zoom->setMinimumContentsLength(8);
-    m_comboBox_zoom->setEditable(true);
-    m_comboBox_zoom->setFocusPolicy(Qt::ClickFocus);
-    m_comboBox_zoom->lineEdit()->setCompleter(0);
-    m_comboBox_zoom->installEventFilter(this);
-
-    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
-    {
-        const qreal &z = Helper::defaultZoomSizes.at(i);
-        m_comboBox_zoom->addItem(QString::number((z * 100), 'f', 0) + "%", z);
-        if (z == 1)
-        {
-            m_comboBox_zoom->setCurrentIndex(m_comboBox_zoom->count() - 1);
-        }
-    }
-    /* End comboBoxZoom */
-
-
 
     connectActions();
 
@@ -135,12 +112,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         {
             m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
             m_lineEdit_path->clearFocus();
-            event->accept();
-        }
-        else if (m_comboBox_zoom->lineEdit()->hasFocus())
-        {
-            on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
-            m_comboBox_zoom->clearFocus();
             event->accept();
         }
     }
@@ -491,14 +462,14 @@ void MainWindow::connectActions()
     connect(m_picture_item, SIGNAL(toggleFullscreen()), m_act_fullscreen, SLOT(toggle()));
     connect(m_picture_item, SIGNAL(pageNext()), m_view_files, SLOT(pageNext()));
     connect(m_picture_item, SIGNAL(pagePrevious()), m_view_files, SLOT(pagePrevious()));
-    connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)), this, SLOT(on_zoom_changed(qreal,qreal)));
+    connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)), m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
     connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
     connect(m_picture_item, SIGNAL(quit()), this, SLOT(close()));
     connect(m_picture_item, SIGNAL(boss()), this, SLOT(showMinimized()));
     connect(m_picture_item, SIGNAL(setFullscreen(bool)), m_act_fullscreen, SLOT(setChecked(bool)));
 
     connect(m_comboBox_zoom, SIGNAL(activated(int)), this, SLOT(on_comboBoxZoom_activated(int)));
-    connect(m_comboBox_zoom->lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_comboBoxZoom_TextChanged()));
+    connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)), m_picture_item, SLOT(setZoom(qreal)));
 
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(m_act_dirUp, SIGNAL(triggered()), m_view_files, SLOT(dirUp()));
@@ -632,10 +603,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         if (obj == m_lineEdit_path)
         {
             on_lineEditPath_focus_lost();
-        }
-        else if (obj == m_comboBox_zoom)
-        {
-            on_comboBoxZoom_focus_lost();
         }
     }
 
@@ -850,81 +817,6 @@ void MainWindow::toggleLargeIcons(bool b)
     m_settings->setLargeIcons(b);
 }
 
-void MainWindow::on_zoom_changed(qreal current, qreal previous)
-{
-    if (!Helper::defaultZoomSizes.contains(current))
-    {
-        /* Add current Zoom value to comboBox */
-
-        const QString zoomText = QString::number((current * 100), 'f', 0) + "%";
-        int insertIndex = 0;
-        for (; insertIndex < m_comboBox_zoom->count(); ++insertIndex)
-        {
-            if (m_comboBox_zoom->itemData(insertIndex).toReal() > current)
-            {
-                break;
-            }
-        }
-
-        m_comboBox_zoom->insertItem(insertIndex, zoomText, current);
-        m_comboBox_zoom->setCurrentIndex(insertIndex);
-    }
-    else
-    {
-        /* Add select current Zoom value from comboBox */
-
-        for (int existingIndex = 0; existingIndex < m_comboBox_zoom->count(); ++existingIndex)
-        {
-            if (Helper::FuzzyCompare(m_comboBox_zoom->itemData(existingIndex).toReal(), current))
-            {
-                m_comboBox_zoom->setCurrentIndex(existingIndex);
-                break;
-            }
-        }
-    }
-
-    if (!Helper::defaultZoomSizes.contains(previous))
-    {
-        /* Remove previous Zoom value if it's not in default zoom sizes */
-
-        for (int existingIndex = 0; existingIndex < m_comboBox_zoom->count(); ++existingIndex)
-        {
-            if (Helper::FuzzyCompare(m_comboBox_zoom->itemData(existingIndex).toReal(), previous))
-            {
-                m_comboBox_zoom->removeItem(existingIndex);
-                break;
-            }
-        }
-    }
-}
-
-void MainWindow::on_comboBoxZoom_TextChanged()
-{
-    QString zoomvalue = m_comboBox_zoom->lineEdit()->text();
-    zoomvalue.remove('%');
-
-    bool ok;
-    const int dec = zoomvalue.toInt(&ok, 10);
-
-    if (ok)
-    {
-        const qreal z = (qreal)dec / 100;
-        m_picture_item->setZoom(z);
-    }
-    else
-    {
-        on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
-    }
-}
-
-void MainWindow::on_comboBoxZoom_focus_lost()
-{
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_comboBoxZoom_focus_lost" << m_comboBox_zoom->lineEdit()->text();
-#endif
-    on_zoom_changed(m_picture_item->getZoom(), m_picture_item->getZoom());
-    m_comboBox_zoom->clearFocus();
-}
 
 void MainWindow::on_comboBoxZoom_activated(const int &index)
 {
