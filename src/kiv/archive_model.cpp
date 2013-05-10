@@ -109,15 +109,11 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     // Try to open as RAR
     if (ArchiveRar::loadlib())
     {
-
         struct RAROpenArchiveDataEx OpenArchiveData;
         memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
 
-        wchar_t* ArcNameW = new wchar_t[path.length() + 1];
-        int sl = path.toWCharArray(ArcNameW);
-        ArcNameW[sl] = 0;
-
-        OpenArchiveData.ArcNameW = ArcNameW;
+        std::wstring path_wstr = path.toStdWString();
+        OpenArchiveData.ArcNameW = path_wstr.c_str();
         OpenArchiveData.CmtBufSize = 0;
         OpenArchiveData.OpenMode = RAR_OM_LIST;
         OpenArchiveData.Callback = NULL;
@@ -212,10 +208,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
             qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
 #endif
             m_type = ArchiveType::Rar;
-            delete[] ArcNameW;
-            return;
         }
-        delete[] ArcNameW;
     }
 }
 

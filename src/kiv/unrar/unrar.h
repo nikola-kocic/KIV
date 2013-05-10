@@ -108,18 +108,18 @@ typedef int (CALLBACK *UNRARCALLBACK)(unsigned int msg, LPARAM UserData, LPARAM 
 
 struct RAROpenArchiveDataEx
 {
-  char         *ArcName;
-  wchar_t      *ArcNameW;
-  unsigned int  OpenMode;
-  unsigned int  OpenResult;
-  char         *CmtBuf;
-  unsigned int  CmtBufSize;
-  unsigned int  CmtSize;
-  unsigned int  CmtState;
-  unsigned int  Flags;
-  UNRARCALLBACK Callback;
-  LPARAM        UserData;
-  unsigned int  Reserved[28];
+  const char    *ArcName;
+  const wchar_t *ArcNameW;
+  unsigned int   OpenMode;
+  unsigned int   OpenResult;
+  char          *CmtBuf;
+  unsigned int   CmtBufSize;
+  unsigned int   CmtSize;
+  unsigned int   CmtState;
+  unsigned int   Flags;
+  UNRARCALLBACK  Callback;
+  LPARAM         UserData;
+  unsigned int   Reserved[28];
 };
 
 enum UNRARCALLBACK_MESSAGES {
@@ -141,7 +141,7 @@ typedef int    (PASCAL *RARCloseArchiveT)(Qt::HANDLE hArcData);
 typedef int    (PASCAL *RARReadHeaderT)(Qt::HANDLE hArcData,struct RARHeaderData *HeaderData);
 typedef int    (PASCAL *RARReadHeaderExT)(Qt::HANDLE hArcData,struct RARHeaderDataEx *HeaderData);
 typedef int    (PASCAL *RARProcessFileT)(Qt::HANDLE hArcData,int Operation,char *DestPath,char *DestName);
-typedef int    (PASCAL *RARProcessFileWT)(Qt::HANDLE hArcData,int Operation,wchar_t *DestPath,wchar_t *DestName);
+typedef int    (PASCAL *RARProcessFileWT)(Qt::HANDLE hArcData,int Operation,wchar_t *DestPath,const wchar_t *DestName);
 typedef void   (PASCAL *RARSetCallbackT)(Qt::HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserData);
 typedef void   (PASCAL *RARSetChangeVolProcT)(Qt::HANDLE hArcData,CHANGEVOLPROC ChangeVolProc);
 typedef void   (PASCAL *RARSetProcessDataProcT)(Qt::HANDLE hArcData,PROCESSDATAPROC ProcessDataProc);

@@ -39,19 +39,11 @@ bool ArchiveRar::loadlib()
 bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, const QString &newFileName)
 {
     bool success = false;
-    wchar_t* ArcNameW = new wchar_t[archiveName.length() + 1];
-    int sl = archiveName.toWCharArray(ArcNameW);
-    ArcNameW[sl] = 0;
-
-    QString newfilename = newFileName;
-    newfilename.replace('/', QDir::separator());
-    wchar_t* NewFileNameW = new wchar_t[newfilename.length() + 1];
-    sl = newfilename.toWCharArray(NewFileNameW);
-    NewFileNameW[sl] = 0;
+    std::wstring arcNameW = archiveName.toStdWString();
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-    OpenArchiveData.ArcNameW = ArcNameW;
+    OpenArchiveData.ArcNameW = arcNameW.c_str();
     OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
     OpenArchiveData.Callback = 0;
@@ -72,7 +64,8 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
             const QString currentFileName = QString::fromWCharArray(HeaderData.FileNameW);
             if (currentFileName == fileName)
             {
-                RARProcessFileW(hArcData, RAR_EXTRACT, NULL, NewFileNameW);
+                std::wstring newFileNameW = QDir::toNativeSeparators(newFileName).toStdWString();
+                RARProcessFileW(hArcData, RAR_EXTRACT, NULL, newFileNameW.c_str());
                 success = true;
                 break;
             }
@@ -93,8 +86,6 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
 
         RARCloseArchive(hArcData);
     }
-
-    delete[] ArcNameW;
 
     return success;
 }
@@ -121,16 +112,11 @@ static int CALLBACK CallbackProc(unsigned int msg, LPARAM myBufferPtr, LPARAM ra
 QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &fileName)
 {
     QByteArray *out = 0;
-
-    wchar_t* ArcNameW = new wchar_t[archiveName.length() + 1];
-    int sl = archiveName.toWCharArray(ArcNameW);
-    ArcNameW[sl] = 0;
-
-    char *callBackBuffer = 0;
+    std::wstring arcNameW = archiveName.toStdWString();
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-    OpenArchiveData.ArcNameW = ArcNameW;
+    OpenArchiveData.ArcNameW = arcNameW.c_str();
     OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
 
@@ -138,13 +124,14 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
 
     if (OpenArchiveData.OpenResult == 0)
     {
+        char *callBackBuffer = 0;
         RARSetCallback(hArcData, CallbackProc, (LPARAM)&callBackBuffer);
-        int RHCode, PFCode;
-        struct RARHeaderDataEx HeaderData;
 
+        struct RARHeaderDataEx HeaderData;
         HeaderData.CmtBuf = NULL;
         memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
+        int RHCode, PFCode;
         while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
         {
             const QString currentFileName = QString::fromWCharArray(HeaderData.FileNameW);
@@ -179,7 +166,6 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
         RARCloseArchive(hArcData);
     }
 
-    delete[] ArcNameW;
     if (out == 0)
     {
         return new QByteArray();
