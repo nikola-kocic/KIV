@@ -42,38 +42,36 @@ HEADERS += \
     pictureitem_interface.h \
     pictureitem_data.h
 
-
-win32{
-    RC_FILE = kiv.rc
-}
-
 FORMS += \
     settings_dialog.ui
 
 QT += opengl
 
-INCLUDEPATH += $$PWD/../zlib
+win32{
+    RC_FILE = kiv.rc
+    INCLUDEPATH += $$PWD/../zlib
+}
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../quazip/quazip/release/ -lquazip1
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../quazip/quazip/debug/ -lquazip1
-else:unix: LIBS += -L$$OUT_PWD/../quazip/quazip/ -lquazip1
+
+win32:CONFIG(release, debug|release) {
+    LIBS += -L$$OUT_PWD/../quazip/quazip/release/ -lquazip1
+} else:win32:CONFIG(debug, debug|release) {
+    LIBS += -L$$OUT_PWD/../quazip/quazip/debug/ -lquazip1
+} else:unix {
+    LIBS += -L$$OUT_PWD/../quazip/quazip/ -lquazip
+}
 
 INCLUDEPATH += $$PWD/../quazip/quazip
 DEPENDPATH += $$PWD/../quazip/quazip
 
 
-CONFIG(debug, debug|release) {
+win32:CONFIG(release, debug|release) {
+    ICONS_DEST = $$OUT_PWD/release
+} else:win32:CONFIG(debug, debug|release) {
     ICONS_DEST = $$OUT_PWD/debug/icons
 } else {
-    ICONS_DEST = $$OUT_PWD/release/icons
+    ICONS_DEST = $$OUT_PWD/icons
 }
 
 ICONS_DIR += $$PWD/../../files/icons
-
-windows {
-    *-g++* {
-        QMAKE_COPY_DIR = cp -r
-    }
-}
-
 QMAKE_POST_LINK = $$QMAKE_COPY_DIR \"$$ICONS_DIR\" \"$$ICONS_DEST\"
