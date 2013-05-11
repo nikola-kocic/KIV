@@ -50,7 +50,8 @@ QT += opengl
 
 win32{
     RC_FILE = kiv.rc
-    INCLUDEPATH += $$PWD/../zlib
+    greaterThan(QT_MAJOR_VERSION, 4): INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+    else: INCLUDEPATH += $$PWD/../zlib
 }
 
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5

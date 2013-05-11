@@ -4,7 +4,7 @@ QT -= gui
 DEPENDPATH += .
 INCLUDEPATH += .
 !win32:VERSION = 1.0.0
-greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
+
 DEFINES += QUAZIP_BUILD
 CONFIG(staticlib): DEFINES += QUAZIP_STATIC
 
@@ -38,7 +38,8 @@ win32 {
     # workaround for qdatetime.h macro bug
     DEFINES += NOMINMAX
 
-    INCLUDEPATH += $$PWD/../../zlib
+    greaterThan(QT_MAJOR_VERSION, 4): INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+    else: INCLUDEPATH += $$PWD/../../zlib
 }
 
 

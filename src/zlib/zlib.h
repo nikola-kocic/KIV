@@ -33,16 +33,6 @@
 
 #include "zconf.h"
 
-#ifdef QT5
-#include <qglobal.h>
-#if defined(QT_VISIBILITY_AVAILABLE)
-# undef ZEXTERN
-# define ZEXTERN __attribute__((visibility("default")))
-#else
-# undef ZEXTERN
-# define ZEXTERN Q_DECL_EXPORT
-#endif
-#else
 #include "qconfig.h"
 #if defined(QT_VISIBILITY_AVAILABLE)
 # undef ZEXTERN
@@ -50,7 +40,6 @@
 #elif defined(QT_MAKEDLL)
 # undef ZEXTERN
 # define ZEXTERN __declspec(dllexport)
-#endif
 #endif
 
 #ifdef __cplusplus
