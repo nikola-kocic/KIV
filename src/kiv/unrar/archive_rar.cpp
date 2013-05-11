@@ -57,11 +57,13 @@ bool ArchiveRar::loadlib()
     return true;
 }
 
-bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, const QString &newFileName)
+unsigned int ArchiveRar::extract(const QString &archiveName,
+                                 const QString &fileName,
+                                 const QString &newFileName)
 {
     const std::wstring fileNameW = QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
-    bool success = false;
+    unsigned int returnCode = 1000;
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
@@ -75,7 +77,7 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
 
     if (OpenArchiveData.OpenResult != 0)
     {
-        return false;
+        return OpenArchiveData.OpenResult;
     }
 
     int RHCode, PFCode;
@@ -89,17 +91,15 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
         if (wcscmp(fileNameW.c_str(),  HeaderData.FileNameW) == 0)
         {
             std::wstring newFileNameW = QDir::toNativeSeparators(newFileName).toStdWString();
-            RARProcessFileW(hArcData, RAR_EXTRACT, NULL, newFileNameW.c_str());
-            success = true;
+            PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, NULL, newFileNameW.c_str());
+            returnCode = PFCode;
             break;
         }
-        else
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
         {
-            if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
-            {
-                qWarning("%d", PFCode);
-                break;
-            }
+            qWarning("%d", PFCode);
+            returnCode = PFCode;
+            break;
         }
     }
 
@@ -110,10 +110,13 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
 
     RARCloseArchive(hArcData);
 
-    return success;
+    return returnCode;
 }
 
-static int CALLBACK CallbackProc(unsigned int msg, LPARAM myBufferPtr, LPARAM rarBuffer, LPARAM bytesProcessed)
+static int CALLBACK CallbackProc(unsigned int msg,
+                                 LPARAM myBufferPtr,
+                                 LPARAM rarBuffer,
+                                 LPARAM bytesProcessed)
 {
     switch(msg)
     {
@@ -132,11 +135,13 @@ static int CALLBACK CallbackProc(unsigned int msg, LPARAM myBufferPtr, LPARAM ra
     return 0;
 }
 
-QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &fileName)
+unsigned int ArchiveRar::readFile(const QString &archiveName,
+                                  const QString &fileName,
+                                  QByteArray &buffer)
 {
     const std::wstring fileNameW = QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
-    QByteArray *out = 0;
+    unsigned int returnCode = 1000;
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
@@ -148,7 +153,7 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
 
     if (OpenArchiveData.OpenResult != 0)
     {
-        return new QByteArray();
+        return OpenArchiveData.OpenResult;
     }
 
     char *callBackBuffer = 0;
@@ -164,23 +169,18 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
             qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
-            char *buffer = new char[UnpSize];
-            callBackBuffer = buffer;
+            buffer.resize(UnpSize);
+            callBackBuffer = buffer.data();
 
             PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
-            callBackBuffer = 0;
-            out = new QByteArray(buffer, UnpSize);
-            delete[] buffer;
-
+            returnCode = PFCode;
             break;
         }
-        else
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
         {
-            if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
-            {
-                qWarning("%d", PFCode);
-                break;
-            }
+            qWarning("%d", PFCode);
+            returnCode = PFCode;
+            break;
         }
     }
 
@@ -191,7 +191,7 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
 
     RARCloseArchive(hArcData);
 
-    return out;
+    return returnCode;
 }
 
 QDateTime ArchiveRar::dateFromDos(const uint dosTime)

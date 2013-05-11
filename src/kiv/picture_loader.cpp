@@ -86,7 +86,7 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 
 QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 {
-    QByteArray *buff = 0;
+    QByteArray buff;
 
     QFile zipFile(thumb_info.getFileInfo().getContainerPath());
     QuaZip zip(&zipFile);
@@ -99,7 +99,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
             QuaZipFile file(&zip);
             if (file.open(QIODevice::ReadOnly))
             {
-                buff = new QByteArray(file.readAll());
+                buff = file.readAll();
             }
             else
             {
@@ -112,21 +112,26 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
         }
     }
 
-    if (buff == 0)
+    if (buff.isEmpty())
     {
         if (ArchiveRar::loadlib())
         {
-            buff = ArchiveRar::readFile(thumb_info.getFileInfo().getContainerPath(), thumb_info.getFileInfo().rarImagePath());
+            // TODO: Check return value
+            ArchiveRar::readFile(thumb_info.getFileInfo().getContainerPath(),
+                                        thumb_info.getFileInfo().rarImagePath(),
+                                        buff);
         }
     }
 
-    if (buff == 0)
+    if (buff.isEmpty())
+    {
         return QImage(0, 0);
+    }
 
 #ifdef DEBUG_PICTURE_LOADER
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromArchive" << "finished reading from archive" << thumb_info.getFileInfo().getPath();
 #endif
-    QBuffer out(buff);
+    QBuffer out(&buff);
     QImageReader image_reader(&out);
 
 #ifdef DEBUG_PICTURE_LOADER
@@ -140,8 +145,6 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
         }
     }
     const QImage img = image_reader.read();
-
-    delete buff;
 
     return img;
 }

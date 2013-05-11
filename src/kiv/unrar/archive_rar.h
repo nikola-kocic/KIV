@@ -10,8 +10,12 @@ class ArchiveRar
 {
 public:
     static bool loadlib();
-    static bool extract(const QString &archiveName, const QString &fileName, const QString &newFileName);
-    static QByteArray *readFile(const QString &archiveName, const QString &fileName);
+    static unsigned int extract(const QString &archiveName,
+                        const QString &fileName,
+                        const QString &newFileName);
+    static unsigned int readFile(const QString &archiveName,
+                                 const QString &fileName,
+                                 QByteArray &buffer);
     static unsigned int getFileInfoList(const QString &path, QList<ArchiveFileInfo> &list);
 
 private:
