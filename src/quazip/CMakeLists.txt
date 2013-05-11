@@ -1,28 +1,26 @@
-project (QuaZip)
-cmake_minimum_required(VERSION 2.6)
+# set all include directories for in and out of source builds
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
+	${ZLIB_INCLUDE_DIRS}
+)
 
-set(qt_min_version "4.5.0")
-find_package(Qt4 REQUIRED)
-set(QT_USE_QTGUI false)
-include(${QT_USE_FILE})
+# include with QT_USE selected library parts
+INCLUDE(${QT_USE_FILE})
 
-# Use system zlib on unix and Qt ZLIB on Windows
-IF(UNIX)
-	find_package(ZLIB REQUIRED)
-ELSE(UNIX)
-	SET(ZLIB_INCLUDE_DIRS "${QT_ROOT}/src/3rdparty/zlib" CACHE STRING "Path to ZLIB headers of Qt")
-	SET(ZLIB_LIBRARIES "")
-	IF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-		MESSAGE("Please specify a valid zlib include dir")
-	ENDIF(NOT EXISTS "${ZLIB_INCLUDE_DIRS}/zlib.h")
-ENDIF(UNIX)
+file(GLOB SRCS "*.c" "*.cpp")
+file(GLOB PUBLIC_HEADERS "*.h")
 
-# All build libraries are moved to this directory
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+# Must be added to enable export macro
+ADD_DEFINITIONS(-DQUAZIP_BUILD)
 
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
-set(LIB_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Library directory name" FORCE)
+qt4_wrap_cpp(MOC_SRCS ${PUBLIC_HEADERS})
+set(SRCS ${SRCS} ${MOC_SRCS})
 
-add_subdirectory(quazip)
+add_library(quazip SHARED ${SRCS})
+set_target_properties(quazip PROPERTIES VERSION 1.0.0 SOVERSION 1)
+# Link against ZLIB_LIBRARIES if needed (on Windows this variable is empty)
+target_link_libraries(quazip ${QT_QTMAIN_LIBRARY} ${QT_QTCORE_LIBRARY} ${ZLIB_LIBRARIES})
 
-install(FILES FindQuaZip.cmake DESTINATION ${CMAKE_ROOT}/Modules)
+install(FILES ${PUBLIC_HEADERS} DESTINATION include/quazip)
+install(TARGETS quazip LIBRARY DESTINATION ${LIB_DESTINATION} ARCHIVE DESTINATION ${LIB_DESTINATION} RUNTIME DESTINATION ${LIB_DESTINATION})

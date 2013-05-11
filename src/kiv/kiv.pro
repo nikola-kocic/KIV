@@ -57,15 +57,15 @@ win32{
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
 win32:CONFIG(release, debug|release) {
-    LIBS += -L$${OUT_PWD}/../quazip/quazip/release/ -lquazip
+    LIBS += -L$${OUT_PWD}/../quazip/release/ -lquazip
 } else:win32:CONFIG(debug, debug|release) {
-    LIBS += -L$${OUT_PWD}/../quazip/quazip/debug/ -lquazip
+    LIBS += -L$${OUT_PWD}/../quazip/debug/ -lquazip
 } else:unix {
-    LIBS += -L$${OUT_PWD}/../quazip/quazip/ -lquazip
+    LIBS += -L$${OUT_PWD}/../quazip/ -lquazip
 }
 
-INCLUDEPATH += $${PWD}/../quazip/quazip
-DEPENDPATH += $${PWD}/../quazip/quazip
+INCLUDEPATH += $${PWD}/../quazip
+DEPENDPATH += $${PWD}/../quazip
 
 win32:CONFIG(release, debug|release) {
     BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}release
