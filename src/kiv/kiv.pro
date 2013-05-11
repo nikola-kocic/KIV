@@ -17,7 +17,6 @@ SOURCES += \
     view_files_tree.cpp \
     archive_item.cpp \
     archive_model.cpp \
-    unrar/unrar.cpp \
     unrar/archive_rar.cpp \
     pictureitem_data.cpp \
     widgets/zoomwidget.cpp

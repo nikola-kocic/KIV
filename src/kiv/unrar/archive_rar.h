@@ -4,7 +4,7 @@
 #include <QLibrary>
 #include <QBuffer>
 
-#include "unrar.h"
+#include "../enums.h"
 
 class ArchiveRar
 {
@@ -12,12 +12,11 @@ public:
     static bool loadlib();
     static bool extract(const QString &archiveName, const QString &fileName, const QString &newFileName);
     static QByteArray *readFile(const QString &archiveName, const QString &fileName);
-    static bool isDir(const RARHeaderDataEx &headerData);
+    static unsigned int getFileInfoList(const QString &path, QList<ArchiveFileInfo> &list);
 
 private:
+    static QDateTime dateFromDos(const uint dosTime);
     static QLibrary *Lib;
-    static unsigned int LHD_DIRECTORY;
-    static unsigned int LHD_WINDOWMASK;
 };
 
 

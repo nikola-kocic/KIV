@@ -1,10 +1,31 @@
 #include "archive_rar.h"
+#include "unrar.h"
+
 #include <QDir>
 #include <QBuffer>
 
+#define  LHD_LARGE          0x0100
+#define  LHD_UNICODE        0x0200
+#define  LHD_SALT           0x0400
+#define  LHD_EXTTIME        0x1000
+#define  LHD_WINDOWMASK     0x00e0
+#define  LHD_DIRECTORY      0x00e0
+#define  LONG_BLOCK         0x8000
+
+RAROpenArchiveT        RAROpenArchive = 0;
+RAROpenArchiveExT      RAROpenArchiveEx = 0;
+RARCloseArchiveT       RARCloseArchive = 0;
+RARReadHeaderT         RARReadHeader = 0;
+RARReadHeaderExT       RARReadHeaderEx = 0;
+RARProcessFileT        RARProcessFile = 0;
+RARProcessFileWT       RARProcessFileW = 0;
+RARSetCallbackT        RARSetCallback = 0;
+RARSetChangeVolProcT   RARSetChangeVolProc = 0;
+RARSetProcessDataProcT RARSetProcessDataProc = 0;
+RARSetPasswordT        RARSetPassword = 0;
+RARGetDllVersionT      RARGetDllVersion = 0;
+
 QLibrary *ArchiveRar::Lib = 0;
-unsigned int ArchiveRar::LHD_DIRECTORY = 0x00e0U;
-unsigned int ArchiveRar::LHD_WINDOWMASK = 0x00e0U;
 
 bool ArchiveRar::loadlib()
 {
@@ -38,8 +59,9 @@ bool ArchiveRar::loadlib()
 
 bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, const QString &newFileName)
 {
+    const std::wstring fileNameW = QDir::toNativeSeparators(fileName).toStdWString();
+    const std::wstring arcNameW = archiveName.toStdWString();
     bool success = false;
-    std::wstring arcNameW = archiveName.toStdWString();
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
@@ -61,8 +83,7 @@ bool ArchiveRar::extract(const QString &archiveName, const QString &fileName, co
 
         while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
         {
-            const QString currentFileName = QString::fromWCharArray(HeaderData.FileNameW);
-            if (currentFileName == fileName)
+            if (wcscmp(fileNameW.c_str(),  HeaderData.FileNameW) == 0)
             {
                 std::wstring newFileNameW = QDir::toNativeSeparators(newFileName).toStdWString();
                 RARProcessFileW(hArcData, RAR_EXTRACT, NULL, newFileNameW.c_str());
@@ -111,8 +132,9 @@ static int CALLBACK CallbackProc(unsigned int msg, LPARAM myBufferPtr, LPARAM ra
 
 QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &fileName)
 {
+    const std::wstring fileNameW = QDir::toNativeSeparators(fileName).toStdWString();
+    const std::wstring arcNameW = archiveName.toStdWString();
     QByteArray *out = 0;
-    std::wstring arcNameW = archiveName.toStdWString();
 
     struct RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
@@ -134,8 +156,7 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
         int RHCode, PFCode;
         while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
         {
-            const QString currentFileName = QString::fromWCharArray(HeaderData.FileNameW);
-            if (currentFileName == fileName)
+            if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
             {
                 qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
                 char *buffer = new char[UnpSize];
@@ -173,7 +194,84 @@ QByteArray *ArchiveRar::readFile(const QString &archiveName, const QString &file
     return out;
 }
 
-bool ArchiveRar::isDir(const RARHeaderDataEx &headerData)
+QDateTime ArchiveRar::dateFromDos(const uint dosTime)
 {
-    return((headerData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY);
+    const ushort hiWord = (ushort)((dosTime & 0xFFFF0000) >> 16);
+    const ushort loWord = (ushort)(dosTime & 0xFFFF);
+    const uint year = ((hiWord & 0xFE00) >> 9) + 1980;
+    const uint month = (hiWord & 0x01E0) >> 5;
+    const uint day = hiWord & 0x1F;
+    const uint hour = (loWord & 0xF800) >> 11;
+    const uint minute = (loWord & 0x07E0) >> 5;
+    const uint second = (loWord & 0x1F) << 1;
+    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
+}
+
+unsigned int ArchiveRar::getFileInfoList(const QString &path, QList<ArchiveFileInfo> &list)
+{
+    std::wstring path_wstr = path.toStdWString();
+
+    struct RAROpenArchiveDataEx OpenArchiveData;
+    memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
+    OpenArchiveData.ArcNameW = path_wstr.c_str();
+    OpenArchiveData.CmtBufSize = 0;
+    OpenArchiveData.OpenMode = RAR_OM_LIST;
+    OpenArchiveData.Callback = NULL;
+
+    Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
+
+    if (OpenArchiveData.OpenResult != 0)
+    {
+        return OpenArchiveData.OpenResult;
+    }
+
+    int RHCode, PFCode;
+    struct RARHeaderDataEx HeaderData;
+
+    HeaderData.CmtBuf = NULL;
+    memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
+
+    while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+    {
+        ArchiveFileInfo newArchiveFileInfo;
+        QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
+        fileName = QDir::fromNativeSeparators(fileName);
+        if ((HeaderData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY)
+        {
+            fileName.append(QDir::separator());
+            newArchiveFileInfo.uncompressedSize = 0;
+        }
+        else
+        {
+            qint64 unpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
+            newArchiveFileInfo.uncompressedSize = unpSize;
+        }
+        newArchiveFileInfo.name = fileName;
+        newArchiveFileInfo.dateTime = dateFromDos(HeaderData.FileTime);
+
+        list.append(newArchiveFileInfo);
+
+//#ifdef DEBUG_MODEL_FILES
+//qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << fileName;
+//#endif
+
+        if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+        {
+            qWarning("%d", PFCode);
+            break;
+        }
+    }
+
+    if (RHCode == ERAR_BAD_DATA)
+    {
+        qDebug("\nFile header broken");
+    }
+
+    RARCloseArchive(hArcData);
+
+//#ifdef DEBUG_MODEL_FILES
+//    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
+//#endif
+
+    return 0;
 }

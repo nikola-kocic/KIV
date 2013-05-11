@@ -17,6 +17,7 @@ struct ArchiveType
     static const int Rar = 2;
 };
 
+
 class ArchiveModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -47,7 +48,9 @@ private:
             const int type,
             ArchiveItem *parent = 0,
             const bool updateData = false);
-    static QDateTime dateFromDos(const uint dosTime);
+
+    template<class TFileInfo>
+    void populate(const QString &archive_path, const QList<TFileInfo> &archive_files);
 
     ArchiveItem *rootItem;
 

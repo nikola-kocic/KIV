@@ -1,6 +1,9 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
+#include <QDateTime>
+#include <QString>
+
 struct LockMode
 {
     static const int None = 0;
@@ -44,6 +47,37 @@ struct SortDirection
     static const int DateDesc = 3;
     static const int SizeAsc = 4;
     static const int SizeDesc = 5;
+};
+
+struct ArchiveFileInfo {
+  /// File name.
+  QString name;
+  /// Version created by.
+//  quint16 versionCreated;
+//  /// Version needed to extract.
+//  quint16 versionNeeded;
+//  /// General purpose flags.
+//  quint16 flags;
+//  /// Compression method.
+//  quint16 method;
+  /// Last modification date and time.
+  QDateTime dateTime;
+//  /// CRC.
+//  quint32 crc;
+//  /// Compressed file size.
+//  quint32 compressedSize;
+  /// Uncompressed file size.
+  quint32 uncompressedSize;
+//  /// Disk number start.
+//  quint16 diskNumberStart;
+//  /// Internal file attributes.
+//  quint16 internalAttr;
+//  /// External file attributes.
+//  quint32 externalAttr;
+//  /// Comment.
+//  QString comment;
+//  /// Extra field.
+//  QByteArray extra;
 };
 
 #endif // ENUMS_H

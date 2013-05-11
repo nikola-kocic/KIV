@@ -33,8 +33,6 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
         m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
     }
     QFile archiveFile(path);
-    QFileInfo archive_info(archiveFile);
-    QFileIconProvider fip;
 
     // Try to open as ZIP
     QuaZip zip(&archiveFile);
@@ -50,54 +48,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
             qWarning("testRead(): zip.close(): %d", zip.getZipError());
             return;
         }
-
-        /* Populate model */
-
-        ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(),
-                                                       archive_info.lastModified(),
-                                                       archive_info.size(),
-                                                       archive_info.absoluteFilePath(),
-                                                       ArchiveItem::TYPE_ARCHIVE,
-                                                       fip.icon(archive_info),
-                                                       rootItem);
-        rootItem->appendChild(rootArchiveItem);
-
-        for (int i = 0; i < archive_files.size(); ++i)
-        {
-            ArchiveItem *node = rootArchiveItem;
-            const QStringList file_path_parts = archive_files.at(i).name.split('/');
-            QString folderPath = path + "/";
-            for (int j = 0; j < file_path_parts.size(); ++j)
-            {
-                if (file_path_parts.at(j).size() > 0)
-                {
-                    folderPath.append(file_path_parts.at(j) + "/");
-                    if (j < file_path_parts.size() - 1)
-                    {
-                        node = AddNode(file_path_parts.at(j),
-                                       archive_files.at(i).dateTime,
-                                       0,
-                                       folderPath,
-                                       ArchiveItem::TYPE_ARCHIVE_DIR,
-                                       node);
-                    }
-                    else
-                    {
-                        const QFileInfo fi(archive_files.at(i).name);
-                        if (Helper::isImageFile(fi))
-                        {
-                            const QString nodeFilePath = path + "/" + archive_files.at(i).name;
-                            node = AddNode(file_path_parts.at(j),
-                                           archive_files.at(i).dateTime,
-                                           archive_files.at(i).uncompressedSize,
-                                           nodeFilePath,
-                                           ArchiveItem::TYPE_ARCHIVE_FILE,
-                                           node);
-                        }
-                    }
-                }
-            }
-        }
+        populate(path, archive_files);
 #ifdef DEBUG_MODEL_FILES
         qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "ZIP";
 #endif
@@ -108,105 +59,69 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     // Try to open as RAR
     if (ArchiveRar::loadlib())
     {
-        struct RAROpenArchiveDataEx OpenArchiveData;
-        memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
-
-        std::wstring path_wstr = path.toStdWString();
-        OpenArchiveData.ArcNameW = path_wstr.c_str();
-        OpenArchiveData.CmtBufSize = 0;
-        OpenArchiveData.OpenMode = RAR_OM_LIST;
-        OpenArchiveData.Callback = NULL;
-
-        Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
-
-        if (OpenArchiveData.OpenResult == 0)
+        QList<ArchiveFileInfo> archive_files;
+        if (ArchiveRar::getFileInfoList(path, archive_files) == 0)
         {
-            int RHCode, PFCode;
-            struct RARHeaderDataEx HeaderData;
+            populate(path, archive_files);
+            m_type = ArchiveType::Rar;
+            return;
+        }
+    }
+}
 
-            HeaderData.CmtBuf = NULL;
-            memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
+template<class TFileInfo>
+void ArchiveModel::populate(const QString &archive_path, const QList<TFileInfo> &archive_files)
+{
+    /* Populate model */
+    const QFileIconProvider fip;
+    const QFileInfo archive_info(archive_path);
+    const QString path = archive_info.absoluteFilePath();
+    ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(),
+                                                   archive_info.lastModified(),
+                                                   archive_info.size(),
+                                                   archive_info.absoluteFilePath(),
+                                                   ArchiveItem::TYPE_ARCHIVE,
+                                                   fip.icon(archive_info),
+                                                   rootItem);
+    rootItem->appendChild(rootArchiveItem);
 
-            ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(),
-                                                           archive_info.lastModified(),
-                                                           archive_info.size(),
-                                                           archive_info.absoluteFilePath(),
-                                                           ArchiveItem::TYPE_ARCHIVE,
-                                                           fip.icon(archive_info),
-                                                           rootItem);
-            rootItem->appendChild(rootArchiveItem);
-
-            while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+    for (int i = 0; i < archive_files.size(); ++i)
+    {
+#ifdef DEBUG_MODEL_FILES
+    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::populate" << archive_files.at(i).name;
+#endif
+        ArchiveItem *node = rootArchiveItem;
+        const QStringList file_path_parts = archive_files.at(i).name.split('/');
+        QString folderPath = path + "/";
+        for (int j = 0; j < file_path_parts.size(); ++j)
+        {
+            if (file_path_parts.at(j).size() > 0)
             {
-                qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
-
-                ArchiveItem *node = rootArchiveItem;
-                const QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
-
-                const QStringList file_path_parts = fileName.split(QDir::separator());
-                QString folderPath = path + "/";
-                for (int j = 0; j < file_path_parts.size(); ++j)
+                folderPath.append(file_path_parts.at(j) + "/");
+                if (j < file_path_parts.size() - 1)
                 {
-                    if (file_path_parts.at(j).size() > 0)
+                    node = AddNode(file_path_parts.at(j),
+                                   archive_files.at(i).dateTime,
+                                   0,
+                                   folderPath,
+                                   ArchiveItem::TYPE_ARCHIVE_DIR,
+                                   node);
+                }
+                else
+                {
+                    const QFileInfo fi(archive_files.at(i).name);
+                    if (Helper::isImageFile(fi))
                     {
-                        folderPath.append(file_path_parts.at(j) + "/");
-                        if (j < file_path_parts.size() - 1)
-                        {
-                            node = AddNode(file_path_parts.at(j),
-                                           dateFromDos(HeaderData.FileTime),
-                                           0,
-                                           folderPath,
-                                           ArchiveItem::TYPE_ARCHIVE_DIR,
-                                           node);
-                        }
-                        else
-                        {
-                            if (ArchiveRar::isDir(HeaderData))
-                            {
-                                node = AddNode(file_path_parts.at(j),
-                                               dateFromDos(HeaderData.FileTime),
-                                               0,
-                                               folderPath,
-                                               ArchiveItem::TYPE_ARCHIVE_DIR,
-                                               node,
-                                               true);
-                            }
-                            else
-                            {
-                                const QFileInfo fi(fileName);
-                                if (Helper::isImageFile(fi))
-                                {
-                                    const QString nodeFilePath = path + "/" + fileName;
-                                    node = AddNode(file_path_parts.at(j),
-                                                   dateFromDos(HeaderData.FileTime),
-                                                   UnpSize,
-                                                   nodeFilePath,
-                                                   ArchiveItem::TYPE_ARCHIVE_FILE,
-                                                   node);
-                                }
-                            }
-                        }
+                        const QString nodeFilePath = path + "/" + archive_files.at(i).name;
+                        node = AddNode(file_path_parts.at(j),
+                                       archive_files.at(i).dateTime,
+                                       archive_files.at(i).uncompressedSize,
+                                       nodeFilePath,
+                                       ArchiveItem::TYPE_ARCHIVE_FILE,
+                                       node);
                     }
                 }
-
-                if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
-                {
-                    qWarning("%d", PFCode);
-                    break;
-                }
             }
-
-            if (RHCode == ERAR_BAD_DATA)
-            {
-                qDebug("\nFile header broken");
-            }
-
-            RARCloseArchive(hArcData);
-
-#ifdef DEBUG_MODEL_FILES
-            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
-#endif
-            m_type = ArchiveType::Rar;
         }
     }
 }
@@ -391,17 +306,4 @@ QModelIndex ArchiveModel::findIndexChild(const QString &text, const QModelIndex 
         }
     }
     return QModelIndex();
-}
-
-QDateTime ArchiveModel::dateFromDos(const uint dosTime)
-{
-    const ushort hiWord = (ushort)((dosTime & 0xFFFF0000) >> 16);
-    const ushort loWord = (ushort)(dosTime & 0xFFFF);
-    const uint year = ((hiWord & 0xFE00) >> 9) + 1980;
-    const uint month = (hiWord & 0x01E0) >> 5;
-    const uint day = hiWord & 0x1F;
-    const uint hour = (loWord & 0xF800) >> 11;
-    const uint minute = (loWord & 0x07E0) >> 5;
-    const uint second = (loWord & 0x1F) << 1;
-    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
