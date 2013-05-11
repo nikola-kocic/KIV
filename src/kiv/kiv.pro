@@ -56,24 +56,24 @@ win32{
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
 win32:CONFIG(release, debug|release) {
-    LIBS += -L$$OUT_PWD/../quazip/quazip/release/ -lquazip1
+    LIBS += -L$${OUT_PWD}/../quazip/quazip/release/ -lquazip1
 } else:win32:CONFIG(debug, debug|release) {
-    LIBS += -L$$OUT_PWD/../quazip/quazip/debug/ -lquazip1
+    LIBS += -L$${OUT_PWD}/../quazip/quazip/debug/ -lquazip1
 } else:unix {
-    LIBS += -L$$OUT_PWD/../quazip/quazip/ -lquazip
+    LIBS += -L$${OUT_PWD}/../quazip/quazip/ -lquazip
 }
 
-INCLUDEPATH += $$PWD/../quazip/quazip
-DEPENDPATH += $$PWD/../quazip/quazip
-
+INCLUDEPATH += $${PWD}/../quazip/quazip
+DEPENDPATH += $${PWD}/../quazip/quazip
 
 win32:CONFIG(release, debug|release) {
-    ICONS_DEST = $$OUT_PWD/release/icons
+    BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}release
 } else:win32:CONFIG(debug, debug|release) {
-    ICONS_DEST = $$OUT_PWD/debug/icons
+    BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}debug
 } else {
-    ICONS_DEST = $$OUT_PWD/icons
+    BIN_DIR = $${OUT_PWD}
 }
 
-ICONS_DIR += $$PWD/../../files/icons
-QMAKE_POST_LINK = $$QMAKE_COPY_DIR \"$$ICONS_DIR\" \"$$ICONS_DEST\"
+KIV_ROOT_DIR = $${PWD}$${QMAKE_DIR_SEP}..$${QMAKE_DIR_SEP}..
+
+QMAKE_POST_LINK += $${QMAKE_COPY_DIR} \"$${KIV_ROOT_DIR}$${QMAKE_DIR_SEP}res$${QMAKE_DIR_SEP}icons\" \"$${BIN_DIR}$${QMAKE_DIR_SEP}icons\" $$escape_expand(\\n\\t)
