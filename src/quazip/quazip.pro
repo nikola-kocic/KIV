@@ -39,7 +39,7 @@ win32 {
     DEFINES += NOMINMAX
 
     greaterThan(QT_MAJOR_VERSION, 4): INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
-    else: INCLUDEPATH += $$PWD/../../zlib
+    else: INCLUDEPATH += $$PWD/../zlib
 }
 
 
