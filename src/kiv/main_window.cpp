@@ -36,13 +36,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 {
     this->setAcceptDrops(true);
 
-#ifndef QT5
-    if (Helper::getFiltersImage().contains("svg"))
-    {
-        this->setWindowIcon(QIcon(QApplication::applicationDirPath() + "/icons/kiv.svg"));
-    }
-#endif
-
     updateSettings();
     createActions();
     createMenus();
@@ -608,6 +601,16 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
     // standard event processing
     return QObject::eventFilter(obj, event);
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    if (Helper::getFiltersImage().contains("svg"))
+    {
+        m_windowIcon = QIcon(QApplication::applicationDirPath() + "/icons/kiv.svg");
+        this->setWindowIcon(m_windowIcon);
+    }
+    return QMainWindow::showEvent(event);
 }
 
 void MainWindow::on_lineEditPath_editingFinished()

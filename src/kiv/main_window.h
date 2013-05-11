@@ -44,6 +44,7 @@ private:
     QToolBar *m_toolbar;
     QLineEdit *m_lineEdit_path;
     ZoomWidget *m_comboBox_zoom;
+    QIcon m_windowIcon;
 
     /* File Menu Actions */
     QAction *m_act_open;
@@ -154,6 +155,7 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
     bool eventFilter(QObject *, QEvent *);
+    void showEvent(QShowEvent * event);
 };
 
 #endif // MAINWINDOW_H
