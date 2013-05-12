@@ -103,13 +103,13 @@ private slots:
     void imageFinished(int num);
 
 protected:
-    void wheelEvent(QWheelEvent *);
-    void mousePressEvent(QMouseEvent *);
-    void mouseMoveEvent(QMouseEvent *ev);
-    void mouseReleaseEvent(QMouseEvent *);
-    void mouseDoubleClickEvent(QMouseEvent *);
-    void resizeEvent(QResizeEvent *);
-    void keyPressEvent(QKeyEvent *);
+    void wheelEvent(QWheelEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void resizeEvent(QResizeEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 };
 
 inline bool PictureItem::getHardwareAcceleration() const

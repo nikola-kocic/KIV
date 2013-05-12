@@ -89,9 +89,10 @@ MainWindow::~MainWindow()
     delete m_settings;
 }
 
-void MainWindow::closeEvent(QCloseEvent * /*event*/)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
     m_settings->setLastPath(m_view_files->getCurrentFileInfo().getPath());
+    return QMainWindow::closeEvent(event);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -113,6 +114,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         showMinimized();
         event->accept();
     }
+    return QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::createActions()
@@ -568,17 +570,20 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
             event->acceptProposedAction();
         }
     }
+    return QMainWindow::dragEnterEvent(event);
 }
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
+    return QMainWindow::dragMoveEvent(event);
 }
 
 
 void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 {
     event->accept();
+    return QMainWindow::dragLeaveEvent(event);
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
@@ -588,6 +593,7 @@ void MainWindow::dropEvent(QDropEvent *event)
         this->openFile(event->mimeData()->urls().at(0).toLocalFile());
     }
     event->acceptProposedAction();
+    return QMainWindow::dropEvent(event);
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -601,7 +607,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
 
     // standard event processing
-    return QObject::eventFilter(obj, event);
+    return QMainWindow::eventFilter(obj, event);
 }
 
 void MainWindow::showEvent(QShowEvent *event)

@@ -174,69 +174,73 @@ void PictureItem::calculateAverageColor(const QImage &img)
 
 
 
-void PictureItem::mousePressEvent(QMouseEvent *ev)
+void PictureItem::mousePressEvent(QMouseEvent *event)
 {
     this->setFocus();
 
-    if (ev->button() == Qt::LeftButton)
+    if (event->button() == Qt::LeftButton)
     {
         /* Start dragging */
-        this->beginDrag(ev->pos());
+        this->beginDrag(event->pos());
     }
-    else if (ev->button() == Qt::MiddleButton)
+    else if (event->button() == Qt::MiddleButton)
     {
         switch (m_settings->getMiddleClick())
         {
         case MiddleClickAction::Fullscreen :
             emit(toggleFullscreen());
-            ev->accept();
+            event->accept();
             break;
 
         case MiddleClickAction::AutoFit:
             this->fitToScreen();
-            ev->accept();
+            event->accept();
             break;
 
         case MiddleClickAction::ZoomReset:
             this->setZoom(1);
-            ev->accept();
+            event->accept();
             break;
 
         case MiddleClickAction::NextPage:
             emit pageNext();
-            ev->accept();
+            event->accept();
             break;
 
         case MiddleClickAction::Quit:
             emit quit();
-            ev->accept();
+            event->accept();
             break;
 
         case MiddleClickAction::Boss:
             emit boss();
-            ev->accept();
+            event->accept();
             break;
 
         default: break;
 
         }
     }
+
+    return QWidget::mousePressEvent(event);
 }
 
 
 /* End Region Drag */
 
 
-void PictureItem::mouseDoubleClickEvent(QMouseEvent *ev)
+void PictureItem::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (ev->buttons() == Qt::LeftButton)
+    if (event->buttons() == Qt::LeftButton)
     {
         emit(toggleFullscreen());
-        ev->accept();
+        event->accept();
     }
+
+    return QWidget::mouseDoubleClickEvent(event);
 }
 
-void PictureItem::resizeEvent(QResizeEvent *)
+void PictureItem::resizeEvent(QResizeEvent *event)
 {
     if (this->isPixmapNull())
     {
@@ -247,40 +251,42 @@ void PictureItem::resizeEvent(QResizeEvent *)
 
     m_data->avoidOutOfScreen(m_imageDisplay->getWidget()->size());
     this->updateLockMode();
+
+    return QWidget::resizeEvent(event);
 }
 
 
 
-void PictureItem::keyPressEvent(QKeyEvent *ev)
+void PictureItem::keyPressEvent(QKeyEvent *event)
 {
-    switch (ev->key())
+    switch (event->key())
     {
     case Qt::Key_Up:
         this->ScrollPageVertical(120);
-        ev->accept();
+        event->accept();
         break;
 
     case Qt::Key_Down:
         this->ScrollPageVertical(-120);
-        ev->accept();
+        event->accept();
         break;
 
     case Qt::Key_Left:
         this->ScrollPageHorizontal(120);
-        ev->accept();
+        event->accept();
         break;
 
     case Qt::Key_Right:
         this->ScrollPageHorizontal(-120);
-        ev->accept();
+        event->accept();
         break;
 
     case Qt::Key_Escape:
         emit setFullscreen(false);
-        ev->accept();
+        event->accept();
         break;
     }
-    return QWidget::keyPressEvent(ev);
+    return QWidget::keyPressEvent(event);
 }
 
 void PictureItem::wheelEvent(QWheelEvent *event)
@@ -433,6 +439,8 @@ void PictureItem::wheelEvent(QWheelEvent *event)
         this->ScrollPageHorizontal(event->delta());
         event->accept();
     }
+
+    return QWidget::wheelEvent(event);
 }
 
 
@@ -622,17 +630,21 @@ void PictureItem::updateLockMode()
 
 /* Region Drag */
 
-void PictureItem::mouseMoveEvent(QMouseEvent *ev)
+void PictureItem::mouseMoveEvent(QMouseEvent *event)
 {
-    this->drag(ev->pos());
+    this->drag(event->pos());
+
+    return QWidget::mouseMoveEvent(event);
 }
 
-void PictureItem::mouseReleaseEvent(QMouseEvent *ev)
+void PictureItem::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (m_dragging && (ev->button() == Qt::LeftButton))
+    if (m_dragging && (event->button() == Qt::LeftButton))
     {
         this->endDrag();
     }
+
+    return QWidget::mouseReleaseEvent(event);
 }
 
 void PictureItem::drag(const QPoint &pt)
