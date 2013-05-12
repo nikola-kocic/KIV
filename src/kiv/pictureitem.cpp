@@ -178,33 +178,10 @@ void PictureItem::mousePressEvent(QMouseEvent *ev)
 {
     this->setFocus();
 
-    if (ev->button() ==  Qt::RightButton)
+    if (ev->button() == Qt::LeftButton)
     {
-        if (this->contextMenuPolicy() == Qt::PreventContextMenu)
-        {
-            this->setContextMenuPolicy(Qt::CustomContextMenu);
-        }
-        if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
-        {
-            this->setContextMenuPolicy(Qt::PreventContextMenu);
-            emit pageNext();
-            ev->accept();
-        }
-    }
-    else if (ev->button() == Qt::LeftButton)
-    {
-        if (ev->buttons() == (Qt::LeftButton | Qt::RightButton))
-        {
-            this->setContextMenuPolicy(Qt::PreventContextMenu);
-            emit pagePrevious();
-            ev->accept();
-        }
-        else
-        {
-
-            /* Start dragging */
-            this->beginDrag(ev->pos());
-        }
+        /* Start dragging */
+        this->beginDrag(ev->pos());
     }
     else if (ev->button() == Qt::MiddleButton)
     {
@@ -315,12 +292,6 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
             ev->accept();
         }
         break;
-
-    case Qt::Key_Menu:
-        if (this->contextMenuPolicy() == Qt::PreventContextMenu)
-        {
-            this->setContextMenuPolicy(Qt::CustomContextMenu);
-        }
     }
 }
 
