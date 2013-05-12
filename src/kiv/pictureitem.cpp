@@ -275,24 +275,12 @@ void PictureItem::keyPressEvent(QKeyEvent *ev)
         ev->accept();
         break;
 
-    case Qt::Key_B:
-        emit boss();
-        ev->accept();
-        break;
-
     case Qt::Key_Escape:
         emit setFullscreen(false);
         ev->accept();
         break;
-
-    case Qt::Key_Return:
-        if (ev->modifiers() & Qt::AltModifier)
-        {
-            emit toggleFullscreen();
-            ev->accept();
-        }
-        break;
     }
+    return QWidget::keyPressEvent(ev);
 }
 
 void PictureItem::wheelEvent(QWheelEvent *event)

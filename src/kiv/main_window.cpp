@@ -134,14 +134,14 @@ void MainWindow::createActions()
     /* File Actions */
 
     m_act_open = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
-    m_act_open->setShortcut(tr("Ctrl+O"));
+    m_act_open->setShortcut(QKeySequence::Open);
 
     m_act_save = new QAction(QIcon::fromTheme("document-save-as"), tr("&Save Page As..."), this);
-    m_act_save->setShortcut(tr("Ctrl+S"));
+    m_act_save->setShortcut(QKeySequence::SaveAs);
     m_act_save->setEnabled(false);
 
     m_act_exit = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
-    m_act_exit->setShortcut(tr("Ctrl+Q"));
+    m_act_exit->setShortcut(QKeySequence::Quit);
 
     m_act_bookmark_add = new QAction(tr("Bookmark &This Page"), this);
     m_act_bookmark_add->setShortcut(tr("Ctrl+D"));
@@ -150,10 +150,10 @@ void MainWindow::createActions()
     /* Options Actions */
 
     m_act_pagePrevious = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous Page"), this);
-    m_act_pagePrevious->setShortcut(Qt::Key_PageUp);
+    m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
 
     m_act_pageNext = new QAction(QIcon::fromTheme("go-next"), tr("&Next Page"), this);
-    m_act_pageNext->setShortcut(Qt::Key_PageDown);
+    m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
 
     m_act_rotateLeft = new QAction(QIcon::fromTheme("object-rotate-left"), tr("Rotate &Left"), this);
     m_act_rotateLeft->setEnabled(false);
@@ -179,7 +179,8 @@ void MainWindow::createActions()
 
 
     m_act_fullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("&Full Screen"), this);
-    m_act_fullscreen->setShortcut(Qt::Key_F11);
+    m_act_fullscreen->setShortcuts(
+                QList<QKeySequence>() << Qt::Key_F11 << QKeySequence(Qt::ALT | Qt::Key_Return));
     m_act_fullscreen->setCheckable(true);
 
     m_act_sidebar = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Show Side&bar"), this);
@@ -201,17 +202,16 @@ void MainWindow::createActions()
 
     m_act_settings = new QAction(QIcon::fromTheme("configure", QIcon::fromTheme("gtk-preferences")), tr("&Settings..."), this);
     m_act_settings->setMenuRole(QAction::PreferencesRole);
-    //    settingsAct->setVisible(false);
-
+    m_act_settings->setShortcut(QKeySequence::Preferences);
 
     /* Zoom Actions */
 
     m_act_zoomIn = new QAction(QIcon::fromTheme("zoom-in"), tr("Zoom &In"), this);
-    m_act_zoomIn->setShortcut(Qt::CTRL | Qt::Key_Plus);
+    m_act_zoomIn->setShortcut(QKeySequence::ZoomIn);
     m_act_zoomIn->setEnabled(false);
 
     m_act_zoomOut = new QAction(QIcon::fromTheme("zoom-out"), tr("Zoom &Out"), this);
-    m_act_zoomOut->setShortcut(Qt::CTRL | Qt::Key_Minus);
+    m_act_zoomOut->setShortcut(QKeySequence::ZoomOut);
     m_act_zoomOut->setEnabled(false);
 
     m_act_zoomReset = new QAction(QIcon::fromTheme("zoom-original"), tr("&Original Size (100%)"), this);
@@ -250,12 +250,13 @@ void MainWindow::createActions()
     m_act_webSite = new QAction(tr("&Web Site"), this);
 
     m_act_about = new QAction(tr("&About"), this);
-    m_act_about->setShortcut(Qt::Key_F1);
+    m_act_about->setShortcut(QKeySequence::HelpContents);
 
 
     /* Toolbar Actions */
 
     m_act_refreshPath = new QAction(QIcon::fromTheme("view-refresh"), tr("&Refresh"), this);
+    m_act_refreshPath->setShortcut(QKeySequence::Refresh);
 
     m_act_dirUp = new QAction(QIcon::fromTheme("go-up"), tr("Go &Up"), this);
     m_act_dirUp->setEnabled(false);
