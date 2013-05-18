@@ -17,7 +17,6 @@ public:
     static QStringList getFiltersImage();
 
     static QStringList filtersArchive;
-    static QList<qreal> defaultZoomSizes;
 
     static QString size(const qint64 bytes);
 

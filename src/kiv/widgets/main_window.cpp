@@ -423,8 +423,8 @@ void MainWindow::connectActions()
     connect(m_act_rotateLeft, SIGNAL(triggered()), this, SLOT(rotateLeft()));
     connect(m_act_rotateRight, SIGNAL(triggered()), this, SLOT(rotateRight()));
     connect(m_act_rotateReset, SIGNAL(triggered()), this, SLOT(rotateReset()));
-    connect(m_act_zoomIn, SIGNAL(triggered()), m_picture_item, SLOT(zoomIn()));
-    connect(m_act_zoomOut, SIGNAL(triggered()), m_picture_item, SLOT(zoomOut()));
+    connect(m_act_zoomIn, SIGNAL(triggered()), m_comboBox_zoom, SLOT(zoomIn()));
+    connect(m_act_zoomOut, SIGNAL(triggered()), m_comboBox_zoom, SLOT(zoomOut()));
     connect(m_act_zoomReset, SIGNAL(triggered()), this, SLOT(zoomReset()));
     connect(m_act_fitToWindow, SIGNAL(triggered()), m_picture_item, SLOT(fitToScreen()));
     connect(m_act_fitToWidth, SIGNAL(triggered()), m_picture_item, SLOT(fitWidth()));
@@ -446,13 +446,14 @@ void MainWindow::connectActions()
     connect(m_picture_item, SIGNAL(toggleFullscreen()), m_act_fullscreen, SLOT(toggle()));
     connect(m_picture_item, SIGNAL(pageNext()), m_view_files, SLOT(pageNext()));
     connect(m_picture_item, SIGNAL(pagePrevious()), m_view_files, SLOT(pagePrevious()));
+    connect(m_picture_item, SIGNAL(zoomIn()), m_comboBox_zoom, SLOT(zoomIn()));
+    connect(m_picture_item, SIGNAL(zoomOut()), m_comboBox_zoom, SLOT(zoomOut()));
     connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)), m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
     connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
     connect(m_picture_item, SIGNAL(quit()), this, SLOT(close()));
     connect(m_picture_item, SIGNAL(boss()), this, SLOT(showMinimized()));
     connect(m_picture_item, SIGNAL(setFullscreen(bool)), m_act_fullscreen, SLOT(setChecked(bool)));
 
-    connect(m_comboBox_zoom, SIGNAL(activated(int)), this, SLOT(on_comboBoxZoom_activated(int)));
     connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)), m_picture_item, SLOT(setZoom(qreal)));
 
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
@@ -679,7 +680,7 @@ void MainWindow::addBookmark()
 
 void MainWindow::zoomReset()
 {
-    m_picture_item->setZoom(1);
+    m_comboBox_zoom->setZoom(1);
 }
 
 void MainWindow::lockZoom()
@@ -775,12 +776,6 @@ void MainWindow::toggleLargeIcons(bool b)
 
     m_toolbar->setIconSize(QSize(size, size));
     m_settings->setLargeIcons(b);
-}
-
-
-void MainWindow::on_comboBoxZoom_activated(const int &index)
-{
-    m_picture_item->setZoom(m_comboBox_zoom->itemData(index).toReal());
 }
 
 void MainWindow::toggleShowThumbnails(bool b)

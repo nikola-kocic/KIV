@@ -6,12 +6,16 @@
 #endif
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QVector>
 
 #include "helper.h"
 
 ZoomWidget::ZoomWidget(QWidget *parent)
-    : QComboBox(parent),
-      m_zoomValue(1)
+    : QComboBox(parent)
+    , m_zoomValue(1)
+    , m_defaultZoomSizes(QVector<qreal>()
+                         << 0.1 << 0.25 << 0.5 << 0.75 << 1.0 << 1.25 << 1.5 << 2.0
+                         << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0)
 {
     //setEnabled(false);
     setInsertPolicy(QComboBox::NoInsert);
@@ -21,9 +25,9 @@ ZoomWidget::ZoomWidget(QWidget *parent)
     setFocusPolicy(Qt::StrongFocus);
     lineEdit()->setCompleter(0);
 
-    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
+    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
     {
-        const qreal &z = Helper::defaultZoomSizes.at(i);
+        const qreal &z = m_defaultZoomSizes.at(i);
         addItem(QString::number((z * 100), 'f', 0) + "%", z);
         if (qFuzzyCompare(z, 1) == true)
         {
@@ -32,12 +36,13 @@ ZoomWidget::ZoomWidget(QWidget *parent)
     }
 
     connect(lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_textChanged()));
+    connect(this, SIGNAL(activated(int)), this, SLOT(on_activated(int)));
 }
 
 void ZoomWidget::on_zoomChanged(qreal current, qreal previous)
 {
     m_zoomValue = current;
-    if (!Helper::defaultZoomSizes.contains(current))
+    if (!m_defaultZoomSizes.contains(current))
     {
         /* Add current Zoom value to comboBox */
 
@@ -56,7 +61,7 @@ void ZoomWidget::on_zoomChanged(qreal current, qreal previous)
     }
     else
     {
-        /* Add select current Zoom value from comboBox */
+        /* Select current Zoom value from comboBox */
 
         for (int existingIndex = 0; existingIndex < count(); ++existingIndex)
         {
@@ -68,7 +73,7 @@ void ZoomWidget::on_zoomChanged(qreal current, qreal previous)
         }
     }
 
-    if (!Helper::defaultZoomSizes.contains(previous))
+    if (!m_defaultZoomSizes.contains(previous))
     {
         /* Remove previous Zoom value if it's not in default zoom sizes */
 
@@ -102,6 +107,11 @@ void ZoomWidget::on_textChanged()
     }
 }
 
+void ZoomWidget::on_activated(int index)
+{
+    setZoom(itemData(index).toReal());
+}
+
 void ZoomWidget::keyPressEvent(QKeyEvent *event)
 {
 #ifdef DEBUG_ZOOM_WIDGET
@@ -123,4 +133,45 @@ void ZoomWidget::focusOutEvent(QFocusEvent *event)
 #endif
     on_zoomChanged(m_zoomValue, m_zoomValue);
     return QComboBox::focusOutEvent(event);
+}
+
+void ZoomWidget::zoomIn()
+{
+    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    {
+        if (m_defaultZoomSizes.at(i) > m_zoomValue)
+        {
+            setZoom(m_defaultZoomSizes.at(i));
+            return;
+        }
+    }
+
+    setZoom(m_zoomValue * 1.25);
+}
+
+void ZoomWidget::zoomOut()
+{
+    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    {
+        if (m_defaultZoomSizes.at(i) >= m_zoomValue)
+        {
+            if (i != 0)
+            {
+                setZoom(m_defaultZoomSizes.at(i - 1));
+            }
+            else
+            {
+                setZoom(m_zoomValue / 1.25);
+            }
+            return;
+        }
+    }
+
+    setZoom(m_zoomValue / 1.25);
+}
+
+void ZoomWidget::setZoom(qreal value)
+{
+    emit zoomChanged(value);
+    on_zoomChanged(value, m_zoomValue);
 }

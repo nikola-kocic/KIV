@@ -137,7 +137,6 @@ private slots:
     /* Directory Toolbar Actions Slots */
     void refreshPath();
 
-    void on_comboBoxZoom_activated(const int &index);
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);

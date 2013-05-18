@@ -2,7 +2,7 @@
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)
+PictureItem::PictureItem(const Settings * const settings, QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 
     , m_data(new PictureItemData())
@@ -488,40 +488,6 @@ void PictureItem::setZoom(const qreal value)
     emit zoomChanged(m_data->getZoom(), previous);
 }
 
-void PictureItem::zoomIn()
-{
-    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
-    {
-        if (Helper::defaultZoomSizes.at(i) > m_data->getZoom())
-        {
-            this->setZoom(Helper::defaultZoomSizes.at(i));
-            return;
-        }
-    }
-
-    this->setZoom(m_data->getZoom() * 1.25);
-}
-
-void PictureItem::zoomOut()
-{
-    for (int i = 0; i < Helper::defaultZoomSizes.size(); ++i)
-    {
-        if (Helper::defaultZoomSizes.at(i) >= m_data->getZoom())
-        {
-            if (i != 0)
-            {
-                this->setZoom(Helper::defaultZoomSizes.at(i - 1));
-            }
-            else
-            {
-                this->setZoom(m_data->getZoom() / 1.25);
-            }
-            return;
-        }
-    }
-
-    setZoom(m_data->getZoom() / 1.25);
-}
 
 void PictureItem::fitToScreen()
 {

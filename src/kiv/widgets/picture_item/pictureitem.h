@@ -33,7 +33,7 @@ class PictureItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PictureItem(Settings *settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    explicit PictureItem(Settings const * const settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
     ~PictureItem();
 
     qreal getZoom() const;
@@ -64,7 +64,7 @@ private:
     void updateLockMode();
 
     PictureItemData *m_data;
-    Settings *m_settings;
+    const Settings *m_settings;
     bool m_opengl;
     PictureItemInterface *m_imageDisplay;
     QFutureWatcher< QImage > *m_loader_image;
@@ -85,6 +85,8 @@ signals:
     void pagePrevious();
     void toggleFullscreen();
     void setFullscreen(bool);
+    void zoomIn();
+    void zoomOut();
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
     void quit();
@@ -92,8 +94,6 @@ signals:
 
 public slots:
     void setZoom(const qreal value);
-    void zoomIn();
-    void zoomOut();
     void fitToScreen();
     void fitWidth();
     void fitHeight();

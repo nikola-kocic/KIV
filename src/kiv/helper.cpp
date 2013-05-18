@@ -11,8 +11,6 @@ QStringList Helper::m_filters_image = QStringList();
 QStringList Helper::filtersArchive = QStringList() << "zip" << "cbz"
                                                    << "rar" << "cbr"
                                                       ;
-QList<qreal> Helper::defaultZoomSizes = QList<qreal>() << 0.1 << 0.25 << 0.5 <<  0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0;
-
 QStringList Helper::getFiltersImage()
 {
     if (m_filters_image.isEmpty())

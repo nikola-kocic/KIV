@@ -1,6 +1,5 @@
 #include "location_widget.h"
 
-#include <QDebug>
 #include <QKeyEvent>
 
 LocationWidget::LocationWidget(QAbstractItemModel *model, QWidget *parent)
