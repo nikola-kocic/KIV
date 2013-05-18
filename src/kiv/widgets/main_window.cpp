@@ -107,6 +107,18 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     {
         m_act_fullscreen->setChecked(false);
     }
+    else if (event->key() == Qt::Key_Minus)
+    {
+        m_act_zoomOut->trigger();
+    }
+    else if (event->key() == Qt::Key_Plus)
+    {
+        m_act_zoomIn->trigger();
+    }
+    else if (event->key() == Qt::Key_0)
+    {
+        m_act_zoomReset->trigger();
+    }
     return QMainWindow::keyPressEvent(event);
 }
 
@@ -115,7 +127,7 @@ void MainWindow::createActions()
     QDir appdir(QApplication::applicationDirPath());
     QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());
 
-    static const char * GENERIC_ICON_TO_CHECK = "media-skip-backward";
+    static const char * GENERIC_ICON_TO_CHECK = "go-next";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
         /* If there is no default working icon theme then we should
            use an icon theme that we provide via a icons folder
@@ -141,14 +153,14 @@ void MainWindow::createActions()
     m_act_bookmark_add = new QAction(tr("Bookmark &This Page"), this);
     m_act_bookmark_add->setShortcut(tr("Ctrl+D"));
 
+    m_act_pageNext = new QAction(QIcon::fromTheme("go-next"), tr("&Next"), this);
+    m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
 
-    /* Options Actions */
-
-    m_act_pagePrevious = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous Page"), this);
+    m_act_pagePrevious = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous"), this);
     m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
 
-    m_act_pageNext = new QAction(QIcon::fromTheme("go-next"), tr("&Next Page"), this);
-    m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
+
+    /* View Actions */
 
     m_act_rotateLeft = new QAction(QIcon::fromTheme("object-rotate-left"), tr("Rotate &Left"), this);
     m_act_rotateLeft->setEnabled(false);
@@ -159,7 +171,7 @@ void MainWindow::createActions()
     m_act_rotateReset = new QAction(tr("R&eset Rotation"), this);
     m_act_rotateReset->setEnabled(false);
 
-    m_act_thumbnails = new QAction(QIcon::fromTheme("image-x-generic"), tr("&Show Thumbnails"), this);
+    m_act_thumbnails = new QAction(QIcon::fromTheme("image-x-generic"), tr("&Thumbnails"), this);
     m_act_thumbnails->setCheckable(true);
 
     m_act_mode_icons = new QAction(tr("&Icons"), this);
@@ -178,9 +190,12 @@ void MainWindow::createActions()
                 QList<QKeySequence>() << Qt::Key_F11 << QKeySequence(Qt::ALT | Qt::Key_Return));
     m_act_fullscreen->setCheckable(true);
 
-    m_act_sidebar = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Show Side&bar"), this);
+    m_act_sidebar = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Side&bar"), this);
     m_act_sidebar->setCheckable(true);
     m_act_sidebar->setChecked(true);
+
+
+    /* Options Actions */
 
     m_act_largeIcons = new QAction(tr("Large Toolbar &Icons"), this);
     m_act_largeIcons->setCheckable(true);
@@ -275,61 +290,71 @@ void MainWindow::createMenus()
 
     populateBookmarks();
 
+    fileMenu->addSeparator();
+    fileMenu->addAction(m_act_pageNext);
+    this->addAction(m_act_pageNext);
+    fileMenu->addAction(m_act_pagePrevious);
+    this->addAction(m_act_pagePrevious);
+
+    fileMenu->addSeparator();
+
     fileMenu->addAction(m_act_exit);
 
-    QMenu *editMenu = m_menu_main->addMenu(tr("&Edit"));
-    editMenu->addAction(m_act_zoomIn);
+
+    QMenu *imageMenu = m_menu_main->addMenu(tr("&Image"));
+    imageMenu->addSeparator();
+    imageMenu->addAction(m_act_zoomIn);
     this->addAction(m_act_zoomIn);
-    editMenu->addAction(m_act_zoomOut);
+    imageMenu->addAction(m_act_zoomOut);
     this->addAction(m_act_zoomOut);
-    editMenu->addAction(m_act_zoomReset);
+    imageMenu->addAction(m_act_zoomReset);
     this->addAction(m_act_zoomReset);
-    editMenu->addSeparator();
-    editMenu->addAction(m_act_rotateLeft);
-    editMenu->addAction(m_act_rotateRight);
-    editMenu->addAction(m_act_rotateReset);
-    editMenu->addSeparator();
-    editMenu->addAction(m_act_fitToWindow);
+    imageMenu->addSeparator();
+    imageMenu->addAction(m_act_rotateLeft);
+    imageMenu->addAction(m_act_rotateRight);
+    imageMenu->addAction(m_act_rotateReset);
+    imageMenu->addSeparator();
+    imageMenu->addAction(m_act_fitToWindow);
     this->addAction(m_act_fitToWindow);
-    editMenu->addAction(m_act_fitToWidth);
-    editMenu->addAction(m_act_fitToHeight);
-    editMenu->addSeparator();
+    imageMenu->addAction(m_act_fitToWidth);
+    imageMenu->addAction(m_act_fitToHeight);
+    imageMenu->addSeparator();
 
     QActionGroup *lockActions = new QActionGroup(this);
-    lockActions->addAction(m_act_lockNone);
     lockActions->addAction(m_act_lockZoom);
     lockActions->addAction(m_act_lockAutofit);
     lockActions->addAction(m_act_lockFitWidth);
     lockActions->addAction(m_act_lockFitHeight);
+    lockActions->addAction(m_act_lockNone);
 
-    editMenu->addAction(m_act_lockNone);
-    editMenu->addAction(m_act_lockZoom);
-    editMenu->addAction(m_act_lockAutofit);
-    editMenu->addAction(m_act_lockFitWidth);
-    editMenu->addAction(m_act_lockFitHeight);
+    imageMenu->addAction(m_act_lockNone);
+    imageMenu->addAction(m_act_lockZoom);
+    imageMenu->addAction(m_act_lockAutofit);
+    imageMenu->addAction(m_act_lockFitWidth);
+    imageMenu->addAction(m_act_lockFitHeight);
 
 
-    QMenu *optionsMenu = m_menu_main->addMenu(tr("&Options"));
-    this->addAction(m_act_pagePrevious);
-    this->addAction(m_act_pageNext);
-    optionsMenu->addAction(m_act_pagePrevious);
-    optionsMenu->addAction(m_act_pageNext);
-    optionsMenu->addSeparator();
-    optionsMenu->addAction(m_act_thumbnails);
+    QMenu *viewMenu = m_menu_main->addMenu(tr("&View"));
+    viewMenu->addAction(m_act_thumbnails);
 
+    viewMenu->addSeparator();
     QActionGroup *viewModes = new QActionGroup(this);
     viewModes->addAction(m_act_mode_list);
     viewModes->addAction(m_act_mode_details);
     viewModes->addAction(m_act_mode_icons);
 
-    QMenu *menuViewMode = optionsMenu->addMenu("&View Mode");
-    menuViewMode->addAction(m_act_mode_list);
-    menuViewMode->addAction(m_act_mode_details);
-    menuViewMode->addAction(m_act_mode_icons);
+    viewMenu->addAction(m_act_mode_list);
+    viewMenu->addAction(m_act_mode_details);
+    viewMenu->addAction(m_act_mode_icons);
 
+    viewMenu->addSeparator();
+    viewMenu->addAction(m_act_sidebar);
     this->addAction(m_act_fullscreen);
-    optionsMenu->addAction(m_act_fullscreen);
-    optionsMenu->addAction(m_act_sidebar);
+    viewMenu->addAction(m_act_fullscreen);
+
+
+    QMenu *optionsMenu = m_menu_main->addMenu(tr("&Options"));
+
     optionsMenu->addAction(m_act_largeIcons);
     optionsMenu->addAction(m_act_settings);
 
@@ -383,16 +408,16 @@ void MainWindow::createMenus()
     menuRotate->addAction(m_act_rotateReset);
 
     QMenu *menuFit = m_menu_context_picture->addMenu(tr("Fit"));
+    menuFit->addAction(m_act_fitToWindow);
     menuFit->addAction(m_act_fitToHeight);
     menuFit->addAction(m_act_fitToWidth);
-    menuFit->addAction(m_act_fitToWindow);
 
     QMenu *menuLock = m_menu_context_picture->addMenu(tr("Lock"));
-    menuLock->addAction(m_act_lockNone);
     menuLock->addAction(m_act_lockZoom);
     menuLock->addAction(m_act_lockAutofit);
     menuLock->addAction(m_act_lockFitWidth);
     menuLock->addAction(m_act_lockFitHeight);
+    menuLock->addAction(m_act_lockNone);
 
     m_menu_context_picture->addSeparator();
     m_menu_context_picture->addAction(m_act_exit);
