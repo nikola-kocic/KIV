@@ -7,11 +7,13 @@ SOURCES += \
     settings.cpp \
     models/archive_item.cpp \
     models/archive_model.cpp \
+    models/filesystem_model.cpp \
     models/unrar/archive_rar.cpp \
     widgets/files_view/thumbnailitemdelegate.cpp \
     widgets/files_view/view_files.cpp \
     widgets/files_view/view_files_list.cpp \
     widgets/files_view/view_files_tree.cpp \
+    widgets/location_widget.cpp \
     widgets/main_window/main_window.cpp \
     widgets/picture_item/pictureitem.cpp \
     widgets/picture_item/pictureitem_data.cpp \
@@ -30,10 +32,12 @@ HEADERS += \
     settings.h \
     models/archive_item.h \
     models/archive_model.h \
+    models/filesystem_model.h \
     models/unrar/archive_rar.h \
     models/unrar/unrar.h \
     widgets/files_view/thumbnailitemdelegate.h \
     widgets/files_view/view_files.h \
+    widgets/location_widget.h \
     widgets/main_window/main_window.h \
     widgets/picture_item/pictureitem.h \
     widgets/picture_item/pictureitem_data.h \

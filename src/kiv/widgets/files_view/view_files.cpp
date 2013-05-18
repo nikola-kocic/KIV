@@ -15,7 +15,7 @@
 #include "models/archive_item.h"
 #include "models/unrar/archive_rar.h"
 
-ViewFiles::ViewFiles(QWidget *parent)
+ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
     : QWidget(parent)
 
     , m_fileinfo_current(FileInfo(""))
@@ -31,7 +31,7 @@ ViewFiles::ViewFiles(QWidget *parent)
     , m_view_current(0)
 
     , m_model_archive_files(0)
-    , m_model_filesystem(new FileSystemModel(this))
+    , m_model_filesystem(model_filesystem)
     , m_proxy_file_list(new FileListSortFilterProxyModel(this))
     , m_proxy_containers(new ContainersSortFilterProxyModel(this))
     , m_proxy_archive_dirs(new ArchiveDirsSortFilterProxyModel(this))
@@ -41,25 +41,7 @@ ViewFiles::ViewFiles(QWidget *parent)
     , m_combobox_sort(new QComboBox(this))
 
 {
-    /* Start modelFilesystem */
-    QStringList filters;
-    const QStringList filtersArchive = Helper::filtersArchive;
-    for (int i = 0; i < filtersArchive.size(); ++i)
-    {
-        filters.append("*." + filtersArchive.at(i));
-    }
-    const QStringList filtersImage = Helper::getFiltersImage();
-    for (int i = 0; i < filtersImage.size(); ++i)
-    {
-        filters.append("*." + filtersImage.at(i));
-    }
-
-    m_model_filesystem->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
-    m_model_filesystem->setNameFilterDisables(false);
-    m_model_filesystem->setNameFilters(filters);
-    m_model_filesystem->setRootPath("");
     m_proxy_containers->setSourceModel(m_model_filesystem);
-    /* End modelFilesystem */
 
     connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)), this, SLOT(on_thumbnail_finished(QModelIndex)));
 
@@ -663,31 +645,6 @@ void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 /* End Thumbnails */
 
 
-QVariant ViewFiles::FileSystemModel::data(const QModelIndex &index, int role) const
-{
-    switch (role)
-    {
-
-    case Qt::TextAlignmentRole:
-    {
-        if (index.column() == 1)
-        {
-            return int(Qt::AlignRight | Qt::AlignVCenter);
-        }
-        break;
-    }
-    case Qt::ToolTipRole:
-        const QFileInfo fi = this->fileInfo(index);
-        QString tooltip = (QFileSystemModel::tr("Name") + ": " + fi.fileName() + "\n" + QFileSystemModel::tr("Date Modified") + ": " + fi.lastModified().toString(Qt::SystemLocaleShortDate));
-        if (!this->isDir(index))
-        {
-            tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(fi.size()));
-        }
-        return tooltip;
-    }
-
-    return QFileSystemModel::data(index, role);
-}
 
 bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {

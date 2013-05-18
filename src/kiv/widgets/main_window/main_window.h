@@ -8,8 +8,10 @@
 #include <QSplitter>
 #include <QToolBar>
 
+#include "models/filesystem_model.h"
 #include "picture_loader.h"
 #include "widgets/files_view/view_files.h"
+#include "widgets/location_widget.h"
 #include "widgets/picture_item/pictureitem.h"
 #include "widgets/zoom_item/zoomwidget.h"
 
@@ -27,10 +29,9 @@ private:
     void connectActions();
     void updateSettings();
     void populateBookmarks();
-    bool openFile(const FileInfo &info);
-    inline bool openFile(const QString &path) { return openFile(FileInfo(path)); }
 
 
+    FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 
     ViewFiles *m_view_files;
@@ -41,7 +42,7 @@ private:
     QMenuBar *m_menu_main;
 
     QToolBar *m_toolbar;
-    QLineEdit *m_lineEdit_path;
+    LocationWidget *m_location_widget;
     ZoomWidget *m_comboBox_zoom;
     QIcon m_windowIcon;
 
@@ -136,8 +137,6 @@ private slots:
     /* Directory Toolbar Actions Slots */
     void refreshPath();
 
-    void on_lineEditPath_editingFinished();
-    void on_lineEditPath_focus_lost();
     void on_comboBoxZoom_activated(const int &index);
     void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
@@ -146,6 +145,9 @@ private slots:
     void on_view_mode_details_triggered();
     void on_view_mode_icons_triggered();
 
+    bool openFile(const FileInfo &info);
+    inline bool openFile(const QString &path) { return openFile(FileInfo(path)); }
+
 protected:
     void closeEvent(QCloseEvent *event);
     void keyPressEvent(QKeyEvent *event);
@@ -153,7 +155,6 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
-    bool eventFilter(QObject *obj, QEvent *event);
     void showEvent(QShowEvent *event);
 };
 

@@ -3,7 +3,6 @@
 #include <qglobal.h>
 #include <QAction>
 #include <QBoxLayout>
-#include <QCompleter>
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -23,17 +22,18 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)
+    , m_model_filesystem(new FileSystemModel(this))
 
     , m_settings(new Settings())
 
-    , m_view_files(new ViewFiles(this))
+    , m_view_files(new ViewFiles(m_model_filesystem, this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))
     , m_picture_item(new PictureItem(m_settings, this))
 
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
-    , m_lineEdit_path(new QLineEdit(this))
+    , m_location_widget(new LocationWidget(m_model_filesystem, this))
     , m_comboBox_zoom(new ZoomWidget(this))
 {
     this->setAcceptDrops(true);
@@ -41,11 +41,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     updateSettings();
     createActions();
     createMenus();
-
-    QCompleter *completer = new QCompleter(this);
-    completer->setModel(m_view_files->getFilesystemModel());
-    m_lineEdit_path->setCompleter(completer);
-    m_lineEdit_path->installEventFilter(this);
 
     connectActions();
 
@@ -102,16 +97,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::keyPressEvent" << event->key();
 #endif
-    if (event->key() == Qt::Key_Escape)
-    {
-        if (m_lineEdit_path->hasFocus())
-        {
-            m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
-            m_lineEdit_path->clearFocus();
-            event->accept();
-        }
-    }
-    else if (event->key() == Qt::Key_B)
+    if (event->key() == Qt::Key_B)
     {
         showMinimized();
         event->accept();
@@ -356,7 +342,7 @@ void MainWindow::createMenus()
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_act_dirUp);
     m_toolbar->addAction(m_act_refreshPath);
-    m_toolbar->addWidget(m_lineEdit_path);
+    m_toolbar->addWidget(m_location_widget);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_act_pagePrevious);
     m_toolbar->addAction(m_act_pageNext);
@@ -453,7 +439,7 @@ void MainWindow::connectActions()
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
-    connect(m_lineEdit_path, SIGNAL(returnPressed()), this, SLOT(on_lineEditPath_editingFinished()));
+    connect(m_location_widget, SIGNAL(locationChanged(FileInfo)), this, SLOT(openFile(FileInfo)));
     connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
 
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
@@ -543,7 +529,7 @@ void MainWindow::on_filesView_currentChanged(const FileInfo &info)
 
     this->setCursor(Qt::BusyCursor);
 
-    m_lineEdit_path->setText(info.getPath());
+    m_location_widget->setFileInfo(info);
     m_picture_item->setPixmap(info);
 }
 
@@ -599,20 +585,6 @@ void MainWindow::dropEvent(QDropEvent *event)
     return QMainWindow::dropEvent(event);
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-    if(event->type() == QEvent::FocusOut)
-    {
-        if (obj == m_lineEdit_path)
-        {
-            on_lineEditPath_focus_lost();
-        }
-    }
-
-    // standard event processing
-    return QMainWindow::eventFilter(obj, event);
-}
-
 void MainWindow::showEvent(QShowEvent *event)
 {
     if (Helper::getFiltersImage().contains("svg"))
@@ -623,31 +595,6 @@ void MainWindow::showEvent(QShowEvent *event)
     return QMainWindow::showEvent(event);
 }
 
-void MainWindow::on_lineEditPath_editingFinished()
-{
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_editingFinished" << this->m_lineEdit_path->text();
-#endif
-    const FileInfo info = FileInfo(m_lineEdit_path->text());
-    if (info.isValid())
-    {
-        this->openFile(m_lineEdit_path->text());
-    }
-    else
-    {
-        m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
-        m_picture_item->setFocus();
-    }
-}
-
-void MainWindow::on_lineEditPath_focus_lost()
-{
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_lineEditPath_focus_lost" << this->m_lineEdit_path->text();
-#endif
-    m_lineEdit_path->setText(m_view_files->getCurrentFileInfo().getPath());
-    m_lineEdit_path->clearFocus();
-}
 
 void MainWindow::refreshPath()
 {

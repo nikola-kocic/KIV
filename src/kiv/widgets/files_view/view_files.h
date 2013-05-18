@@ -18,6 +18,7 @@
 
 #include "helper.h"
 #include "models/archive_model.h"
+#include "models/filesystem_model.h"
 #include "settings.h"
 #include "thumbnailitemdelegate.h"
 
@@ -61,7 +62,7 @@ class ViewFiles : public QWidget
     Q_OBJECT
 
 public:
-    explicit ViewFiles(QWidget *parent = 0);
+    explicit ViewFiles(FileSystemModel *model_filesystem, QWidget *parent = 0);
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
@@ -76,13 +77,6 @@ public slots:
     void pagePrevious();
 
 private:
-    class FileSystemModel : public QFileSystemModel
-    {
-    public:
-        explicit FileSystemModel(QObject *parent = 0) : QFileSystemModel(parent) {}
-        QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    };
-
     class FileListSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
