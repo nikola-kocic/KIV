@@ -153,7 +153,7 @@ QString FileInfo::getPath() const
     QString path;
     if (isInArchive())
     {
-        path = m_container.canonicalFilePath() + "/" + zipImagePath();
+        path = m_container.canonicalFilePath() + "/" + getArchiveImagePath();
     }
     else if (fileExists())
     {
@@ -166,7 +166,7 @@ QString FileInfo::getPath() const
     return path;
 }
 
-QString FileInfo::zipImagePath() const
+QString FileInfo::getArchiveImagePath() const
 {
     return m_zipPath + m_zipImageFileName;
 }
@@ -188,7 +188,7 @@ QString FileInfo::getContainerPath() const
     return m_container.canonicalFilePath();
 }
 
-QString FileInfo::getZipPath() const
+QString FileInfo::getArchiveContainerPath() const
 {
     return m_zipPath;
 }
@@ -208,7 +208,7 @@ QString FileInfo::getDebugInfo() const
 {
     const QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath()
             + "\nImageFileName: " + getImageFileName()
-            + "\nZipPath: " + getZipPath()
+            + "\nZipPath: " + getArchiveContainerPath()
             + "\nIsInArchive: " + (isInArchive() ? "true" : "false")
             + "\nContainer Name: " + getContainerName()
             + "\n***";

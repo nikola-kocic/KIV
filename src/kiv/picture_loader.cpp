@@ -97,7 +97,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
     {
         zip.setFileNameCodec("UTF-8");
 
-        if (zip.setCurrentFile(thumb_info.getFileInfo().zipImagePath()))
+        if (zip.setCurrentFile(thumb_info.getFileInfo().getArchiveImagePath()))
         {
             QuaZipFile file(&zip);
             if (file.open(QIODevice::ReadOnly))
@@ -121,7 +121,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
         {
             // TODO: Check return value
             ArchiveRar::readFile(thumb_info.getFileInfo().getContainerPath(),
-                                        thumb_info.getFileInfo().zipImagePath(),
+                                        thumb_info.getFileInfo().getArchiveImagePath(),
                                         buff);
         }
     }

@@ -221,7 +221,7 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         {
             m_view_archiveDirs->show();
         }
-        const QModelIndex dirIndex = m_model_archive_files->getDirectory(info.getZipPath());
+        const QModelIndex dirIndex = m_model_archive_files->getDirectory(info.getArchiveContainerPath());
         m_view_archiveDirs->setCurrentIndex(m_proxy_archive_dirs->mapFromSource(dirIndex));
         m_view_archiveDirs->expand(m_view_archiveDirs->currentIndex());
 
@@ -606,14 +606,14 @@ void ViewFiles::saveCurrentFile(const QString &fileName) const
         switch (m_model_archive_files->getType())
         {
         case ArchiveType::Zip:
-            JlCompress::extractFile(m_fileinfo_current.getContainerPath(), m_fileinfo_current.zipImagePath(), fileName);
+            JlCompress::extractFile(m_fileinfo_current.getContainerPath(), m_fileinfo_current.getArchiveImagePath(), fileName);
             break;
 
         case ArchiveType::Rar:
         {
             if (ArchiveRar::loadlib())
             {
-                ArchiveRar::extract(m_fileinfo_current.getContainerPath(), m_fileinfo_current.zipImagePath(), fileName);
+                ArchiveRar::extract(m_fileinfo_current.getContainerPath(), m_fileinfo_current.getArchiveImagePath(), fileName);
             }
             break;
         }
