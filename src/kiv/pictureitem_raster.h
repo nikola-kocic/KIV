@@ -4,7 +4,7 @@
 #include "pictureitem_interface.h"
 #include <QWidget>
 
-class PictureItemRaster : public QWidget, public PictureItemInterface
+class PictureItemRaster : private QWidget, public PictureItemInterface
 {
     Q_OBJECT
 

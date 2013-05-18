@@ -9,7 +9,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrentMap>
 
-class PictureItemGL : public QGLWidget, public PictureItemInterface
+class PictureItemGL : private QGLWidget, public PictureItemInterface
 {
     Q_OBJECT
 
