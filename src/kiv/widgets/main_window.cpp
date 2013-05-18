@@ -102,6 +102,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         showMinimized();
         event->accept();
     }
+    else if (event->key() == Qt::Key_Escape)
+    {
+        m_act_fullscreen->setChecked(false);
+    }
     return QMainWindow::keyPressEvent(event);
 }
 
@@ -442,16 +446,17 @@ void MainWindow::connectActions()
     connect(m_location_widget, SIGNAL(locationChanged(FileInfo)), this, SLOT(openFile(FileInfo)));
     connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
 
+    connect(m_picture_item, SIGNAL(mousePress(QMouseEvent*const)),
+            this, SLOT(on_pictureItemMousePress(QMouseEvent*const)));
+    connect(m_picture_item, SIGNAL(mouseDoubleClick(QMouseEvent*const)),
+            this, SLOT(on_pictureItemMouseDoubleClick(QMouseEvent*const)));
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
-    connect(m_picture_item, SIGNAL(toggleFullscreen()), m_act_fullscreen, SLOT(toggle()));
     connect(m_picture_item, SIGNAL(pageNext()), m_view_files, SLOT(pageNext()));
     connect(m_picture_item, SIGNAL(pagePrevious()), m_view_files, SLOT(pagePrevious()));
     connect(m_picture_item, SIGNAL(zoomIn()), m_comboBox_zoom, SLOT(zoomIn()));
     connect(m_picture_item, SIGNAL(zoomOut()), m_comboBox_zoom, SLOT(zoomOut()));
     connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)), m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
     connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
-    connect(m_picture_item, SIGNAL(quit()), this, SLOT(close()));
-    connect(m_picture_item, SIGNAL(boss()), this, SLOT(showMinimized()));
     connect(m_picture_item, SIGNAL(setFullscreen(bool)), m_act_fullscreen, SLOT(setChecked(bool)));
 
     connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)), m_picture_item, SLOT(setZoom(qreal)));
@@ -827,4 +832,49 @@ void MainWindow::on_view_mode_details_triggered()
 void MainWindow::on_view_mode_icons_triggered()
 {
     m_view_files->setViewMode(FileViewMode::Icons);
+}
+
+void MainWindow::on_pictureItemMousePress(const QMouseEvent * const event)
+{
+    if (event->buttons() != Qt::MiddleButton)
+    {
+        return;
+    }
+
+    switch (m_settings->getMiddleClick())
+    {
+    case MiddleClickAction::Fullscreen :
+        m_act_fullscreen->toggle();
+        break;
+
+    case MiddleClickAction::AutoFit:
+        m_picture_item->fitToScreen();
+        break;
+
+    case MiddleClickAction::ZoomReset:
+        m_comboBox_zoom->setZoom(1);
+        break;
+
+    case MiddleClickAction::NextPage:
+        m_view_files->pageNext();
+        break;
+
+    case MiddleClickAction::Quit:
+        close();
+        break;
+
+    case MiddleClickAction::Boss:
+        showMinimized();
+        break;
+
+    default: break;
+    }
+}
+
+void MainWindow::on_pictureItemMouseDoubleClick(const QMouseEvent * const event)
+{
+    if (event->buttons() == Qt::LeftButton)
+    {
+        m_act_fullscreen->toggle();
+    }
 }

@@ -25,7 +25,10 @@ void LocationWidget::keyPressEvent(QKeyEvent *event)
     {
         clearFocus();
     }
-    return QLineEdit::keyPressEvent(event);
+    else
+    {
+        return QLineEdit::keyPressEvent(event);
+    }
 }
 
 void LocationWidget::on_returnPressed()

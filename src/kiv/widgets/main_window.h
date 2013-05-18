@@ -143,6 +143,8 @@ private slots:
     void on_view_mode_list_triggered();
     void on_view_mode_details_triggered();
     void on_view_mode_icons_triggered();
+    void on_pictureItemMousePress(const QMouseEvent * const event);
+    void on_pictureItemMouseDoubleClick(const QMouseEvent * const event);
 
     bool openFile(const FileInfo &info);
     inline bool openFile(const QString &path) { return openFile(FileInfo(path)); }

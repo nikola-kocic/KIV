@@ -130,12 +130,10 @@ void PictureItem::afterPixmapLoad()
     this->setRotation(0);
 
     this->updateLockMode();
+
     if (m_data->m_boundingRect.width() > m_imageDisplay->getWidget()->width())
     {
-        if ((m_settings->getRightToLeft() && !m_data->m_flag_jumpToEnd)
-                || (!m_settings->getRightToLeft() && m_data->m_flag_jumpToEnd)
-
-                )
+        if (m_settings->getRightToLeft() ^ m_data->m_flag_jumpToEnd)
         {
             m_data->m_boundingRect.moveLeft(-(m_data->m_boundingRect.width() - m_imageDisplay->getWidget()->width()));
         }
@@ -184,43 +182,9 @@ void PictureItem::mousePressEvent(QMouseEvent *event)
         /* Start dragging */
         this->beginDrag(event->pos());
     }
-    else if (event->button() == Qt::MiddleButton)
+    else
     {
-        switch (m_settings->getMiddleClick())
-        {
-        case MiddleClickAction::Fullscreen :
-            emit(toggleFullscreen());
-            event->accept();
-            break;
-
-        case MiddleClickAction::AutoFit:
-            this->fitToScreen();
-            event->accept();
-            break;
-
-        case MiddleClickAction::ZoomReset:
-            this->setZoom(1);
-            event->accept();
-            break;
-
-        case MiddleClickAction::NextPage:
-            emit pageNext();
-            event->accept();
-            break;
-
-        case MiddleClickAction::Quit:
-            emit quit();
-            event->accept();
-            break;
-
-        case MiddleClickAction::Boss:
-            emit boss();
-            event->accept();
-            break;
-
-        default: break;
-
-        }
+        emit mousePress(event);
     }
 
     return QWidget::mousePressEvent(event);
@@ -232,12 +196,7 @@ void PictureItem::mousePressEvent(QMouseEvent *event)
 
 void PictureItem::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (event->buttons() == Qt::LeftButton)
-    {
-        emit(toggleFullscreen());
-        event->accept();
-    }
-
+    emit mouseDoubleClick(event);
     return QWidget::mouseDoubleClickEvent(event);
 }
 
@@ -281,11 +240,6 @@ void PictureItem::keyPressEvent(QKeyEvent *event)
         this->ScrollPageHorizontal(-120);
         event->accept();
         break;
-
-    case Qt::Key_Escape:
-        emit setFullscreen(false);
-        event->accept();
-        break;
     }
     return QWidget::keyPressEvent(event);
 }
@@ -322,7 +276,6 @@ void PictureItem::wheelEvent(QWheelEvent *event)
                     (m_settings->getScrollChangesPage()) &&
                     (
                         (LockMode::Autofit == m_data->getLockMode()) ||
-                        (LockMode::FitHeight == m_data->getLockMode()) ||
                         (m_data->m_boundingRect.height() <= m_imageDisplay->getWidget()->height() && m_data->m_boundingRect.width() <= m_imageDisplay->getWidget()->width())
                         )
                     )
@@ -624,50 +577,54 @@ void PictureItem::drag(const QPoint &pt)
     if (m_dragging)
     {
         const QSize widgetSize = m_imageDisplay->getWidget()->size();
+        const qreal widthDiff = widgetSize.width() - m_data->m_boundingRect.width();
+        const qreal heightDiff = widgetSize.height() - m_data->m_boundingRect.height();
+        const int xDiff = pt.x() - m_point_drag.x();
+        const int yDiff = pt.y() - m_point_drag.y();
+
         /* Am I dragging it outside of the panel? */
-        if ((pt.x() - m_point_drag.x() >= (m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2)) && (pt.x() - m_point_drag.x() <= 0))
+        if ((xDiff >= widthDiff) && (xDiff <= 0))
         {
             /* No, everything is just fine */
-            m_data->m_boundingRect.moveLeft(pt.x() - m_point_drag.x());
+            m_data->m_boundingRect.moveLeft(xDiff);
         }
-        else if ((pt.x() - m_point_drag.x() > 0))
+        else if (xDiff > 0)
         {
             /* Now don't drag it out of the panel please */
             m_data->m_boundingRect.moveLeft(0);
         }
-        else if ((pt.x() - m_point_drag.x() < (m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2)))
+        else if (xDiff < widthDiff)
         {
             /* I am dragging it out of my panel. How many pixels do I have left? */
-            if ((m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2) <= 0)
+            if (widthDiff <= 0)
             {
                 /* Make it fit perfectly */
-                m_data->m_boundingRect.moveLeft((m_data->m_boundingRect.width() - widgetSize.width()) - ((m_data->m_boundingRect.width() - widgetSize.width()) * 2));
+                m_data->m_boundingRect.moveLeft(widthDiff);
             }
         }
 
         /* Am I dragging it outside of the panel? */
-        if (pt.y() - m_point_drag.y() >= (m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height() - widgetSize.height()) * 2) && (pt.y() - m_point_drag.y() <= 0))
+        if (yDiff >= heightDiff && (yDiff <= 0))
         {
             /* No, everything is just fine */
-            m_data->m_boundingRect.moveTop(pt.y() - m_point_drag.y());
+            m_data->m_boundingRect.moveTop(yDiff);
         }
-        else if ((pt.y() - m_point_drag.y() > 0))
+        else if (yDiff > 0)
         {
             /* Now don't drag it out of the panel please */
             m_data->m_boundingRect.moveTop(0);
         }
-        else if (pt.y() - m_point_drag.y() < (m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height() - widgetSize.height()) * 2))
+        else if (yDiff < heightDiff)
         {
             /* I am dragging it out of my panel. How many pixels do I have left? */
-            if ((m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height() - widgetSize.height()) * 2) <= 0)
+            if (heightDiff <= 0)
             {
                 /* Make it fit perfectly */
-                m_data->m_boundingRect.moveTop((m_data->m_boundingRect.height() - widgetSize.height()) - ((m_data->m_boundingRect.height()- widgetSize.height()) * 2));
+                m_data->m_boundingRect.moveTop(heightDiff);
             }
         }
 
         m_imageDisplay->getWidget()->update();
-
     }
 }
 

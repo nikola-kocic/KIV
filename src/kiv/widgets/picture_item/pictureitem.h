@@ -78,19 +78,17 @@ private:
     QTime t;
 #endif
 
-
-
 signals:
     void pageNext();
     void pagePrevious();
-    void toggleFullscreen();
     void setFullscreen(bool);
     void zoomIn();
     void zoomOut();
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
-    void quit();
-    void boss();
+    void mouseWheel(const QWheelEvent * const event);
+    void mousePress(const QMouseEvent * const event);
+    void mouseDoubleClick(const QMouseEvent * const event);
 
 public slots:
     void setZoom(const qreal value);

@@ -123,7 +123,10 @@ void ZoomWidget::keyPressEvent(QKeyEvent *event)
         clearFocus();
         event->accept();
     }
-    return QComboBox::keyPressEvent(event);
+    else
+    {
+        return QComboBox::keyPressEvent(event);
+    }
 }
 
 void ZoomWidget::focusOutEvent(QFocusEvent *event)
