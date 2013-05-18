@@ -27,7 +27,11 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
     ui->ddWheel->setCurrentIndex(ui->ddWheel->findData(m_settings->getWheel()));
     ui->cbRTL->setChecked(m_settings->getRightToLeft());
 
+#ifdef QT5
+    ui->cbHardwareAcceleration->setEnabled(false);
+#else
     ui->cbHardwareAcceleration->setChecked(m_settings->getHardwareAcceleration());
+#endif
     ui->spinBox_thumbnail_width->setValue(m_settings->getThumbnailSize().width());
     ui->spinBox_thumbnail_height->setValue(m_settings->getThumbnailSize().height());
 
