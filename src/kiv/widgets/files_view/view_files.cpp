@@ -613,7 +613,7 @@ void ViewFiles::saveCurrentFile(const QString &fileName) const
         {
             if (ArchiveRar::loadlib())
             {
-                ArchiveRar::extract(m_fileinfo_current.getContainerPath(), m_fileinfo_current.rarImagePath(), fileName);
+                ArchiveRar::extract(m_fileinfo_current.getContainerPath(), m_fileinfo_current.zipImagePath(), fileName);
             }
             break;
         }

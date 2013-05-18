@@ -20,6 +20,9 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
     , m_zipImageFileName("")
     , m_isInArchive(false)
 {
+#ifdef DEBUG_FILE_INFO
+    Helper::debuglog(Q_FUNC_INFO, "called with path: " + path);
+#endif
     if (path.isEmpty())
     {
         return;
@@ -147,29 +150,25 @@ bool FileInfo::isContainerValid() const
 
 QString FileInfo::getPath() const
 {
+    QString path;
     if (isInArchive())
     {
-        return m_container.canonicalFilePath() + "/" + zipImagePath();
+        path = m_container.canonicalFilePath() + "/" + zipImagePath();
     }
     else if (fileExists())
     {
-        return m_image.canonicalFilePath();
+        path = m_image.canonicalFilePath();
     }
     else
     {
-        return m_container.canonicalFilePath();
+        path = m_container.canonicalFilePath();
     }
+    return path;
 }
 
 QString FileInfo::zipImagePath() const
 {
     return m_zipPath + m_zipImageFileName;
-}
-
-QString FileInfo::rarImagePath() const
-{
-    const QString rarImagePath = QDir::toNativeSeparators(m_zipPath + m_zipImageFileName);
-    return rarImagePath;
 }
 
 QString FileInfo::getImageFileName() const
@@ -196,7 +195,8 @@ QString FileInfo::getZipPath() const
 
 QString FileInfo::getContainerName() const
 {
-    return m_container.fileName();
+    const QString containerName = m_container.fileName();
+    return containerName;
 }
 
 bool FileInfo::isContainerRoot() const
@@ -206,6 +206,11 @@ bool FileInfo::isContainerRoot() const
 
 QString FileInfo::getDebugInfo() const
 {
-    const QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath() + "\nImageFileName: " + getImageFileName() + "\nZipPath: " + getZipPath() + "\nIsInArchive: " + (isInArchive() ? "true" : "false") + "\n***";
+    const QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath()
+            + "\nImageFileName: " + getImageFileName()
+            + "\nZipPath: " + getZipPath()
+            + "\nIsInArchive: " + (isInArchive() ? "true" : "false")
+            + "\nContainer Name: " + getContainerName()
+            + "\n***";
     return str;
 }

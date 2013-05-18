@@ -121,7 +121,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
         {
             // TODO: Check return value
             ArchiveRar::readFile(thumb_info.getFileInfo().getContainerPath(),
-                                        thumb_info.getFileInfo().rarImagePath(),
+                                        thumb_info.getFileInfo().zipImagePath(),
                                         buff);
         }
     }
