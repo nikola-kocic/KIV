@@ -69,8 +69,6 @@ private:
     PictureItemInterface *m_imageDisplay;
     QFutureWatcher< QImage > *m_loader_image;
 
-    QTimer *m_timer_scrollPage;
-
     bool m_dragging;
     QPoint m_point_drag;
 

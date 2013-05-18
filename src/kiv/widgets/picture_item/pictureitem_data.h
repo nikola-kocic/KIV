@@ -28,7 +28,6 @@ public:
     void setPixmapNull(const bool value);
 
     QRectF m_boundingRect;
-    bool m_flag_jumpToEnd;
     QColor m_color_clear;
     qreal m_offsetX;
     qreal m_offsetY;

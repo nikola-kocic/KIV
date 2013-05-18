@@ -2,7 +2,6 @@
 
 PictureItemData::PictureItemData()
     : m_boundingRect(QRectF())
-    , m_flag_jumpToEnd(false)
     , m_color_clear(Qt::lightGray)
     , m_offsetX(0)
     , m_offsetY(0)
@@ -10,7 +9,6 @@ PictureItemData::PictureItemData()
     , m_zoom_value(1.0)
     , m_rotation_value(0.0)
     , m_lockMode(LockMode::None)
-
 {
 }
 

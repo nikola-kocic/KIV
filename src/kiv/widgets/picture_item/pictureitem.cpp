@@ -11,15 +11,12 @@ PictureItem::PictureItem(const Settings * const settings, QWidget *parent, Qt::W
     , m_opengl(settings->getHardwareAcceleration())
     , m_imageDisplay(0)
     , m_loader_image(new QFutureWatcher<QImage>(this))
-    , m_timer_scrollPage(new QTimer(this))
 
     , m_dragging(false)
     , m_point_drag(QPoint())
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    m_timer_scrollPage->setSingleShot(true);
 
     connect(m_loader_image, SIGNAL(resultReadyAt(int)), this, SLOT(imageFinished(int)));
 
@@ -133,24 +130,13 @@ void PictureItem::afterPixmapLoad()
 
     if (m_data->m_boundingRect.width() > m_imageDisplay->getWidget()->width())
     {
-        if (m_settings->getRightToLeft() ^ m_data->m_flag_jumpToEnd)
+        if (m_settings->getRightToLeft())
         {
             m_data->m_boundingRect.moveLeft(-(m_data->m_boundingRect.width() - m_imageDisplay->getWidget()->width()));
         }
     }
 
-    if (m_data->m_flag_jumpToEnd)
-    {
-        if (m_data->m_boundingRect.height() > m_imageDisplay->getWidget()->height())
-        {
-            m_data->m_boundingRect.moveTop(-(m_data->m_boundingRect.height() - m_imageDisplay->getWidget()->height()));
-        }
-        m_data->m_flag_jumpToEnd = false;
-    }
-    else
-    {
-        m_data->m_boundingRect.moveTop(0);
-    }
+     m_data->m_boundingRect.moveTop(0);
 }
 
 void PictureItem::calculateAverageColor(const QImage &img)
@@ -270,16 +256,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
     else if (Qt::NoModifier == event->modifiers())
     {
         /* If page can't be scrolled, change page if necessary */
-        if (WheelAction::ChangePage == m_settings->getWheel() ||
-                (
-                    (WheelAction::Scroll == m_settings->getWheel()) &&
-                    (m_settings->getScrollChangesPage()) &&
-                    (
-                        (LockMode::Autofit == m_data->getLockMode()) ||
-                        (m_data->m_boundingRect.height() <= m_imageDisplay->getWidget()->height() && m_data->m_boundingRect.width() <= m_imageDisplay->getWidget()->width())
-                        )
-                    )
-                )
+        if (WheelAction::ChangePage == m_settings->getWheel())
         {
             if (event->delta() < 0)
             {
@@ -288,10 +265,6 @@ void PictureItem::wheelEvent(QWheelEvent *event)
             }
             else
             {
-                if (WheelAction::Scroll == m_settings->getWheel())
-                {
-                    m_data->m_flag_jumpToEnd = m_settings->getJumpToEnd();
-                }
                 emit pagePrevious();
                 event->accept();
             }
@@ -299,83 +272,7 @@ void PictureItem::wheelEvent(QWheelEvent *event)
         /* Scroll page */
         else if (WheelAction::Scroll == m_settings->getWheel())
         {
-            event->accept();
-            if (
-                    (event->delta() < 0) &&
-                    (!m_timer_scrollPage->isActive()) &&
-                    ((-m_data->m_boundingRect.y() + m_imageDisplay->getWidget()->height()) >= m_data->m_boundingRect.height())
-                    )
-            {
-                /* Scroll horizontally; If page is scrolled to end, start timer */
-                if (m_settings->getScrollPageByWidth())
-                {
-                    if (m_settings->getRightToLeft())
-                    {
-                        if (m_data->m_boundingRect.x() < 0)
-                        {
-                            this->ScrollPageHorizontal(-event->delta());
-
-                            if (0 == m_data->m_boundingRect.x())
-                            {
-                                this->start_timerScrollPage();
-                            }
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if ((m_data->m_boundingRect.width() + m_data->m_boundingRect.x()) > m_imageDisplay->getWidget()->width())
-                        {
-                            this->ScrollPageHorizontal(event->delta());
-
-
-                            if ((m_data->m_boundingRect.width() + m_data->m_boundingRect.x()) == m_imageDisplay->getWidget()->width())
-                            {
-                                this->start_timerScrollPage();
-                            }
-                            return;
-                        }
-                    }
-                }
-                /* If this code is reached (page was already scrolled to end), change page to next */
-                if (
-                        (m_settings->getScrollChangesPage()) &&
-                        (!m_timer_scrollPage->isActive())
-                        )
-                {
-                    this->start_timerScrollPage();
-                    emit pageNext();
-                }
-            }
-            /* If page is at top, change page to previous */
-            else if (
-                     (m_settings->getScrollChangesPage()) &&
-                     (event->delta() > 0) &&
-                     (0 == m_data->m_boundingRect.y()) &&
-                     (!m_timer_scrollPage->isActive())
-                     )
-            {
-                this->start_timerScrollPage();
-                m_data->m_flag_jumpToEnd = m_settings->getJumpToEnd();
-                emit pagePrevious();
-            }
-            /* Scroll vertically; If page is scrolled to top or bottom, start timer */
-            else
-            {
-                ScrollPageVertical(event->delta());
-
-                if (
-                        (
-                            ((m_data->m_boundingRect.height() + m_data->m_boundingRect.y()) == m_imageDisplay->getWidget()->height()) ||
-                            (0 == m_data->m_boundingRect.y())
-                            ) &&
-                        (!m_timer_scrollPage->isActive())
-                        )
-                {
-                    this->start_timerScrollPage();
-                }
-            }
-
+            ScrollPageVertical(event->delta());
         }
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
@@ -395,15 +292,6 @@ void PictureItem::wheelEvent(QWheelEvent *event)
     }
 
     return QWidget::wheelEvent(event);
-}
-
-
-void PictureItem::start_timerScrollPage()
-{
-    if (m_settings->getPageChangeTimeout() > 0)
-    {
-        m_timer_scrollPage->start(m_settings->getPageChangeTimeout());
-    }
 }
 
 

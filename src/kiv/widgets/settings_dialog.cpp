@@ -25,32 +25,20 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
     ui->ddWheel->addItem(tr("Zoom In / Out"),        WheelAction::Zoom);
 
     ui->ddWheel->setCurrentIndex(ui->ddWheel->findData(m_settings->getWheel()));
-
-    ui->cbScrollByWidth->setChecked(m_settings->getScrollPageByWidth());
     ui->cbRTL->setChecked(m_settings->getRightToLeft());
-    ui->cbScrollChangesPage->setChecked(m_settings->getScrollChangesPage());
-    ui->sbWaitTime->setValue(m_settings->getPageChangeTimeout());
-    ui->cbJumpToEnd->setChecked(m_settings->getJumpToEnd());
 
     ui->cbHardwareAcceleration->setChecked(m_settings->getHardwareAcceleration());
     ui->spinBox_thumbnail_width->setValue(m_settings->getThumbnailSize().width());
     ui->spinBox_thumbnail_height->setValue(m_settings->getThumbnailSize().height());
 
     ui->checkBox_calculate_average_color->setChecked(m_settings->getCalculateAverageColor());
-
-    on_cbScrollChangesPage_clicked(ui->cbScrollChangesPage->isChecked());
 }
 
 void Settings_Dialog::on_buttonBox_accepted()
 {
     m_settings->setMiddleClick(ui->ddMiddleClick->itemData(ui->ddMiddleClick->currentIndex()).toInt());
     m_settings->setWheel(ui->ddWheel->itemData(ui->ddWheel->currentIndex()).toInt());
-
-    m_settings->setScrollPageByWidth(ui->cbScrollByWidth->isChecked());
     m_settings->setRightToLeft(ui->cbRTL->isChecked());
-    m_settings->setScrollChangesPage(ui->cbScrollChangesPage->isChecked());
-    m_settings->setJumpToEnd(ui->cbJumpToEnd->isChecked());
-    m_settings->setPageChangeTimeout(ui->sbWaitTime->value());
 
     m_settings->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
     m_settings->setThumbnailSize(QSize(ui->spinBox_thumbnail_width->value(), ui->spinBox_thumbnail_height->value()));
@@ -60,24 +48,4 @@ void Settings_Dialog::on_buttonBox_accepted()
 Settings_Dialog::~Settings_Dialog()
 {
     delete ui;
-}
-
-void Settings_Dialog::on_cbScrollChangesPage_clicked(bool checked)
-{
-    ui->sbWaitTime->setEnabled(checked);
-    ui->labelWaitTime->setEnabled(checked);
-    ui->cbJumpToEnd->setEnabled(checked);
-}
-
-
-void Settings_Dialog::on_ddWheel_currentIndexChanged(int index)
-{
-    if (ui->ddWheel->itemData(index).toInt() != WheelAction::Scroll)
-    {
-        ui->groupBox->setEnabled(false);
-    }
-    else
-    {
-        ui->groupBox->setEnabled(true);
-    }
 }

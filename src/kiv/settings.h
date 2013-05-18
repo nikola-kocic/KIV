@@ -38,20 +38,8 @@ public:
     int getWheel() const;
     void setWheel(const int v);
 
-    bool getScrollPageByWidth() const;
-    void setScrollPageByWidth(const bool b);
-
     bool getRightToLeft() const;
     void setRightToLeft(const bool b);
-
-    bool getScrollChangesPage() const;
-    void setScrollChangesPage(const bool b);
-
-    int getPageChangeTimeout() const;
-    void setPageChangeTimeout(const int v);
-
-    bool getJumpToEnd() const;
-    void setJumpToEnd(const bool b);
 
     /* End Behaviour */
 
@@ -121,16 +109,6 @@ inline void Settings::setWheel(const int v)
 }
 
 
-inline bool Settings::getScrollPageByWidth() const
-{ return m_scrollPageByWidth; }
-
-inline void Settings::setScrollPageByWidth(const bool b)
-{
-    m_scrollPageByWidth = b;
-    m_settings->setValue("Behavior/ScrollPageByWidth", m_scrollPageByWidth);
-}
-
-
 inline bool Settings::getRightToLeft() const
 { return m_rightToLeft; }
 
@@ -138,36 +116,6 @@ inline void Settings::setRightToLeft(const bool b)
 {
     m_rightToLeft = b;
     m_settings->setValue("Behavior/RightToLeft", m_rightToLeft);
-}
-
-
-inline bool Settings::getScrollChangesPage() const
-{ return m_scrollChangesPage; }
-
-inline void Settings::setScrollChangesPage(const bool b)
-{
-    m_scrollChangesPage = b;
-    m_settings->setValue("Behavior/ScrollChangesPage", m_scrollChangesPage);
-}
-
-
-inline int Settings::getPageChangeTimeout() const
-{ return m_pageChangeTimeout; }
-
-inline void Settings::setPageChangeTimeout(const int v)
-{
-    m_pageChangeTimeout = v;
-    m_settings->setValue("Behavior/PageChangeTimeout", m_pageChangeTimeout);
-}
-
-
-inline bool Settings::getJumpToEnd() const
-{ return m_jumpToEnd; }
-
-inline void Settings::setJumpToEnd(const bool b)
-{
-    m_jumpToEnd = b;
-    m_settings->setValue("Behavior/JumpToBottom", m_jumpToEnd);
 }
 
 
