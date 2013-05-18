@@ -547,7 +547,7 @@ void MainWindow::on_filesView_currentChanged(const FileInfo &info)
     m_picture_item->setPixmap(info);
 }
 
-void MainWindow::openFile(const FileInfo &info)
+bool MainWindow::openFile(const FileInfo &info)
 {
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::openFile" << info.getDebugInfo();
@@ -555,11 +555,12 @@ void MainWindow::openFile(const FileInfo &info)
 
     if (!info.isValid())
     {
-        return;
+        return false;
     }
 
     m_view_files->setCurrentFile(info);
     m_picture_item->setFocus();
+    return true;
 }
 
 

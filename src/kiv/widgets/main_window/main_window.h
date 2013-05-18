@@ -27,8 +27,8 @@ private:
     void connectActions();
     void updateSettings();
     void populateBookmarks();
-    void openFile(const FileInfo &info);
-    inline void openFile(const QString &path) { openFile(FileInfo(path)); }
+    bool openFile(const FileInfo &info);
+    inline bool openFile(const QString &path) { return openFile(FileInfo(path)); }
 
 
     Settings *m_settings;
@@ -153,8 +153,8 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
-    bool eventFilter(QObject *, QEvent *);
-    void showEvent(QShowEvent * event);
+    bool eventFilter(QObject *obj, QEvent *event);
+    void showEvent(QShowEvent *event);
 };
 
 #endif // MAINWINDOW_H
