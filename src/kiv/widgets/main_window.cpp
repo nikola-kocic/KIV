@@ -1,4 +1,4 @@
-#include "widgets/main_window/main_window.h"
+#include "widgets/main_window.h"
 
 #include <qglobal.h>
 #include <QAction>
@@ -17,7 +17,7 @@
 #include <QDebug>
 #endif
 
-#include "widgets/settings_dialog/settings_dialog.h"
+#include "widgets/settings_dialog.h"
 #include "settings.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)

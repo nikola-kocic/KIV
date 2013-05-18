@@ -1,4 +1,4 @@
-#include "widgets/zoom_item/zoomwidget.h"
+#include "widgets/zoom_widget.h"
 
 //#define DEBUG_ZOOM_WIDGET
 #ifdef DEBUG_ZOOM_WIDGET

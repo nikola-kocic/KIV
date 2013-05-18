@@ -13,7 +13,7 @@
 #include "widgets/files_view/view_files.h"
 #include "widgets/location_widget.h"
 #include "widgets/picture_item/pictureitem.h"
-#include "widgets/zoom_item/zoomwidget.h"
+#include "widgets/zoom_widget.h"
 
 class MainWindow : public QMainWindow
 {
