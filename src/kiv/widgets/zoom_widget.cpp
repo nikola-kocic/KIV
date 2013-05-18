@@ -178,3 +178,8 @@ void ZoomWidget::setZoom(qreal value)
     emit zoomChanged(value);
     on_zoomChanged(value, m_zoomValue);
 }
+
+qreal ZoomWidget::getZoom()
+{
+    return m_zoomValue;
+}

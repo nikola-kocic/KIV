@@ -9,6 +9,7 @@ class ZoomWidget : public QComboBox
     Q_OBJECT
 public:
     explicit ZoomWidget(QWidget *parent = 0);
+    qreal getZoom();
 
 protected:
     void keyPressEvent(QKeyEvent *event);

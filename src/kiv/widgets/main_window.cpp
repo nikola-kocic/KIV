@@ -9,6 +9,7 @@
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QMouseEvent>
 #include <QMimeData>
 #include <QUrl>
 
@@ -450,14 +451,11 @@ void MainWindow::connectActions()
             this, SLOT(on_pictureItemMousePress(QMouseEvent*const)));
     connect(m_picture_item, SIGNAL(mouseDoubleClick(QMouseEvent*const)),
             this, SLOT(on_pictureItemMouseDoubleClick(QMouseEvent*const)));
+    connect(m_picture_item, SIGNAL(mouseWheel(QWheelEvent*const)),
+             this, SLOT(on_pictureItemMouseWheel(QWheelEvent*const)));
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
-    connect(m_picture_item, SIGNAL(pageNext()), m_view_files, SLOT(pageNext()));
-    connect(m_picture_item, SIGNAL(pagePrevious()), m_view_files, SLOT(pagePrevious()));
-    connect(m_picture_item, SIGNAL(zoomIn()), m_comboBox_zoom, SLOT(zoomIn()));
-    connect(m_picture_item, SIGNAL(zoomOut()), m_comboBox_zoom, SLOT(zoomOut()));
     connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)), m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
     connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
-    connect(m_picture_item, SIGNAL(setFullscreen(bool)), m_act_fullscreen, SLOT(setChecked(bool)));
 
     connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)), m_picture_item, SLOT(setZoom(qreal)));
 
@@ -876,5 +874,56 @@ void MainWindow::on_pictureItemMouseDoubleClick(const QMouseEvent * const event)
     if (event->buttons() == Qt::LeftButton)
     {
         m_act_fullscreen->toggle();
+    }
+}
+
+void MainWindow::on_pictureItemMouseWheel(const QWheelEvent * const event)
+{
+    /* event->delta() > 0 == Up
+       event->delta() < 0 == Down */
+    if ((Qt::ControlModifier == event->modifiers()) ||
+        ((Qt::NoModifier == event->modifiers()) && (WheelAction::Zoom == m_settings->getWheel())))
+    {
+        if (event->delta() < 0)
+        {
+            m_comboBox_zoom->zoomOut();
+        }
+        else
+        {
+            m_comboBox_zoom->zoomIn();
+        }
+    }
+    else if (Qt::NoModifier == event->modifiers())
+    {
+        /* If page can't be scrolled, change page if necessary */
+        if (WheelAction::ChangePage == m_settings->getWheel())
+        {
+            if (event->delta() < 0)
+            {
+                m_view_files->pageNext();
+            }
+            else
+            {
+                m_view_files->pagePrevious();
+            }
+        }
+        /* Scroll page */
+        else if (WheelAction::Scroll == m_settings->getWheel())
+        {
+            m_picture_item->scrollPageVertical(event->delta());
+        }
+    }
+    else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
+    {
+        /* For standard scroll (+-120), zoom +-25% */
+        m_comboBox_zoom->setZoom(m_comboBox_zoom->getZoom() * (1 + ((event->delta() / 4.8) / 100)));
+    }
+    else if (Qt::ShiftModifier == event->modifiers())
+    {
+        m_picture_item->scrollPageVertical(event->delta());
+    }
+    else if (Qt::AltModifier == event->modifiers())
+    {
+        m_picture_item->scrollPageHorizontal(event->delta());
     }
 }

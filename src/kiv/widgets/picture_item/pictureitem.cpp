@@ -202,28 +202,27 @@ void PictureItem::resizeEvent(QResizeEvent *event)
 }
 
 
-
 void PictureItem::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key())
     {
     case Qt::Key_Up:
-        this->ScrollPageVertical(120);
+        this->scrollPageVertical(120);
         event->accept();
         break;
 
     case Qt::Key_Down:
-        this->ScrollPageVertical(-120);
+        this->scrollPageVertical(-120);
         event->accept();
         break;
 
     case Qt::Key_Left:
-        this->ScrollPageHorizontal(120);
+        this->scrollPageHorizontal(120);
         event->accept();
         break;
 
     case Qt::Key_Right:
-        this->ScrollPageHorizontal(-120);
+        this->scrollPageHorizontal(-120);
         event->accept();
         break;
     }
@@ -232,65 +231,7 @@ void PictureItem::keyPressEvent(QKeyEvent *event)
 
 void PictureItem::wheelEvent(QWheelEvent *event)
 {
-    /* event->delta() > 0 == Up
-       event->delta() < 0 == Down */
-    if (
-            (Qt::ControlModifier == event->modifiers()) ||
-            (
-                (Qt::NoModifier == event->modifiers()) &&
-                (WheelAction::Zoom == m_settings->getWheel())
-                )
-            )
-    {
-        if (event->delta() < 0)
-        {
-            this->zoomOut();
-            event->accept();
-        }
-        else
-        {
-            this->zoomIn();
-            event->accept();
-        }
-    }
-    else if (Qt::NoModifier == event->modifiers())
-    {
-        /* If page can't be scrolled, change page if necessary */
-        if (WheelAction::ChangePage == m_settings->getWheel())
-        {
-            if (event->delta() < 0)
-            {
-                emit pageNext();
-                event->accept();
-            }
-            else
-            {
-                emit pagePrevious();
-                event->accept();
-            }
-        }
-        /* Scroll page */
-        else if (WheelAction::Scroll == m_settings->getWheel())
-        {
-            ScrollPageVertical(event->delta());
-        }
-    }
-    else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
-    {
-        this->setZoom(m_data->getZoom() * (1 + ((event->delta() / 4.8) / 100))); /* For standard scroll (+-120), zoom +-25% */
-        event->accept();
-    }
-    else if (Qt::ShiftModifier == event->modifiers())
-    {
-        this->ScrollPageVertical(event->delta());
-        event->accept();
-    }
-    else if (Qt::AltModifier == event->modifiers())
-    {
-        this->ScrollPageHorizontal(event->delta());
-        event->accept();
-    }
-
+    emit mouseWheel(event);
     return QWidget::wheelEvent(event);
 }
 
@@ -541,14 +482,14 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
-void PictureItem::ScrollPageVertical(const int value)
+void PictureItem::scrollPageVertical(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(0,value));
     this->endDrag();
 }
 
-void PictureItem::ScrollPageHorizontal(const int value)
+void PictureItem::scrollPageHorizontal(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(value,0));

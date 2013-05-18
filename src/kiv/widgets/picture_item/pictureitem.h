@@ -52,10 +52,7 @@ public:
 
 private:
     void initPictureItem();
-    void start_timerScrollPage();
     void afterPixmapLoad();
-    void ScrollPageHorizontal(const int value);
-    void ScrollPageVertical(const int value);
     void calculateAverageColor(const QImage &img);
 
     void drag(const QPoint &pt);
@@ -77,11 +74,6 @@ private:
 #endif
 
 signals:
-    void pageNext();
-    void pagePrevious();
-    void setFullscreen(bool);
-    void zoomIn();
-    void zoomOut();
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
     void mouseWheel(const QWheelEvent * const event);
@@ -93,6 +85,8 @@ public slots:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
+    void scrollPageHorizontal(const int value);
+    void scrollPageVertical(const int value);
 
 private slots:
     void imageFinished(int num);
@@ -108,24 +102,16 @@ protected:
 };
 
 inline bool PictureItem::getHardwareAcceleration() const
-{
-    return m_opengl;
-}
+{ return m_opengl; }
 
 inline bool PictureItem::isPixmapNull() const
-{
-    return m_data->isPixmapNull();
-}
+{ return m_data->isPixmapNull(); }
 
 inline qreal PictureItem::getRotation() const
-{
-    return m_data->getRotation();
-}
+{ return m_data->getRotation(); }
 
 inline qreal PictureItem::getZoom() const
-{
-    return m_data->getZoom();
-}
+{ return m_data->getZoom(); }
 
 
 #endif // PICTUREITEM_H
