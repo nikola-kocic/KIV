@@ -1,10 +1,11 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include "fileinfo.h"
-#include <QStringList>
-#include <QFileInfo>
 #include <QApplication>
+#include <QFileInfo>
+#include <QStringList>
+
+#include "fileinfo.h"
 
 class Helper
 {

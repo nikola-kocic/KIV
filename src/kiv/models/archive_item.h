@@ -1,9 +1,9 @@
 #ifndef ARCHIVE_ITEM_H
 #define ARCHIVE_ITEM_H
 
-#include <QVariant>
 #include <QDateTime>
 #include <QIcon>
+#include <QVariant>
 
 class ArchiveItem
 {

@@ -1,13 +1,14 @@
-#include <QStringList>
-
 #include "archive_item.h"
-#include "helper.h"
+
 #include <QFileSystemModel>
+#include <QStringList>
 
 //#define DEBUG_ARCHIVE_ITEM
 #ifdef DEBUG_ARCHIVE_ITEM
 #include <QDebug>
 #endif
+
+#include "helper.h"
 
 ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, const QIcon &icon, ArchiveItem *parent) :
     parentItem(parent),

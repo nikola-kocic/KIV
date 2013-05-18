@@ -1,7 +1,4 @@
-#include "view_files.h"
-#include "archive_item.h"
-#include "JlCompress.h"
-#include "unrar/archive_rar.h"
+#include "widgets/files_view/view_files.h"
 
 #include <QHeaderView>
 #include <QLabel>
@@ -12,6 +9,11 @@
 #include <QDebug>
 #include <QTime>
 #endif
+
+#include <JlCompress.h>
+
+#include "models/archive_item.h"
+#include "models/unrar/archive_rar.h"
 
 ViewFiles::ViewFiles(QWidget *parent)
     : QWidget(parent)
@@ -642,7 +644,6 @@ void ViewFiles::saveCurrentFile(const QString &fileName) const
     {
         QFile::copy(m_fileinfo_current.getPath(), fileName);
     }
-//    PictureLoader::getImage(info).save(fileName, "PNG");
 
     return;
 }

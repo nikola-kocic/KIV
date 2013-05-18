@@ -1,13 +1,13 @@
 #ifndef THUMBNAILITEMDELEGATE_H
 #define THUMBNAILITEMDELEGATE_H
 
-#include "picture_loader.h"
-
+#include <QDateTime>
+#include <QFutureWatcher>
 #include <QModelIndex>
 #include <QPainter>
-#include <QFutureWatcher>
 #include <QStyledItemDelegate>
-#include <QDateTime>
+
+#include "picture_loader.h"
 
 class ThumbnailItemDelegate : public QStyledItemDelegate
 {

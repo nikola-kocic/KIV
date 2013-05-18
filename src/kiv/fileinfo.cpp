@@ -1,13 +1,15 @@
 #include "fileinfo.h"
-#include "helper.h"
-#include <QFileInfo>
+
 #include <QDir>
+#include <QFileInfo>
 
 //#define DEBUG_FILE_INFO
 #ifdef DEBUG_FILE_INFO
 #include <QDebug>
 #include <QDateTime>
 #endif
+
+#include "helper.h"
 
 FileInfo::FileInfo(const QString &path, const bool isContainer)
     : m_container(QFileInfo())

@@ -1,11 +1,11 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "fileinfo.h"
-#include "enums.h"
-
 #include <QSettings>
 #include <QSize>
+
+#include "fileinfo.h"
+#include "enums.h"
 
 class Bookmark
 {

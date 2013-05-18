@@ -1,10 +1,7 @@
 #include "picture_loader.h"
-#include "quazip.h"
-#include "quazipfile.h"
-#include "unrar/archive_rar.h"
 
-#include <QFile>
 #include <QBuffer>
+#include <QFile>
 #include <QImageReader>
 #include <QPainter>
 
@@ -13,6 +10,12 @@
 #include <QDebug>
 //#include <QTime>
 #endif
+
+#include <quazip.h>
+#include <quazipfile.h>
+
+#include "models/unrar/archive_rar.h"
+
 
 QImage PictureLoader::getImage(const FileInfo &info)
 {

@@ -1,8 +1,9 @@
 #include "archive_rar.h"
-#include "unrar.h"
 
-#include <QDir>
 #include <QBuffer>
+#include <QDir>
+
+#include "unrar.h"
 
 #define  LHD_LARGE          0x0100
 #define  LHD_UNICODE        0x0200

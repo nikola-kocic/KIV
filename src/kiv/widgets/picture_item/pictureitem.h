@@ -1,16 +1,10 @@
 #ifndef PICTUREITEM_H
 #define PICTUREITEM_H
 
-#include "settings.h"
-#include "picture_loader.h"
-#include "pictureitem_data.h"
-#include "pictureitem_gl.h"
-#include "pictureitem_raster.h"
-#include "teximg.h"
-
 #include <QBoxLayout>
 #include <QFutureWatcher>
-#include <QTimer>
+#include <QKeyEvent>
+#include <QMouseEvent>
 #ifdef QT5
 #include <QtConcurrent/QtConcurrentMap>
 #include <QtConcurrent/QtConcurrentRun>
@@ -18,16 +12,21 @@
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
 #endif
-
-#include <QMouseEvent>
+#include <QTimer>
 #include <QWheelEvent>
-#include <QKeyEvent>
 
 //#define DEBUG_PICTUREITEM
 
 #ifdef DEBUG_PICTUREITEM
     #include <QDateTime>
 #endif
+
+#include "picture_loader.h"
+#include "pictureitem_data.h"
+#include "pictureitem_gl.h"
+#include "pictureitem_raster.h"
+#include "settings.h"
+#include "teximg.h"
 
 class PictureItem : public QWidget
 {

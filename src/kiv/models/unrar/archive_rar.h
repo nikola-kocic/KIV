@@ -4,7 +4,7 @@
 #include <QLibrary>
 #include <QBuffer>
 
-#include "../enums.h"
+#include "enums.h"
 
 class ArchiveRar
 {

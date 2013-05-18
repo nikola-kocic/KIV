@@ -1,8 +1,11 @@
 #include "thumbnailitemdelegate.h"
 
-#include <QFileIconProvider>
-#include <QPixmap>
 #include <QAbstractItemView>
+#include <QCryptographicHash>
+#include <QDir>
+#include <QFileIconProvider>
+#include <QFileSystemModel>
+#include <QPixmap>
 #ifdef QT5
 #include <QtConcurrent/QtConcurrentMap>
 #include <QtConcurrent/QtConcurrentRun>
@@ -10,9 +13,6 @@
 #include <QtConcurrentMap>
 #include <QtConcurrentRun>
 #endif
-#include <QCryptographicHash>
-#include <QDir>
-#include <QFileSystemModel>
 
 //#define DEBUG_THUMBNAIL_ITEM_DELEGATE
 

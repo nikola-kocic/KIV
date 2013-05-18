@@ -1,7 +1,5 @@
 #ifndef QT5
-#include "pictureitem_gl.h"
-#include "settings.h"
-#include "picture_loader.h"
+#include "widgets/picture_item/pictureitem_gl.h"
 
 //#define DEBUG_PICTUREITEM_GL
 
@@ -9,6 +7,10 @@
 #include <QDebug>
 #include <QDateTime>
 #endif
+
+#include "settings.h"
+#include "picture_loader.h"
+
 PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)    
     : QGLWidget(parent)
     , PictureItemInterface(data, parent)

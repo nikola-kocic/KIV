@@ -1,10 +1,10 @@
 #ifndef TEXIMG_H
 #define TEXIMG_H
 
-#include "picture_loader.h"
-
 #include <QImage>
 #include <QPainter>
+
+#include "picture_loader.h"
 
 struct TexIndex
 {

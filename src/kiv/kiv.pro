@@ -1,52 +1,54 @@
 
 SOURCES += \
-    main.cpp \
-    settings_dialog.cpp \
-    settings.cpp \
-    pictureitem.cpp \
-    pictureitem_gl.cpp \
-    pictureitem_raster.cpp \
-    main_window.cpp \
-    view_files.cpp \
-    teximg.cpp \
-    picture_loader.cpp \
-    helper.cpp \
     fileinfo.cpp \
-    view_files_list.cpp \
-    thumbnailitemdelegate.cpp \
-    view_files_tree.cpp \
-    archive_item.cpp \
-    archive_model.cpp \
-    unrar/archive_rar.cpp \
-    pictureitem_data.cpp \
-    widgets/zoomwidget.cpp
+    helper.cpp \
+    main.cpp \
+    picture_loader.cpp \
+    settings.cpp \
+    models/archive_item.cpp \
+    models/archive_model.cpp \
+    models/unrar/archive_rar.cpp \
+    widgets/files_view/thumbnailitemdelegate.cpp \
+    widgets/files_view/view_files.cpp \
+    widgets/files_view/view_files_list.cpp \
+    widgets/files_view/view_files_tree.cpp \
+    widgets/main_window/main_window.cpp \
+    widgets/picture_item/pictureitem.cpp \
+    widgets/picture_item/pictureitem_data.cpp \
+    widgets/picture_item/pictureitem_gl.cpp \
+    widgets/picture_item/pictureitem_raster.cpp \
+    widgets/picture_item/teximg.cpp \
+    widgets/settings_dialog/settings_dialog.cpp \
+    widgets/zoom_item/zoomwidget.cpp
 
 HEADERS += \
-    settings_dialog.h \
-    settings.h \
-    pictureitem.h \
-    main_window.h \
-    view_files.h \
-    teximg.h \
-    picture_loader.h \
-    helper.h \
-    fileinfo.h \
-    thumbnailitemdelegate.h \
-    archive_item.h \
-    archive_model.h \
-    pictureitem_gl.h \
-    pictureitem_raster.h \
     enums.h \
-    unrar/unrar.h \
-    unrar/archive_rar.h \
+    fileinfo.h \
+    helper.h \
+    picture_loader.h \
     pictureitem_interface.h \
-    pictureitem_data.h \
-    widgets/zoomwidget.h
+    settings.h \
+    models/archive_item.h \
+    models/archive_model.h \
+    models/unrar/archive_rar.h \
+    models/unrar/unrar.h \
+    widgets/files_view/thumbnailitemdelegate.h \
+    widgets/files_view/view_files.h \
+    widgets/main_window/main_window.h \
+    widgets/picture_item/pictureitem.h \
+    widgets/picture_item/pictureitem_data.h \
+    widgets/picture_item/pictureitem_gl.h \
+    widgets/picture_item/pictureitem_raster.h \
+    widgets/picture_item/teximg.h \
+    widgets/settings_dialog/settings_dialog.h \
+    widgets/zoom_item/zoomwidget.h
 
 FORMS += \
-    settings_dialog.ui
+    widgets/settings_dialog/settings_dialog.ui
 
 QT += opengl
+
+INCLUDEPATH += $$PWD
 
 win32{
     RC_FILE = kiv.rc

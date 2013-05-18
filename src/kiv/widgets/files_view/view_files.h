@@ -1,26 +1,25 @@
 #ifndef VIEWFILES_H
 #define VIEWFILES_H
 
-#include "helper.h"
-#include "picture_loader.h"
-#include "thumbnailitemdelegate.h"
-#include "settings.h"
-#include "archive_model.h"
-
+#include <QComboBox>
+#include <QFileSystemModel>
+#include <QFutureWatcher>
 #include <QLayout>
 #include <QListView>
-#include <QTreeView>
-#include <QFutureWatcher>
+#include <QPointer>
+#include <QSortFilterProxyModel>
+#include <QSplitter>
 #ifdef QT5
 #include <QtConcurrent/QtConcurrentMap>
 #else
 #include <QtConcurrentMap>
 #endif
-#include <QSplitter>
-#include <QFileSystemModel>
-#include <QPointer>
-#include <QSortFilterProxyModel>
-#include <QComboBox>
+#include <QTreeView>
+
+#include "helper.h"
+#include "models/archive_model.h"
+#include "settings.h"
+#include "thumbnailitemdelegate.h"
 
 class ListViewFiles;
 class TreeViewFiles;

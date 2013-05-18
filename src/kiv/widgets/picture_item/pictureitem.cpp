@@ -1,4 +1,5 @@
-#include "pictureitem.h"
+#include "widgets/picture_item/pictureitem.h"
+
 #include <QMouseEvent>
 
 PictureItem::PictureItem(Settings *settings, QWidget *parent, Qt::WindowFlags f)

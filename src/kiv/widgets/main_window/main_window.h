@@ -1,18 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "view_files.h"
-#include "picture_loader.h"
-#include "pictureitem.h"
-
-#include <QSplitter>
-#include <QMenuBar>
-#include <QToolBar>
 #include <QComboBox>
-#include <QMainWindow>
 #include <QLineEdit>
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QSplitter>
+#include <QToolBar>
 
-#include "widgets/zoomwidget.h"
+#include "picture_loader.h"
+#include "widgets/files_view/view_files.h"
+#include "widgets/picture_item/pictureitem.h"
+#include "widgets/zoom_item/zoomwidget.h"
 
 class MainWindow : public QMainWindow
 {

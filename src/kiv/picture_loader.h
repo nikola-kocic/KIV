@@ -1,10 +1,10 @@
 #ifndef PICTURELOADER_H
 #define PICTURELOADER_H
 
-#include "helper.h"
-
-#include <QImage>
 #include <QAbstractItemModel>
+#include <QImage>
+
+#include "helper.h"
 
 class ThumbnailInfo
 {

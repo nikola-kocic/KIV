@@ -1,14 +1,14 @@
 #ifndef ARCHIVE_MODEL_H
 #define ARCHIVE_MODEL_H
 
-#include "fileinfo.h"
-
 #include <QAbstractItemModel>
+#include <QIcon>
 #include <QModelIndex>
 #include <QVariant>
-#include <QIcon>
 
-class ArchiveItem;
+#include "models/archive_item.h"
+#include "fileinfo.h"
+
 
 struct ArchiveType
 {

@@ -1,6 +1,4 @@
-#include "pictureitem_raster.h"
-#include "settings.h"
-#include "picture_loader.h"
+#include "widgets/picture_item/pictureitem_raster.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -11,6 +9,9 @@
 #include <QDebug>
 #include <QDateTime>
 #endif
+
+#include "picture_loader.h"
+#include "settings.h"
 
 PictureItemRaster::PictureItemRaster(PictureItemData *data, QWidget *parent)
     : QWidget(parent)

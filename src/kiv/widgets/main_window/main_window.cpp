@@ -1,23 +1,25 @@
-#include "main_window.h"
-#include "settings_dialog.h"
-#include "settings.h"
+#include "widgets/main_window/main_window.h"
+
 #include <qglobal.h>
-#include <QUrl>
 #include <QAction>
 #include <QBoxLayout>
-#include <QFileDialog>
-#include <QDesktopWidget>
 #include <QCompleter>
-#include <QMessageBox>
 #include <QDesktopServices>
-#include <QKeyEvent>
+#include <QDesktopWidget>
+#include <QFileDialog>
 #include <QInputDialog>
+#include <QKeyEvent>
+#include <QMessageBox>
 #include <QMimeData>
+#include <QUrl>
 
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
 #include <QDebug>
 #endif
+
+#include "widgets/settings_dialog/settings_dialog.h"
+#include "settings.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     : QMainWindow(parent, f)

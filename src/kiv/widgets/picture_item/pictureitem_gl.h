@@ -3,11 +3,12 @@
 #define PICTUREITEM_GL_H
 
 #include "pictureitem_interface.h"
-#include "teximg.h"
 
-#include <QGLWidget>
 #include <QFutureWatcher>
+#include <QGLWidget>
 #include <QtConcurrentMap>
+
+#include "teximg.h"
 
 class PictureItemGL : private QGLWidget, public PictureItemInterface
 {

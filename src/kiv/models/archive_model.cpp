@@ -1,11 +1,4 @@
-#include <QtGui>
-
-#include "archive_item.h"
-#include "archive_model.h"
-#include "helper.h"
-
-#include "quazip.h"
-#include "quazipfile.h"
+#include "models/archive_model.h"
 
 #include <QFileIconProvider>
 #include <QFileSystemModel>
@@ -16,6 +9,11 @@
 #include <QDebug>
 #endif
 
+#include <quazip.h>
+#include <quazipfile.h>
+
+#include "helper.h"
+#include "models/archive_item.h"
 #include "unrar/archive_rar.h"
 
 ArchiveModel::ArchiveModel(const QString &path, QObject *parent)

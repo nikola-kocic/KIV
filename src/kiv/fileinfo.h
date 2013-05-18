@@ -1,9 +1,9 @@
 #ifndef FILEINFO_H
 #define FILEINFO_H
 
+#include <QFileInfo>
 #include <QString>
 #include <QStringList>
-#include <QFileInfo>
 
 class FileInfo
 {

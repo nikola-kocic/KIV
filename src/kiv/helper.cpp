@@ -3,8 +3,8 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QFileSystemModel>
-#include <QLocale>
 #include <QImageReader>
+#include <QLocale>
 
 QStringList Helper::m_filters_image = QStringList();
 

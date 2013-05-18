@@ -1,4 +1,5 @@
-#include "view_files.h"
+#include "widgets/files_view/view_files.h"
+
 #include <QHeaderView>
 
 TreeViewFiles::TreeViewFiles(QWidget *parent)

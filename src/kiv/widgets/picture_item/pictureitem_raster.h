@@ -2,6 +2,7 @@
 #define PICTUREITEM_RASTER_H
 
 #include "pictureitem_interface.h"
+
 #include <QWidget>
 
 class PictureItemRaster : private QWidget, public PictureItemInterface
