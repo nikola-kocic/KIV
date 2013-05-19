@@ -5,12 +5,12 @@
 #include <QLineEdit>
 #include <QUrl>
 
-class LocationWidget : public QLineEdit
+class UrlNavigator : public QLineEdit
 {
     Q_OBJECT
 
 public:
-    explicit LocationWidget(QAbstractItemModel *model, const QUrl &url, QWidget *parent = 0);
+    explicit UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *parent = 0);
 
 public slots:
     void setLocationUrl(const QUrl &url);

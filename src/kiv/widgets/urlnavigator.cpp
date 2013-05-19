@@ -1,4 +1,4 @@
-#include "location_widget.h"
+#include "urlnavigator.h"
 
 #include <QDir>
 #include <QKeyEvent>
@@ -10,7 +10,7 @@
 
 #include "fileinfo.h"
 
-LocationWidget::LocationWidget(QAbstractItemModel *model, const QUrl &url, QWidget *parent)
+UrlNavigator::UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *parent)
     : QLineEdit(parent)
     , m_model(model)
     , m_completer(new QCompleter(m_model, this))
@@ -20,19 +20,19 @@ LocationWidget::LocationWidget(QAbstractItemModel *model, const QUrl &url, QWidg
     connect(this, SIGNAL(returnPressed()), this, SLOT(on_returnPressed()));
 }
 
-void LocationWidget::setLocationUrl(const QUrl &url)
+void UrlNavigator::setLocationUrl(const QUrl &url)
 {
     return setLocationUrlInternal(url);
 }
 
-void LocationWidget::focusOutEvent(QFocusEvent *event)
+void UrlNavigator::focusOutEvent(QFocusEvent *event)
 {
     setLocationUrlInternal(m_currentUrl);
     clearFocus();
     return QLineEdit::focusOutEvent(event);
 }
 
-void LocationWidget::keyPressEvent(QKeyEvent *event)
+void UrlNavigator::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)
     {
@@ -44,7 +44,7 @@ void LocationWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void LocationWidget::setLocationUrlInternal(const QUrl &url)
+void UrlNavigator::setLocationUrlInternal(const QUrl &url)
 {
     m_currentUrl = url;
     if (m_currentUrl.isLocalFile())
@@ -58,7 +58,7 @@ void LocationWidget::setLocationUrlInternal(const QUrl &url)
     }
 }
 
-void LocationWidget::on_returnPressed()
+void UrlNavigator::on_returnPressed()
 {
     const FileInfo fileinfo = FileInfo(text());
     if (fileinfo.isValid())

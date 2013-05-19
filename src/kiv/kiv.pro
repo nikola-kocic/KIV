@@ -13,7 +13,6 @@ SOURCES += \
     widgets/files_view/view_files.cpp \
     widgets/files_view/view_files_list.cpp \
     widgets/files_view/view_files_tree.cpp \
-    widgets/location_widget.cpp \
     widgets/main_window.cpp \
     widgets/picture_item/pictureitem.cpp \
     widgets/picture_item/pictureitem_data.cpp \
@@ -21,14 +20,14 @@ SOURCES += \
     widgets/picture_item/pictureitem_raster.cpp \
     widgets/picture_item/teximg.cpp \
     widgets/settings_dialog.cpp \
-    widgets/zoom_widget.cpp
+    widgets/zoom_widget.cpp \
+    widgets/urlnavigator.cpp
 
 HEADERS += \
     enums.h \
     fileinfo.h \
     helper.h \
     picture_loader.h \
-    pictureitem_interface.h \
     settings.h \
     models/archive_item.h \
     models/archive_model.h \
@@ -37,15 +36,16 @@ HEADERS += \
     models/unrar/unrar.h \
     widgets/files_view/thumbnailitemdelegate.h \
     widgets/files_view/view_files.h \
-    widgets/location_widget.h \
     widgets/main_window.h \
     widgets/picture_item/pictureitem.h \
     widgets/picture_item/pictureitem_data.h \
+    widgets/picture_item/pictureitem_interface.h \
     widgets/picture_item/pictureitem_gl.h \
     widgets/picture_item/pictureitem_raster.h \
     widgets/picture_item/teximg.h \
     widgets/settings_dialog.h \
-    widgets/zoom_widget.h
+    widgets/zoom_widget.h \
+    widgets/urlnavigator.h
 
 FORMS += \
     widgets/settings_dialog.ui

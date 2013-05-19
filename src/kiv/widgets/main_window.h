@@ -11,7 +11,7 @@
 #include "models/filesystem_model.h"
 #include "picture_loader.h"
 #include "widgets/files_view/view_files.h"
-#include "widgets/location_widget.h"
+#include "widgets/urlnavigator.h"
 #include "widgets/picture_item/pictureitem.h"
 #include "widgets/zoom_widget.h"
 
@@ -43,7 +43,7 @@ private:
     QMenuBar *m_menu_main;
 
     QToolBar *m_toolbar;
-    LocationWidget *m_location_widget;
+    UrlNavigator *m_urlNavigator;
     ZoomWidget *m_comboBox_zoom;
     QIcon m_windowIcon;
 

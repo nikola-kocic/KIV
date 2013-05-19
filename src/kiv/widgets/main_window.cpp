@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     {
         startFilePath = m_settings->getLastPath();
     }
-    m_location_widget = new LocationWidget(m_model_filesystem, QUrl::fromLocalFile(startFilePath),
+    m_urlNavigator = new UrlNavigator(m_model_filesystem, QUrl::fromLocalFile(startFilePath),
                                          this);
 
     updateSettings();
@@ -372,7 +372,7 @@ void MainWindow::createMenus()
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_act_dirUp);
     m_toolbar->addAction(m_act_refreshPath);
-    m_toolbar->addWidget(m_location_widget);
+    m_toolbar->addWidget(m_urlNavigator);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_act_pagePrevious);
     m_toolbar->addAction(m_act_pageNext);
@@ -469,9 +469,9 @@ void MainWindow::connectActions()
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
-    connect(m_location_widget, SIGNAL(urlChanged(QUrl)), m_view_files, SLOT(setLocationUrl(QUrl)));
-    connect(m_location_widget, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
-    connect(m_view_files, SIGNAL(urlChanged(QUrl)), m_location_widget, SLOT(setLocationUrl(QUrl)));
+    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)), m_view_files, SLOT(setLocationUrl(QUrl)));
+    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
+    connect(m_view_files, SIGNAL(urlChanged(QUrl)), m_urlNavigator, SLOT(setLocationUrl(QUrl)));
     connect(m_view_files, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
 
     connect(m_picture_item, SIGNAL(mousePress(QMouseEvent*const)),
@@ -553,7 +553,7 @@ void MainWindow::deleteBookmark()
 void MainWindow::spreadUrl(const QUrl &url)
 {
     m_view_files->setLocationUrl(url);
-    m_location_widget->setLocationUrl(url);
+    m_urlNavigator->setLocationUrl(url);
 }
 
 bool MainWindow::setLocationUrl(const QUrl &url)
