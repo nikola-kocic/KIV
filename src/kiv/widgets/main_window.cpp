@@ -154,14 +154,17 @@ void MainWindow::createActions()
     m_act_bookmark_add = new QAction(tr("Bookmark &This Page"), this);
     m_act_bookmark_add->setShortcut(tr("Ctrl+D"));
 
-    m_act_pageNext = new QAction(QIcon::fromTheme("go-next"), tr("&Next"), this);
+    m_act_pageNext = new QAction(QIcon::fromTheme("media-skip-forward"), tr("&Next"), this);
     m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
 
-    m_act_pagePrevious = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous"), this);
+    m_act_pagePrevious = new QAction(QIcon::fromTheme("media-skip-backward"), tr("&Previous"), this);
     m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
 
     m_act_back = new QAction(QIcon::fromTheme("go-previous"), tr("&Back"), this);
+    m_act_back->setShortcut(QKeySequence::Back);
+
     m_act_forward = new QAction(QIcon::fromTheme("go-next"), tr("&Forward"), this);
+    m_act_forward->setShortcut(QKeySequence::Forward);
 
     /* View Actions */
 
@@ -299,7 +302,10 @@ void MainWindow::createMenus()
     this->addAction(m_act_pagePrevious);
 
     fileMenu->addSeparator();
+    fileMenu->addAction(m_act_back);
+    fileMenu->addAction(m_act_forward);
 
+    fileMenu->addSeparator();
     fileMenu->addAction(m_act_exit);
 
 
