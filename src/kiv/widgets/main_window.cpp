@@ -196,7 +196,7 @@ void MainWindow::createActions()
                 QList<QKeySequence>() << Qt::Key_F11 << QKeySequence(Qt::ALT | Qt::Key_Return));
     m_act_fullscreen->setCheckable(true);
 
-    m_act_sidebar = new QAction(QIcon::fromTheme("view-split-left-right"),tr("Side&bar"), this);
+    m_act_sidebar = new QAction(QIcon::fromTheme("view-left-right"),tr("Side&bar"), this);
     m_act_sidebar->setCheckable(true);
     m_act_sidebar->setChecked(true);
 
