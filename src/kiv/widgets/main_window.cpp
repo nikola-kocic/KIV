@@ -15,7 +15,7 @@
 
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
-#include <QDebug>
+#include "helper.h"
 #endif
 
 #include "widgets/settings_dialog.h"
@@ -97,7 +97,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::keyPressEvent" << event->key();
+    DEBUGOUT << event->key();
 #endif
     if (event->key() == Qt::Key_B)
     {
@@ -273,7 +273,6 @@ void MainWindow::createActions()
     m_act_dirUp->setEnabled(false);
 
     m_act_bookmark_delete = new QAction(tr("&Delete Bookmark"), this);
-
 }
 
 void MainWindow::createMenus()
@@ -503,7 +502,7 @@ void MainWindow::populateBookmarks()
         if (!oldActions.at(i)->data().toString().isEmpty())
         {
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::populateBookmarks()" << "removed bookmark" << oldActions.at(i)->text() << oldActions.at(i)->data().toString();
+            DEBUGOUT << "removed bookmark" << oldActions.at(i)->text() << oldActions.at(i)->data().toString();
 #endif
             oldActions.at(i)->deleteLater();
         }
@@ -517,7 +516,7 @@ void MainWindow::populateBookmarks()
         connect(bookmark, SIGNAL(triggered()), this, SLOT(on_bookmark_triggered()));
         m_menu_bookmarks->addAction(bookmark);
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::populateBookmarks()" << "added bookmark" << bookmark->text() << bookmark->data().toString();
+        DEBUGOUT << "added bookmark" << bookmark->text() << bookmark->data().toString();
 #endif
     }
 }
@@ -535,7 +534,7 @@ void MainWindow::on_bookmark_triggered()
             return;
         int bookmarkIndex = action->data().toInt();
 #ifdef DEBUG_MAIN_WINDOW
-                qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_bookmark_triggered()";
+        DEBUGOUT;
 #endif
         this->openFilePath(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
     }
@@ -544,25 +543,32 @@ void MainWindow::on_bookmark_triggered()
 void MainWindow::deleteBookmark()
 {
     if (m_act_bookmark_delete->data().isNull())
-        return;
+    { return; }
 
     m_settings->deleteBookmark(m_act_bookmark_delete->data().toInt());
     populateBookmarks();
     m_act_bookmark_delete->setData(QVariant());
 }
 
+void MainWindow::spreadUrl(const QUrl &url)
+{
+    m_view_files->setLocationUrl(url);
+    m_location_widget->setLocationUrl(url);
+}
+
 bool MainWindow::setLocationUrl(const QUrl &url)
 {
-    const FileInfo info(url.toLocalFile());
+    const FileInfo fileinfo(url.toLocalFile());
 
     m_picture_item->setFocus();
 
-    m_act_dirUp->setEnabled(!info.isContainerRoot());
-    this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName() + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
-
+    m_act_dirUp->setEnabled(!fileinfo.isContainerRoot());
+    this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName() + " - "
+                         + QApplication::applicationName() + " "
+                         + QApplication::applicationVersion());
     this->setCursor(Qt::BusyCursor);
 
-    m_picture_item->setPixmap(info);
+    m_picture_item->setPixmap(fileinfo);
     return true;
 }
 
@@ -577,12 +583,6 @@ bool MainWindow::openFilePath(const QString &path)
 
 bool MainWindow::openFile(const FileInfo &info)
 { return openFilePath(info.getPath()); }
-
-void MainWindow::spreadUrl(const QUrl &url)
-{
-    m_view_files->setLocationUrl(url);
-    m_location_widget->setLocationUrl(url);
-}
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -667,8 +667,11 @@ void MainWindow::toggleFullscreen(bool value)
 void MainWindow::openFileDialog()
 {
     const QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
-    const QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_view_files->getCurrentFileInfo().getContainerPath(),
-                                                    tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
+    const QString fileName = QFileDialog::getOpenFileName(
+                this,
+                tr("Open File"),
+                m_view_files->getCurrentFileInfo().getContainerPath(),
+                tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
     {
         this->openFilePath(fileName);

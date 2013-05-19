@@ -20,6 +20,11 @@ LocationWidget::LocationWidget(QAbstractItemModel *model, const QUrl &url, QWidg
     connect(this, SIGNAL(returnPressed()), this, SLOT(on_returnPressed()));
 }
 
+void LocationWidget::setLocationUrl(const QUrl &url)
+{
+    return setLocationUrlInternal(url);
+}
+
 void LocationWidget::focusOutEvent(QFocusEvent *event)
 {
     setLocationUrlInternal(m_currentUrl);
@@ -39,6 +44,20 @@ void LocationWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void LocationWidget::setLocationUrlInternal(const QUrl &url)
+{
+    m_currentUrl = url;
+    if (m_currentUrl.isLocalFile())
+    {
+        const QString path = QDir::toNativeSeparators(m_currentUrl.toLocalFile());
+        setText(path);
+    }
+    else
+    {
+        setText(m_currentUrl.toString(QUrl::RemovePassword));
+    }
+}
+
 void LocationWidget::on_returnPressed()
 {
     const FileInfo fileinfo = FileInfo(text());
@@ -53,24 +72,5 @@ void LocationWidget::on_returnPressed()
     else
     {
         setLocationUrlInternal(m_currentUrl);
-    }
-}
-
-void LocationWidget::setLocationUrl(const QUrl &url)
-{
-    return setLocationUrlInternal(url);
-}
-
-void LocationWidget::setLocationUrlInternal(const QUrl &url)
-{
-    m_currentUrl = url;
-    if (m_currentUrl.isLocalFile())
-    {
-        const QString path = QDir::toNativeSeparators(m_currentUrl.toLocalFile());
-        setText(path);
-    }
-    else
-    {
-        setText(m_currentUrl.toString(QUrl::RemovePassword));
     }
 }
