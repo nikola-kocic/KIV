@@ -160,6 +160,8 @@ void MainWindow::createActions()
     m_act_pagePrevious = new QAction(QIcon::fromTheme("go-previous"), tr("&Previous"), this);
     m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
 
+    m_act_back = new QAction(QIcon::fromTheme("go-previous"), tr("&Back"), this);
+    m_act_forward = new QAction(QIcon::fromTheme("go-next"), tr("&Forward"), this);
 
     /* View Actions */
 
@@ -370,6 +372,8 @@ void MainWindow::createMenus()
 
     m_toolbar->addAction(m_act_sidebar);
     m_toolbar->addSeparator();
+    m_toolbar->addAction(m_act_back);
+    m_toolbar->addAction(m_act_forward);
     m_toolbar->addAction(m_act_dirUp);
     m_toolbar->addAction(m_act_refreshPath);
     m_toolbar->addWidget(m_urlNavigator);
@@ -434,6 +438,8 @@ void MainWindow::connectActions()
     connect(m_act_open, SIGNAL(triggered()), this, SLOT(openFileDialog()));
     connect(m_act_save, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(m_act_exit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(m_act_back, SIGNAL(triggered()), this, SLOT(goBack()));
+    connect(m_act_forward, SIGNAL(triggered()), this, SLOT(goForward()));
 
     connect(m_act_bookmark_add, SIGNAL(triggered()), this, SLOT(addBookmark()));
 
@@ -698,6 +704,16 @@ void MainWindow::saveAs()
 #endif
 
     return;
+}
+
+void MainWindow::goBack()
+{
+    m_urlNavigator->goBack();
+}
+
+void MainWindow::goForward()
+{
+    m_urlNavigator->goForward();
 }
 
 void MainWindow::addBookmark()

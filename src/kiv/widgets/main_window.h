@@ -51,6 +51,8 @@ private:
     QAction *m_act_open;
     QAction *m_act_save;
     QAction *m_act_exit;
+    QAction *m_act_back;
+    QAction *m_act_forward;
 
     /* Bookmarks Menu Actions */
     QAction *m_act_bookmark_add;
@@ -107,6 +109,8 @@ private slots:
     /* File Menu Actions Slots */
     void openFileDialog();
     void saveAs();
+    void goBack();
+    void goForward();
 
     /* Bookmark Menu Action Slots */
     void addBookmark();
