@@ -34,10 +34,20 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
-    , m_location_widget(new LocationWidget(m_model_filesystem, this))
     , m_comboBox_zoom(new ZoomWidget(this))
 {
     this->setAcceptDrops(true);
+    QString startFilePath;
+    if (QApplication::arguments().size() > 1)
+    {
+        startFilePath = QApplication::arguments().at(1);
+    }
+    else
+    {
+        startFilePath = m_settings->getLastPath();
+    }
+    m_location_widget = new LocationWidget(m_model_filesystem, QUrl::fromLocalFile(startFilePath),
+                                         this);
 
     updateSettings();
     createActions();
@@ -70,16 +80,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     this->setCentralWidget(content);
 
     /* End Layout */
-
-
-    if (QApplication::arguments().size() > 1)
-    {
-        this->openFile(QApplication::arguments().at(1));
-    }
-    else
-    {
-        this->openFile(m_settings->getLastPath());
-    }
+    this->openFilePath(startFilePath);
 }
 
 MainWindow::~MainWindow()
@@ -431,7 +432,7 @@ void MainWindow::createMenus()
 
 void MainWindow::connectActions()
 {
-    connect(m_act_open, SIGNAL(triggered()), this, SLOT(open()));
+    connect(m_act_open, SIGNAL(triggered()), this, SLOT(openFileDialog()));
     connect(m_act_save, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(m_act_exit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -469,8 +470,10 @@ void MainWindow::connectActions()
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
-    connect(m_location_widget, SIGNAL(locationChanged(FileInfo)), this, SLOT(openFile(FileInfo)));
-    connect(m_view_files, SIGNAL(currentFileChanged(FileInfo)), this, SLOT(on_filesView_currentChanged(FileInfo)));
+    connect(m_location_widget, SIGNAL(urlChanged(QUrl)), m_view_files, SLOT(setLocationUrl(QUrl)));
+    connect(m_location_widget, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
+    connect(m_view_files, SIGNAL(urlChanged(QUrl)), m_location_widget, SLOT(setLocationUrl(QUrl)));
+    connect(m_view_files, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
 
     connect(m_picture_item, SIGNAL(mousePress(QMouseEvent*const)),
             this, SLOT(on_pictureItemMousePress(QMouseEvent*const)));
@@ -534,7 +537,7 @@ void MainWindow::on_bookmark_triggered()
 #ifdef DEBUG_MAIN_WINDOW
                 qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_bookmark_triggered()";
 #endif
-        this->openFile(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
+        this->openFilePath(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
     }
 }
 
@@ -548,36 +551,38 @@ void MainWindow::deleteBookmark()
     m_act_bookmark_delete->setData(QVariant());
 }
 
-void MainWindow::on_filesView_currentChanged(const FileInfo &info)
+bool MainWindow::setLocationUrl(const QUrl &url)
 {
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesView_currentChanged" << info.getDebugInfo();
-#endif
+    const FileInfo info(url.toLocalFile());
+
+    m_picture_item->setFocus();
+
     m_act_dirUp->setEnabled(!info.isContainerRoot());
     this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName() + " - " + QApplication::applicationName() + " " + QApplication::applicationVersion());
 
     this->setCursor(Qt::BusyCursor);
 
-    m_location_widget->setFileInfo(info);
     m_picture_item->setPixmap(info);
-}
-
-bool MainWindow::openFile(const FileInfo &info)
-{
-#ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::openFile" << info.getDebugInfo();
-#endif
-
-    if (!info.isValid())
-    {
-        return false;
-    }
-
-    m_view_files->setCurrentFile(info);
-    m_picture_item->setFocus();
     return true;
 }
 
+bool MainWindow::openUrl(const QUrl &url)
+{
+    spreadUrl(url);
+    return setLocationUrl(url);
+}
+
+bool MainWindow::openFilePath(const QString &path)
+{ return openUrl(QUrl::fromLocalFile(path)); }
+
+bool MainWindow::openFile(const FileInfo &info)
+{ return openFilePath(info.getPath()); }
+
+void MainWindow::spreadUrl(const QUrl &url)
+{
+    m_view_files->setLocationUrl(url);
+    m_location_widget->setLocationUrl(url);
+}
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -608,7 +613,7 @@ void MainWindow::dropEvent(QDropEvent *event)
 {
     if (event->proposedAction() == Qt::CopyAction)
     {
-        this->openFile(event->mimeData()->urls().at(0).toLocalFile());
+        this->openUrl(event->mimeData()->urls().at(0));
     }
     event->acceptProposedAction();
     return QMainWindow::dropEvent(event);
@@ -659,14 +664,14 @@ void MainWindow::toggleFullscreen(bool value)
     }
 }
 
-void MainWindow::open()
+void MainWindow::openFileDialog()
 {
     const QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
     const QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), m_view_files->getCurrentFileInfo().getContainerPath(),
                                                     tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
     {
-        this->openFile(fileName);
+        this->openFilePath(fileName);
     }
 }
 

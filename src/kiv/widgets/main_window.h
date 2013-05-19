@@ -29,6 +29,7 @@ private:
     void connectActions();
     void updateSettings();
     void populateBookmarks();
+    void spreadUrl(const QUrl &url);
 
 
     FileSystemModel *m_model_filesystem;
@@ -104,7 +105,7 @@ private slots:
     void updateActions();
 
     /* File Menu Actions Slots */
-    void open();
+    void openFileDialog();
     void saveAs();
 
     /* Bookmark Menu Action Slots */
@@ -137,7 +138,6 @@ private slots:
     /* Directory Toolbar Actions Slots */
     void refreshPath();
 
-    void on_filesView_currentChanged(const FileInfo &info);
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);
     void on_view_mode_list_triggered();
@@ -147,8 +147,10 @@ private slots:
     void on_pictureItemMouseDoubleClick(const QMouseEvent * const event);
     void on_pictureItemMouseWheel(const QWheelEvent * const event);
 
+    bool setLocationUrl(const QUrl &url);
     bool openFile(const FileInfo &info);
-    inline bool openFile(const QString &path) { return openFile(FileInfo(path)); }
+    bool openFilePath(const QString &path);
+    bool openUrl(const QUrl &url);
 
 protected:
     void closeEvent(QCloseEvent *event);

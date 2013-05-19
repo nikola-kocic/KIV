@@ -15,6 +15,7 @@
 #include <QtConcurrentMap>
 #endif
 #include <QTreeView>
+#include <QUrl>
 
 #include "helper.h"
 #include "models/archive_model.h"
@@ -75,6 +76,7 @@ public:
 public slots:
     void pageNext();
     void pagePrevious();
+    void setLocationUrl(const QUrl &url);
 
 private:
     class FileListSortFilterProxyModel : public QSortFilterProxyModel
@@ -146,7 +148,7 @@ private slots:
     void on_combobox_sort_currentIndexChanged(int index);
 
 signals:
-    void currentFileChanged(const FileInfo &info);
+    void urlChanged(const QUrl &url);
 };
 
 #endif // VIEWFILES_H

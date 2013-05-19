@@ -196,6 +196,12 @@ void ViewFiles::setViewMode(const int mode)
     }
 }
 
+void ViewFiles::setLocationUrl(const QUrl &url)
+{
+    const FileInfo fileinfo(url.toLocalFile());
+    return setCurrentFile(fileinfo);
+}
+
 void ViewFiles::setCurrentFile(const FileInfo &info)
 {
 #ifdef DEBUG_VIEW_FILES
@@ -253,8 +259,6 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
     m_fileinfo_current = info;
     m_flag_opening = false;
 
-    emit currentFileChanged(m_fileinfo_current);
-
     showThumbnails();
 }
 
@@ -274,6 +278,8 @@ void ViewFiles::on_filesystemView_currentRowChanged(const QModelIndex &current,
     }
 
     QString currentContainer = m_model_filesystem->filePath(index0);
+    emit urlChanged(QUrl::fromLocalFile(currentContainer));
+
     const FileInfo info = FileInfo(currentContainer);
 #ifdef DEBUG_MAIN_WINDOW
     qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesystemView_currentRowChanged" << info.getDebugInfo();
@@ -378,9 +384,9 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
     {
         return;
     }
-
-    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString());
-    emit currentFileChanged(m_fileinfo_current);
+    const QString filePath = current.data(QFileSystemModel::FilePathRole).toString();
+    m_fileinfo_current = FileInfo(filePath);
+    emit urlChanged(QUrl::fromLocalFile(filePath));
 }
 
 void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current,
@@ -403,8 +409,9 @@ void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current,
 #endif
 
     // Pass 'false' for 'IsContainer' because item is only selected
-    m_fileinfo_current = FileInfo(current.data(QFileSystemModel::FilePathRole).toString(), false);
-    emit currentFileChanged(m_fileinfo_current);
+    const QString filePath = current.data(QFileSystemModel::FilePathRole).toString();
+    m_fileinfo_current = FileInfo(filePath, false);
+    emit urlChanged(QUrl::fromLocalFile(filePath));
 }
 
 void ViewFiles::pageNext()

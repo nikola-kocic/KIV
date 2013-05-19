@@ -1,20 +1,28 @@
 #include "location_widget.h"
 
+#include <QDir>
 #include <QKeyEvent>
 
-LocationWidget::LocationWidget(QAbstractItemModel *model, QWidget *parent)
+//#define DEBUG_LOCATION
+#ifdef DEBUG_LOCATION
+#include "helper.h"
+#endif
+
+#include "fileinfo.h"
+
+LocationWidget::LocationWidget(QAbstractItemModel *model, const QUrl &url, QWidget *parent)
     : QLineEdit(parent)
     , m_model(model)
     , m_completer(new QCompleter(m_model, this))
-    , m_current_fileinfo(FileInfo(""))
 {
+    setLocationUrl(url);
     setCompleter(m_completer);
     connect(this, SIGNAL(returnPressed()), this, SLOT(on_returnPressed()));
 }
 
 void LocationWidget::focusOutEvent(QFocusEvent *event)
 {
-    setText(m_current_fileinfo.getPath());
+    setLocationUrlInternal(m_currentUrl);
     clearFocus();
     return QLineEdit::focusOutEvent(event);
 }
@@ -36,23 +44,33 @@ void LocationWidget::on_returnPressed()
     const FileInfo fileinfo = FileInfo(text());
     if (fileinfo.isValid())
     {
-        m_current_fileinfo = fileinfo;
-        emit locationChanged(fileinfo);
+        const QString path = fileinfo.getPath();
+        // TODO: Add check if URL is local file
+        const QUrl url = QUrl::fromLocalFile(path);
+        setLocationUrl(url);
+        emit urlChanged(url);
     }
     else
     {
-        setText(m_current_fileinfo.getPath());
+        setLocationUrlInternal(m_currentUrl);
     }
 }
 
-void LocationWidget::setText(const QString &text)
+void LocationWidget::setLocationUrl(const QUrl &url)
 {
-    m_current_fileinfo = FileInfo(text);
-    return QLineEdit::setText(text);
+    return setLocationUrlInternal(url);
 }
 
-void LocationWidget::setFileInfo(const FileInfo &fileinfo)
+void LocationWidget::setLocationUrlInternal(const QUrl &url)
 {
-    m_current_fileinfo = fileinfo;
-    setText(fileinfo.getPath());
+    m_currentUrl = url;
+    if (m_currentUrl.isLocalFile())
+    {
+        const QString path = QDir::toNativeSeparators(m_currentUrl.toLocalFile());
+        setText(path);
+    }
+    else
+    {
+        setText(m_currentUrl.toString(QUrl::RemovePassword));
+    }
 }
