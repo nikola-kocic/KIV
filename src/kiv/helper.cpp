@@ -1,7 +1,5 @@
 #include "helper.h"
 
-#include <QDateTime>
-#include <QDebug>
 #include <QFileSystemModel>
 #include <QImageReader>
 #include <QLocale>
@@ -121,9 +119,4 @@ int Helper::naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensit
     }
     // The two strings are the same (02 == 2) so fall back to the normal sort
     return QString::compare(s1, s2, cs);
-}
-
-void Helper::debuglog(const char *funcInfo, const QString &data)
-{
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << funcInfo << data;
 }

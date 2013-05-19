@@ -2,10 +2,14 @@
 #define HELPER_H
 
 #include <QApplication>
+#include <QDateTime>
+#include <QDebug>
 #include <QFileInfo>
 #include <QStringList>
 
 #include "fileinfo.h"
+
+#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << Q_FUNC_INFO << "\n"
 
 class Helper
 {
@@ -28,7 +32,6 @@ public:
     static bool FuzzyCompare(const float p1, const float p2);
 
     static int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs);
-    static void debuglog(const char *funcInfo, const QString &data);
 
 private:
     static QStringList m_filters_image;

@@ -115,7 +115,7 @@ void ZoomWidget::on_activated(int index)
 void ZoomWidget::keyPressEvent(QKeyEvent *event)
 {
 #ifdef DEBUG_ZOOM_WIDGET
-    Helper::debuglog(Q_FUNC_INFO, QString::number(event->key()));
+    DEBUGOUT << QString::number(event->key());
 #endif
     if (event->key() == Qt::Key_Escape)
     {
@@ -132,7 +132,7 @@ void ZoomWidget::keyPressEvent(QKeyEvent *event)
 void ZoomWidget::focusOutEvent(QFocusEvent *event)
 {
 #ifdef DEBUG_ZOOM_WIDGET
-    Helper::debuglog(Q_FUNC_INFO, lineEdit()->text());
+    DEBUGOUT << lineEdit()->text();
 #endif
     on_zoomChanged(m_zoomValue, m_zoomValue);
     return QComboBox::focusOutEvent(event);
