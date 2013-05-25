@@ -255,7 +255,9 @@ void MainWindow::createActions()
         toggleLargeIcons(false);
     }
 
+    m_act_exit->setMenuRole(QAction::QuitRole);
     m_act_settings->setMenuRole(QAction::PreferencesRole);
+    m_act_about->setMenuRole(QAction::AboutRole);
 }
 
 void MainWindow::createMenus()
