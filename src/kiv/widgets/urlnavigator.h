@@ -13,12 +13,15 @@ public:
     explicit UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *parent = 0);
     bool goBack();
     bool goForward();
+    int historyIndex() const;
+    int historySize() const;
 
 public slots:
     void setLocationUrl(const QUrl &url);
 
 signals:
     void urlChanged(const QUrl &url);
+    void historyChanged();
 
 protected:
     void focusOutEvent(QFocusEvent *event);
@@ -31,7 +34,7 @@ private:
     QCompleter *m_completer;
     QUrl m_currentUrl;
     QList<QUrl> m_history;
-    int m_currentHistoryIndex;
+    int m_historyIndex;
     const int m_historyMax;
 
 private slots:

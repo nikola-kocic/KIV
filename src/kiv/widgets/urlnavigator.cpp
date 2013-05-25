@@ -14,7 +14,7 @@ UrlNavigator::UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *
     : QLineEdit(parent)
     , m_model(model)
     , m_completer(new QCompleter(m_model, this))
-    , m_currentHistoryIndex(0)
+    , m_historyIndex(0)
     , m_historyMax(30)
 {
     setLocationUrl(url);
@@ -27,9 +27,9 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
 #ifdef DEBUG_LOCATION
     DEBUGOUT << "START; Current history index: " << m_currentHistoryIndex << m_history;
 #endif
-    if (m_currentHistoryIndex + 1 < m_history.size())
+    if (m_historyIndex + 1 < m_history.size())
     {
-        QList<QUrl>::iterator begin = m_history.begin() + m_currentHistoryIndex + 1;
+        QList<QUrl>::iterator begin = m_history.begin() + m_historyIndex + 1;
         QList<QUrl>::iterator end = m_history.end();
         m_history.erase(begin, end);
     }
@@ -41,7 +41,7 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
     {
         m_history.removeAt(0);
     }
-    m_currentHistoryIndex = m_history.size() - 1;
+    m_historyIndex = m_history.size() - 1;
 #ifdef DEBUG_LOCATION
     DEBUGOUT << "END; Current history index: " << m_currentHistoryIndex << m_history;
 #endif
@@ -87,7 +87,7 @@ void UrlNavigator::updateContent()
 #ifdef DEBUG_LOCATION
     DEBUGOUT << "Current history index: " << m_currentHistoryIndex << m_history;
 #endif
-    const QUrl url = m_history.at(m_currentHistoryIndex);
+    const QUrl url = m_history.at(m_historyIndex);
     emit urlChanged(url);
     return setLocationUrlInternal(url);
 }
@@ -109,26 +109,61 @@ void UrlNavigator::on_returnPressed()
     }
 }
 
+/**
+ * @brief Goes back one step in the URL history.
+ * The signals UrlNavigator::urlChanged() and UrlNavigator::historyChanged()
+ * are emitted if true is returned.
+ * @return False is returned if the beginning of the history has already been reached
+ * and hence going back was not possible.
+ */
 bool UrlNavigator::goBack()
 {
-    m_currentHistoryIndex--;
-    if (m_currentHistoryIndex < 0)
+    if (m_historyIndex == 0)
     {
-        m_currentHistoryIndex = 0;
+        return false;
     }
+
+    m_historyIndex--;
+    emit historyChanged();
     updateContent();
 
-    return !(m_currentHistoryIndex == 0);
+    return true;
 }
 
+/**
+ * @brief Goes forward one step in the URL history.
+ * The signals UrlNavigator::urlChanged() and UrlNavigator::historyChanged()
+ * are emitted if true is returned.
+ * @return False is returned if the end of the history has already been reached
+ * and hence going forward was not possible.
+ */
 bool UrlNavigator::goForward()
 {
-    m_currentHistoryIndex++;
-    if (m_currentHistoryIndex > m_history.size() - 1)
+    if (m_historyIndex == m_history.size() - 1)
     {
-        m_currentHistoryIndex = m_history.size() - 1;
+        return false;
     }
+
+    m_historyIndex++;
+    emit historyChanged();
     updateContent();
 
-    return !(m_currentHistoryIndex = m_history.size() - 1);
+    return true;
+}
+
+/**
+ * @return Returns the history index of the current URL,
+ * where 0 <= history index < UrlNavigator::historySize().
+ */
+int UrlNavigator::historyIndex() const
+{
+    return m_historyIndex;
+}
+
+/**
+ * @return Returns the amount of items in the history.
+ */
+int UrlNavigator::historySize() const
+{
+    return m_history.size();
 }
