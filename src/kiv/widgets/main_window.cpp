@@ -36,10 +36,12 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_toolbar(new QToolBar(this))
     , m_comboBox_zoom(new ZoomWidget(this))
 
-    , m_menu_history(new QMenu(tr("History"), this))
+    , m_menu_bookmarks(new QMenu(tr("&Bookmarks"), this))
+    , m_menu_history(new QMenu(tr("&History"), this))
     , m_menu_context_picture(new QMenu(this))
     , m_menu_context_bookmark(new QMenu(this))
     , m_act_bookmark_delete(new QAction(tr("&Delete Bookmark"), this))
+    , m_act_bookmark_active_item(NULL)
 
     , m_act_open(new QAction(QIcon::fromTheme("document-open"),
                              tr("&Open..."), this))
@@ -262,15 +264,12 @@ void MainWindow::createMenus()
     fileMenu->addAction(m_act_open);
     fileMenu->addAction(m_act_save);
 
-    m_menu_bookmarks = fileMenu->addMenu(tr("&Bookmarks"));
     m_menu_bookmarks->addAction(m_act_bookmark_add);
     m_menu_bookmarks->addSeparator();
 
     m_menu_bookmarks->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_menu_bookmarks, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(on_bookmark_customContextMenuRequested(QPoint)));
 
-    populateBookmarks();
+    fileMenu->addMenu(m_menu_bookmarks);
 
     fileMenu->addSeparator();
     fileMenu->addAction(m_act_pageNext);
@@ -375,13 +374,6 @@ void MainWindow::createMenus()
     m_toolbar->addAction(m_act_rotateLeft);
     m_toolbar->addAction(m_act_rotateRight);
     m_toolbar->addAction(m_act_fullscreen);
-
-    foreach (QAction *action, QList<QAction*>() << m_act_back << m_act_forward) {
-        QWidget *action_widget = m_toolbar->widgetForAction(action);
-        action_widget->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(action_widget, SIGNAL(customContextMenuRequested(QPoint)),
-                this, SLOT(on_historyMenuRequested(QPoint)));
-    }
     /* End toolbar */
 
 
@@ -495,31 +487,40 @@ void MainWindow::connectActions()
     connect(m_menu_history, SIGNAL(triggered(QAction*)),
             this, SLOT(on_historyMenuTriggered(QAction*)));
 
+    connect(m_menu_bookmarks, SIGNAL(aboutToShow()),
+            this, SLOT(populateBookmarks()));
+    connect(m_menu_bookmarks, SIGNAL(aboutToHide()),
+            this, SLOT(on_bookmark_menu_aboutToHide()));
+    connect(m_menu_bookmarks, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(on_bookmark_customContextMenuRequested(QPoint)));
     connect(m_menu_bookmarks, SIGNAL(triggered(QAction*)),
             this, SLOT(on_bookmark_triggered(QAction*)));
 
     connect(m_urlNavigator, SIGNAL(historyChanged()), this, SLOT(on_urlHistoryChanged()));
+
+
+    foreach (QAction *action, QList<QAction*>() << m_act_back << m_act_forward)
+    {
+        QWidget *action_widget = m_toolbar->widgetForAction(action);
+        action_widget->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(action_widget, SIGNAL(customContextMenuRequested(QPoint)),
+                this, SLOT(on_historyMenuRequested(QPoint)));
+    }
 }
 
 void MainWindow::populateBookmarks()
 {
-    const QList<QAction*> oldActions = m_menu_bookmarks->actions();
-
-    for (int i = 0; i < oldActions.size(); ++i)
+    // Cache: If bookmarks menu is not empty that means history did not change.
+    if (!m_menu_bookmarks->actions().last()->data().isNull())
     {
-        if (!oldActions.at(i)->data().toString().isEmpty())
-        {
-#ifdef DEBUG_MAIN_WINDOW
-            DEBUGOUT << "removed bookmark" << oldActions.at(i)->text() << oldActions.at(i)->data().toString();
-#endif
-            oldActions.at(i)->deleteLater();
-        }
+        return;
     }
 
     const QList<Bookmark *> bookmarks = m_settings->getBookmarks();
     for (int i = 0; i < bookmarks.size(); ++i)
     {
-        QAction *bookmark = new QAction(bookmarks.at(i)->getName(), this);
+        QAction *bookmark = new QAction(bookmarks.at(i)->getName(),
+                                        m_menu_bookmarks);
         bookmark->setData(i);
         m_menu_bookmarks->addAction(bookmark);
 #ifdef DEBUG_MAIN_WINDOW
@@ -546,12 +547,13 @@ void MainWindow::on_bookmark_triggered(QAction *action)
 
 void MainWindow::deleteBookmark()
 {
-    if (m_act_bookmark_delete->data().isNull())
+    if (m_act_bookmark_active_item == NULL)
     { return; }
 
-    m_settings->deleteBookmark(m_act_bookmark_delete->data().toInt());
-    populateBookmarks();
-    m_act_bookmark_delete->setData(QVariant());
+    m_settings->deleteBookmark(m_act_bookmark_active_item->data().toInt());
+    m_menu_bookmarks->removeAction(m_act_bookmark_active_item);
+    delete m_act_bookmark_active_item;
+    m_act_bookmark_active_item = NULL;
 }
 
 void MainWindow::spreadUrl(const QUrl &url)
@@ -724,12 +726,18 @@ void MainWindow::addBookmark()
     dialog.setTextValue(
                 m_view_files->getCurrentFileInfo().getContainerName() + " /"
                 + m_view_files->getCurrentFileInfo().getImageFileName());
-    if(dialog.exec() != QDialog::Accepted)
+
+    if (dialog.exec() != QDialog::Accepted)
     {
         return;
     }
-    m_settings->addBookmark(dialog.textValue(), m_view_files->getCurrentFileInfo().getPath());
-    populateBookmarks();
+    const QString bookmarkName = dialog.textValue();
+    m_settings->addBookmark(bookmarkName,
+                            m_view_files->getCurrentFileInfo().getPath());
+
+    QAction *bookmark = new QAction(bookmarkName, m_menu_bookmarks);
+    bookmark->setData(m_settings->getBookmarkCount() - 1);
+    m_menu_bookmarks->addAction(bookmark);
 }
 
 void MainWindow::zoomReset()
@@ -862,14 +870,19 @@ void MainWindow::updateActions()
 
 void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
 {
-    if (const QAction *action = m_menu_bookmarks->actionAt(pos))
+    if (QAction *action = m_menu_bookmarks->actionAt(pos))
     {
         if (action->data().isNull())
-            return;
+        { return; }
 
-        m_act_bookmark_delete->setData(action->data());
+        m_act_bookmark_active_item = action;
         m_menu_context_bookmark->popup(m_menu_bookmarks->mapToGlobal(pos));
     }
+}
+
+void MainWindow::on_bookmark_menu_aboutToHide()
+{
+    m_act_bookmark_active_item = NULL;
 }
 
 void MainWindow::on_view_mode_list_triggered()

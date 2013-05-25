@@ -28,9 +28,7 @@ private:
     void createMenus();
     void connectActions();
     void updateSettings();
-    void populateBookmarks();
     void spreadUrl(const QUrl &url);
-
 
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
@@ -67,6 +65,9 @@ private:
 
     /* Bookmarks Menu Actions */
     QAction *m_act_bookmark_add;
+
+    /* Used for storing reference to right-clicked item in bookmarks menu */
+    QAction *m_act_bookmark_active_item;
 
     /* Image Menu Actions */
     QAction *m_act_zoomIn;
@@ -142,6 +143,7 @@ private slots:
 
     void on_customContextMenuRequested(const QPoint &pos);
     void on_bookmark_customContextMenuRequested(const QPoint &pos);
+    void on_bookmark_menu_aboutToHide();
     void on_view_mode_list_triggered();
     void on_view_mode_details_triggered();
     void on_view_mode_icons_triggered();
@@ -152,6 +154,7 @@ private slots:
     void on_historyMenuTriggered(QAction *action);
     void on_urlHistoryChanged();
 
+    void populateBookmarks();
     void populateHistoryMenu();
     bool setLocationUrl(const QUrl &url);
     bool openFile(const FileInfo &info);

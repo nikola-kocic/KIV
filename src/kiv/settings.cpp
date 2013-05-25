@@ -2,6 +2,11 @@
 
 #include <QApplication>
 
+#define SETTINGS_DEBUG
+#ifdef SETTINGS_DEBUG
+#include "helper.h"
+#endif
+
 Settings::Settings()
     : m_settings(new QSettings(QSettings::IniFormat, QSettings::UserScope, QApplication::organizationName(), QApplication::applicationName()))
 
@@ -20,12 +25,20 @@ Settings::Settings()
     , m_largeIcons(m_settings->value("Interface/LargeIcons", false).toBool())
     , m_lastPath(m_settings->value("Interface/LastPath", "").toString())
 {
+#ifdef SETTINGS_DEBUG
+    DEBUGOUT << "filename" << m_settings->fileName();
+#endif
+
     for (int i = 0; ; ++i)
     {
         QVariant varName = m_settings->value("Bookmarks/" + QString::number(i) + "/Name");
         QVariant varPath = m_settings->value("Bookmarks/" + QString::number(i) + "/Path");
         if (varName.isValid() && varPath.isValid())
         {
+#ifdef SETTINGS_DEBUG
+            DEBUGOUT << "append" << "Bookmarks/" + QString::number(i) + "/Name"
+                     << varName.toString() <<  varPath.toString();
+#endif
             m_bookmarks.append(new Bookmark(varName.toString(), varPath.toString()));
         }
         else
@@ -68,6 +81,9 @@ void Settings::refreshBookmarks()
         if (varName.isValid() && varPath.isValid())
         {
             m_settings->remove("Bookmarks/" + QString::number(i));
+#ifdef SETTINGS_DEBUG
+            DEBUGOUT << "removing" << "Bookmarks/" + QString::number(i);
+#endif
         }
         else
         {
@@ -79,5 +95,11 @@ void Settings::refreshBookmarks()
     {
         m_settings->setValue("Bookmarks/" + QString::number(i) + "/Name", m_bookmarks.at(i)->getName());
         m_settings->setValue("Bookmarks/" + QString::number(i) + "/Path", m_bookmarks.at(i)->getPath());
+#ifdef SETTINGS_DEBUG
+            DEBUGOUT << "adding" << "Bookmarks/" + QString::number(i)
+                        + "/Name", m_bookmarks.at(i)->getName();
+            DEBUGOUT << "adding" << "Bookmarks/" + QString::number(i)
+                        + "/Path", m_bookmarks.at(i)->getPath();
+#endif
     }
 }
