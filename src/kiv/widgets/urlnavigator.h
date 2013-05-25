@@ -11,9 +11,12 @@ class UrlNavigator : public QLineEdit
 
 public:
     explicit UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *parent = 0);
+    int historyIndex() const;
+    bool setHistoryIndex(int index);
+
     bool goBack();
     bool goForward();
-    int historyIndex() const;
+
     int historySize() const;
     QList<QUrl> getHistory() const;
 

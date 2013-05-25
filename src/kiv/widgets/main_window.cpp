@@ -1,4 +1,4 @@
-#include "widgets/main_window.h"
+﻿#include "widgets/main_window.h"
 
 #include <qglobal.h>
 #include <QAction>
@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
     , m_comboBox_zoom(new ZoomWidget(this))
+    , m_menu_history(new QMenu(tr("History"), this))
 {
     this->setAcceptDrops(true);
     QString startFilePath;
@@ -302,6 +303,7 @@ void MainWindow::createMenus()
     this->addAction(m_act_pageNext);
     fileMenu->addAction(m_act_pagePrevious);
     this->addAction(m_act_pagePrevious);
+    fileMenu->addMenu(m_menu_history);
 
     fileMenu->addSeparator();
     fileMenu->addAction(m_act_back);
@@ -397,6 +399,13 @@ void MainWindow::createMenus()
     m_toolbar->addAction(m_act_rotateLeft);
     m_toolbar->addAction(m_act_rotateRight);
     m_toolbar->addAction(m_act_fullscreen);
+
+    foreach (QAction *action, QList<QAction*>() << m_act_back << m_act_forward) {
+        QWidget *action_widget = m_toolbar->widgetForAction(action);
+        action_widget->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(action_widget, SIGNAL(customContextMenuRequested(QPoint)),
+                this, SLOT(on_historyMenuRequested(QPoint)));
+    }
     /* End toolbar */
 
 
@@ -505,6 +514,11 @@ void MainWindow::connectActions()
 
     connect(m_act_bookmark_delete, SIGNAL(triggered()), this, SLOT(deleteBookmark()));
 
+    connect(m_menu_history, SIGNAL(aboutToShow()),
+            this, SLOT(populateHistoryMenu()));
+    connect(m_menu_history, SIGNAL(triggered(QAction*)),
+            this, SLOT(on_historyMenuTriggered(QAction*)));
+    connect(m_urlNavigator, SIGNAL(historyChanged()), this, SLOT(on_urlHistoryChanged()));
 }
 
 void MainWindow::populateBookmarks()
@@ -584,14 +598,6 @@ bool MainWindow::setLocationUrl(const QUrl &url)
 
     m_picture_item->setPixmap(fileinfo);
 
-    if (m_urlNavigator->historySize() > 1)
-    {
-        m_act_back->setEnabled(true);
-        if (m_urlNavigator->historyIndex() == m_urlNavigator->historySize() - 1)
-        {
-            m_act_forward->setEnabled(false);
-        }
-    }
     return true;
 }
 
@@ -725,26 +731,12 @@ void MainWindow::saveAs()
 
 void MainWindow::goBack()
 {
-    if (m_urlNavigator->goBack())
-    {
-        if (m_urlNavigator->historyIndex() == 0)
-        {
-            m_act_back->setEnabled(false);
-        }
-        m_act_forward->setEnabled(true);
-    }
+    m_urlNavigator->goBack();
 }
 
 void MainWindow::goForward()
 {
-    if (m_urlNavigator->goForward())
-    {
-        if (m_urlNavigator->historyIndex() == m_urlNavigator->historySize() - 1)
-        {
-            m_act_forward->setEnabled(false);
-        }
-        m_act_back->setEnabled(true);
-    }
+    m_urlNavigator->goForward();
 }
 
 void MainWindow::addBookmark()
@@ -1006,4 +998,54 @@ void MainWindow::on_pictureItemMouseWheel(const QWheelEvent * const event)
     {
         m_picture_item->scrollPageHorizontal(event->delta());
     }
+}
+
+void MainWindow::populateHistoryMenu()
+{
+    // Cache: If history menu is not empty that means history did not change.
+    if (!m_menu_history->isEmpty())
+    {
+        return;
+    }
+    QList<QUrl> history = m_urlNavigator->getHistory();
+    for (int i = 0; i < history.size(); ++i)
+    {
+        QAction* action = m_menu_history->addAction(history.at(i).toLocalFile());
+        action->setData(i);
+        if (i == m_urlNavigator->historyIndex())
+        {
+            action->setCheckable(true);
+            action->setChecked(true);
+        }
+    }
+}
+
+void MainWindow::on_historyMenuRequested(const QPoint & /*pos*/)
+{
+    m_menu_history->popup(QCursor::pos());
+}
+
+void MainWindow::on_historyMenuTriggered(QAction *action)
+{
+    m_urlNavigator->setHistoryIndex(action->data().toInt());
+}
+
+void MainWindow::on_urlHistoryChanged()
+{
+    // Cache: Clear history menu entries when history changes so it's repopulated on next request.
+    m_menu_history->clear();
+
+    int historySize = m_urlNavigator->historySize();
+    if (historySize <= 1)
+    {
+        return;
+    }
+
+    int historyIndex = m_urlNavigator->historyIndex();
+
+    bool back_enabled = !(historyIndex == 0);
+    m_act_back->setEnabled(back_enabled);
+
+    bool forward_enabled = !(historyIndex == historySize - 1);
+    m_act_forward->setEnabled(forward_enabled);
 }

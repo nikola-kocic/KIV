@@ -111,6 +111,24 @@ void UrlNavigator::on_returnPressed()
     }
 }
 
+bool UrlNavigator::setHistoryIndex(int index)
+{
+    if (index < 0 || index > m_history.size() - 1)
+    {
+        return false;
+    }
+    if (index == m_historyIndex)
+    {
+        return true;
+    }
+
+    m_historyIndex = index;
+    updateContent();
+    emit historyChanged();
+
+    return true;
+}
+
 /**
  * @brief Goes back one step in the URL history.
  * The signals UrlNavigator::urlChanged() and UrlNavigator::historyChanged()
@@ -125,11 +143,7 @@ bool UrlNavigator::goBack()
         return false;
     }
 
-    m_historyIndex--;
-    updateContent();
-    emit historyChanged();
-
-    return true;
+    return setHistoryIndex(m_historyIndex - 1);
 }
 
 /**
@@ -146,11 +160,7 @@ bool UrlNavigator::goForward()
         return false;
     }
 
-    m_historyIndex++;
-    updateContent();
-    emit historyChanged();
-
-    return true;
+    return setHistoryIndex(m_historyIndex + 1);
 }
 
 /**

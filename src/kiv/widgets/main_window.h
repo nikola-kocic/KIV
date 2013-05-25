@@ -99,6 +99,7 @@ private:
     QMenu *m_menu_bookmarks;
     QMenu *m_menu_context_picture;
     QMenu *m_menu_context_bookmark;
+    QMenu *m_menu_history;
 
     QAction *m_act_bookmark_delete;
 
@@ -150,7 +151,11 @@ private slots:
     void on_pictureItemMousePress(const QMouseEvent * const event);
     void on_pictureItemMouseDoubleClick(const QMouseEvent * const event);
     void on_pictureItemMouseWheel(const QWheelEvent * const event);
+    void on_historyMenuRequested(const QPoint &pos);
+    void on_historyMenuTriggered(QAction *action);
+    void on_urlHistoryChanged();
 
+    void populateHistoryMenu();
     bool setLocationUrl(const QUrl &url);
     bool openFile(const FileInfo &info);
     bool openFilePath(const QString &path);
