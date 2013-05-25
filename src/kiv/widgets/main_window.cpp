@@ -162,9 +162,11 @@ void MainWindow::createActions()
 
     m_act_back = new QAction(QIcon::fromTheme("go-previous"), tr("&Back"), this);
     m_act_back->setShortcut(QKeySequence::Back);
+    m_act_back->setEnabled(false);
 
     m_act_forward = new QAction(QIcon::fromTheme("go-next"), tr("&Forward"), this);
     m_act_forward->setShortcut(QKeySequence::Forward);
+    m_act_forward->setEnabled(false);
 
     /* View Actions */
 
@@ -581,6 +583,15 @@ bool MainWindow::setLocationUrl(const QUrl &url)
     this->setCursor(Qt::BusyCursor);
 
     m_picture_item->setPixmap(fileinfo);
+
+    if (m_urlNavigator->historySize() > 1)
+    {
+        m_act_back->setEnabled(true);
+        if (m_urlNavigator->historyIndex() == m_urlNavigator->historySize() - 1)
+        {
+            m_act_forward->setEnabled(false);
+        }
+    }
     return true;
 }
 
@@ -714,12 +725,26 @@ void MainWindow::saveAs()
 
 void MainWindow::goBack()
 {
-    m_urlNavigator->goBack();
+    if (m_urlNavigator->goBack())
+    {
+        if (m_urlNavigator->historyIndex() == 0)
+        {
+            m_act_back->setEnabled(false);
+        }
+        m_act_forward->setEnabled(true);
+    }
 }
 
 void MainWindow::goForward()
 {
-    m_urlNavigator->goForward();
+    if (m_urlNavigator->goForward())
+    {
+        if (m_urlNavigator->historyIndex() == m_urlNavigator->historySize() - 1)
+        {
+            m_act_forward->setEnabled(false);
+        }
+        m_act_back->setEnabled(true);
+    }
 }
 
 void MainWindow::addBookmark()

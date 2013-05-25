@@ -15,6 +15,7 @@ public:
     bool goForward();
     int historyIndex() const;
     int historySize() const;
+    QList<QUrl> getHistory() const;
 
 public slots:
     void setLocationUrl(const QUrl &url);

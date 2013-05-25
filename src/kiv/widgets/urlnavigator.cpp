@@ -46,7 +46,9 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
     DEBUGOUT << "END; Current history index: " << m_currentHistoryIndex << m_history;
 #endif
 
-    return setLocationUrlInternal(url);
+    setLocationUrlInternal(url);
+
+    emit historyChanged();
 }
 
 void UrlNavigator::focusOutEvent(QFocusEvent *event)
@@ -124,8 +126,8 @@ bool UrlNavigator::goBack()
     }
 
     m_historyIndex--;
-    emit historyChanged();
     updateContent();
+    emit historyChanged();
 
     return true;
 }
@@ -145,8 +147,8 @@ bool UrlNavigator::goForward()
     }
 
     m_historyIndex++;
-    emit historyChanged();
     updateContent();
+    emit historyChanged();
 
     return true;
 }
@@ -166,4 +168,9 @@ int UrlNavigator::historyIndex() const
 int UrlNavigator::historySize() const
 {
     return m_history.size();
+}
+
+QList<QUrl> UrlNavigator::getHistory() const
+{
+    return m_history;
 }
