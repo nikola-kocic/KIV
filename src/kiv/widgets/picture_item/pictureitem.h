@@ -33,7 +33,8 @@ class PictureItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PictureItem(Settings const * const settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    explicit PictureItem(Settings const * const settings, QWidget *parent = 0,
+                         Qt::WindowFlags f = 0);
     ~PictureItem();
 
     qreal getZoom() const;
@@ -76,9 +77,6 @@ private:
 signals:
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
-    void mouseWheel(const QWheelEvent * const event);
-    void mousePress(const QMouseEvent * const event);
-    void mouseDoubleClick(const QMouseEvent * const event);
 
 public slots:
     void setZoom(const qreal value);
@@ -92,11 +90,9 @@ private slots:
     void imageFinished(int num);
 
 protected:
-    void wheelEvent(QWheelEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
 };

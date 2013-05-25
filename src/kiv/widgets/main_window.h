@@ -29,6 +29,11 @@ private:
     void connectActions();
     void updateSettings();
     void spreadUrl(const QUrl &url);
+    inline bool isPosInPictureItem(const QPoint &pos) const
+    {
+        return m_picture_item->rect().contains(
+                    m_picture_item->mapFromGlobal(pos));
+    }
 
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
@@ -147,9 +152,6 @@ private slots:
     void on_view_mode_list_triggered();
     void on_view_mode_details_triggered();
     void on_view_mode_icons_triggered();
-    void on_pictureItemMousePress(const QMouseEvent * const event);
-    void on_pictureItemMouseDoubleClick(const QMouseEvent * const event);
-    void on_pictureItemMouseWheel(const QWheelEvent * const event);
     void on_historyMenuRequested(const QPoint &pos);
     void on_historyMenuTriggered(QAction *action);
     void on_urlHistoryChanged();
@@ -169,6 +171,9 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
     void showEvent(QShowEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
 };
 
 #endif // MAINWINDOW_H

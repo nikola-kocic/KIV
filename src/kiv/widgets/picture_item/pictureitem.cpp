@@ -168,10 +168,6 @@ void PictureItem::mousePressEvent(QMouseEvent *event)
         /* Start dragging */
         this->beginDrag(event->pos());
     }
-    else
-    {
-        emit mousePress(event);
-    }
 
     return QWidget::mousePressEvent(event);
 }
@@ -179,12 +175,6 @@ void PictureItem::mousePressEvent(QMouseEvent *event)
 
 /* End Region Drag */
 
-
-void PictureItem::mouseDoubleClickEvent(QMouseEvent *event)
-{
-    emit mouseDoubleClick(event);
-    return QWidget::mouseDoubleClickEvent(event);
-}
 
 void PictureItem::resizeEvent(QResizeEvent *event)
 {
@@ -228,13 +218,6 @@ void PictureItem::keyPressEvent(QKeyEvent *event)
     }
     return QWidget::keyPressEvent(event);
 }
-
-void PictureItem::wheelEvent(QWheelEvent *event)
-{
-    emit mouseWheel(event);
-    return QWidget::wheelEvent(event);
-}
-
 
 /* Region Rotation */
 

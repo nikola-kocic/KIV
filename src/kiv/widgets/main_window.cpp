@@ -41,7 +41,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_menu_context_picture(new QMenu(this))
     , m_menu_context_bookmark(new QMenu(this))
     , m_act_bookmark_delete(new QAction(tr("&Delete Bookmark"), this))
-    , m_act_bookmark_active_item(NULL)
 
     , m_act_open(new QAction(QIcon::fromTheme("document-open"),
                              tr("&Open..."), this))
@@ -61,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_act_exit(new QAction(QIcon::fromTheme("application-exit"),
                              tr("E&xit"), this))
     , m_act_bookmark_add(new QAction(tr("Bookmark &This Page"), this))
+    , m_act_bookmark_active_item(NULL)
 
     , m_act_zoomIn(new QAction(QIcon::fromTheme("zoom-in"),
                                tr("Zoom &In"), this))
@@ -463,12 +463,6 @@ void MainWindow::connectActions()
     connect(m_view_files, SIGNAL(urlChanged(QUrl)), m_urlNavigator, SLOT(setLocationUrl(QUrl)));
     connect(m_view_files, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
 
-    connect(m_picture_item, SIGNAL(mousePress(QMouseEvent*const)),
-            this, SLOT(on_pictureItemMousePress(QMouseEvent*const)));
-    connect(m_picture_item, SIGNAL(mouseDoubleClick(QMouseEvent*const)),
-            this, SLOT(on_pictureItemMouseDoubleClick(QMouseEvent*const)));
-    connect(m_picture_item, SIGNAL(mouseWheel(QWheelEvent*const)),
-             this, SLOT(on_pictureItemMouseWheel(QWheelEvent*const)));
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
     connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)),
             m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
@@ -900,9 +894,10 @@ void MainWindow::on_view_mode_icons_triggered()
     m_view_files->setViewMode(FileViewMode::Icons);
 }
 
-void MainWindow::on_pictureItemMousePress(const QMouseEvent * const event)
+void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    if (event->buttons() != Qt::MiddleButton)
+    if (event->buttons() != Qt::MiddleButton
+        || !isPosInPictureItem(event->globalPos()))
     {
         return;
     }
@@ -937,20 +932,27 @@ void MainWindow::on_pictureItemMousePress(const QMouseEvent * const event)
     }
 }
 
-void MainWindow::on_pictureItemMouseDoubleClick(const QMouseEvent * const event)
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (event->buttons() == Qt::LeftButton)
+    if (event->buttons() == Qt::LeftButton
+        && isPosInPictureItem(event->globalPos()))
     {
         m_act_fullscreen->toggle();
     }
 }
 
-void MainWindow::on_pictureItemMouseWheel(const QWheelEvent * const event)
+void MainWindow::wheelEvent(QWheelEvent *event)
 {
+    if (!isPosInPictureItem(event->globalPos()))
+    {
+        return;
+    }
+
     /* event->delta() > 0 == Up
        event->delta() < 0 == Down */
-    if ((Qt::ControlModifier == event->modifiers()) ||
-        ((Qt::NoModifier == event->modifiers()) && (WheelAction::Zoom == m_settings->getWheel())))
+    if ((Qt::ControlModifier == event->modifiers())
+        ||((Qt::NoModifier == event->modifiers())
+           && (WheelAction::Zoom == m_settings->getWheel())))
     {
         if (event->delta() < 0)
         {
@@ -984,7 +986,8 @@ void MainWindow::on_pictureItemMouseWheel(const QWheelEvent * const event)
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
     {
         /* For standard scroll (+-120), zoom +-25% */
-        m_comboBox_zoom->setZoom(m_comboBox_zoom->getZoom() * (1 + ((event->delta() / 4.8) / 100)));
+        m_comboBox_zoom->setZoom(m_comboBox_zoom->getZoom()
+                                 * (1 + ((event->delta() / 4.8) / 100)));
     }
     else if (Qt::ShiftModifier == event->modifiers())
     {
