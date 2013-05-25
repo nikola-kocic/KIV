@@ -1012,7 +1012,9 @@ void MainWindow::populateHistoryMenu()
     QList<QUrl> history = m_urlNavigator->getHistory();
     for (int i = 0; i < history.size(); ++i)
     {
-        QAction* action = m_menu_history->addAction(history.at(i).toLocalFile());
+        const QString path = QDir::toNativeSeparators(
+                    history.at(i).toLocalFile());
+        QAction* action = m_menu_history->addAction(path);
         action->setData(i);
         if (i == m_urlNavigator->historyIndex())
         {
