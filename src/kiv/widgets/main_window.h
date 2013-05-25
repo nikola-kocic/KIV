@@ -112,7 +112,7 @@ private slots:
 
     /* Bookmark Menu Action Slots */
     void addBookmark();
-    void on_bookmark_triggered();
+    void on_bookmark_triggered(QAction *action);
     void deleteBookmark();
 
     /* Edit Menu Actions Slots */

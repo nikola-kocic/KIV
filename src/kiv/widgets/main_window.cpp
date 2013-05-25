@@ -494,6 +494,10 @@ void MainWindow::connectActions()
             this, SLOT(populateHistoryMenu()));
     connect(m_menu_history, SIGNAL(triggered(QAction*)),
             this, SLOT(on_historyMenuTriggered(QAction*)));
+
+    connect(m_menu_bookmarks, SIGNAL(triggered(QAction*)),
+            this, SLOT(on_bookmark_triggered(QAction*)));
+
     connect(m_urlNavigator, SIGNAL(historyChanged()), this, SLOT(on_urlHistoryChanged()));
 }
 
@@ -517,7 +521,6 @@ void MainWindow::populateBookmarks()
     {
         QAction *bookmark = new QAction(bookmarks.at(i)->getName(), this);
         bookmark->setData(i);
-        connect(bookmark, SIGNAL(triggered()), this, SLOT(on_bookmark_triggered()));
         m_menu_bookmarks->addAction(bookmark);
 #ifdef DEBUG_MAIN_WINDOW
         DEBUGOUT << "added bookmark" << bookmark->text() << bookmark->data().toString();
@@ -530,18 +533,15 @@ void MainWindow::on_customContextMenuRequested(const QPoint &pos)
     m_menu_context_picture->popup(m_picture_item->mapToGlobal(pos));
 }
 
-void MainWindow::on_bookmark_triggered()
+void MainWindow::on_bookmark_triggered(QAction *action)
 {
-    if (const QAction *action = qobject_cast<const QAction *>(sender()))
-    {
-        if (action->data().isNull())
-            return;
-        int bookmarkIndex = action->data().toInt();
+    if (action->data().isNull())
+    { return; }
+    int bookmarkIndex = action->data().toInt();
 #ifdef DEBUG_MAIN_WINDOW
-        DEBUGOUT;
+    DEBUGOUT;
 #endif
-        this->openFilePath(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
-    }
+    this->openFilePath(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
 }
 
 void MainWindow::deleteBookmark()
