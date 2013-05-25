@@ -1,4 +1,4 @@
-﻿#include "widgets/main_window.h"
+#include "widgets/main_window.h"
 
 #include <qglobal.h>
 #include <QAction>
@@ -35,7 +35,73 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
     , m_comboBox_zoom(new ZoomWidget(this))
+
     , m_menu_history(new QMenu(tr("History"), this))
+    , m_menu_context_picture(new QMenu(this))
+    , m_menu_context_bookmark(new QMenu(this))
+    , m_act_bookmark_delete(new QAction(tr("&Delete Bookmark"), this))
+
+    , m_act_open(new QAction(QIcon::fromTheme("document-open"),
+                             tr("&Open..."), this))
+    , m_act_save(new QAction(QIcon::fromTheme("document-save-as"),
+                             tr("&Save Page As..."), this))
+    , m_act_pageNext(new QAction(QIcon::fromTheme("media-skip-forward"),
+                                 tr("&Next"), this))
+    , m_act_pagePrevious(new QAction(QIcon::fromTheme("media-skip-backward"),
+                                     tr("&Previous"), this))
+    , m_act_dirUp(new QAction(QIcon::fromTheme("go-up"), tr("Go &Up"), this))
+    , m_act_back(new QAction(QIcon::fromTheme("go-previous"),
+                             tr("&Back"), this))
+    , m_act_forward(new QAction(QIcon::fromTheme("go-next"),
+                                tr("&Forward"), this))
+    , m_act_refreshPath(new QAction(QIcon::fromTheme("view-refresh"),
+                                    tr("&Refresh"), this))
+    , m_act_exit(new QAction(QIcon::fromTheme("application-exit"),
+                             tr("E&xit"), this))
+    , m_act_bookmark_add(new QAction(tr("Bookmark &This Page"), this))
+
+    , m_act_zoomIn(new QAction(QIcon::fromTheme("zoom-in"),
+                               tr("Zoom &In"), this))
+    , m_act_zoomOut(new QAction(QIcon::fromTheme("zoom-out"),
+                                tr("Zoom &Out"), this))
+    , m_act_zoomReset(new QAction(QIcon::fromTheme("zoom-original"),
+                                  tr("&Original Size (100%)"), this))
+    , m_act_rotateLeft(new QAction(QIcon::fromTheme("object-rotate-left"),
+                                   tr("Rotate &Left"), this))
+    , m_act_rotateRight(new QAction(QIcon::fromTheme("object-rotate-right"),
+                                    tr("Rotate &Right"), this))
+    , m_act_rotateReset(new QAction(tr("R&eset Rotation"), this))
+    , m_act_fitToWindow(new QAction(QIcon::fromTheme("zoom-fit-best"),
+                                    tr("&Fit to Window"), this))
+    , m_act_fitToWidth(new QAction(QIcon::fromTheme("zoom-fit-width"),
+                                   tr("Fit &Width"), this))
+    , m_act_fitToHeight(new QAction(QIcon::fromTheme("zoom-fit-height"),
+                                    tr("Fit &Height"), this))
+    , m_act_lockNone(new QAction(tr("Lock &None"), this))
+    , m_act_lockZoom(new QAction(tr("Lock Zoom &Value"), this))
+    , m_act_lockAutofit(new QAction(tr("Lock Autofi&t"), this))
+    , m_act_lockFitWidth(new QAction(tr("Lock Fit Wi&dth"), this))
+    , m_act_lockFitHeight(new QAction(tr("Lock Fit Hei&ght"), this))
+
+    , m_act_thumbnails(new QAction(QIcon::fromTheme("image-x-generic"),
+                                   tr("&Thumbnails"), this))
+    , m_act_mode_list(new QAction(tr("&List"), this))
+    , m_act_mode_details(new QAction(tr("&Details"), this))
+    , m_act_mode_icons(new QAction(tr("&Icons"), this))
+    , m_act_sidebar(new QAction(QIcon::fromTheme("view-left-right"),
+                                tr("Side&bar"), this))
+    , m_act_fullscreen(new QAction(QIcon::fromTheme("view-fullscreen"),
+                                   tr("&Full Screen"), this))
+
+    , m_act_largeIcons(new QAction(tr("Large Toolbar &Icons"), this))
+    , m_act_settings(new QAction(
+                         QIcon::fromTheme("configure",
+                                          QIcon::fromTheme("gtk-preferences")),
+                         tr("&Settings..."), this))
+
+    , m_act_webSite(new QAction(tr("&Web Site"), this))
+    , m_act_about(new QAction(tr("&About"), this))
+
 {
     this->setAcceptDrops(true);
     QString startFilePath;
@@ -126,88 +192,56 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::createActions()
 {
-    QDir appdir(QApplication::applicationDirPath());
-    QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths()) << appdir.path());
-
-    static const char * GENERIC_ICON_TO_CHECK = "go-next";
-    if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
-        /* If there is no default working icon theme then we should
-           use an icon theme that we provide via a icons folder
-           This case happens under Windows and Mac OS X
-           This does not happen under GNOME or KDE */
-        static const char * FALLBACK_ICON_THEME = "default";
-        QIcon::setThemeName(FALLBACK_ICON_THEME);
-    }
-
-
-    /* File Actions */
-
-    m_act_open = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
-    m_act_open->setShortcut(QKeySequence::Open);
-
-    m_act_save = new QAction(QIcon::fromTheme("document-save-as"), tr("&Save Page As..."), this);
-    m_act_save->setShortcut(QKeySequence::SaveAs);
     m_act_save->setEnabled(false);
-
-    m_act_exit = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
-    m_act_exit->setShortcut(QKeySequence::Quit);
-
-    m_act_bookmark_add = new QAction(tr("Bookmark &This Page"), this);
-    m_act_bookmark_add->setShortcut(tr("Ctrl+D"));
-
-    m_act_pageNext = new QAction(QIcon::fromTheme("media-skip-forward"), tr("&Next"), this);
-    m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
-
-    m_act_pagePrevious = new QAction(QIcon::fromTheme("media-skip-backward"), tr("&Previous"), this);
-    m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
-
-    m_act_back = new QAction(QIcon::fromTheme("go-previous"), tr("&Back"), this);
-    m_act_back->setShortcut(QKeySequence::Back);
+    m_act_dirUp->setEnabled(false);
     m_act_back->setEnabled(false);
-
-    m_act_forward = new QAction(QIcon::fromTheme("go-next"), tr("&Forward"), this);
-    m_act_forward->setShortcut(QKeySequence::Forward);
     m_act_forward->setEnabled(false);
-
-    /* View Actions */
-
-    m_act_rotateLeft = new QAction(QIcon::fromTheme("object-rotate-left"), tr("Rotate &Left"), this);
+    m_act_zoomIn->setEnabled(false);
+    m_act_zoomOut->setEnabled(false);
+    m_act_zoomReset->setEnabled(false);
     m_act_rotateLeft->setEnabled(false);
-
-    m_act_rotateRight = new QAction(QIcon::fromTheme("object-rotate-right"), tr("Rotate &Right"), this);
     m_act_rotateRight->setEnabled(false);
-
-    m_act_rotateReset = new QAction(tr("R&eset Rotation"), this);
     m_act_rotateReset->setEnabled(false);
+    m_act_fitToWindow->setEnabled(false);
+    m_act_fitToWidth->setEnabled(false);
+    m_act_fitToHeight->setEnabled(false);
 
-    m_act_thumbnails = new QAction(QIcon::fromTheme("image-x-generic"), tr("&Thumbnails"), this);
+    m_act_open->setShortcut(QKeySequence::Open);
+    m_act_save->setShortcut(QKeySequence::SaveAs);
+    m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
+    m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
+    m_act_back->setShortcut(QKeySequence::Back);
+    m_act_forward->setShortcut(QKeySequence::Forward);
+    m_act_refreshPath->setShortcut(QKeySequence::Refresh);
+    m_act_exit->setShortcut(QKeySequence::Quit);
+    m_act_bookmark_add->setShortcut(Qt::CTRL | Qt::Key_D);
+    m_act_zoomIn->setShortcut(QKeySequence::ZoomIn);
+    m_act_zoomOut->setShortcut(QKeySequence::ZoomOut);
+    m_act_zoomReset->setShortcut(Qt::CTRL | Qt::Key_0);
+    m_act_fitToWindow->setShortcut(Qt::CTRL | Qt::Key_T);
+    m_act_fullscreen->setShortcuts(QList<QKeySequence>()
+                                   << Qt::Key_F11
+                                   << QKeySequence(Qt::ALT | Qt::Key_Return));
+    m_act_settings->setShortcut(QKeySequence::Preferences);
+    m_act_about->setShortcut(QKeySequence::HelpContents);
+
+
+    m_act_lockNone->setCheckable(true);
+    m_act_lockZoom->setCheckable(true);
+    m_act_lockAutofit->setCheckable(true);
+    m_act_lockFitWidth->setCheckable(true);
+    m_act_lockFitHeight->setCheckable(true);
     m_act_thumbnails->setCheckable(true);
-
-    m_act_mode_icons = new QAction(tr("&Icons"), this);
-    m_act_mode_icons->setCheckable(true);
-
-    m_act_mode_details = new QAction(tr("&Details"), this);
-    m_act_mode_details->setCheckable(true);
-
-    m_act_mode_list = new QAction(tr("&List"), this);
     m_act_mode_list->setCheckable(true);
-    m_act_mode_list->setChecked(true);
-
-
-    m_act_fullscreen = new QAction(QIcon::fromTheme("view-fullscreen"), tr("&Full Screen"), this);
-    m_act_fullscreen->setShortcuts(
-                QList<QKeySequence>() << Qt::Key_F11 << QKeySequence(Qt::ALT | Qt::Key_Return));
-    m_act_fullscreen->setCheckable(true);
-
-    m_act_sidebar = new QAction(QIcon::fromTheme("view-left-right"),tr("Side&bar"), this);
+    m_act_mode_details->setCheckable(true);
+    m_act_mode_icons->setCheckable(true);
     m_act_sidebar->setCheckable(true);
-    m_act_sidebar->setChecked(true);
-
-
-    /* Options Actions */
-
-    m_act_largeIcons = new QAction(tr("Large Toolbar &Icons"), this);
+    m_act_fullscreen->setCheckable(true);
     m_act_largeIcons->setCheckable(true);
+
+    m_act_mode_list->setChecked(true);
+    m_act_sidebar->setChecked(true);
+    m_act_lockNone->setChecked(true);
 
     /* Large icons are On by default but I want small icons by default */
     if (m_settings->getLargeIcons())
@@ -219,68 +253,7 @@ void MainWindow::createActions()
         toggleLargeIcons(false);
     }
 
-    m_act_settings = new QAction(QIcon::fromTheme("configure", QIcon::fromTheme("gtk-preferences")), tr("&Settings..."), this);
     m_act_settings->setMenuRole(QAction::PreferencesRole);
-    m_act_settings->setShortcut(QKeySequence::Preferences);
-
-    /* Zoom Actions */
-
-    m_act_zoomIn = new QAction(QIcon::fromTheme("zoom-in"), tr("Zoom &In"), this);
-    m_act_zoomIn->setShortcut(QKeySequence::ZoomIn);
-    m_act_zoomIn->setEnabled(false);
-
-    m_act_zoomOut = new QAction(QIcon::fromTheme("zoom-out"), tr("Zoom &Out"), this);
-    m_act_zoomOut->setShortcut(QKeySequence::ZoomOut);
-    m_act_zoomOut->setEnabled(false);
-
-    m_act_zoomReset = new QAction(QIcon::fromTheme("zoom-original"), tr("&Original Size (100%)"), this);
-    m_act_zoomReset->setShortcut(Qt::CTRL | Qt::Key_0);
-    m_act_zoomReset->setEnabled(false);
-
-    m_act_fitToWindow = new QAction(QIcon::fromTheme("zoom-fit-best"), tr("&Fit to Window"), this);
-    m_act_fitToWindow->setShortcut(Qt::CTRL | Qt::Key_T);
-    m_act_fitToWindow->setEnabled(false);
-
-    m_act_fitToWidth = new QAction(QIcon::fromTheme("zoom-fit-width"), tr("Fit &Width"), this);
-    m_act_fitToWidth->setEnabled(false);
-
-    m_act_fitToHeight = new QAction(QIcon::fromTheme("zoom-fit-height"), tr("Fit &Height"), this);
-    m_act_fitToHeight->setEnabled(false);
-
-    m_act_lockNone = new QAction(tr("Lock &None"), this);
-    m_act_lockNone->setCheckable(true);
-    m_act_lockNone->setChecked(true);
-
-    m_act_lockAutofit = new QAction(tr("Lock Autofi&t"), this);
-    m_act_lockAutofit->setCheckable(true);
-
-    m_act_lockFitHeight = new QAction(tr("Lock Fit Hei&ght"), this);
-    m_act_lockFitHeight->setCheckable(true);
-
-    m_act_lockFitWidth = new QAction(tr("Lock Fit Wi&dth"), this);
-    m_act_lockFitWidth->setCheckable(true);
-
-    m_act_lockZoom = new QAction(tr("Lock Zoom &Value"), this);
-    m_act_lockZoom->setCheckable(true);
-
-
-    /* Help Actions */
-
-    m_act_webSite = new QAction(tr("&Web Site"), this);
-
-    m_act_about = new QAction(tr("&About"), this);
-    m_act_about->setShortcut(QKeySequence::HelpContents);
-
-
-    /* Toolbar Actions */
-
-    m_act_refreshPath = new QAction(QIcon::fromTheme("view-refresh"), tr("&Refresh"), this);
-    m_act_refreshPath->setShortcut(QKeySequence::Refresh);
-
-    m_act_dirUp = new QAction(QIcon::fromTheme("go-up"), tr("Go &Up"), this);
-    m_act_dirUp->setEnabled(false);
-
-    m_act_bookmark_delete = new QAction(tr("&Delete Bookmark"), this);
 }
 
 void MainWindow::createMenus()
@@ -294,7 +267,8 @@ void MainWindow::createMenus()
     m_menu_bookmarks->addSeparator();
 
     m_menu_bookmarks->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_menu_bookmarks, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_bookmark_customContextMenuRequested(QPoint)));
+    connect(m_menu_bookmarks, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(on_bookmark_customContextMenuRequested(QPoint)));
 
     populateBookmarks();
 
@@ -306,8 +280,10 @@ void MainWindow::createMenus()
     fileMenu->addMenu(m_menu_history);
 
     fileMenu->addSeparator();
+    fileMenu->addAction(m_act_dirUp);
     fileMenu->addAction(m_act_back);
     fileMenu->addAction(m_act_forward);
+    fileMenu->addAction(m_act_refreshPath);
 
     fileMenu->addSeparator();
     fileMenu->addAction(m_act_exit);
@@ -410,7 +386,6 @@ void MainWindow::createMenus()
 
 
     /* Start contextMenu */
-    m_menu_context_picture = new QMenu(this);
     m_menu_context_picture->addAction(m_act_pageNext);
     m_menu_context_picture->addAction(m_act_pagePrevious);
     m_menu_context_picture->addSeparator();
@@ -446,7 +421,6 @@ void MainWindow::createMenus()
 
     /* End contextMenu */
 
-    m_menu_context_bookmark = new QMenu(this);
     m_menu_context_bookmark->addAction(m_act_bookmark_delete);
 }
 
@@ -504,8 +478,10 @@ void MainWindow::connectActions()
     connect(m_picture_item, SIGNAL(mouseWheel(QWheelEvent*const)),
              this, SLOT(on_pictureItemMouseWheel(QWheelEvent*const)));
     connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
-    connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)), m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
-    connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_customContextMenuRequested(QPoint)));
+    connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)),
+            m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
+    connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(on_customContextMenuRequested(QPoint)));
 
     connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)), m_picture_item, SLOT(setZoom(qreal)));
 
@@ -591,8 +567,8 @@ bool MainWindow::setLocationUrl(const QUrl &url)
     m_picture_item->setFocus();
 
     m_act_dirUp->setEnabled(!fileinfo.isContainerRoot());
-    this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName() + " - "
-                         + QApplication::applicationName() + " "
+    this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName()
+                         + " - " + QApplication::applicationName() + " "
                          + QApplication::applicationVersion());
     this->setCursor(Qt::BusyCursor);
 
@@ -710,7 +686,8 @@ void MainWindow::openFileDialog()
 void MainWindow::saveAs()
 {
     const FileInfo info = m_view_files->getCurrentFileInfo();
-    const QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), info.getImageFileName());
+    const QString fileName = QFileDialog::getSaveFileName(
+                this, tr("Save File"), info.getImageFileName());
     if (fileName.isEmpty())
     {
         return;
@@ -744,7 +721,9 @@ void MainWindow::addBookmark()
     QInputDialog dialog(this);
     dialog.setWindowTitle(tr("Bookmark Page"));
     dialog.setLabelText(tr("Bookmark Name:"));
-    dialog.setTextValue(m_view_files->getCurrentFileInfo().getContainerName() + " /" + m_view_files->getCurrentFileInfo().getImageFileName());
+    dialog.setTextValue(
+                m_view_files->getCurrentFileInfo().getContainerName() + " /"
+                + m_view_files->getCurrentFileInfo().getImageFileName());
     if(dialog.exec() != QDialog::Accepted)
     {
         return;
@@ -825,9 +804,13 @@ void MainWindow::about()
     aboutBox.setWindowTitle("About " + QApplication::applicationName());
     aboutBox.setTextFormat(Qt::RichText);
     aboutBox.setText(
-                QApplication::applicationName() + " " + tr("version") + " " + QApplication::applicationVersion() + "<br><br>" +
-                tr("Author") + QString::fromUtf8(": Nikola Kocić") + "<br><br>" +
-                tr("Website") + ": <a href = \"https://github.com/nikola-kocic/KIV\">https://github.com/nikola-kocic/KIV</a>"
+                QApplication::applicationName() + " " + tr("version") + " "
+                + QApplication::applicationVersion() + "<br><br>"
+                + tr("Author: ")
+                + QString::fromUtf8("Nikola Kocić")
+                + "<br><br>" + tr("Website: ")
+                + "<a href = \"https://github.com/nikola-kocic/KIV\">"
+                "https://github.com/nikola-kocic/KIV</a>"
                 );
     aboutBox.exec();
 }
@@ -1000,6 +983,9 @@ void MainWindow::on_pictureItemMouseWheel(const QWheelEvent * const event)
     }
 }
 
+
+/* History start */
+
 void MainWindow::populateHistoryMenu()
 {
     // Cache: If history menu is not empty that means history did not change.
@@ -1049,3 +1035,5 @@ void MainWindow::on_urlHistoryChanged()
     bool forward_enabled = !(historyIndex == historySize - 1);
     m_act_forward->setEnabled(forward_enabled);
 }
+
+/* History end */

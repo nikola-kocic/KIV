@@ -47,18 +47,28 @@ private:
     ZoomWidget *m_comboBox_zoom;
     QIcon m_windowIcon;
 
+    QMenu *m_menu_bookmarks;
+    QMenu *m_menu_history;
+    QMenu *m_menu_context_picture;
+    QMenu *m_menu_context_bookmark;
+
+    QAction *m_act_bookmark_delete;
+
     /* File Menu Actions */
     QAction *m_act_open;
     QAction *m_act_save;
-    QAction *m_act_exit;
+    QAction *m_act_pageNext;
+    QAction *m_act_pagePrevious;
+    QAction *m_act_dirUp;
     QAction *m_act_back;
     QAction *m_act_forward;
+    QAction *m_act_refreshPath;
+    QAction *m_act_exit;
 
     /* Bookmarks Menu Actions */
     QAction *m_act_bookmark_add;
 
-
-    /* Edit Menu Actions */
+    /* Image Menu Actions */
     QAction *m_act_zoomIn;
     QAction *m_act_zoomOut;
     QAction *m_act_zoomReset;
@@ -68,40 +78,27 @@ private:
     QAction *m_act_fitToWindow;
     QAction *m_act_fitToWidth;
     QAction *m_act_fitToHeight;
+    QAction *m_act_lockNone;
     QAction *m_act_lockZoom;
     QAction *m_act_lockAutofit;
     QAction *m_act_lockFitWidth;
     QAction *m_act_lockFitHeight;
-    QAction *m_act_lockNone;
+
+    /* View Menu Actions */
+    QAction *m_act_thumbnails;
+    QAction *m_act_mode_list;
+    QAction *m_act_mode_details;
+    QAction *m_act_mode_icons;
+    QAction *m_act_sidebar;
+    QAction *m_act_fullscreen;
 
     /* Options Menu Actions */
-    QAction *m_act_pagePrevious;
-    QAction *m_act_pageNext;
-    QAction *m_act_fullscreen;
-    QAction *m_act_thumbnails;
-    QAction *m_act_sidebar;
     QAction *m_act_largeIcons;
     QAction *m_act_settings;
 
-
-    QAction *m_act_mode_icons;
-    QAction *m_act_mode_details;
-    QAction *m_act_mode_list;
-
-    /* Help Actions */
+    /* Help Menu Actions */
     QAction *m_act_webSite;
     QAction *m_act_about;
-
-    /* Toolbar Actions */
-    QAction *m_act_dirUp;
-    QAction *m_act_refreshPath;
-
-    QMenu *m_menu_bookmarks;
-    QMenu *m_menu_context_picture;
-    QMenu *m_menu_context_bookmark;
-    QMenu *m_menu_history;
-
-    QAction *m_act_bookmark_delete;
 
 private slots:
 
