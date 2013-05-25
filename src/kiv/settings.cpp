@@ -2,7 +2,7 @@
 
 #include <QApplication>
 
-#define SETTINGS_DEBUG
+//#define SETTINGS_DEBUG
 #ifdef SETTINGS_DEBUG
 #include "helper.h"
 #endif
