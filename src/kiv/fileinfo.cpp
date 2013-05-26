@@ -98,7 +98,9 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
             m_hasValidContainer = true;
             m_isInArchive = true;
 
-            const QString zipAbsoluteFilePath = editedPath.right(editedPath.size() - tempContainerPath.size() - 1);
+            const QString zipAbsoluteFilePath =
+                    editedPath.right(editedPath.size()
+                                     - tempContainerPath.size() - 1);
 
             if (!zipAbsoluteFilePath.isEmpty())
             {
@@ -111,7 +113,9 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 
                 if (indexOfZipSlash != zipAbsoluteFilePath.size() - 1)
                 {
-                    m_zipImageFileName = zipAbsoluteFilePath.right(zipAbsoluteFilePath.size() - indexOfZipSlash - 1);
+                    m_zipImageFileName = zipAbsoluteFilePath.right(
+                                zipAbsoluteFilePath.size()
+                                - indexOfZipSlash - 1);
                     m_fileExists = true;
                 }
             }

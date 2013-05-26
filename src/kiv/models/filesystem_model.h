@@ -11,4 +11,4 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 };
 
-#endif // FILESYSTEM_MODEL_H
+#endif  // FILESYSTEM_MODEL_H

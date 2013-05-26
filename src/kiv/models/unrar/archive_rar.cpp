@@ -50,8 +50,10 @@ bool ArchiveRar::loadlib()
     RARProcessFile = (RARProcessFileT)Lib->resolve("RARProcessFile");
     RARProcessFileW = (RARProcessFileWT)Lib->resolve("RARProcessFileW");
     RARSetCallback = (RARSetCallbackT)Lib->resolve("RARSetCallback");
-    RARSetChangeVolProc = (RARSetChangeVolProcT)Lib->resolve("RARSetChangeVolProc");
-    RARSetProcessDataProc = (RARSetProcessDataProcT)Lib->resolve("RARSetProcessDataProc");
+    RARSetChangeVolProc =
+            (RARSetChangeVolProcT)Lib->resolve("RARSetChangeVolProc");
+    RARSetProcessDataProc =
+            (RARSetProcessDataProcT)Lib->resolve("RARSetProcessDataProc");
     RARSetPassword = (RARSetPasswordT)Lib->resolve("RARSetPassword");
     RARGetDllVersion = (RARGetDllVersionT)Lib->resolve("RARGetDllVersion");
 
@@ -62,7 +64,8 @@ unsigned int ArchiveRar::extract(const QString &archiveName,
                                  const QString &fileName,
                                  const QString &newFileName)
 {
-    const std::wstring fileNameW = QDir::toNativeSeparators(fileName).toStdWString();
+    const std::wstring fileNameW =
+            QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
     unsigned int returnCode = 1000;
 
@@ -91,12 +94,15 @@ unsigned int ArchiveRar::extract(const QString &archiveName,
     {
         if (wcscmp(fileNameW.c_str(),  HeaderData.FileNameW) == 0)
         {
-            std::wstring newFileNameW = QDir::toNativeSeparators(newFileName).toStdWString();
-            PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, NULL, newFileNameW.c_str());
+            std::wstring newFileNameW =
+                    QDir::toNativeSeparators(newFileName).toStdWString();
+            PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, NULL,
+                                     newFileNameW.c_str());
             returnCode = PFCode;
             break;
         }
-        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL))
+                 != 0)
         {
             qWarning("%d", PFCode);
             returnCode = PFCode;
@@ -140,7 +146,8 @@ unsigned int ArchiveRar::readFile(const QString &archiveName,
                                   const QString &fileName,
                                   QByteArray &buffer)
 {
-    const std::wstring fileNameW = QDir::toNativeSeparators(fileName).toStdWString();
+    const std::wstring fileNameW =
+            QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
     unsigned int returnCode = 1000;
 
@@ -169,7 +176,8 @@ unsigned int ArchiveRar::readFile(const QString &archiveName,
     {
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
-            qint64 UnpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
+            qint64 UnpSize = HeaderData.UnpSize
+                    + (((qint64)HeaderData.UnpSizeHigh) << 32);
             buffer.resize(UnpSize);
             callBackBuffer = buffer.data();
 
@@ -177,7 +185,8 @@ unsigned int ArchiveRar::readFile(const QString &archiveName,
             returnCode = PFCode;
             break;
         }
-        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL))
+                 != 0)
         {
             qWarning("%d", PFCode);
             returnCode = PFCode;
@@ -206,7 +215,8 @@ QDateTime ArchiveRar::dateFromDos(const uint dosTime)
     return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
 
-unsigned int ArchiveRar::getFileInfoList(const QString &path, QList<ArchiveFileInfo> &list)
+unsigned int ArchiveRar::getFileInfoList(const QString &path,
+                                         QList<ArchiveFileInfo> &list)
 {
     std::wstring path_wstr = path.toStdWString();
 
@@ -242,7 +252,8 @@ unsigned int ArchiveRar::getFileInfoList(const QString &path, QList<ArchiveFileI
         }
         else
         {
-            qint64 unpSize = HeaderData.UnpSize + (((qint64)HeaderData.UnpSizeHigh) << 32);
+            qint64 unpSize = HeaderData.UnpSize
+                    + (((qint64)HeaderData.UnpSizeHigh) << 32);
             newArchiveFileInfo.uncompressedSize = unpSize;
         }
         newArchiveFileInfo.name = fileName;

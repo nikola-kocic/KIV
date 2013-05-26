@@ -16,14 +16,20 @@ public:
     bool isContainerValid() const;
     bool isContainerRoot() const;
 
-    QString getPath() const; /* C:/Folder1/Folder2/image.png" or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */
+     /* C:/Folder1/Folder2/image.png"
+      * or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */
+    QString getPath() const;
+
     QString getImageFileName() const; /* image.png */
     QString getContainerPath() const; /* C:/Folder1/Folder2" */
 
-    QString getArchiveImagePath() const;  /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
-    QString getArchiveContainerPath() const; /* "ZipFolder1/ZipFolder2/" (ends with '/') */
-    QString getContainerName() const;
+    /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
+    QString getArchiveImagePath() const;
 
+    /* "ZipFolder1/ZipFolder2/" (ends with '/') */
+    QString getArchiveContainerPath() const;
+
+    QString getContainerName() const;
 
     QString getDebugInfo() const;
 
@@ -39,4 +45,4 @@ private:
     bool m_isInArchive;
 };
 
-#endif // FILEINFO_H
+#endif  // FILEINFO_H

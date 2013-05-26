@@ -9,7 +9,8 @@
 
 #include "fileinfo.h"
 
-#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << Q_FUNC_INFO << "\n\t"
+#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate)\
+                          << Q_FUNC_INFO << "\n\t"
 
 class Helper
 {
@@ -31,7 +32,9 @@ public:
     static bool FuzzyCompare(const double p1, const double p2);
     static bool FuzzyCompare(const float p1, const float p2);
 
-    static int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs);
+    static int naturalCompare(const QString &s1,
+                              const QString &s2,
+                              Qt::CaseSensitivity cs);
 
 private:
     static QStringList m_filters_image;
@@ -69,5 +72,5 @@ inline bool Helper::FuzzyCompare(const float p1, const float p2)
     }
 }
 
-#endif // HELPER_H
+#endif  // HELPER_H
 

@@ -82,7 +82,9 @@ private:
     class FileListSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
-        explicit FileListSortFilterProxyModel(QObject *parent = 0) : QSortFilterProxyModel(parent) {}
+        explicit FileListSortFilterProxyModel(QObject *parent = 0)
+            : QSortFilterProxyModel(parent)
+        {}
     protected:
         bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     };
@@ -90,20 +92,28 @@ private:
     class ContainersSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
-        explicit ContainersSortFilterProxyModel(QObject *parent = 0) : QSortFilterProxyModel(parent) {}
+        explicit ContainersSortFilterProxyModel(QObject *parent = 0)
+            : QSortFilterProxyModel(parent)
+        {}
     protected:
-        bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
-        bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+        bool filterAcceptsColumn(int source_column,
+                                 const QModelIndex &source_parent) const;
+        bool filterAcceptsRow(int source_row,
+                              const QModelIndex &source_parent) const;
     };
 
     class ArchiveDirsSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
-        explicit ArchiveDirsSortFilterProxyModel(QObject *parent = 0) : QSortFilterProxyModel(parent) {}
+        explicit ArchiveDirsSortFilterProxyModel(QObject *parent = 0)
+            : QSortFilterProxyModel(parent)
+        {}
 
     protected:
-        bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const;
-        bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+        bool filterAcceptsColumn(int source_column,
+                                 const QModelIndex &source_parent) const;
+        bool filterAcceptsRow(int sourceRow,
+                              const QModelIndex &sourceParent) const;
     };
 
     void initViewItem();
@@ -125,9 +135,14 @@ private:
     QPointer<ArchiveModel> m_model_archive_files;
     FileSystemModel *m_model_filesystem;
 
-    FileListSortFilterProxyModel *m_proxy_file_list; // source model is FileSystemModel or ArchiveModel
-    ContainersSortFilterProxyModel *m_proxy_containers; // source model is FileSystemModel
-    ArchiveDirsSortFilterProxyModel *m_proxy_archive_dirs; // source model is ArchiveModel
+    /* source model is FileSystemModel or ArchiveModel */
+    FileListSortFilterProxyModel *m_proxy_file_list;
+
+    /* source model is FileSystemModel */
+    ContainersSortFilterProxyModel *m_proxy_containers;
+
+    /* source model is ArchiveModel */
+    ArchiveDirsSortFilterProxyModel *m_proxy_archive_dirs;
 
     ThumbnailItemDelegate *m_thumbnail_delegate;
 
@@ -139,12 +154,15 @@ public slots:
 
 private slots:
     void on_item_activated(const QModelIndex &index);
-    void on_FilesView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void on_FilesView_currentRowChanged(const QModelIndex &current,
+                                        const QModelIndex &previous);
     void on_thumbnail_finished(const QModelIndex &index);
     void on_rows_inserted(const QModelIndexList &indexes);
 
-    void on_archiveDirsView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
-    void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void on_archiveDirsView_currentRowChanged(const QModelIndex &current,
+                                              const QModelIndex &previous);
+    void on_filesystemView_currentRowChanged(const QModelIndex &current,
+                                             const QModelIndex &previous);
     void on_combobox_sort_currentIndexChanged(int index);
 
 signals:

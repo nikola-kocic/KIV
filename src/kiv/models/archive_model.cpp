@@ -18,7 +18,8 @@
 
 ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     : QAbstractItemModel(parent)
-    , rootItem(new ArchiveItem("", QDateTime(), 0, "", ArchiveItem::TYPE_ARCHIVE))
+    , rootItem(new ArchiveItem("", QDateTime(), 0, "",
+                               ArchiveItem::TYPE_ARCHIVE))
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
     , m_icon_file(QIcon::fromTheme("image-x-generic"))
     , m_type(ArchiveType::None)
@@ -68,19 +69,21 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
 }
 
 template<class TFileInfo>
-void ArchiveModel::populate(const QString &archive_path, const QList<TFileInfo> &archive_files)
+void ArchiveModel::populate(const QString &archive_path,
+                            const QList<TFileInfo> &archive_files)
 {
     /* Populate model */
     const QFileIconProvider fip;
     const QFileInfo archive_info(archive_path);
     const QString path = archive_info.absoluteFilePath();
-    ArchiveItem *rootArchiveItem = new ArchiveItem(archive_info.fileName(),
-                                                   archive_info.lastModified(),
-                                                   archive_info.size(),
-                                                   archive_info.absoluteFilePath(),
-                                                   ArchiveItem::TYPE_ARCHIVE,
-                                                   fip.icon(archive_info),
-                                                   rootItem);
+    ArchiveItem *rootArchiveItem = new ArchiveItem(
+                archive_info.fileName(),
+                archive_info.lastModified(),
+                archive_info.size(),
+                archive_info.absoluteFilePath(),
+                ArchiveItem::TYPE_ARCHIVE,
+                fip.icon(archive_info),
+                rootItem);
     rootItem->appendChild(rootArchiveItem);
 
     for (int i = 0; i < archive_files.size(); ++i)
@@ -110,7 +113,8 @@ void ArchiveModel::populate(const QString &archive_path, const QList<TFileInfo> 
                     const QFileInfo fi(archive_files.at(i).name);
                     if (Helper::isImageFile(fi))
                     {
-                        const QString nodeFilePath = path + "/" + archive_files.at(i).name;
+                        const QString nodeFilePath = path + "/"
+                                + archive_files.at(i).name;
                         node = AddNode(file_path_parts.at(j),
                                        archive_files.at(i).dateTime,
                                        archive_files.at(i).uncompressedSize,
@@ -170,7 +174,9 @@ ArchiveItem *ArchiveModel::getItem(const QModelIndex &index) const
     return rootItem;
 }
 
-QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ArchiveModel::headerData(int section,
+                                  Qt::Orientation orientation,
+                                  int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
@@ -188,7 +194,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
-QModelIndex ArchiveModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex ArchiveModel::index(int row,
+                                int column,
+                                const QModelIndex &parent) const
 {
     if (column < 0 || row < 0)
     {
@@ -269,7 +277,8 @@ ArchiveItem *ArchiveModel::AddNode(
                                         bytes,
                                         path,
                                         type,
-                                        (type == ArchiveItem::TYPE_ARCHIVE_FILE ? m_icon_file : m_icon_dir),
+                                        (type == ArchiveItem::TYPE_ARCHIVE_FILE
+                                         ? m_icon_file : m_icon_dir),
                                         parent);
     parent->appendChild(ntvi);
 
@@ -280,7 +289,8 @@ QModelIndex ArchiveModel::getDirectory(const QString &path)
 {
     QModelIndex cri = this->index(0, 0);
 
-    const QStringList file_path_parts = path.split('/', QString::SkipEmptyParts);
+    const QStringList file_path_parts = path.split('/',
+                                                   QString::SkipEmptyParts);
     for (int j = 0; j < file_path_parts.size(); ++j)
     {
         cri = findIndexChild(file_path_parts.at(j), cri);
@@ -293,7 +303,8 @@ QModelIndex ArchiveModel::getDirectory(const QString &path)
     return cri;
 }
 
-QModelIndex ArchiveModel::findIndexChild(const QString &text, const QModelIndex &root)
+QModelIndex ArchiveModel::findIndexChild(const QString &text,
+                                         const QModelIndex &root)
 {
     if (!root.isValid()) return QModelIndex();
     for (int i = 0; root.child(i, 0).isValid(); ++i)

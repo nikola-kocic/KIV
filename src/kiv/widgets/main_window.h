@@ -176,4 +176,4 @@ protected:
     void wheelEvent(QWheelEvent *event);
 };
 
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

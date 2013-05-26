@@ -9,13 +9,20 @@
 class PictureItemInterface
 {
 public:
-    explicit PictureItemInterface(PictureItemData *data, QWidget*) : m_data(data), m_widget(NULL) {}
+    explicit PictureItemInterface(PictureItemData *data, QWidget*)
+        : m_data(data), m_widget(NULL)
+    {}
     virtual ~PictureItemInterface() {}
     virtual void setRotation(const qreal current, const qreal previous) = 0;
     virtual void setZoom(const qreal current, const qreal previous) = 0;
     virtual void setImage(const QImage &img) = 0;
-    virtual void setNullImage() { this->setImage(QImage()); }
-    virtual void setBackgroundColor(const QColor &color) { m_data->m_color_clear = color; }
+
+    virtual void setNullImage()
+    { this->setImage(QImage()); }
+
+    virtual void setBackgroundColor(const QColor &color)
+    { m_data->m_color_clear = color; }
+
     QWidget* getWidget();
 
 protected:
@@ -26,4 +33,4 @@ protected:
 inline QWidget* PictureItemInterface::getWidget()
 { return m_widget; }
 
-#endif // PICTUREITEM_INTERFACE_H
+#endif  // PICTUREITEM_INTERFACE_H

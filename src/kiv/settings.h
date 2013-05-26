@@ -125,7 +125,8 @@ inline bool Settings::getCalculateAverageColor() const
 inline void Settings::setCalculateAverageColor(const bool b)
 {
     m_calculateAverageColor = b;
-    m_settings->setValue("Interface/CalculateAverageColor", m_calculateAverageColor);
+    m_settings->setValue("Interface/CalculateAverageColor",
+                         m_calculateAverageColor);
 }
 
 
@@ -135,7 +136,8 @@ inline bool Settings::getHardwareAcceleration() const
 inline void Settings::setHardwareAcceleration(const bool b)
 {
     m_hardwareAcceleration = b;
-    m_settings->setValue("Interface/HardwareAcceleration", m_hardwareAcceleration);
+    m_settings->setValue("Interface/HardwareAcceleration",
+                         m_hardwareAcceleration);
 }
 
 
@@ -175,4 +177,4 @@ inline int Settings::getBookmarkCount() const
 inline QList<Bookmark *> Settings::getBookmarks() const
 { return m_bookmarks; }
 
-#endif // SETTINGS_H
+#endif  // SETTINGS_H

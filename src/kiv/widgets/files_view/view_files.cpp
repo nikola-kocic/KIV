@@ -40,7 +40,8 @@ ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
 {
     m_proxy_containers->setSourceModel(m_model_filesystem);
 
-    connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)), this, SLOT(on_thumbnail_finished(QModelIndex)));
+    connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)),
+            this, SLOT(on_thumbnail_finished(QModelIndex)));
 
     /* Start archiveDirsView */
     m_view_archiveDirs->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -69,7 +70,8 @@ ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
     m_combobox_sort->addItem(tr("Size Ascending"), SortDirection::SizeAsc);
     m_combobox_sort->addItem(tr("Size Descending"), SortDirection::SizeDesc);
 
-    m_combobox_sort->setCurrentIndex(m_combobox_sort->findData(SortDirection::NameAsc));
+    m_combobox_sort->setCurrentIndex(m_combobox_sort->findData(
+                                         SortDirection::NameAsc));
 
 
     /* Start Layout */
@@ -113,9 +115,17 @@ ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
 
     /* End Layout */
 
-    connect(m_view_archiveDirs->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), this, SLOT(on_archiveDirsView_currentRowChanged(QModelIndex, QModelIndex)));
-    connect(m_view_filesystem->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_combobox_sort, SIGNAL(currentIndexChanged(int)), this, SLOT(on_combobox_sort_currentIndexChanged(int)));
+    connect(m_view_archiveDirs->selectionModel(),
+            SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+            this,
+            SLOT(on_archiveDirsView_currentRowChanged(QModelIndex,
+                                                      QModelIndex)));
+    connect(m_view_filesystem->selectionModel(),
+            SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+            this,
+            SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
+    connect(m_combobox_sort, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(on_combobox_sort_currentIndexChanged(int)));
 
     initViewItem();
 }
@@ -136,7 +146,8 @@ void ViewFiles::initViewItem()
         m_treeView_files = new TreeViewFiles(this);
         m_listView_files = 0;
         m_view_current = qobject_cast<QAbstractItemView *>(m_treeView_files);
-        connect(m_treeView_files, SIGNAL(rowsInserted(QModelIndexList)), this, SLOT(on_rows_inserted(QModelIndexList)));
+        connect(m_treeView_files, SIGNAL(rowsInserted(QModelIndexList)),
+                this, SLOT(on_rows_inserted(QModelIndexList)));
     }
     else
     {
@@ -144,13 +155,18 @@ void ViewFiles::initViewItem()
         m_listView_files->setViewMode(m_view_mode);
         m_treeView_files = 0;
         m_view_current = qobject_cast<QAbstractItemView *>(m_listView_files);
-        connect(m_listView_files, SIGNAL(rowsInserted(QModelIndexList)), this, SLOT(on_rows_inserted(QModelIndexList)));
+        connect(m_listView_files, SIGNAL(rowsInserted(QModelIndexList)),
+                this, SLOT(on_rows_inserted(QModelIndexList)));
     }
 
     m_view_current->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_view_current->setModel(m_proxy_file_list);
-    connect(m_view_current->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(on_FilesView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_view_current, SIGNAL(activated(QModelIndex)), this, SLOT(on_item_activated(QModelIndex)));
+    connect(m_view_current->selectionModel(),
+            SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+            this,
+            SLOT(on_FilesView_currentRowChanged(QModelIndex,QModelIndex)));
+    connect(m_view_current, SIGNAL(activated(QModelIndex)),
+            this, SLOT(on_item_activated(QModelIndex)));
 
     if (m_fileinfo_current.isValid())
     {
@@ -174,9 +190,9 @@ void ViewFiles::setViewMode(const int mode)
     if (m_view_mode != mode)
     {
         /* Check if View from previous View Mode can be reused */
-        if (
-            (mode == FileViewMode::Icons || mode == FileViewMode::List) &&
-            (m_view_mode == FileViewMode::Icons || m_view_mode == FileViewMode::List)
+        if ((mode == FileViewMode::Icons || mode == FileViewMode::List)
+            && (m_view_mode == FileViewMode::Icons
+                || m_view_mode == FileViewMode::List)
             )
         {
             m_listView_files->setViewMode(mode);
@@ -207,7 +223,9 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 
     m_flag_opening = true;
 
-    m_view_filesystem->setCurrentIndex(m_proxy_containers->mapFromSource(m_model_filesystem->index(info.getContainerPath())));
+    m_view_filesystem->setCurrentIndex(
+                m_proxy_containers->mapFromSource(
+                    m_model_filesystem->index(info.getContainerPath())));
 
     if (info.isInArchive())
     {
@@ -224,13 +242,18 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         {
             m_view_archiveDirs->show();
         }
-        const QModelIndex dirIndex = m_model_archive_files->getDirectory(info.getArchiveContainerPath());
-        m_view_archiveDirs->setCurrentIndex(m_proxy_archive_dirs->mapFromSource(dirIndex));
+        const QModelIndex dirIndex = m_model_archive_files->getDirectory(
+                    info.getArchiveContainerPath());
+        m_view_archiveDirs->setCurrentIndex(
+                    m_proxy_archive_dirs->mapFromSource(dirIndex));
         m_view_archiveDirs->expand(m_view_archiveDirs->currentIndex());
 
         if (info.fileExists())
         {
-            m_view_current->setCurrentIndex(m_proxy_file_list->mapFromSource(m_model_archive_files->findIndexChild(info.getImageFileName(), dirIndex)));
+            m_view_current->setCurrentIndex(
+                        m_proxy_file_list->mapFromSource(
+                            m_model_archive_files->findIndexChild(
+                                info.getImageFileName(), dirIndex)));
         }
     }
     else
@@ -244,8 +267,12 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 
             m_proxy_file_list->setSourceModel(m_model_filesystem);
         }
-        m_view_current->setRootIndex(m_proxy_file_list->mapFromSource(m_model_filesystem->index(info.getContainerPath())));
-        m_view_current->setCurrentIndex(m_proxy_file_list->mapFromSource(m_model_filesystem->index(info.getPath())));
+        m_view_current->setRootIndex(
+                    m_proxy_file_list->mapFromSource(
+                        m_model_filesystem->index(info.getContainerPath())));
+        m_view_current->setCurrentIndex(
+                    m_proxy_file_list->mapFromSource(
+                        m_model_filesystem->index(info.getPath())));
     }
 
     m_view_current->scrollTo(m_view_current->currentIndex());
@@ -259,8 +286,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
     showThumbnails();
 }
 
-void ViewFiles::on_filesystemView_currentRowChanged(const QModelIndex &current,
-                                                    const QModelIndex &/*previous*/)
+void ViewFiles::on_filesystemView_currentRowChanged(
+        const QModelIndex &current, const QModelIndex &/*previous*/)
 {
     const QModelIndex index0 = m_proxy_containers->mapToSource(current);
     if (m_model_filesystem->isDir(index0))
@@ -349,18 +376,21 @@ void ViewFiles::on_combobox_sort_currentIndexChanged(int index)
 
 void ViewFiles::dirUp()
 {
-    if (m_fileinfo_current.isInArchive() && m_view_archiveDirs->currentIndex().parent().isValid())
+    if (m_fileinfo_current.isInArchive()
+        && m_view_archiveDirs->currentIndex().parent().isValid())
     {
-        m_view_archiveDirs->setCurrentIndex(m_view_archiveDirs->currentIndex().parent());
+        m_view_archiveDirs->setCurrentIndex(
+                    m_view_archiveDirs->currentIndex().parent());
     }
     else if (m_view_filesystem->currentIndex().parent().isValid())
     {
-        m_view_filesystem->setCurrentIndex(m_view_filesystem->currentIndex().parent());
+        m_view_filesystem->setCurrentIndex(
+                    m_view_filesystem->currentIndex().parent());
     }
 }
 
-void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
-                                                     const QModelIndex &/*previous*/)
+void ViewFiles::on_archiveDirsView_currentRowChanged(
+        const QModelIndex &current, const QModelIndex &/*previous*/)
 {
     // Indexes are from ArchiveDirsSortFilterProxyModel
 #ifdef DEBUG_VIEW_FILES
@@ -372,7 +402,9 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
         return;
     }
 
-    m_view_current->setRootIndex(m_proxy_file_list->mapFromSource(m_proxy_archive_dirs->mapToSource(current)));
+    m_view_current->setRootIndex(
+                m_proxy_file_list->mapFromSource(
+                    m_proxy_archive_dirs->mapToSource(current)));
     m_view_current->selectionModel()->clear();
     m_view_current->scrollToTop();
     showThumbnails();
@@ -381,7 +413,8 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
     {
         return;
     }
-    const QString filePath = current.data(QFileSystemModel::FilePathRole).toString();
+    const QString filePath = current.data(
+                QFileSystemModel::FilePathRole).toString();
     m_fileinfo_current = FileInfo(filePath);
     emit urlChanged(QUrl::fromLocalFile(filePath));
 }
@@ -406,7 +439,8 @@ void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current,
 #endif
 
     // Pass 'false' for 'IsContainer' because item is only selected
-    const QString filePath = current.data(QFileSystemModel::FilePathRole).toString();
+    const QString filePath =
+            current.data(QFileSystemModel::FilePathRole).toString();
     m_fileinfo_current = FileInfo(filePath, false);
     emit urlChanged(QUrl::fromLocalFile(filePath));
 }
@@ -502,22 +536,31 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
     // Index is from FileListSortFilterProxyModel
 
     // TODO see if fixed_index is necessary
-    const QModelIndex fixed_index = (index.column() > 0 ? index.sibling(index.row(), 0) : index);
+    const QModelIndex fixed_index = (index.column() > 0
+                                     ? index.sibling(index.row(), 0) : index);
 
     if (m_fileinfo_current.isInArchive())
     {
-        if (fixed_index.data(Helper::ROLE_TYPE).toInt() == ArchiveItem::TYPE_ARCHIVE_DIR)
+        if (fixed_index.data(Helper::ROLE_TYPE).toInt() ==
+            ArchiveItem::TYPE_ARCHIVE_DIR)
         {
-            m_view_archiveDirs->setCurrentIndex(m_proxy_archive_dirs->mapFromSource(m_proxy_file_list->mapToSource(fixed_index)));
+            m_view_archiveDirs->setCurrentIndex(
+                        m_proxy_archive_dirs->mapFromSource(
+                            m_proxy_file_list->mapToSource(fixed_index)));
             m_view_archiveDirs->expand(m_view_archiveDirs->currentIndex());
         }
     }
     else
     {
-        const QModelIndex source_index = m_proxy_file_list->mapToSource(fixed_index);
-        if (m_model_filesystem->isDir(source_index) || Helper::isArchiveFile(m_model_filesystem->fileInfo(source_index)))
+        const QModelIndex source_index =
+                m_proxy_file_list->mapToSource(fixed_index);
+        if (m_model_filesystem->isDir(source_index)
+            || Helper::isArchiveFile(m_model_filesystem->fileInfo(
+                                         source_index))
+            )
         {
-            m_view_filesystem->setCurrentIndex(m_proxy_containers->mapFromSource(source_index));
+            m_view_filesystem->setCurrentIndex(
+                        m_proxy_containers->mapFromSource(source_index));
             m_view_filesystem->expand(m_view_filesystem->currentIndex());
         }
     }
@@ -550,10 +593,16 @@ void ViewFiles::showThumbnails()
         }
 
         QModelIndexList indexes;
-        for (int i = 0; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
+        for (int i = 0;
+             i < m_view_current->model()->rowCount(m_view_current->rootIndex());
+             ++i)
         {
-            indexes.append(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
-//            DEBUGOUT << "\t" << m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data().toString();
+            indexes.append(m_view_current->model()->index(
+                               i, 0, m_view_current->rootIndex()));
+            DEBUGOUT << "\t"
+                     << m_view_current->model()->
+                        index(i, 0, m_view_current->rootIndex()).data().
+                        toString();
         }
 
         on_rows_inserted(indexes);
@@ -574,8 +623,13 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
 
     for (int i = 0; i < indexes.size(); ++i)
     {
-        const QModelIndex fixed_index = m_proxy_file_list->mapToSource(indexes.at(i));
-        m_thumbnail_delegate->updateThumbnail(FileInfo(fixed_index.data(QFileSystemModel::FilePathRole).toString()), fixed_index);
+        const QModelIndex fixed_index =
+                m_proxy_file_list->mapToSource(indexes.at(i));
+        m_thumbnail_delegate->updateThumbnail(
+                    FileInfo(
+                        fixed_index.data(QFileSystemModel::FilePathRole).
+                        toString()),
+                    fixed_index);
     }
 }
 
@@ -610,14 +664,18 @@ void ViewFiles::saveCurrentFile(const QString &fileName) const
         switch (m_model_archive_files->getType())
         {
         case ArchiveType::Zip:
-            JlCompress::extractFile(m_fileinfo_current.getContainerPath(), m_fileinfo_current.getArchiveImagePath(), fileName);
+            JlCompress::extractFile(m_fileinfo_current.getContainerPath(),
+                                    m_fileinfo_current.getArchiveImagePath(),
+                                    fileName);
             break;
 
         case ArchiveType::Rar:
         {
             if (ArchiveRar::loadlib())
             {
-                ArchiveRar::extract(m_fileinfo_current.getContainerPath(), m_fileinfo_current.getArchiveImagePath(), fileName);
+                ArchiveRar::extract(m_fileinfo_current.getContainerPath(),
+                                    m_fileinfo_current.getArchiveImagePath(),
+                                    fileName);
             }
             break;
         }
@@ -650,28 +708,38 @@ void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 
 
 
-bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool ViewFiles::FileListSortFilterProxyModel::lessThan(
+        const QModelIndex &left, const QModelIndex &right) const
 {
     if (qobject_cast<const ArchiveModel*>(left.model()))
     {
         const int left_type = left.data(Helper::ROLE_TYPE).toInt();
         const int right_type = right.data(Helper::ROLE_TYPE).toInt();
 
-        const QString left_name = left.sibling(left.row(), ArchiveItem::col_name).data(Qt::EditRole).toString();
-        const QString right_name = right.sibling(right.row(), ArchiveItem::col_name).data(Qt::EditRole).toString();
+        const QString left_name =
+                left.sibling(left.row(),ArchiveItem::col_name).
+                data(Qt::EditRole).toString();
+        const QString right_name =
+                right.sibling(right.row(), ArchiveItem::col_name).
+                data(Qt::EditRole).toString();
 
-        if (left_type == right_type)  // if both indexes are same type, compare them
+        // if both indexes are same type, compare them
+        if (left_type == right_type)
         {
             switch (this->sortColumn())
             {
             case ArchiveItem::col_name:
             {
-                return (Helper::naturalCompare(left_name, right_name, Qt::CaseInsensitive) < 0);
+                return (Helper::naturalCompare(left_name, right_name,
+                                               Qt::CaseInsensitive)
+                        < 0);
             }
             case ArchiveItem::col_date:
             {
-                const QDateTime left_date = left.data(Qt::EditRole).toDateTime();
-                const QDateTime right_date = right.data(Qt::EditRole).toDateTime();
+                const QDateTime left_date =
+                        left.data(Qt::EditRole).toDateTime();
+                const QDateTime right_date =
+                        right.data(Qt::EditRole).toDateTime();
 
                 if (left_date < right_date)
                 {
@@ -684,7 +752,9 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 }
                 else
                 {
-                    return (Helper::naturalCompare(left_name, right_name, Qt::CaseInsensitive) < 0);
+                    return (Helper::naturalCompare(left_name, right_name,
+                                                   Qt::CaseInsensitive)
+                            < 0);
                 }
             }
             case ArchiveItem::col_size:
@@ -703,7 +773,8 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 else
                 {
                     // If same size, sort by Name Ascending
-                    const int name_comparison = Helper::naturalCompare(left_name, right_name, Qt::CaseInsensitive);
+                    const int name_comparison = Helper::naturalCompare(
+                                left_name, right_name, Qt::CaseInsensitive);
                     if (this->sortOrder() == Qt::AscendingOrder)
                         return (name_comparison < 0);
                     else
@@ -724,7 +795,8 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
 
         return true;
     }
-    else if (const QFileSystemModel *fsm = qobject_cast<const QFileSystemModel*>(left.model()))
+    else if (const QFileSystemModel *fsm =
+             qobject_cast<const QFileSystemModel*>(left.model()))
     {
         const QFileInfo left_fileinfo = fsm->fileInfo(left);
         const QFileInfo right_fileinfo = fsm->fileInfo(right);
@@ -740,23 +812,30 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
             case 0:
             {
                 return (Helper::naturalCompare(
-                            left_fileinfo.fileName(), right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+                            left_fileinfo.fileName(), right_fileinfo.fileName(),
+                            Qt::CaseInsensitive)
+                        < 0);
             }
             case 3:
             {
-                if (left_fileinfo.lastModified() < right_fileinfo.lastModified())
+                if (left_fileinfo.lastModified()
+                    < right_fileinfo.lastModified())
                 {
                     return true;
                 }
 
-                else if (left_fileinfo.lastModified() > right_fileinfo.lastModified())
+                else if (left_fileinfo.lastModified()
+                         > right_fileinfo.lastModified())
                 {
                     return false;
                 }
                 else
                 {
                     return (Helper::naturalCompare(
-                                left_fileinfo.fileName(),right_fileinfo.fileName(), Qt::CaseInsensitive) < 0);
+                                left_fileinfo.fileName(),
+                                right_fileinfo.fileName(),
+                                Qt::CaseInsensitive)
+                            < 0);
                 }
             }
             case 1:
@@ -773,13 +852,18 @@ bool ViewFiles::FileListSortFilterProxyModel::lessThan(const QModelIndex &left, 
                 else
                 {
                     // If same size, sort by Name Ascending
-                    const int name_comparison = Helper::naturalCompare(left_fileinfo.fileName(),
-                                                                       right_fileinfo.fileName(),
-                                                                       Qt::CaseInsensitive);
+                    const int name_comparison = Helper::naturalCompare(
+                                left_fileinfo.fileName(),
+                                right_fileinfo.fileName(),
+                                Qt::CaseInsensitive);
                     if (this->sortOrder() == Qt::AscendingOrder)
+                    {
                         return (name_comparison < 0);
+                    }
                     else
+                    {
                         return (name_comparison > 0);
+                    }
                 }
             }
             }
@@ -811,9 +895,11 @@ bool ViewFiles::ContainersSortFilterProxyModel::filterAcceptsColumn(
 bool ViewFiles::ContainersSortFilterProxyModel::filterAcceptsRow(
         int source_row, const QModelIndex &source_parent) const
 {
-    if (const QFileSystemModel *fsm = qobject_cast<const QFileSystemModel*>(this->sourceModel()))
+    if (const QFileSystemModel *fsm =
+        qobject_cast<const QFileSystemModel*>(this->sourceModel()))
     {
-        const QFileInfo fi = fsm->fileInfo(fsm->index(source_row, 0, source_parent));
+        const QFileInfo fi = fsm->fileInfo(fsm->index(source_row, 0,
+                                                      source_parent));
         return (fi.isDir() || Helper::isArchiveFile(fi));
     }
     return true;
@@ -828,6 +914,8 @@ bool ViewFiles::ArchiveDirsSortFilterProxyModel::filterAcceptsColumn(
 bool ViewFiles::ArchiveDirsSortFilterProxyModel::filterAcceptsRow(
         int sourceRow, const QModelIndex &sourceParent) const
 {
-    const QModelIndex index0 = this->sourceModel()->index(sourceRow, 0, sourceParent);
-    return !(index0.data(Helper::ROLE_TYPE).toInt() == ArchiveItem::TYPE_ARCHIVE_FILE);
+    const QModelIndex index0 = this->sourceModel()->index(sourceRow, 0,
+                                                          sourceParent);
+    return !(index0.data(Helper::ROLE_TYPE).toInt()
+             == ArchiveItem::TYPE_ARCHIVE_FILE);
 }

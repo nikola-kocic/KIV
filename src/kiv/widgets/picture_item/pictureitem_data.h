@@ -34,7 +34,9 @@ public:
 
     void avoidOutOfScreen(const QSize &widgetSize);
     void updateSize(const QSize &widgetSize);
-    QPointF pointToOrigin(const qreal width, const qreal height, const QSize &widgetSize);
+    QPointF pointToOrigin(const qreal width,
+                          const qreal height,
+                          const QSize &widgetSize);
 
 private:
     bool m_pixmapNull;
@@ -64,4 +66,4 @@ inline qreal PictureItemData::getRotation() const
 inline void PictureItemData::setRotation(const qreal r)
 { m_rotation_value = r; }
 
-#endif // PICTUREITEMDATA_H
+#endif  // PICTUREITEMDATA_H

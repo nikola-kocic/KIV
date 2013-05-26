@@ -39,7 +39,8 @@ void PictureItemData::updateSize(const QSize &widgetSize)
     {
         if (m_zoom_value == 1)
         {
-            m_offsetX = qRound((widgetSize.width() - m_boundingRect.width()) / 2);
+            m_offsetX = qRound(
+                        (widgetSize.width() - m_boundingRect.width()) / 2);
         }
         else
         {
@@ -55,7 +56,8 @@ void PictureItemData::updateSize(const QSize &widgetSize)
     {
         if (m_zoom_value == 1)
         {
-            m_offsetY = qRound((widgetSize.height() - m_boundingRect.height()) / 2);
+            m_offsetY = qRound(
+                        (widgetSize.height() - m_boundingRect.height()) / 2);
         }
         else
         {

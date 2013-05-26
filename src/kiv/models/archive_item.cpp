@@ -10,19 +10,28 @@
 #include "helper.h"
 #endif
 
-ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, const QIcon &icon, ArchiveItem *parent) :
-    parentItem(parent),
-    m_name(name),
-    m_date(date),
-    m_bytes(bytes),
-    m_path(path),
-    m_type(type),
-    m_icon(icon),
-    m_tooltip(QFileSystemModel::tr("Name") + ": " + m_name + "\n" + QFileSystemModel::tr("Date Modified") + ": " + m_date.toString(Qt::SystemLocaleShortDate))
+ArchiveItem::ArchiveItem(const QString &name,
+                         const QDateTime &date,
+                         const quint64 &bytes,
+                         const QString &path,
+                         const int type,
+                         const QIcon &icon,
+                         ArchiveItem *parent)
+    : parentItem(parent)
+    , m_name(name)
+    , m_date(date)
+    , m_bytes(bytes)
+    , m_path(path)
+    , m_type(type)
+    , m_icon(icon)
+    , m_tooltip(QFileSystemModel::tr("Name") + ": " + m_name + "\n"
+                + QFileSystemModel::tr("Date Modified") + ": "
+                + m_date.toString(Qt::SystemLocaleShortDate))
 {
     if (m_type == TYPE_ARCHIVE_FILE)
     {
-        m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(m_bytes));
+        m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": "
+                         + Helper::size(m_bytes));
     }
 
 #ifdef DEBUG_ARCHIVE_ITEM
@@ -49,9 +58,9 @@ int ArchiveItem::indexToInsertByName(const ArchiveItem* const item)
     const QString itemName = item->data(Qt::EditRole, col_name).toString();
     int i = 0;
 
-    for (; i < this->childCount(); ++i)
+    for (; i < childCount(); ++i)
     {
-        int currentItemType = this->child(i)->data(Helper::ROLE_TYPE, 0).toInt();
+        int currentItemType = child(i)->data(Helper::ROLE_TYPE, 0).toInt();
         if (type == TYPE_ARCHIVE)
         {
             // TODO: Allow archive in archive
@@ -59,8 +68,11 @@ int ArchiveItem::indexToInsertByName(const ArchiveItem* const item)
         }
         if (currentItemType == type)
         {
-            const QString currentItemName = this->child(i)->data(Qt::EditRole, col_name).toString();
-            if (Helper::naturalCompare(currentItemName, itemName, Qt::CaseInsensitive) > 0)
+            const QString currentItemName =
+                    child(i)->data(Qt::EditRole, col_name).toString();
+            if (Helper::naturalCompare(currentItemName, itemName,
+                                       Qt::CaseInsensitive)
+                > 0)
             {
                 return i;
             }

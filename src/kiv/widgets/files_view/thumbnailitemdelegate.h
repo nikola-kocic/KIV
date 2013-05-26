@@ -16,13 +16,15 @@ class ThumbnailItemDelegate : public QStyledItemDelegate
 public:
     explicit ThumbnailItemDelegate(const QSize &thumbSize, QObject *parent = 0);
     ~ThumbnailItemDelegate();
-    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem &option,
+                   const QModelIndex &index) const;
     void updateThumbnail(const FileInfo &info, const QModelIndex &index);
     void setThumbnailSize(const QSize &size);
     void cancelThumbnailGeneration();
 
 protected:
-    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const;
+    void initStyleOption(QStyleOptionViewItem *option,
+                         const QModelIndex &index) const;
 
 private:
 
@@ -45,7 +47,10 @@ private:
     class ProcessInfo
     {
     public:
-        ProcessInfo(const QModelIndex &index, const FileInfo &fileinfo, const QByteArray &pathhash, const QDateTime &date)
+        ProcessInfo(const QModelIndex &index,
+                    const FileInfo &fileinfo,
+                    const QByteArray &pathhash,
+                    const QDateTime &date)
             : m_index(index)
             , m_fileinfo(fileinfo)
             , m_path_hash(pathhash)
@@ -79,4 +84,4 @@ private slots:
     void showThumbnail(int num);
 };
 
-#endif // THUMBNAILITEMDELEGATE_H
+#endif  // THUMBNAILITEMDELEGATE_H

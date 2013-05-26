@@ -33,4 +33,4 @@ signals:
     void zoomChanged(qreal value);
 };
 
-#endif // ZOOMWIDGET_H
+#endif  // ZOOMWIDGET_H

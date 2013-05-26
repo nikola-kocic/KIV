@@ -49,5 +49,5 @@ private slots:
 inline void PictureItemGL::setZoom(const qreal, const qreal)
 { setRotation(m_data->getRotation(), m_data->getRotation()); }
 
-#endif // PICTUREITEM_GL_H
-#endif // QT5
+#endif  // PICTUREITEM_GL_H
+#endif  // QT5

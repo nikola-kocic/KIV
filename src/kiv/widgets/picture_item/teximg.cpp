@@ -35,7 +35,8 @@ void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
         {
             if (tileDim->bmpSize <= i)
             {
-                if (i <= TexImg::ThresholdTileSize || tileDim->bmpSize - (i >> 1) > i >> 2)
+                if (i <= TexImg::ThresholdTileSize
+                    || tileDim->bmpSize - (i >> 1) > i >> 2)
                 {
                     tileDim->pow2LastSize = (tileDim->pow2BaseSize = i);
                     tileDim->pow2BaseCount = 0;
@@ -81,7 +82,9 @@ void TexImg::ComputeBitmapPow2Size(TileDim *tileDim)
             }
         }
     }
-    tileDim->pow2Size = tileDim->pow2BaseCount * tileDim->pow2BaseSize + tileDim->pow2LastSize;
+    tileDim->pow2Size =
+            tileDim->pow2BaseCount * tileDim->pow2BaseSize
+            + tileDim->pow2LastSize;
 }
 
 void TexImg::InitTiles(TileDim *tileDim)
@@ -105,13 +108,16 @@ void TexImg::InitTiles(TileDim *tileDim)
     }
     const int pow2BaseCount = tileDim->pow2BaseCount;
     tileDim->tileSize[pow2BaseCount] = tileDim->pow2LastSize;
-    tileDim->switchBorder[pow2BaseCount] = qMin(tileDim->bmpSize, tileDim->switchBorder.at(pow2BaseCount));
+    tileDim->switchBorder[pow2BaseCount] =
+            qMin(tileDim->bmpSize, tileDim->switchBorder.at(pow2BaseCount));
     tileDim->offsetBorder[tileDim->tileCount] = tileDim->bmpSize;
     tileDim->switchBorder[tileDim->tileCount] = tileDim->bmpSize;
     for (int j = 0; j <= tileDim->tileCount; ++j)
     {
-        tileDim->offsetBorderNorm[j] = (double)tileDim->offsetBorder.at(j) / (double)tileDim->bmpSize;
-        tileDim->switchBorderNorm[j] = (double)tileDim->switchBorder.at(j) / (double)tileDim->bmpSize;
+        tileDim->offsetBorderNorm[j] = (double)tileDim->offsetBorder.at(j)
+                / (double)tileDim->bmpSize;
+        tileDim->switchBorderNorm[j] = (double)tileDim->switchBorder.at(j)
+                / (double)tileDim->bmpSize;
     }
 }
 
@@ -136,10 +142,13 @@ void TexImg::setImage(const QImage &img)
 
 QImage TexImg::CreatePow2Bitmap(const TexIndex *const index)
 {
-    QImage texImage = QImage(index->currentTileWidth, index->currentTileHeight, QImage::Format_RGB32);
+    QImage texImage = QImage(index->currentTileWidth,
+                             index->currentTileHeight,
+                             QImage::Format_RGB32);
 
     int vLimit;
-    if (index->vBorderOffset + index->currentTileHeight >= index->bitmapData.height())
+    if (index->vBorderOffset + index->currentTileHeight
+        >= index->bitmapData.height())
     {
         vLimit = index->bitmapData.height() - index->vBorderOffset;
     }
@@ -149,7 +158,8 @@ QImage TexImg::CreatePow2Bitmap(const TexIndex *const index)
     }
 
     int hLimit;
-    if (index->hBorderOffset + index->currentTileWidth >= index->bitmapData.width())
+    if (index->hBorderOffset + index->currentTileWidth
+        >= index->bitmapData.width())
     {
         hLimit = index->bitmapData.width() - index->hBorderOffset;
     }
@@ -161,14 +171,29 @@ QImage TexImg::CreatePow2Bitmap(const TexIndex *const index)
     QPainter p(&texImage);
     QBrush b(index->background);
     p.fillRect(texImage.rect(), b);
-    p.drawImage(QRectF(0, 0, hLimit, vLimit), index->bitmapData, QRectF(index->hBorderOffset, index->vBorderOffset, hLimit, vLimit));
+    p.drawImage(QRectF(0, 0, hLimit, vLimit),
+                index->bitmapData,
+                QRectF(index->hBorderOffset,
+                       index->vBorderOffset,
+                       hLimit,
+                       vLimit));
     p.end();
 
     return texImage;
 }
 
-bool ClipTextureVertex(double texCrd1, double texCrd2, double vertexCrd1, double vertexCrd2, double texBorder1, double texBorder2, double texOffsetMin, double texScale,
-                       double &texClip1, double &texClip2, double &vertexClip1, double &vertexClip2)
+bool ClipTextureVertex(double texCrd1,
+                       double texCrd2,
+                       double vertexCrd1,
+                       double vertexCrd2,
+                       double texBorder1,
+                       double texBorder2,
+                       double texOffsetMin,
+                       double texScale,
+                       double &texClip1,
+                       double &texClip2,
+                       double &vertexClip1,
+                       double &vertexClip2)
 {
     bool flag = false;
     if (texCrd1 > texCrd2)

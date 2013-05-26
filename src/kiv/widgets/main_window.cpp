@@ -115,8 +115,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     {
         startFilePath = m_settings->getLastPath();
     }
-    m_urlNavigator = new UrlNavigator(m_model_filesystem, QUrl::fromLocalFile(startFilePath),
-                                         this);
+    m_urlNavigator = new UrlNavigator(m_model_filesystem,
+                                      QUrl::fromLocalFile(startFilePath),
+                                      this);
 
     updateSettings();
     createActions();
@@ -429,54 +430,76 @@ void MainWindow::connectActions()
     connect(m_act_bookmark_add, SIGNAL(triggered()), this, SLOT(addBookmark()));
 
     connect(m_act_settings, SIGNAL(triggered()), this, SLOT(settingsDialog()));
-    connect(m_act_pagePrevious, SIGNAL(triggered()), m_view_files, SLOT(pagePrevious()));
-    connect(m_act_pageNext, SIGNAL(triggered()), m_view_files, SLOT(pageNext()));
+    connect(m_act_pagePrevious, SIGNAL(triggered()),
+            m_view_files, SLOT(pagePrevious()));
+    connect(m_act_pageNext, SIGNAL(triggered()),
+            m_view_files, SLOT(pageNext()));
 
 
-    connect(m_act_thumbnails, SIGNAL(toggled(bool)), this, SLOT(toggleShowThumbnails(bool)));
-    connect(m_act_fullscreen, SIGNAL(toggled(bool)), this, SLOT(toggleFullscreen(bool)));
-    connect(m_act_largeIcons, SIGNAL(toggled(bool)), this, SLOT(toggleLargeIcons(bool)));
-    connect(m_act_sidebar, SIGNAL(toggled(bool)), this, SLOT(toggleSidebar(bool)));
-    connect(m_act_mode_list, SIGNAL(triggered()), this, SLOT(on_view_mode_list_triggered()));
-    connect(m_act_mode_details, SIGNAL(triggered()), this, SLOT(on_view_mode_details_triggered()));
-    connect(m_act_mode_icons, SIGNAL(triggered()), this, SLOT(on_view_mode_icons_triggered()));
+    connect(m_act_thumbnails, SIGNAL(toggled(bool)),
+            this, SLOT(toggleShowThumbnails(bool)));
+    connect(m_act_fullscreen, SIGNAL(toggled(bool)),
+            this, SLOT(toggleFullscreen(bool)));
+    connect(m_act_largeIcons, SIGNAL(toggled(bool)),
+            this, SLOT(toggleLargeIcons(bool)));
+    connect(m_act_sidebar, SIGNAL(toggled(bool)),
+            this, SLOT(toggleSidebar(bool)));
+    connect(m_act_mode_list, SIGNAL(triggered()),
+            this, SLOT(on_view_mode_list_triggered()));
+    connect(m_act_mode_details, SIGNAL(triggered()),
+            this, SLOT(on_view_mode_details_triggered()));
+    connect(m_act_mode_icons, SIGNAL(triggered()),
+            this, SLOT(on_view_mode_icons_triggered()));
 
     connect(m_act_rotateLeft, SIGNAL(triggered()), this, SLOT(rotateLeft()));
     connect(m_act_rotateRight, SIGNAL(triggered()), this, SLOT(rotateRight()));
     connect(m_act_rotateReset, SIGNAL(triggered()), this, SLOT(rotateReset()));
     connect(m_act_zoomIn, SIGNAL(triggered()), m_comboBox_zoom, SLOT(zoomIn()));
-    connect(m_act_zoomOut, SIGNAL(triggered()), m_comboBox_zoom, SLOT(zoomOut()));
+    connect(m_act_zoomOut, SIGNAL(triggered()),
+            m_comboBox_zoom, SLOT(zoomOut()));
     connect(m_act_zoomReset, SIGNAL(triggered()), this, SLOT(zoomReset()));
-    connect(m_act_fitToWindow, SIGNAL(triggered()), m_picture_item, SLOT(fitToScreen()));
-    connect(m_act_fitToWidth, SIGNAL(triggered()), m_picture_item, SLOT(fitWidth()));
-    connect(m_act_fitToHeight, SIGNAL(triggered()), m_picture_item, SLOT(fitHeight()));
+    connect(m_act_fitToWindow, SIGNAL(triggered()),
+            m_picture_item, SLOT(fitToScreen()));
+    connect(m_act_fitToWidth, SIGNAL(triggered()),
+            m_picture_item, SLOT(fitWidth()));
+    connect(m_act_fitToHeight, SIGNAL(triggered()),
+            m_picture_item, SLOT(fitHeight()));
 
     connect(m_act_lockNone, SIGNAL(triggered()), this, SLOT(lockNone()));
     connect(m_act_lockZoom, SIGNAL(triggered()), this, SLOT(lockZoom()));
     connect(m_act_lockAutofit, SIGNAL(triggered()), this, SLOT(lockAutofit()));
-    connect(m_act_lockFitHeight, SIGNAL(triggered()), this, SLOT(lockFitHeight()));
-    connect(m_act_lockFitWidth, SIGNAL(triggered()), this, SLOT(lockFitWidth()));
+    connect(m_act_lockFitHeight, SIGNAL(triggered()),
+            this, SLOT(lockFitHeight()));
+    connect(m_act_lockFitWidth, SIGNAL(triggered()),
+            this, SLOT(lockFitWidth()));
 
     connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
     connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
 
-    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)), m_view_files, SLOT(setLocationUrl(QUrl)));
-    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
-    connect(m_view_files, SIGNAL(urlChanged(QUrl)), m_urlNavigator, SLOT(setLocationUrl(QUrl)));
-    connect(m_view_files, SIGNAL(urlChanged(QUrl)), this, SLOT(setLocationUrl(QUrl)));
+    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)),
+            m_view_files, SLOT(setLocationUrl(QUrl)));
+    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)),
+            this, SLOT(setLocationUrl(QUrl)));
+    connect(m_view_files, SIGNAL(urlChanged(QUrl)),
+            m_urlNavigator, SLOT(setLocationUrl(QUrl)));
+    connect(m_view_files, SIGNAL(urlChanged(QUrl)),
+            this, SLOT(setLocationUrl(QUrl)));
 
-    connect(m_picture_item, SIGNAL(imageChanged()), this, SLOT(updateActions()));
+    connect(m_picture_item, SIGNAL(imageChanged()),
+            this, SLOT(updateActions()));
     connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)),
             m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
     connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(on_customContextMenuRequested(QPoint)));
 
-    connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)), m_picture_item, SLOT(setZoom(qreal)));
+    connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)),
+            m_picture_item, SLOT(setZoom(qreal)));
 
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
     connect(m_act_dirUp, SIGNAL(triggered()), m_view_files, SLOT(dirUp()));
 
-    connect(m_act_bookmark_delete, SIGNAL(triggered()), this, SLOT(deleteBookmark()));
+    connect(m_act_bookmark_delete, SIGNAL(triggered()),
+            this, SLOT(deleteBookmark()));
 
     connect(m_menu_history, SIGNAL(aboutToShow()),
             this, SLOT(populateHistoryMenu()));
@@ -492,7 +515,8 @@ void MainWindow::connectActions()
     connect(m_menu_bookmarks, SIGNAL(triggered(QAction*)),
             this, SLOT(on_bookmark_triggered(QAction*)));
 
-    connect(m_urlNavigator, SIGNAL(historyChanged()), this, SLOT(on_urlHistoryChanged()));
+    connect(m_urlNavigator, SIGNAL(historyChanged()),
+            this, SLOT(on_urlHistoryChanged()));
 
 
     foreach (QAction *action, QList<QAction*>() << m_act_back << m_act_forward)
@@ -506,7 +530,8 @@ void MainWindow::connectActions()
 
 void MainWindow::populateBookmarks()
 {
-    // Cache: If bookmarks menu is not empty that means history did not change.
+    /* Cache: If bookmarks menu is not empty that means
+     * history did not change. */
     if (!m_menu_bookmarks->actions().last()->data().isNull())
     {
         return;
@@ -520,7 +545,8 @@ void MainWindow::populateBookmarks()
         bookmark->setData(i);
         m_menu_bookmarks->addAction(bookmark);
 #ifdef DEBUG_MAIN_WINDOW
-        DEBUGOUT << "added bookmark" << bookmark->text() << bookmark->data().toString();
+        DEBUGOUT << "added bookmark" << bookmark->text()
+                 << bookmark->data().toString();
 #endif
     }
 }
@@ -591,7 +617,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasUrls())
     {
-        if (Helper::checkFileExtension(QFileInfo(event->mimeData()->urls().at(0).toLocalFile())))
+        if (Helper::checkFileExtension(
+                QFileInfo(event->mimeData()->urls().at(0).toLocalFile())))
         {
             event->acceptProposedAction();
         }
@@ -626,7 +653,8 @@ void MainWindow::showEvent(QShowEvent *event)
 {
     if (Helper::getFiltersImage().contains("svg"))
     {
-        m_windowIcon = QIcon(QApplication::applicationDirPath() + "/icons/kiv.svg");
+        m_windowIcon = QIcon(QApplication::applicationDirPath()
+                             + "/icons/kiv.svg");
         this->setWindowIcon(m_windowIcon);
     }
     return QMainWindow::showEvent(event);
@@ -660,7 +688,8 @@ void MainWindow::toggleFullscreen(bool value)
     else
     {
 #ifdef linux
-        /* Workaround for bug https://bugreports.qt-project.org/browse/QTBUG-10594 */
+        /* Workaround for bug
+         * https://bugreports.qt-project.org/browse/QTBUG-10594 */
         showNormal();
 #endif
         showMaximized();
@@ -669,12 +698,14 @@ void MainWindow::toggleFullscreen(bool value)
 
 void MainWindow::openFileDialog()
 {
-    const QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
+    const QString imageExtensions =
+            "*." + Helper::getFiltersImage().join(" *.");
     const QString fileName = QFileDialog::getOpenFileName(
                 this,
                 tr("Open File"),
                 m_view_files->getCurrentFileInfo().getContainerPath(),
-                tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
+                tr("Zip files") + "(*.zip *.cbz);;" + tr("Images")
+                + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
     {
         this->openFilePath(fileName);
@@ -787,9 +818,11 @@ void MainWindow::settingsDialog()
     if (sd.exec() == QDialog::Accepted)
     {
         /* Update settings */
-        if (m_settings->getHardwareAcceleration() != m_picture_item->getHardwareAcceleration())
+        if (m_settings->getHardwareAcceleration()
+            != m_picture_item->getHardwareAcceleration())
         {
-            m_picture_item->setHardwareAcceleration(m_settings->getHardwareAcceleration());
+            m_picture_item->setHardwareAcceleration(
+                        m_settings->getHardwareAcceleration());
             m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
         }
 
@@ -1006,7 +1039,7 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 
 void MainWindow::populateHistoryMenu()
 {
-    // Cache: If history menu is not empty that means history did not change.
+    /* Cache: If history menu is not empty that means history did not change. */
     if (!m_menu_history->isEmpty())
     {
         return;
@@ -1038,7 +1071,8 @@ void MainWindow::on_historyMenuTriggered(QAction *action)
 
 void MainWindow::on_urlHistoryChanged()
 {
-    // Cache: Clear history menu entries when history changes so it's repopulated on next request.
+    /* Cache: Clear history menu entries when history changes
+     * so it's repopulated on next request. */
     m_menu_history->clear();
 
     int historySize = m_urlNavigator->historySize();

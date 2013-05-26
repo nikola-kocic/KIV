@@ -80,4 +80,4 @@ struct ArchiveFileInfo {
 //  QByteArray extra;
 };
 
-#endif // ENUMS_H
+#endif  // ENUMS_H

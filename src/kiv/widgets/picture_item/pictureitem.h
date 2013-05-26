@@ -109,4 +109,4 @@ inline qreal PictureItem::getZoom() const
 { return m_data->getZoom(); }
 
 
-#endif // PICTUREITEM_H
+#endif  // PICTUREITEM_H

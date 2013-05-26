@@ -10,7 +10,9 @@ class UrlNavigator : public QLineEdit
     Q_OBJECT
 
 public:
-    explicit UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *parent = 0);
+    explicit UrlNavigator(QAbstractItemModel *model,
+                          const QUrl &url,
+                          QWidget *parent = 0);
     int historyIndex() const;
     bool setHistoryIndex(int index);
 
@@ -45,4 +47,4 @@ private slots:
     void on_returnPressed();
 };
 
-#endif // LOCATION_WIDGET_H
+#endif  // LOCATION_WIDGET_H

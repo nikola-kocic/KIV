@@ -28,4 +28,4 @@ protected:
 
 };
 
-#endif // PICTUREITEM_RASTER_H
+#endif  // PICTUREITEM_RASTER_H

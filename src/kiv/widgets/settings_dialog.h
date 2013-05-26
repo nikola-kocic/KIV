@@ -25,4 +25,4 @@ private:
     Settings *m_settings;
 };
 
-#endif // SETTINGS_DIALOG_H
+#endif  // SETTINGS_DIALOG_H

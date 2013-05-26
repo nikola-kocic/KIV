@@ -21,7 +21,8 @@ PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
 {
     m_widget = this;
     QGLContext::setTextureCacheLimit(0);
-    connect(m_loader_texture, SIGNAL(resultReadyAt(int)), this, SLOT(textureFinished(int)));
+    connect(m_loader_texture, SIGNAL(resultReadyAt(int)),
+            this, SLOT(textureFinished(int)));
 }
 
 PictureItemGL::~PictureItemGL()
@@ -92,7 +93,8 @@ void PictureItemGL::setNullImage()
 void PictureItemGL::loadTextures(QList<TexIndex *> indexes)
 {
     m_returnTexCount = indexes.size();
-    m_loader_texture->setFuture(QtConcurrent::mapped(indexes, TexImg::CreatePow2Bitmap));
+    m_loader_texture->setFuture(QtConcurrent::mapped(indexes,
+                                                     TexImg::CreatePow2Bitmap));
 }
 
 void PictureItemGL::textureFinished(int num)
@@ -119,7 +121,12 @@ void PictureItemGL::setTexture(const QImage &tex, const int num)
     const int hIndex = num / m_texImg->vTile->tileCount;
     const int vIndex = num % m_texImg->vTile->tileCount;
 
-    m_textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
+    m_textures[hIndex][vIndex] = bindTexture(
+                tex,
+                GL_TEXTURE_2D,
+                GL_RGB,
+                QGLContext::LinearFilteringBindOption
+                | QGLContext::MipmapBindOption);
 
 #ifdef DEBUG_PICTUREITEM_GL
     DEBUGOUT << "bound texture" << this->m_textures.at(hIndex).at(vIndex)
@@ -183,9 +190,12 @@ void PictureItemGL::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslated(m_data->m_boundingRect.x() + m_data->m_offsetX + m_data->m_boundingRect.width() / 2,
-                 m_data->m_boundingRect.y() + m_data->m_offsetY + m_data->m_boundingRect.height() / 2,
+    glTranslated((m_data->m_boundingRect.x() + m_data->m_offsetX
+                  + m_data->m_boundingRect.width() / 2),
+                 (m_data->m_boundingRect.y() + m_data->m_offsetY
+                  + m_data->m_boundingRect.height() / 2),
                  0);
+
     glRotated(m_data->getRotation(), 0, 0, 1);
     glTranslated(-(m_texImg->hTile->bmpSize * m_data->getZoom()) / 2,
                  -(m_texImg->vTile->bmpSize * m_data->getZoom()) / 2,
@@ -193,34 +203,57 @@ void PictureItemGL::paintGL()
     glScaled(m_scaleX, m_scaleY, 1);
 
     const QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
-    const QRectF vertImage = QRectF(QPointF(0, 0), QPointF (this->width(), this->height()));
+    const QRectF vertImage = QRectF(QPointF(0, 0),
+                                    QPointF (this->width(), this->height()));
 
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
-        double texScale = (double)m_texImg->hTile->bmpSize / (double)m_texImg->hTile->tileSize.at(hIndex);
+        double texScale = (double)m_texImg->hTile->bmpSize
+                / (double)m_texImg->hTile->tileSize.at(hIndex);
         double tx;
         double tx2;
         double qx;
         double qx2;
 
-        if (!ClipTextureVertex(texImage.left(), texImage.right(), vertImage.left(), vertImage.right(),
-                               m_texImg->hTile->switchBorderNorm.at(hIndex), m_texImg->hTile->switchBorderNorm.at(hIndex + 1),
-                               m_texImg->hTile->offsetBorderNorm.at(hIndex), texScale, tx, tx2, qx, qx2))
+        if (!ClipTextureVertex(
+                texImage.left(),
+                texImage.right(),
+                vertImage.left(),
+                vertImage.right(),
+                m_texImg->hTile->switchBorderNorm.at(hIndex),
+                m_texImg->hTile->switchBorderNorm.at(hIndex + 1),
+                m_texImg->hTile->offsetBorderNorm.at(hIndex),
+                texScale,
+                tx,
+                tx2,
+                qx,
+                qx2))
         {
             continue;
         }
 
         for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
         {
-            texScale = (double)m_texImg->vTile->bmpSize / (double)m_texImg->vTile->tileSize.at(vIndex);
+            texScale = (double)m_texImg->vTile->bmpSize
+                    / (double)m_texImg->vTile->tileSize.at(vIndex);
             double ty;
             double ty2;
             double qy;
             double qy2;
 
-            if (!ClipTextureVertex(texImage.top(), texImage.bottom(), vertImage.top(), vertImage.bottom(),
-                                   m_texImg->vTile->switchBorderNorm.at(vIndex), m_texImg->vTile->switchBorderNorm.at(vIndex + 1),
-                                   m_texImg->vTile->offsetBorderNorm.at(vIndex), texScale, ty, ty2, qy, qy2))
+            if (!ClipTextureVertex(
+                    texImage.top(),
+                    texImage.bottom(),
+                    vertImage.top(),
+                    vertImage.bottom(),
+                    m_texImg->vTile->switchBorderNorm.at(vIndex),
+                    m_texImg->vTile->switchBorderNorm.at(vIndex + 1),
+                    m_texImg->vTile->offsetBorderNorm.at(vIndex),
+                    texScale,
+                    ty,
+                    ty2,
+                    qy,
+                    qy2))
             {
                 continue;
             }
@@ -258,7 +291,9 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
     {
         const qreal newWidth = m_texImg->hTile->bmpSize * m_data->getZoom();
         const qreal newHeight = m_texImg->vTile->bmpSize * m_data->getZoom();
-        const QPointF p = m_data->pointToOrigin(newWidth, newHeight, this->size());
+        const QPointF p = m_data->pointToOrigin(newWidth,
+                                                newHeight,
+                                                this->size());
         m_data->m_boundingRect = QRectF(p.x(), p.y(), newWidth, newHeight);
     }
     else
@@ -266,13 +301,23 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
         QTransform tRot;
         tRot.translate(m_data->m_boundingRect.x(), m_data->m_boundingRect.y());
         tRot.scale(m_data->getZoom(), m_data->getZoom());
-        tRot.translate((m_texImg->vTile->bmpSize / 2), (m_texImg->hTile->bmpSize / 2));
+        tRot.translate((m_texImg->vTile->bmpSize / 2),
+                       (m_texImg->hTile->bmpSize / 2));
         tRot.rotate(current);
-        tRot.translate((-m_texImg->vTile->bmpSize / 2), (-m_texImg->hTile->bmpSize / 2));
-        const QRect transformedRot = tRot.mapRect(QRect(QPoint(0, 0), QSize(m_texImg->hTile->bmpSize, m_texImg->vTile->bmpSize)));
+        tRot.translate((-m_texImg->vTile->bmpSize / 2),
+                       (-m_texImg->hTile->bmpSize / 2));
+        const QRect transformedRot =
+                tRot.mapRect(QRect(QPoint(0, 0),
+                                   QSize(m_texImg->hTile->bmpSize,
+                                         m_texImg->vTile->bmpSize)));
 
-        const QPointF p = m_data->pointToOrigin(transformedRot.width(), transformedRot.height(), this->size());
-        m_data->m_boundingRect = QRectF(p.x(), p.y(), transformedRot.width(), transformedRot.height());
+        const QPointF p = m_data->pointToOrigin(transformedRot.width(),
+                                                transformedRot.height(),
+                                                this->size());
+        m_data->m_boundingRect = QRectF(p.x(),
+                                        p.y(),
+                                        transformedRot.width(),
+                                        transformedRot.height());
     }
 
     m_data->avoidOutOfScreen(this->size());

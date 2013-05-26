@@ -10,7 +10,8 @@
 
 #include "fileinfo.h"
 
-UrlNavigator::UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *parent)
+UrlNavigator::UrlNavigator(QAbstractItemModel *model, const QUrl &url,
+                           QWidget *parent)
     : QLineEdit(parent)
     , m_model(model)
     , m_completer(new QCompleter(m_model, this))
@@ -25,7 +26,8 @@ UrlNavigator::UrlNavigator(QAbstractItemModel *model, const QUrl &url, QWidget *
 void UrlNavigator::setLocationUrl(const QUrl &url)
 {
 #ifdef DEBUG_LOCATION
-    DEBUGOUT << "START; Current history index: " << m_currentHistoryIndex << m_history;
+    DEBUGOUT << "START; Current history index: " << m_currentHistoryIndex
+             << m_history;
 #endif
     if (m_historyIndex + 1 < m_history.size())
     {
@@ -33,7 +35,8 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
         QList<QUrl>::iterator end = m_history.end();
         m_history.erase(begin, end);
     }
-    if (m_history.isEmpty() || (!m_history.isEmpty() && m_history.last() != url))
+    if (m_history.isEmpty()
+        || (!m_history.isEmpty() && m_history.last() != url))
     {
         m_history.append(url);
     }
@@ -43,7 +46,8 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
     }
     m_historyIndex = m_history.size() - 1;
 #ifdef DEBUG_LOCATION
-    DEBUGOUT << "END; Current history index: " << m_currentHistoryIndex << m_history;
+    DEBUGOUT << "END; Current history index: " << m_currentHistoryIndex
+             << m_history;
 #endif
 
     setLocationUrlInternal(url);
@@ -75,7 +79,8 @@ void UrlNavigator::setLocationUrlInternal(const QUrl &url)
     m_currentUrl = url;
     if (m_currentUrl.isLocalFile())
     {
-        const QString path = QDir::toNativeSeparators(m_currentUrl.toLocalFile());
+        const QString path =
+                QDir::toNativeSeparators(m_currentUrl.toLocalFile());
         setText(path);
     }
     else
@@ -133,8 +138,8 @@ bool UrlNavigator::setHistoryIndex(int index)
  * @brief Goes back one step in the URL history.
  * The signals UrlNavigator::urlChanged() and UrlNavigator::historyChanged()
  * are emitted if true is returned.
- * @return False is returned if the beginning of the history has already been reached
- * and hence going back was not possible.
+ * @return False is returned if the beginning of the history has already been
+ * reached and hence going back was not possible.
  */
 bool UrlNavigator::goBack()
 {

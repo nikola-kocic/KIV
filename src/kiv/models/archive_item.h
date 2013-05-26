@@ -8,7 +8,13 @@
 class ArchiveItem
 {
 public:
-    explicit ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, const QIcon &icon = QIcon(), ArchiveItem *parent = 0);
+    explicit ArchiveItem(const QString &name,
+                         const QDateTime &date,
+                         const quint64 &bytes,
+                         const QString &path,
+                         const int type,
+                         const QIcon &icon = QIcon(),
+                         ArchiveItem *parent = 0);
     ~ArchiveItem();
     void appendChild(ArchiveItem *child);
     ArchiveItem *child(int row);
@@ -44,4 +50,4 @@ private:
     static const int col_count = 3;
 };
 
-#endif // ARCHIVE_ITEM_H
+#endif  // ARCHIVE_ITEM_H

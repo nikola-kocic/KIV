@@ -15,8 +15,9 @@ ZoomWidget::ZoomWidget(QWidget *parent)
     : QComboBox(parent)
     , m_zoomValue(1)
     , m_defaultZoomSizes(QVector<qreal>()
-                         << 0.1 << 0.25 << 0.5 << 0.75 << 1.0 << 1.25 << 1.5 << 2.0
-                         << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0)
+                         << 0.1 << 0.25 << 0.5 << 0.75 << 1.0 << 1.25 << 1.5
+                         << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0
+                         << 9.0 << 10.0)
 {
     //setEnabled(false);
     setInsertPolicy(QComboBox::NoInsert);
@@ -80,7 +81,8 @@ void ZoomWidget::on_zoomChanged(qreal current, qreal previous)
 
         for (int existingIndex = 0; existingIndex < count(); ++existingIndex)
         {
-            if (Helper::FuzzyCompare(itemData(existingIndex).toReal(), previous))
+            if (Helper::FuzzyCompare(itemData(existingIndex).toReal(),
+                                     previous))
             {
                 removeItem(existingIndex);
                 break;

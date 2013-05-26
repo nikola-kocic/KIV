@@ -20,12 +20,14 @@
 #endif
 
 
-ThumbnailItemDelegate::ThumbnailItemDelegate(const QSize &thumbSize, QObject *parent)
+ThumbnailItemDelegate::ThumbnailItemDelegate(const QSize &thumbSize,
+                                             QObject *parent)
     : QStyledItemDelegate(parent)
     , m_thumb_size(thumbSize)
     , m_watcherThumbnail(new QFutureWatcher<QImage>(this))
 {
-    connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)), this, SLOT(showThumbnail(int)));
+    connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)),
+            this, SLOT(showThumbnail(int)));
 }
 
 ThumbnailItemDelegate::~ThumbnailItemDelegate()
@@ -45,7 +47,9 @@ void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
 QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option,
                                       const QModelIndex &/*index*/) const
 {
-    const QSize &size_grid = QSize(m_thumb_size.width() + 6, m_thumb_size.height() + option.decorationSize.height());
+    const QSize &size_grid = QSize(
+                m_thumb_size.width() + 6,
+                m_thumb_size.height() + option.decorationSize.height());
     return size_grid;
 }
 
@@ -59,11 +63,14 @@ void ThumbnailItemDelegate::cancelThumbnailGeneration()
     }
 }
 
-void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIndex &index)
+void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info,
+                                            const QModelIndex &index)
 {
     QDateTime currentDateTime;
-    const QByteArray &filepath = index.data(QFileSystemModel::FilePathRole).toByteArray();
-    const QByteArray &path_hash = QCryptographicHash::hash(filepath, QCryptographicHash::Md4);
+    const QByteArray &filepath =
+            index.data(QFileSystemModel::FilePathRole).toByteArray();
+    const QByteArray &path_hash =
+            QCryptographicHash::hash(filepath, QCryptographicHash::Md4);
     const QVariant &date = index.data(Helper::ROLE_FILE_DATE);
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
@@ -79,7 +86,8 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     }
     else
     {
-        if (const QFileSystemModel *fsm = qobject_cast<const QFileSystemModel *>(index.model()))
+        if (const QFileSystemModel *fsm =
+            qobject_cast<const QFileSystemModel *>(index.model()))
         {
             currentDateTime = fsm->lastModified(index);
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
@@ -115,32 +123,42 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
 
     if (info.fileExists())
     {
-        m_files_to_process.append(new ProcessInfo(index, info, path_hash, currentDateTime));
+        m_files_to_process.append(new ProcessInfo(index, info, path_hash,
+                                                  currentDateTime));
         if (m_files_to_process.size() == 1)
         {
-            m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(info, m_thumb_size)));
+            m_watcherThumbnail->setFuture(
+                        QtConcurrent::run(PictureLoader::getThumbnail,
+                                          ThumbnailInfo(info, m_thumb_size)));
         }
     }
     else
     {
         QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-        QImage thumb = PictureLoader::styleThumbnail(icon.pixmap(icon.availableSizes().last()).toImage(), m_thumb_size);
+        QImage thumb = PictureLoader::styleThumbnail(
+                    icon.pixmap(icon.availableSizes().last()).toImage(),
+                    m_thumb_size);
         icon = QIcon(QPixmap::fromImage(thumb));
 
-        m_thumbnails.insert(path_hash, new ThumbImageDate(icon, currentDateTime));
+        m_thumbnails.insert(path_hash, new ThumbImageDate(icon,
+                                                          currentDateTime));
         emit thumbnailFinished(index);
     }
 }
 
 
-void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const
+void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option,
+                                            const QModelIndex &index) const
 {
     QStyledItemDelegate::initStyleOption(option, index);
 
-    const QByteArray &path_hash = QCryptographicHash::hash(index.data(QFileSystemModel::FilePathRole).toByteArray(), QCryptographicHash::Md4);
+    const QByteArray &path_hash = QCryptographicHash::hash(
+                index.data(QFileSystemModel::FilePathRole).toByteArray(),
+                QCryptographicHash::Md4);
     if (m_thumbnails.contains(path_hash))
     {
-        if (QStyleOptionViewItemV4 *v4 = qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
+        if (QStyleOptionViewItemV4 *v4 =
+            qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
         {
             const ThumbImageDate *tid = m_thumbnails.value(path_hash);
             if (tid->getThumb().availableSizes().isEmpty())
@@ -172,7 +190,9 @@ void ThumbnailItemDelegate::showThumbnail(int num)
     DEBUGOUT << m_files_to_process.at(0)->getFileInfo().getPath();
 #endif
 
-    ThumbImageDate *tid = new ThumbImageDate(QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num))), m_files_to_process.first()->getDate());
+    ThumbImageDate *tid = new ThumbImageDate(
+                QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num))),
+                m_files_to_process.first()->getDate());
     m_thumbnails.insert(m_files_to_process.first()->getPathHash(), tid);
 
     emit thumbnailFinished(m_files_to_process.first()->getIndex());
@@ -183,7 +203,11 @@ void ThumbnailItemDelegate::showThumbnail(int num)
 
     if (!m_files_to_process.isEmpty())
     {
-        m_watcherThumbnail->setFuture(QtConcurrent::run(PictureLoader::getThumbnail, ThumbnailInfo(m_files_to_process.at(0)->getFileInfo(), m_thumb_size)));
+        m_watcherThumbnail->setFuture(
+                    QtConcurrent::run(
+                        PictureLoader::getThumbnail,
+                        ThumbnailInfo(m_files_to_process.at(0)->getFileInfo(),
+                                      m_thumb_size)));
     }
     else
     {

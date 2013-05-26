@@ -9,14 +9,16 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
     ui->setupUi(this);
 
     ui->ddMiddleClick->addItem(tr("<None>"),      MiddleClickAction::None);
-    ui->ddMiddleClick->addItem(tr("Full Screen"), MiddleClickAction::Fullscreen);
+    ui->ddMiddleClick->addItem(tr("Full Screen"),
+                               MiddleClickAction::Fullscreen);
     ui->ddMiddleClick->addItem(tr("Autofit"),     MiddleClickAction::AutoFit);
     ui->ddMiddleClick->addItem(tr("Actual Size"), MiddleClickAction::ZoomReset);
     ui->ddMiddleClick->addItem(tr("Next Page"),   MiddleClickAction::NextPage);
     ui->ddMiddleClick->addItem(tr("Boss Key"),    MiddleClickAction::Boss);
     ui->ddMiddleClick->addItem(tr("Quit"),        MiddleClickAction::Quit);
 
-    ui->ddMiddleClick->setCurrentIndex(ui->ddMiddleClick->findData(m_settings->getMiddleClick()));
+    ui->ddMiddleClick->setCurrentIndex(
+                ui->ddMiddleClick->findData(m_settings->getMiddleClick()));
 
 
     ui->ddWheel->addItem(tr("<None>"),               WheelAction::None);
@@ -30,23 +32,33 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
 #ifdef QT5
     ui->cbHardwareAcceleration->setEnabled(false);
 #else
-    ui->cbHardwareAcceleration->setChecked(m_settings->getHardwareAcceleration());
+    ui->cbHardwareAcceleration->setChecked(
+                m_settings->getHardwareAcceleration());
 #endif
-    ui->spinBox_thumbnail_width->setValue(m_settings->getThumbnailSize().width());
-    ui->spinBox_thumbnail_height->setValue(m_settings->getThumbnailSize().height());
+    ui->spinBox_thumbnail_width->setValue(
+                m_settings->getThumbnailSize().width());
+    ui->spinBox_thumbnail_height->setValue(
+                m_settings->getThumbnailSize().height());
 
-    ui->checkBox_calculate_average_color->setChecked(m_settings->getCalculateAverageColor());
+    ui->checkBox_calculate_average_color->setChecked(
+                m_settings->getCalculateAverageColor());
 }
 
 void Settings_Dialog::on_buttonBox_accepted()
 {
-    m_settings->setMiddleClick(ui->ddMiddleClick->itemData(ui->ddMiddleClick->currentIndex()).toInt());
-    m_settings->setWheel(ui->ddWheel->itemData(ui->ddWheel->currentIndex()).toInt());
+    m_settings->setMiddleClick(
+                ui->ddMiddleClick->itemData(ui->ddMiddleClick->currentIndex()).
+                toInt());
+    m_settings->setWheel(
+                ui->ddWheel->itemData(ui->ddWheel->currentIndex()).toInt());
     m_settings->setRightToLeft(ui->cbRTL->isChecked());
 
-    m_settings->setHardwareAcceleration(ui->cbHardwareAcceleration->isChecked());
-    m_settings->setThumbnailSize(QSize(ui->spinBox_thumbnail_width->value(), ui->spinBox_thumbnail_height->value()));
-    m_settings->setCalculateAverageColor(ui->checkBox_calculate_average_color->isChecked());
+    m_settings->setHardwareAcceleration(
+                ui->cbHardwareAcceleration->isChecked());
+    m_settings->setThumbnailSize(QSize(ui->spinBox_thumbnail_width->value(),
+                                       ui->spinBox_thumbnail_height->value()));
+    m_settings->setCalculateAverageColor(
+                ui->checkBox_calculate_average_color->isChecked());
 }
 
 Settings_Dialog::~Settings_Dialog()

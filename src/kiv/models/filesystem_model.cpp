@@ -42,16 +42,17 @@ QVariant FileSystemModel::data(const QModelIndex &index, int role) const
     }
     case Qt::ToolTipRole:
         const QFileInfo fi = this->fileInfo(index);
-        QString tooltip = (QFileSystemModel::tr("Name") + ": " + fi.fileName() + "\n" +
-                           QFileSystemModel::tr("Date Modified") + ": " +
-                           fi.lastModified().toString(Qt::SystemLocaleShortDate));
+        QString tooltip = (QFileSystemModel::tr("Name") + ": " + fi.fileName()
+                           + "\n" + QFileSystemModel::tr("Date Modified") + ": "
+                           + fi.lastModified().toString(
+                               Qt::SystemLocaleShortDate));
         if (!this->isDir(index))
         {
-            tooltip.append("\n" + QFileSystemModel::tr("Size") + ": " + Helper::size(fi.size()));
+            tooltip.append("\n" + QFileSystemModel::tr("Size") + ": "
+                           + Helper::size(fi.size()));
         }
         return tooltip;
     }
 
     return QFileSystemModel::data(index, role);
 }
-
