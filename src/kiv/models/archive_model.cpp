@@ -4,17 +4,17 @@
 #include <QFileSystemModel>
 #include <QStyle>
 
-//#define DEBUG_MODEL_FILES
-#ifdef DEBUG_MODEL_FILES
-#include <QDebug>
-#endif
-
 #include <quazip.h>
 #include <quazipfile.h>
 
 #include "helper.h"
 #include "models/archive_item.h"
 #include "unrar/archive_rar.h"
+
+//#define DEBUG_MODEL_FILES
+#ifdef DEBUG_MODEL_FILES
+#include "helper.h"
+#endif
 
 ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     : QAbstractItemModel(parent)
@@ -24,7 +24,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     , m_type(ArchiveType::None)
 {
 #ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << path;
+    DEBUGOUT << path;
 #endif
     if (m_icon_file.isNull())
     {
@@ -48,7 +48,7 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
         }
         populate(path, archive_files);
 #ifdef DEBUG_MODEL_FILES
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "ZIP";
+        DEBUGOUT << "ZIP";
 #endif
         m_type = ArchiveType::Zip;
         return;
@@ -86,7 +86,7 @@ void ArchiveModel::populate(const QString &archive_path, const QList<TFileInfo> 
     for (int i = 0; i < archive_files.size(); ++i)
     {
 #ifdef DEBUG_MODEL_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::populate" << archive_files.at(i).name;
+        DEBUGOUT << archive_files.at(i).name;
 #endif
         ArchiveItem *node = rootArchiveItem;
         const QStringList file_path_parts = archive_files.at(i).name.split('/');

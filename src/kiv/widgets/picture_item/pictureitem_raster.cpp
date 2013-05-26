@@ -3,15 +3,13 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-//#define DEBUG_PICTUREITEM_RASTER
-
-#ifdef DEBUG_PICTUREITEM_RASTER
-#include <QDebug>
-#include <QDateTime>
-#endif
-
 #include "picture_loader.h"
 #include "settings.h"
+
+//#define DEBUG_PICTUREITEM_RASTER
+#ifdef DEBUG_PICTUREITEM_RASTER
+#include "helper.h"
+#endif
 
 PictureItemRaster::PictureItemRaster(PictureItemData *data, QWidget *parent)
     : QWidget(parent)
@@ -24,8 +22,8 @@ PictureItemRaster::PictureItemRaster(PictureItemData *data, QWidget *parent)
 
 PictureItemRaster::~PictureItemRaster()
 {
-#ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "~PictureItemRaster()";
+#ifdef DEBUG_PICTUREITEM_RASTER
+    DEBUGOUT;
 #endif
 }
 

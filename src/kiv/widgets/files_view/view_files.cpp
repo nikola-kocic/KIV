@@ -2,18 +2,15 @@
 
 #include <QHeaderView>
 #include <QLabel>
-
-//#define DEBUG_VIEW_FILES
-
-#ifdef DEBUG_VIEW_FILES
-#include <QDebug>
-#include <QTime>
-#endif
-
 #include <JlCompress.h>
 
 #include "models/archive_item.h"
 #include "models/unrar/archive_rar.h"
+
+//#define DEBUG_VIEW_FILES
+#ifdef DEBUG_VIEW_FILES
+#include "helper.h"
+#endif
 
 ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
     : QWidget(parent)
@@ -132,7 +129,7 @@ FileInfo ViewFiles::getCurrentFileInfo() const
 void ViewFiles::initViewItem()
 {
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::initViewItem" << m_view_mode;
+    DEBUGOUT << m_view_mode;
 #endif
     if (m_view_mode == FileViewMode::Details)
     {
@@ -172,15 +169,15 @@ void ViewFiles::initViewItem()
 void ViewFiles::setViewMode(const int mode)
 {
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::setViewMode" << mode;
+    DEBUGOUT << mode;
 #endif
     if (m_view_mode != mode)
     {
         /* Check if View from previous View Mode can be reused */
         if (
-                (mode == FileViewMode::Icons || mode == FileViewMode::List) &&
-                (m_view_mode == FileViewMode::Icons || m_view_mode == FileViewMode::List)
-                )
+            (mode == FileViewMode::Icons || mode == FileViewMode::List) &&
+            (m_view_mode == FileViewMode::Icons || m_view_mode == FileViewMode::List)
+            )
         {
             m_listView_files->setViewMode(mode);
             m_view_mode = mode;
@@ -205,7 +202,7 @@ void ViewFiles::setLocationUrl(const QUrl &url)
 void ViewFiles::setCurrentFile(const FileInfo &info)
 {
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::setCurrentFile" << info.getDebugInfo();
+    DEBUGOUT << info.getDebugInfo();
 #endif
 
     m_flag_opening = true;
@@ -254,7 +251,7 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
     m_view_current->scrollTo(m_view_current->currentIndex());
 
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::setCurrentFile end" << info.getDebugInfo();
+    DEBUGOUT << "end" << info.getDebugInfo();
 #endif
     m_fileinfo_current = info;
     m_flag_opening = false;
@@ -282,7 +279,7 @@ void ViewFiles::on_filesystemView_currentRowChanged(const QModelIndex &current,
 
     const FileInfo info = FileInfo(currentContainer);
 #ifdef DEBUG_MAIN_WINDOW
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "MainWindow::on_filesystemView_currentRowChanged" << info.getDebugInfo();
+    DEBUGOUT << info.getDebugInfo();
 #endif
 
     this->setCurrentFile(info);
@@ -367,7 +364,7 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current,
 {
     // Indexes are from ArchiveDirsSortFilterProxyModel
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_archiveDirsView_currentRowChanged" << m_fileinfo_current.getDebugInfo();
+    DEBUGOUT << m_fileinfo_current.getDebugInfo();
 #endif
 
     if (!current.isValid())
@@ -405,7 +402,7 @@ void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current,
     }
 
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_FilesView_currentRowChanged" << m_fileinfo_current.getDebugInfo();
+    DEBUGOUT << m_fileinfo_current.getDebugInfo();
 #endif
 
     // Pass 'false' for 'IsContainer' because item is only selected
@@ -500,7 +497,7 @@ void ViewFiles::pagePrevious()
 void ViewFiles::on_item_activated(const QModelIndex &index)
 {
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_item_activated" <<index.internalId() <<  index.data().toString();
+    DEBUGOUT<< index.internalId() << index.data().toString();
 #endif
     // Index is from FileListSortFilterProxyModel
 
@@ -542,7 +539,7 @@ void ViewFiles::showThumbnails()
 {
 
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::showThumbnails" << m_show_thumbnails << m_fileinfo_current.getDebugInfo();
+    DEBUGOUT << m_show_thumbnails << m_fileinfo_current.getDebugInfo();
 #endif
     if (m_show_thumbnails)
     {
@@ -556,7 +553,7 @@ void ViewFiles::showThumbnails()
         for (int i = 0; i < m_view_current->model()->rowCount(m_view_current->rootIndex()); ++i)
         {
             indexes.append(m_view_current->model()->index(i, 0, m_view_current->rootIndex()));
-//            qDebug() << "\t" << m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data().toString();
+//            DEBUGOUT << "\t" << m_view_current->model()->index(i, 0, m_view_current->rootIndex()).data().toString();
         }
 
         on_rows_inserted(indexes);
@@ -568,7 +565,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
 {
 
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_rows_inserted" << "thumbnails?" << m_show_thumbnails;
+    DEBUGOUT << "thumbnails?" << m_show_thumbnails;
 #endif
     if (!m_show_thumbnails)
     {
@@ -585,7 +582,7 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
 void ViewFiles::setShowThumbnails(const bool b)
 {
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::setShowThumbnails" << b;
+    DEBUGOUT << b;
 #endif
     m_show_thumbnails = b;
 
@@ -640,7 +637,7 @@ void ViewFiles::saveCurrentFile(const QString &fileName) const
 void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 {
 #ifdef DEBUG_VIEW_FILES
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ViewFiles::on_thumbnail_finished" << index.internalId() << index.data().toString();
+    DEBUGOUT << index.internalId() << index.data().toString();
 #endif
 
     const QModelIndex fixed_index = m_proxy_file_list->mapFromSource(index);

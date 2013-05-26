@@ -1,15 +1,13 @@
 #ifndef QT5
 #include "widgets/picture_item/pictureitem_gl.h"
 
-//#define DEBUG_PICTUREITEM_GL
-
-#ifdef DEBUG_PICTUREITEM_GL
-#include <QDebug>
-#include <QDateTime>
-#endif
-
 #include "settings.h"
 #include "picture_loader.h"
+
+//#define DEBUG_PICTUREITEM_GL
+#ifdef DEBUG_PICTUREITEM_GL
+#include "helper.h"
+#endif
 
 PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)    
     : QGLWidget(parent)
@@ -29,7 +27,7 @@ PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
 PictureItemGL::~PictureItemGL()
 {
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "~PictureItemGL()";
+    DEBUGOUT;
 #endif
     clearTextures();
     delete m_texImg;
@@ -44,8 +42,9 @@ void PictureItemGL::clearTextures()
         {
             deleteTexture(m_textures.at(hIndex).at(vIndex));
 #ifdef DEBUG_PICTUREITEM_GL
-            qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItemGL::clearTextures" <<
-                        "deleted texture" << this->m_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex;
+            DEBUGOUT << "deleted texture"
+                     << this->m_textures.at(hIndex).at(vIndex)
+                     << "@" << hIndex << vIndex;
 #endif
         }
     }
@@ -110,8 +109,7 @@ void PictureItemGL::textureFinished(int num)
         this->updateGL();
 
 #ifdef DEBUG_PICTUREITEM
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItemGL::textureFinished"
-                 << "loaded textures" << t.elapsed();
+        DEBUGOUT << "loaded textures" << t.elapsed();
 #endif
     }
 }
@@ -124,8 +122,8 @@ void PictureItemGL::setTexture(const QImage &tex, const int num)
     m_textures[hIndex][vIndex] = bindTexture(tex, GL_TEXTURE_2D, GL_RGB, QGLContext::LinearFilteringBindOption | QGLContext::MipmapBindOption);
 
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItemGL::setTexture"
-             << "bound texture" << this->m_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex <<";" << tex.size();
+    DEBUGOUT << "bound texture" << this->m_textures.at(hIndex).at(vIndex)
+             << "@" << hIndex << vIndex <<";" << tex.size();
 #endif
 }
 
@@ -154,7 +152,7 @@ void PictureItemGL::initializeGL()
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size);
 
 #ifdef DEBUG_PICTUREITEM_GL
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItemGL::initializeGL()" << "GL_MAX_TEXTURE_SIZE" << size;
+    DEBUGOUT << "GL_MAX_TEXTURE_SIZE" << size;
 #endif
 
     m_texImg->setTexMaxSize(size);

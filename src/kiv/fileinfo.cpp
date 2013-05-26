@@ -3,13 +3,12 @@
 #include <QDir>
 #include <QFileInfo>
 
+#include "helper.h"
+
 //#define DEBUG_FILE_INFO
 #ifdef DEBUG_FILE_INFO
-#include <QDebug>
-#include <QDateTime>
-#endif
-
 #include "helper.h"
+#endif
 
 FileInfo::FileInfo(const QString &path, const bool isContainer)
     : m_container(QFileInfo())
@@ -21,7 +20,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
     , m_isInArchive(false)
 {
 #ifdef DEBUG_FILE_INFO
-    Helper::debuglog(Q_FUNC_INFO, "called with path: " + path);
+    DEBUGOUT << "called with path: " << path;
 #endif
     if (path.isEmpty())
     {
@@ -37,7 +36,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         m_hasValidContainer = true;
 
 #ifdef DEBUG_FILE_INFO
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo" << "path is path to directory\n" << getDebugInfo() << "\n\n";
+        DEBUGOUT << "path is path to directory" << getDebugInfo();
 #endif
         return;
     }
@@ -54,8 +53,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
             m_isInArchive = true;
         }
 #ifdef DEBUG_FILE_INFO
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo"
-                 << "path is path to zip file\n" << getDebugInfo() << "\n\n";
+        DEBUGOUT << "path is path to zip file" << getDebugInfo();
 #endif
         return;
     }
@@ -74,8 +72,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         m_fileExists = true;
 
 #ifdef DEBUG_FILE_INFO
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo"
-                 << "path is image\n" << getDebugInfo() << "\n\n";
+        DEBUGOUT << "path is image\n\t" << getDebugInfo();
 #endif
         return;
     }
@@ -91,7 +88,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         indexOfContainerSlash = tempContainerPath.lastIndexOf('/');
 
 //#ifdef DEBUG_FILE_INFO
-//        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo" << "index of /" << indexOfContainerSlash << "path" << temppath;
+//        DEBUGOUT << "index of /" << indexOfContainerSlash << "path" << temppath;
 //#endif
         tempContainerPath.truncate(indexOfContainerSlash);
         const QFileInfo tempFileInfo = QFileInfo(tempContainerPath);
@@ -120,7 +117,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
             }
 
 #ifdef DEBUG_FILE_INFO
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "FileInfo::FileInfo" << "path is image in archive\n" << getDebugInfo() << "\n\n";
+            DEBUGOUT << "path is image in archive\n\t" << getDebugInfo();
 #endif
             return;
         }
@@ -206,11 +203,11 @@ bool FileInfo::isContainerRoot() const
 
 QString FileInfo::getDebugInfo() const
 {
-    const QString str = "***\nContainer: " + getContainerPath() + "\nPath: " + getPath()
-            + "\nImageFileName: " + getImageFileName()
-            + "\nZipPath: " + getArchiveContainerPath()
-            + "\nIsInArchive: " + (isInArchive() ? "true" : "false")
-            + "\nContainer Name: " + getContainerName()
-            + "\n***";
+    const QString str = "\n\tContainer: " + getContainerPath()
+            + "\n\tPath: " + getPath()
+            + "\n\tImageFileName: " + getImageFileName()
+            + "\n\tZipPath: " + getArchiveContainerPath()
+            + "\n\tIsInArchive: " + (isInArchive() ? "true" : "false")
+            + "\n\tContainer Name: " + getContainerName();
     return str;
 }

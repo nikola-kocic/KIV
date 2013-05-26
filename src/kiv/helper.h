@@ -9,7 +9,7 @@
 
 #include "fileinfo.h"
 
-#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << Q_FUNC_INFO << "\n"
+#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << Q_FUNC_INFO << "\n\t"
 
 class Helper
 {

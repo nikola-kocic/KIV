@@ -32,7 +32,8 @@ void ListViewFiles::rowsInserted(const QModelIndex &parent, int start, int end)
             indexes.append(parent.child(i, 0));
         }
 
-//        qDebug() << "ListViewFiles::rowsInserted" << parent << i << parent.child(i, 0) << parent.child(i, 0).data().toString();
+//        DEBUGOUT << parent << i << parent.child(i, 0)
+//                 << parent.child(i, 0).data().toString();
     }
     emit rowsInserted(indexes);
 }

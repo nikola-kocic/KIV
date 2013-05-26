@@ -251,7 +251,7 @@ unsigned int ArchiveRar::getFileInfoList(const QString &path, QList<ArchiveFileI
         list.append(newArchiveFileInfo);
 
 //#ifdef DEBUG_MODEL_FILES
-//qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << fileName;
+//        DEBUGOUT << fileName;
 //#endif
 
         if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
@@ -269,7 +269,7 @@ unsigned int ArchiveRar::getFileInfoList(const QString &path, QList<ArchiveFileI
     RARCloseArchive(hArcData);
 
 //#ifdef DEBUG_MODEL_FILES
-//    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ArchiveModel::ArchiveModel" << "RAR";
+//    DEBUGOUT << "RAR";
 //#endif
 
     return 0;

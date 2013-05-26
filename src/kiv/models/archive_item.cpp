@@ -3,12 +3,12 @@
 #include <QFileSystemModel>
 #include <QStringList>
 
+#include "helper.h"
+
 //#define DEBUG_ARCHIVE_ITEM
 #ifdef DEBUG_ARCHIVE_ITEM
-#include <QDebug>
-#endif
-
 #include "helper.h"
+#endif
 
 ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint64 &bytes, const QString &path, const int type, const QIcon &icon, ArchiveItem *parent) :
     parentItem(parent),
@@ -26,7 +26,7 @@ ArchiveItem::ArchiveItem(const QString &name, const QDateTime &date, const quint
     }
 
 #ifdef DEBUG_ARCHIVE_ITEM
-    qDebug() << "created ArchiveItem" << name << "handle" << this << "parent:" << parent;
+    DEBUGOUT << name << "handle" << this << "parent:" << parent;
 #endif
 }
 
@@ -34,7 +34,7 @@ ArchiveItem::~ArchiveItem()
 {
     qDeleteAll(childItems);
 #ifdef DEBUG_ARCHIVE_ITEM
-    qDebug() << "deleted" << m_name << "handle" << this;
+    DEBUGOUT << m_name << "handle" << this;
 #endif
 }
 

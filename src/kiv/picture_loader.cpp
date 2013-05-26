@@ -5,22 +5,21 @@
 #include <QImageReader>
 #include <QPainter>
 
-//#define DEBUG_PICTURE_LOADER
-#ifdef DEBUG_PICTURE_LOADER
-#include <QDebug>
-//#include <QTime>
-#endif
-
 #include <quazip.h>
 #include <quazipfile.h>
 
 #include "models/unrar/archive_rar.h"
 
+//#define DEBUG_PICTURE_LOADER
+#ifdef DEBUG_PICTURE_LOADER
+#include "helper.h"
+#endif
+
 
 QImage PictureLoader::getImage(const FileInfo &info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImage" << info.getPath();
+    DEBUGOUT << info.getPath();
 #endif
     if (!info.fileExists())
     {
@@ -40,7 +39,7 @@ QImage PictureLoader::getImage(const FileInfo &info)
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
 {
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getThumbnail" << thumb_info.getFileInfo().getPath() << thumb_info.getThumbSize();
+    DEBUGOUT << thumb_info.getFileInfo().getPath() << thumb_info.getThumbSize();
 #endif
     if (!thumb_info.getFileInfo().fileExists())
     {
@@ -74,7 +73,7 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 {
     QImageReader image_reader(thumb_info.getFileInfo().getPath());
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << thumb_info.getFileInfo().getPath() << image_reader.format() << image_reader.supportedImageFormats();
+    DEBUGOUT << thumb_info.getFileInfo().getPath() << image_reader.format() << image_reader.supportedImageFormats();
 #endif
     if (!thumb_info.getThumbSize().isEmpty())
     {
@@ -132,13 +131,13 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
     }
 
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::getImageFromArchive" << "finished reading from archive" << thumb_info.getFileInfo().getPath();
+    DEBUGOUT << "finished reading from archive" << thumb_info.getFileInfo().getPath();
 #endif
     QBuffer out(&buff);
     QImageReader image_reader(&out);
 
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << image_reader.format() << image_reader.supportedImageFormats();
+    DEBUGOUT << image_reader.format() << image_reader.supportedImageFormats();
 #endif
     if (!thumb_info.getThumbSize().isEmpty())
     {
@@ -157,7 +156,7 @@ QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &th
     QSize result = image_size;
     result.scale(thumb_size, Qt::KeepAspectRatio);
 #ifdef DEBUG_PICTURE_LOADER
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureLoader::ThumbnailImageSize" << "scaling image from" << image_size << "to" << result;
+    DEBUGOUT << "scaling image from" << image_size << "to" << result;
 #endif
     return result;
 }

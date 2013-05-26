@@ -54,7 +54,7 @@ void PictureItem::setHardwareAcceleration(const bool b)
     if (m_opengl != b)
     {
 #ifdef DEBUG_PICTUREITEM
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setHardwareAcceleration" << "Deleted m_imageDisplay";
+        DEBUGOUT << "Deleted m_imageDisplay";
 #endif
         this->layout()->removeWidget(m_imageDisplay->getWidget());
 //        m_imageDisplay->getWidget()->deleteLater();
@@ -72,7 +72,7 @@ void PictureItem::setHardwareAcceleration(const bool b)
 void PictureItem::setPixmap(const FileInfo &info)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::setPixmap" << info.getPath();
+    DEBUGOUT << info.getPath();
 #endif
     m_imageDisplay->getWidget()->setUpdatesEnabled(false);
     m_imageDisplay->setNullImage();
@@ -98,7 +98,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 void PictureItem::imageFinished(int num)
 {
 #ifdef DEBUG_PICTUREITEM
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "PictureItem::imageFinished" << t.restart() << m_loader_image->resultAt(num).size();
+    DEBUGOUT << t.restart() << m_loader_image->resultAt(num).size();
 #endif
     m_data->setPixmapNull(m_loader_image->resultAt(num).isNull());
     calculateAverageColor(m_loader_image->resultAt(num));

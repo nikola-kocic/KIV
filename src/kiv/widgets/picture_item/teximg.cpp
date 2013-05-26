@@ -1,6 +1,5 @@
 #include "teximg.h"
 
-//#include <QDebug>
 #include <QSize>
 
 TexImg::TexImg()

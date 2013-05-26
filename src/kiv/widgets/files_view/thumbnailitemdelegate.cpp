@@ -15,10 +15,8 @@
 #endif
 
 //#define DEBUG_THUMBNAIL_ITEM_DELEGATE
-
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-#include <QDebug>
-#include <QTime>
+#include "helper.h"
 #endif
 
 
@@ -69,14 +67,14 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     const QVariant &date = index.data(Helper::ROLE_FILE_DATE);
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::updateThumbnail" << filepath;
+    DEBUGOUT << filepath;
 #endif
 
     if (date.isValid())
     {
         currentDateTime = date.toDateTime();
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug("Date from QVariant");
+        DEBUGOUT << "Date from QVariant";
 #endif
     }
     else
@@ -85,7 +83,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
         {
             currentDateTime = fsm->lastModified(index);
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-            qDebug("Date from QFileSystemModel");
+            DEBUGOUT << "Date from QFileSystemModel";
 #endif
         }
         else
@@ -93,13 +91,13 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
             QFileInfo fi(filepath);
             currentDateTime = fi.lastModified();
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-            qDebug("Date from QFileInfo");
+            DEBUGOUT << "Date from QFileInfo";
 #endif
         }
     }
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << currentDateTime;
+    DEBUGOUT << currentDateTime;
 #endif
 
     if (m_thumbnails.contains(path_hash))
@@ -112,7 +110,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info, const QModelIn
     }
 
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-        qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::updateThumbnail" << "generating for" << filepath;
+    DEBUGOUT << "generating for" << filepath;
 #endif
 
     if (info.fileExists())
@@ -171,7 +169,7 @@ void ThumbnailItemDelegate::showThumbnail(int num)
         return;
     }
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate) << "ThumbnailItemDelegate::showThumbnail" << m_files_to_process.at(0).getFileInfo().getPath();
+    DEBUGOUT << m_files_to_process.at(0)->getFileInfo().getPath();
 #endif
 
     ThumbImageDate *tid = new ThumbImageDate(QIcon(QPixmap::fromImage(m_watcherThumbnail->resultAt(num))), m_files_to_process.first()->getDate());

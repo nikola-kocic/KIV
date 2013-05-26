@@ -1,14 +1,15 @@
 #include "widgets/zoom_widget.h"
 
-//#define DEBUG_ZOOM_WIDGET
-#ifdef DEBUG_ZOOM_WIDGET
-#include <QDebug>
-#endif
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QVector>
 
 #include "helper.h"
+
+//#define DEBUG_ZOOM_WIDGET
+#ifdef DEBUG_ZOOM_WIDGET
+#include "helper.h"
+#endif
 
 ZoomWidget::ZoomWidget(QWidget *parent)
     : QComboBox(parent)
