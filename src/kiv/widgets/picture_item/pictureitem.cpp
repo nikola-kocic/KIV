@@ -100,18 +100,16 @@ void PictureItem::setPixmap(const FileInfo &info)
 
 void PictureItem::imageFinished(int num)
 {
+    const QImage newImage = m_loader_image->resultAt(num);
 #ifdef DEBUG_PICTUREITEM
-    DEBUGOUT << t.restart() << m_loader_image->resultAt(num).size();
+    DEBUGOUT << t.restart() << newImage.size();
 #endif
-    m_data->setPixmapNull(m_loader_image->resultAt(num).isNull());
-    calculateAverageColor(m_loader_image->resultAt(num));
+    m_data->setPixmapNull(newImage.isNull());
+    calculateAverageColor(newImage);
 
-    m_imageDisplay->setImage(m_loader_image->resultAt(num));
+    m_imageDisplay->setImage(newImage);
 
-    m_data->m_boundingRect = QRect(0,
-                                   0,
-                                   m_loader_image->resultAt(num).width(),
-                                   m_loader_image->resultAt(num).height());
+    m_data->m_boundingRect = QRect(0, 0, newImage.width(), newImage.height());
 
     this->afterPixmapLoad();
 
@@ -156,12 +154,9 @@ void PictureItem::calculateAverageColor(const QImage &img)
         m_imageDisplay->setBackgroundColor(
                     QColor::fromRgb(averageColorImage.pixel(0,0)));
     }
-    else
+    else if (m_data->m_color_clear != Qt::lightGray)
     {
-        if (m_data->m_color_clear != Qt::lightGray)
-        {
-            m_imageDisplay->setBackgroundColor(Qt::lightGray);
-        }
+        m_imageDisplay->setBackgroundColor(Qt::lightGray);
     }
 }
 
@@ -403,10 +398,7 @@ void PictureItem::drag(const QPoint &pt)
 
     const QSize widgetSize = m_imageDisplay->getWidget()->size();
     const qreal widthDiff = widgetSize.width() - m_data->m_boundingRect.width();
-    const qreal heightDiff =
-            widgetSize.height() - m_data->m_boundingRect.height();
     const int xDiff = pt.x() - m_point_drag.x();
-    const int yDiff = pt.y() - m_point_drag.y();
 
     /* Am I dragging it outside of the panel? */
     if ((xDiff >= widthDiff) && (xDiff <= 0))
@@ -429,6 +421,10 @@ void PictureItem::drag(const QPoint &pt)
             m_data->m_boundingRect.moveLeft(widthDiff);
         }
     }
+
+    const qreal heightDiff =
+            widgetSize.height() - m_data->m_boundingRect.height();
+    const int yDiff = pt.y() - m_point_drag.y();
 
     /* Am I dragging it outside of the panel? */
     if (yDiff >= heightDiff && (yDiff <= 0))

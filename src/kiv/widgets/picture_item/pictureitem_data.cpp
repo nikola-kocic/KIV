@@ -14,18 +14,9 @@ PictureItemData::PictureItemData()
 
 void PictureItemData::setZoom(const qreal z)
 {
-    if (z < 0.001)
-    {
-        m_zoom_value = 0.001;
-    }
-    else if (z > 1000)
-    {
-        m_zoom_value = 1000;
-    }
-    else
-    {
-        m_zoom_value = z;
-    }
+    m_zoom_value = (z < 0.001) ? 0.001 :
+                                 (z > 1000) ? 1000 :
+                                              z;
 }
 
 void PictureItemData::updateSize(const QSize &widgetSize)
@@ -37,15 +28,8 @@ void PictureItemData::updateSize(const QSize &widgetSize)
 
     if (widgetSize.width() > m_boundingRect.width())
     {
-        if (m_zoom_value == 1)
-        {
-            m_offsetX = qRound(
-                        (widgetSize.width() - m_boundingRect.width()) / 2);
-        }
-        else
-        {
-            m_offsetX = (widgetSize.width() - m_boundingRect.width()) / 2;
-        }
+        const qreal offsetX = (widgetSize.width() - m_boundingRect.width()) / 2;
+        m_offsetX = (m_zoom_value == 1) ? qRound(offsetX) : offsetX;
     }
     else
     {
@@ -54,15 +38,9 @@ void PictureItemData::updateSize(const QSize &widgetSize)
 
     if (widgetSize.height() > m_boundingRect.height())
     {
-        if (m_zoom_value == 1)
-        {
-            m_offsetY = qRound(
-                        (widgetSize.height() - m_boundingRect.height()) / 2);
-        }
-        else
-        {
-            m_offsetY = (widgetSize.height() - m_boundingRect.height()) / 2;
-        }
+        const qreal offsetY =
+                (widgetSize.height() - m_boundingRect.height()) / 2;
+        m_offsetY = (m_zoom_value == 1) ? qRound(offsetY) : offsetY;
     }
     else
     {
