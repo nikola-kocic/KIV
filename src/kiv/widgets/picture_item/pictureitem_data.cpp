@@ -41,9 +41,7 @@ int PictureItemData::fitToScreen(const QSize &widgetSize, qreal &zoomVal) const
         return 1;
     }
 
-    const QRect orig_size = QRect(
-                m_boundingRect.y(),
-                m_boundingRect.x(),
+    const QSize orig_size = QSize(
                 m_boundingRect.width() / m_zoom_value,
                 m_boundingRect.height() / m_zoom_value);
 
