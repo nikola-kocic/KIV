@@ -36,6 +36,8 @@ private:
     qreal m_scaleY;
     QVector < QVector <GLuint> > m_textures;
     TexImg *m_texImg;
+    QSizeF m_rotated_img_size;
+    QSizeF m_img_size;
 
 protected:
     void initializeGL();
@@ -45,9 +47,6 @@ protected:
 private slots:
     void textureFinished(int num);
 };
-
-inline void PictureItemGL::setZoom(const qreal, const qreal)
-{ setRotation(m_data->getRotation(), m_data->getRotation()); }
 
 #endif  // PICTUREITEM_GL_H
 #endif  // QT5

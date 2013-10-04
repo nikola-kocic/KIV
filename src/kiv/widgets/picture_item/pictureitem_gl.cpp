@@ -58,6 +58,8 @@ void PictureItemGL::setImage(const QImage &img)
     this->setUpdatesEnabled(false);
 
     m_texImg->setImage(img);
+    m_img_size = img.size();
+    m_rotated_img_size = m_img_size;
 
     m_textures = QVector < QVector < GLuint > >(m_texImg->hTile->tileCount);
     QList<TexIndex *> indexes;
@@ -174,8 +176,8 @@ void PictureItemGL::updateSize()
 
     m_data->updateSize(this->size());
 
-    m_scaleX = (m_texImg->hTile->bmpSize * m_data->getZoom()) / this->width();
-    m_scaleY = (m_texImg->vTile->bmpSize * m_data->getZoom()) / this->height();
+    m_scaleX = (m_img_size.width() * m_data->getZoom()) / this->width();
+    m_scaleY = (m_img_size.height() * m_data->getZoom()) / this->height();
 }
 
 void PictureItemGL::paintGL()
@@ -198,8 +200,8 @@ void PictureItemGL::paintGL()
                  0);
 
     glRotated(m_data->getRotation(), 0, 0, 1);
-    glTranslated(-(m_texImg->hTile->bmpSize * m_data->getZoom()) / 2,
-                 -(m_texImg->vTile->bmpSize * m_data->getZoom()) / 2,
+    glTranslated(-(m_img_size.width() * m_data->getZoom()) / 2,
+                 -(m_img_size.height() * m_data->getZoom()) / 2,
                  0);
     glScaled(m_scaleX, m_scaleY, 1);
 
@@ -209,7 +211,7 @@ void PictureItemGL::paintGL()
 
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
-        double texScale = (double)m_texImg->hTile->bmpSize
+        double texScale = (double)m_img_size.width()
                 / (double)m_texImg->hTile->tileSize.at(hIndex);
         double tx;
         double tx2;
@@ -235,7 +237,7 @@ void PictureItemGL::paintGL()
 
         for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
         {
-            texScale = (double)m_texImg->vTile->bmpSize
+            texScale = (double)m_img_size.height()
                     / (double)m_texImg->vTile->tileSize.at(vIndex);
             double ty;
             double ty2;
@@ -288,34 +290,41 @@ void PictureItemGL::resizeGL(int width, int height)
 
 void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 {
-    QSizeF newSize;
     if (qRound(current) % 360 == 0)
     {
-        newSize = QSizeF(m_texImg->hTile->bmpSize * m_data->getZoom(),
-                        m_texImg->vTile->bmpSize * m_data->getZoom());
+        m_rotated_img_size = m_img_size;
     }
     else
     {
         QTransform tRot;
         tRot.translate(m_data->m_boundingRect.x(), m_data->m_boundingRect.y());
-        tRot.scale(m_data->getZoom(), m_data->getZoom());
-        tRot.translate((m_texImg->vTile->bmpSize / 2),
-                       (m_texImg->hTile->bmpSize / 2));
+        tRot.translate((m_img_size.width() / 2),
+                       (m_img_size.height() / 2));
         tRot.rotate(current);
-        tRot.translate((-m_texImg->vTile->bmpSize / 2),
-                       (-m_texImg->hTile->bmpSize / 2));
+        tRot.translate((-m_img_size.width() / 2),
+                       (-m_img_size.height() / 2));
         const QRectF transformedRot =
-                tRot.mapRect(QRect(QPoint(0, 0),
-                                   QSize(m_texImg->hTile->bmpSize,
-                                         m_texImg->vTile->bmpSize)));
+                tRot.mapRect(QRectF(QPointF(0, 0), m_img_size));
 
-        newSize = transformedRot.size();
+        m_rotated_img_size = transformedRot.size();
     }
 
+    const QSizeF newSize = m_rotated_img_size * m_data->getZoom();
     const QPointF p = m_data->pointToOrigin(newSize, this->size());
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());
     this->updateSize();
     this->updateGL();
 }
+
+void PictureItemGL::setZoom(const qreal current, const qreal)
+{
+    const QSizeF newSize = m_rotated_img_size * current;
+    const QPointF p = m_data->pointToOrigin(newSize, this->size());
+    m_data->m_boundingRect = QRectF(p, newSize);
+    m_data->avoidOutOfScreen(this->size());
+    this->updateSize();
+    this->updateGL();
+}
+
 #endif // QT5
