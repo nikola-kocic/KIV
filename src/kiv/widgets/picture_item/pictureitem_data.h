@@ -36,9 +36,12 @@ public:
     void updateSize(const QSize &widgetSize);
     QPointF pointToOrigin(const qreal width,
                           const qreal height,
-                          const QSize &widgetSize);
+                          const QSize &widgetSize) const;
 
-private:
+    int fitToScreen(const QSize &widgetSize, qreal &zoomVal) const;
+    int fitWidth(const QSize &widgetSize, qreal &zoomVal) const;
+    int fitHeight(const QSize &widgetSize, qreal &zoomVal) const;
+protected:
     bool m_pixmapNull;
     qreal m_zoom_value;
     qreal m_rotation_value;

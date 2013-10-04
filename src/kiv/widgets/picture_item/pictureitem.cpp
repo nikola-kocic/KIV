@@ -262,79 +262,32 @@ void PictureItem::setZoom(const qreal value)
 
 void PictureItem::fitToScreen()
 {
-    if (this->isPixmapNull())
+    qreal zoomVal;
+    if (m_data->fitToScreen(m_imageDisplay->getWidget()->size(), zoomVal) != 0)
     {
         return;
     }
-
-    const QRect orig_size = QRect(
-                m_data->m_boundingRect.x(),
-                m_data->m_boundingRect.y(),
-                m_data->m_boundingRect.width() / m_data->getZoom(),
-                m_data->m_boundingRect.height() / m_data->getZoom());
-
-    const qreal x_ratio =
-            (qreal)m_imageDisplay->getWidget()->width() / orig_size.width();
-    const qreal y_ratio =
-            (qreal)m_imageDisplay->getWidget()->height() / orig_size.height();
-
-    if ((orig_size.width() <= m_imageDisplay->getWidget()->width())
-        && (orig_size.height() <= m_imageDisplay->getWidget()->height()))
-    {
-        this->setZoom(1);
-    }
-    else if ((x_ratio * orig_size.height())
-             < m_imageDisplay->getWidget()->height())
-    {
-        this->setZoom(x_ratio);
-    }
-    else
-    {
-        this->setZoom(y_ratio);
-    }
+    this->setZoom(zoomVal);
 }
 
 void PictureItem::fitWidth()
 {
-    if (this->isPixmapNull())
+    qreal zoomVal;
+    if (m_data->fitWidth(m_imageDisplay->getWidget()->size(), zoomVal) != 0)
     {
         return;
     }
-
-    const qreal tw = m_data->m_boundingRect.width() / m_data->getZoom();
-
-    const qreal x_ratio = (qreal)m_imageDisplay->getWidget()->width() / tw;
-
-    if (tw <= m_imageDisplay->getWidget()->width())
-    {
-        this->setZoom(1);
-    }
-    else
-    {
-        this->setZoom(x_ratio);
-    }
+    this->setZoom(zoomVal);
 }
 
 void PictureItem::fitHeight()
 {
-    if (this->isPixmapNull())
+    qreal zoomVal;
+    if (m_data->fitHeight(m_imageDisplay->getWidget()->size(), zoomVal) != 0)
     {
         return;
     }
-
-    const qreal th = m_data->m_boundingRect.height() / m_data->getZoom();
-
-    const qreal y_ratio = (qreal)m_imageDisplay->getWidget()->height() / th;
-
-    if (th <= m_imageDisplay->getWidget()->height())
-    {
-        this->setZoom(1);
-    }
-    else
-    {
-        this->setZoom(y_ratio);
-    }
-
+    this->setZoom(zoomVal);
 }
 
 void PictureItem::setLockMode(const int mode)

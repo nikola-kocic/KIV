@@ -26,6 +26,97 @@ int PictureItemData::setZoom(const qreal desiredZoom, qreal &zoomVal)
     zoomVal = m_zoom_value;
     return 0;
 }
+
+/* Calculates zoom value needed for picture to fit to widget size.
+ * If picture is smaller than widget, it's set to 100% zoom.
+ * widgetSize: size of widget containing picture.
+ * zoomVal: stores calculated zoom value.
+ * return: 0 if successful.
+ */
+int PictureItemData::fitToScreen(const QSize &widgetSize, qreal &zoomVal) const
+{
+    if (this->isPixmapNull())
+    {
+        return 1;
+    }
+
+    const QRect orig_size = QRect(
+                m_boundingRect.y(),
+                m_boundingRect.x(),
+                m_boundingRect.width() / m_zoom_value,
+                m_boundingRect.height() / m_zoom_value);
+
+    const qreal x_ratio = (qreal)widgetSize.width() / orig_size.width();
+    const qreal y_ratio = (qreal)widgetSize.height() / orig_size.height();
+
+    if ((orig_size.width() <= widgetSize.width())
+        && (orig_size.height() <= widgetSize.height()))
+    {
+        zoomVal = 1;
+    }
+    else if ((x_ratio * orig_size.height()) < widgetSize.height())
+    {
+        zoomVal = x_ratio;
+    }
+    else
+    {
+        zoomVal = y_ratio;
+    }
+    return 0;
+}
+
+/* Calculates zoom value needed for picture to fit to widget width.
+ * widgetSize: size of widget containing picture.
+ * zoomVal: stores calculated zoom value.
+ * return: 0 if successful.
+ */
+int PictureItemData::fitWidth(const QSize &widgetSize, qreal &zoomVal) const
+{
+    if (this->isPixmapNull())
+    {
+        return 1;
+    }
+
+    const qreal tw = m_boundingRect.width() / m_zoom_value;
+
+    const qreal x_ratio = (qreal)widgetSize.width() / tw;
+
+    if (tw <= widgetSize.width())
+    {
+        zoomVal = 1;
+    }
+    else
+    {
+        zoomVal = x_ratio;
+    }
+    return 0;
+}
+
+/* Calculates zoom value needed for picture to fit to widget height.
+ * widgetSize: size of widget containing picture.
+ * zoomVal: stores calculated zoom value.
+ * return: 0 if successful.
+ */
+int PictureItemData::fitHeight(const QSize &widgetSize, qreal &zoomVal) const
+{
+    if (this->isPixmapNull())
+    {
+        return 1;
+    }
+
+    const qreal th = m_boundingRect.height() / m_zoom_value;
+
+    const qreal y_ratio = (qreal)widgetSize.height() / th;
+
+    if (th <= widgetSize.height())
+    {
+        zoomVal = 1;
+    }
+    else
+    {
+        zoomVal = y_ratio;
+    }
+    return 0;
 }
 
 void PictureItemData::updateSize(const QSize &widgetSize)
@@ -112,7 +203,7 @@ void PictureItemData::avoidOutOfScreen(const QSize &widgetSize)
 }
 
 QPointF PictureItemData::pointToOrigin(const qreal width, const qreal height,
-                                       const QSize &widgetSize)
+                                       const QSize &widgetSize) const
 {
     qreal originX = 0;
     qreal originY = 0;
