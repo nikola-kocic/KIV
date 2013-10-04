@@ -105,7 +105,7 @@ void PictureItem::imageFinished(int num)
     DEBUGOUT << t.restart() << newImage.size();
 #endif
     m_data->setPixmapNull(newImage.isNull());
-    calculateAverageColor(newImage);
+    m_imageDisplay->setBackgroundColor(getAverageColor(newImage));
 
     m_imageDisplay->setImage(newImage);
 
@@ -145,19 +145,16 @@ void PictureItem::afterPixmapLoad()
      m_data->m_boundingRect.moveTop(0);
 }
 
-void PictureItem::calculateAverageColor(const QImage &img)
+QColor PictureItem::getAverageColor(const QImage &img) const
 {
+    QColor retColor = Qt::lightGray;
     if (m_settings->getCalculateAverageColor() && !img.isNull())
     {
         const QImage averageColorImage = img.scaled(1, 1, Qt::IgnoreAspectRatio,
                                                     Qt::SmoothTransformation);
-        m_imageDisplay->setBackgroundColor(
-                    QColor::fromRgb(averageColorImage.pixel(0,0)));
+        retColor = QColor::fromRgb(averageColorImage.pixel(0,0));
     }
-    else if (m_data->m_color_clear != Qt::lightGray)
-    {
-        m_imageDisplay->setBackgroundColor(Qt::lightGray);
-    }
+    return retColor;
 }
 
 /* End Region Image loading */

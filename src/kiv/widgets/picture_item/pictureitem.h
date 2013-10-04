@@ -53,7 +53,7 @@ public:
 private:
     void initPictureItem();
     void afterPixmapLoad();
-    void calculateAverageColor(const QImage &img);
+    QColor getAverageColor(const QImage &img) const;
 
     void drag(const QPoint &pt);
     void beginDrag(const QPoint &pt);
