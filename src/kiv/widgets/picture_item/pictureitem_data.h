@@ -41,11 +41,17 @@ public:
     int fitToScreen(const QSize &widgetSize, qreal &zoomVal) const;
     int fitWidth(const QSize &widgetSize, qreal &zoomVal) const;
     int fitHeight(const QSize &widgetSize, qreal &zoomVal) const;
+
+    void drag(const QPoint &pt,
+              const QSize &widgetSize);
+    void beginDrag(const QPoint &pt);
+
 protected:
     bool m_pixmapNull;
     qreal m_zoom_value;
     qreal m_rotation_value;
     int m_lockMode;
+    QPoint m_point_drag;
 };
 
 inline bool PictureItemData::isPixmapNull() const

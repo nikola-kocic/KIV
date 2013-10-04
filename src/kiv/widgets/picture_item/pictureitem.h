@@ -67,7 +67,6 @@ private:
     QFutureWatcher< QImage > *m_loader_image;
 
     bool m_dragging;
-    QPoint m_point_drag;
 
 #ifdef DEBUG_PICTUREITEM
     QTime t;

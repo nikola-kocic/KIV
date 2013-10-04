@@ -14,7 +14,6 @@ PictureItem::PictureItem(const Settings * const settings, QWidget *parent,
     , m_loader_image(new QFutureWatcher<QImage>(this))
 
     , m_dragging(false)
-    , m_point_drag(QPoint())
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -351,57 +350,7 @@ void PictureItem::drag(const QPoint &pt)
     }
 
     const QSize widgetSize = m_imageDisplay->getWidget()->size();
-    const qreal widthDiff = widgetSize.width() - m_data->m_boundingRect.width();
-    const int xDiff = pt.x() - m_point_drag.x();
-
-    /* Am I dragging it outside of the panel? */
-    if ((xDiff >= widthDiff) && (xDiff <= 0))
-    {
-        /* No, everything is just fine */
-        m_data->m_boundingRect.moveLeft(xDiff);
-    }
-    else if (xDiff > 0)
-    {
-        /* Now don't drag it out of the panel please */
-        m_data->m_boundingRect.moveLeft(0);
-    }
-    else if (xDiff < widthDiff)
-    {
-        /* I am dragging it out of my panel.
-             * How many pixels do I have left? */
-        if (widthDiff <= 0)
-        {
-            /* Make it fit perfectly */
-            m_data->m_boundingRect.moveLeft(widthDiff);
-        }
-    }
-
-    const qreal heightDiff =
-            widgetSize.height() - m_data->m_boundingRect.height();
-    const int yDiff = pt.y() - m_point_drag.y();
-
-    /* Am I dragging it outside of the panel? */
-    if (yDiff >= heightDiff && (yDiff <= 0))
-    {
-        /* No, everything is just fine */
-        m_data->m_boundingRect.moveTop(yDiff);
-    }
-    else if (yDiff > 0)
-    {
-        /* Now don't drag it out of the panel please */
-        m_data->m_boundingRect.moveTop(0);
-    }
-    else if (yDiff < heightDiff)
-    {
-        /* I am dragging it out of my panel.
-             * How many pixels do I have left? */
-        if (heightDiff <= 0)
-        {
-            /* Make it fit perfectly */
-            m_data->m_boundingRect.moveTop(heightDiff);
-        }
-    }
-
+    m_data->drag(pt, widgetSize);
     m_imageDisplay->getWidget()->update();
 }
 
@@ -413,8 +362,7 @@ void PictureItem::beginDrag(const QPoint &pt)
     }
 
     /* Initial drag position */
-    m_point_drag.setX(pt.x() - m_data->m_boundingRect.x());
-    m_point_drag.setY(pt.y() - m_data->m_boundingRect.y());
+    m_data->beginDrag(pt);
     m_dragging = true;
     this->setCursor(Qt::ClosedHandCursor);
 }
