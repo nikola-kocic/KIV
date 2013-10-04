@@ -96,10 +96,9 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
         p.end();
     }
 
-    const qreal newWidth = m_img_size.width() * m_data->getZoom();
-    const qreal newHeight = m_img_size.height() * m_data->getZoom();
-    const QPointF p = m_data->pointToOrigin(newWidth, newHeight, this->size());
-    m_data->m_boundingRect = QRectF(p.x(), p.y(), newWidth, newHeight);
+    const QSizeF newSize = m_img_size * m_data->getZoom();
+    const QPointF p = m_data->pointToOrigin(newSize, this->size());
+    m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());
     m_data->updateSize(this->size());
     this->update();
@@ -107,10 +106,9 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
 
 void PictureItemRaster::setZoom(const qreal current, const qreal /*previous*/)
 {
-    const qreal newWidth = m_img_size.width() * current;
-    const qreal newHeight = m_img_size.height() * current;
-    const QPointF p = m_data->pointToOrigin(newWidth, newHeight, this->size());
-    m_data->m_boundingRect = QRectF(p.x(), p.y(), newWidth, newHeight);
+    const QSizeF newSize = m_img_size * current;
+    const QPointF p = m_data->pointToOrigin(newSize, this->size());
+    m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());
     m_data->updateSize(this->size());
     this->update();

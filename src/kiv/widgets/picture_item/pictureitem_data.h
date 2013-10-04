@@ -34,8 +34,7 @@ public:
 
     void avoidOutOfScreen(const QSize &widgetSize);
     void updateSize(const QSize &widgetSize);
-    QPointF pointToOrigin(const qreal width,
-                          const qreal height,
+    QPointF pointToOrigin(const QSizeF &pictureSize,
                           const QSize &widgetSize) const;
 
     int fitToScreen(const QSize &widgetSize, qreal &zoomVal) const;

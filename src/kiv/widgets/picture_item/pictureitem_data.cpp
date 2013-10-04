@@ -201,23 +201,24 @@ void PictureItemData::avoidOutOfScreen(const QSize &widgetSize)
     }
 }
 
-QPointF PictureItemData::pointToOrigin(const qreal width, const qreal height,
+QPointF PictureItemData::pointToOrigin(const QSizeF &pictureSize,
                                        const QSize &widgetSize) const
 {
     qreal originX = 0;
     qreal originY = 0;
 
-    if (width > widgetSize.width())
+    if (pictureSize.width() > widgetSize.width())
     {
-        const qreal zoomX = (qreal)width / (qreal)m_boundingRect.width();
+        const qreal zoomX = pictureSize.width() / m_boundingRect.width();
         const qreal oldX = (widgetSize.width() / 2) - m_boundingRect.x();
         const qreal newX = oldX * zoomX;
         originX = (widgetSize.width() / 2) - newX;
     }
 
-    if (width > widgetSize.width() || height > widgetSize.height())
+    if (pictureSize.width() > widgetSize.width()
+        || pictureSize.height() > widgetSize.height())
     {
-        const qreal zoomY = (qreal)height / (qreal)m_boundingRect.height();
+        const qreal zoomY = pictureSize.height() / m_boundingRect.height();
         const qreal oldY = (widgetSize.height() / 2) - m_boundingRect.y();
         const qreal newY = oldY * zoomY;
         originY = (widgetSize.height() / 2) - newY;
