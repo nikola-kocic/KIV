@@ -12,7 +12,7 @@ class PictureItemData
 public:
     explicit PictureItemData();
 
-    void setZoom(const qreal z);
+    int setZoom(const qreal desiredZoom, qreal &zoomVal);
     qreal getZoom() const;
 
     void setRotation(const qreal r);

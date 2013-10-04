@@ -249,10 +249,14 @@ void PictureItem::setZoom(const qreal value)
     }
 
     const qreal previous = m_data->getZoom();
-    m_data->setZoom(value);
-    m_imageDisplay->setZoom(m_data->getZoom(), previous);
+    qreal zoomVal;
+    if (m_data->setZoom(value, zoomVal) != 0)
+    {
+        return;
+    }
+    m_imageDisplay->setZoom(zoomVal, previous);
 
-    emit zoomChanged(m_data->getZoom(), previous);
+    emit zoomChanged(zoomVal, previous);
 }
 
 

@@ -12,11 +12,20 @@ PictureItemData::PictureItemData()
 {
 }
 
-void PictureItemData::setZoom(const qreal z)
+/* Sets zoom value in range of 0.001 to 1000. If it's not within that range,
+ * it's rounded to nearest valid value.
+ * desiredZoom: zoom that should be applied.
+ * zoomVal: stores applied zoom value.
+ * return: 0 if successful.
+ */
+int PictureItemData::setZoom(const qreal desiredZoom, qreal &zoomVal)
 {
-    m_zoom_value = (z < 0.001) ? 0.001 :
-                                 (z > 1000) ? 1000 :
-                                              z;
+    m_zoom_value = (desiredZoom < 0.001) ? 0.001 :
+                                 (desiredZoom > 1000) ? 1000 :
+                                              desiredZoom;
+    zoomVal = m_zoom_value;
+    return 0;
+}
 }
 
 void PictureItemData::updateSize(const QSize &widgetSize)
