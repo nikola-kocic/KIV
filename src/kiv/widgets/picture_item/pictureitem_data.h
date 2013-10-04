@@ -21,10 +21,10 @@ public:
     bool isPixmapNull() const;
     void setPixmapNull(const bool value);
 
+    QPointF getOffset() const;
+
     QRectF m_boundingRect;
     QColor m_color_clear;
-    qreal m_offsetX;
-    qreal m_offsetY;
 
     void avoidOutOfScreen(const QSize &widgetSize);
     void updateSize(const QSize &widgetSize);
@@ -43,6 +43,7 @@ protected:
     bool m_pixmapNull;
     qreal m_zoom_value;
     qreal m_rotation_value;
+    QPointF m_offset;
     QPoint m_point_drag;
 };
 
@@ -60,5 +61,8 @@ inline qreal PictureItemData::getRotation() const
 
 inline void PictureItemData::setRotation(const qreal r)
 { m_rotation_value = r; }
+
+inline QPointF PictureItemData::getOffset() const
+{ return m_offset; }
 
 #endif  // PICTUREITEMDATA_H

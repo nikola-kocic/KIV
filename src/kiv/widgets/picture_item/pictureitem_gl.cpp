@@ -190,9 +190,10 @@ void PictureItemGL::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslated((m_data->m_boundingRect.x() + m_data->m_offsetX
+    const QPointF offset = m_data->getOffset();
+    glTranslated((m_data->m_boundingRect.x() + offset.x()
                   + m_data->m_boundingRect.width() / 2),
-                 (m_data->m_boundingRect.y() + m_data->m_offsetY
+                 (m_data->m_boundingRect.y() + offset.y()
                   + m_data->m_boundingRect.height() / 2),
                  0);
 

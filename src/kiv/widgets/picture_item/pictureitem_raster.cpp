@@ -54,12 +54,12 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
 
     p.fillRect(boundingRect, m_data->m_color_clear);
     const qreal zoom = m_data->getZoom();
+    const QPointF offset = m_data->getOffset();
     const QRectF sourceRect = QRectF(-m_data->m_boundingRect.x() / zoom,
                                      -m_data->m_boundingRect.y() / zoom,
                                      boundingRect.width() / zoom,
                                      boundingRect.height() / zoom);
-    const QRectF drawRect = QRectF(QPointF(m_data->m_offsetX, m_data->m_offsetY),
-                                   boundingRect.size());
+    const QRectF drawRect = QRectF(offset, boundingRect.size());
     p.drawPixmap(drawRect, m_pixmap_edited, sourceRect);
     p.end();
 }

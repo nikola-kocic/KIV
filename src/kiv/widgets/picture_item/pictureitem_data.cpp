@@ -3,11 +3,10 @@
 PictureItemData::PictureItemData()
     : m_boundingRect(QRectF())
     , m_color_clear(Qt::lightGray)
-    , m_offsetX(0)
-    , m_offsetY(0)
     , m_pixmapNull(true)
     , m_zoom_value(1.0)
     , m_rotation_value(0.0)
+    , m_offset(QPoint(0, 0))
     , m_point_drag(QPoint())
 {
 }
@@ -40,9 +39,7 @@ int PictureItemData::fitToScreen(const QSize &widgetSize, qreal &zoomVal) const
         return 1;
     }
 
-    const QSize orig_size = QSize(
-                m_boundingRect.width() / m_zoom_value,
-                m_boundingRect.height() / m_zoom_value);
+    const QSizeF orig_size = m_boundingRect.size() / m_zoom_value;
 
     const qreal x_ratio = (qreal)widgetSize.width() / orig_size.width();
     const qreal y_ratio = (qreal)widgetSize.height() / orig_size.height();
@@ -127,22 +124,22 @@ void PictureItemData::updateSize(const QSize &widgetSize)
     if (widgetSize.width() > m_boundingRect.width())
     {
         const qreal offsetX = (widgetSize.width() - m_boundingRect.width()) / 2;
-        m_offsetX = (m_zoom_value == 1) ? qRound(offsetX) : offsetX;
+        m_offset.setX((m_zoom_value == 1) ? qRound(offsetX) : offsetX);
     }
     else
     {
-        m_offsetX = 0;
+        m_offset.setX(0);
     }
 
     if (widgetSize.height() > m_boundingRect.height())
     {
         const qreal offsetY =
                 (widgetSize.height() - m_boundingRect.height()) / 2;
-        m_offsetY = (m_zoom_value == 1) ? qRound(offsetY) : offsetY;
+        m_offset.setY((m_zoom_value == 1) ? qRound(offsetY) : offsetY);
     }
     else
     {
-        m_offsetY = 0;
+        m_offset.setY(0);
     }
 }
 
