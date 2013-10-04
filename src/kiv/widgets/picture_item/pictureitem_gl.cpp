@@ -287,14 +287,12 @@ void PictureItemGL::resizeGL(int width, int height)
 
 void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 {
+    qreal newWidth;
+    qreal newHeight;
     if (qRound(current) % 360 == 0)
     {
-        const qreal newWidth = m_texImg->hTile->bmpSize * m_data->getZoom();
-        const qreal newHeight = m_texImg->vTile->bmpSize * m_data->getZoom();
-        const QPointF p = m_data->pointToOrigin(newWidth,
-                                                newHeight,
-                                                this->size());
-        m_data->m_boundingRect = QRectF(p.x(), p.y(), newWidth, newHeight);
+        newWidth = m_texImg->hTile->bmpSize * m_data->getZoom();
+        newHeight = m_texImg->vTile->bmpSize * m_data->getZoom();
     }
     else
     {
@@ -311,15 +309,12 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
                                    QSize(m_texImg->hTile->bmpSize,
                                          m_texImg->vTile->bmpSize)));
 
-        const QPointF p = m_data->pointToOrigin(transformedRot.width(),
-                                                transformedRot.height(),
-                                                this->size());
-        m_data->m_boundingRect = QRectF(p.x(),
-                                        p.y(),
-                                        transformedRot.width(),
-                                        transformedRot.height());
+        newWidth = transformedRot.width();
+        newHeight = transformedRot.height();
     }
 
+    const QPointF p = m_data->pointToOrigin(newWidth, newHeight, this->size());
+    m_data->m_boundingRect = QRectF(p.x(), p.y(), newWidth, newHeight);
     m_data->avoidOutOfScreen(this->size());
     this->updateSize();
     this->updateGL();
