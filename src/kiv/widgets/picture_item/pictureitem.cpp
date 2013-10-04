@@ -13,6 +13,7 @@ PictureItem::PictureItem(const Settings * const settings, QWidget *parent,
     , m_imageDisplay(0)
     , m_loader_image(new QFutureWatcher<QImage>(this))
 
+    , m_lockMode(LockMode::None)
     , m_dragging(false)
 {
     this->setCursor(Qt::OpenHandCursor);
@@ -123,7 +124,7 @@ void PictureItem::imageFinished(int num)
 
 void PictureItem::afterPixmapLoad()
 {
-    if (m_data->getLockMode() == LockMode::None)
+    if (m_lockMode == LockMode::None)
     {
         this->setZoom(1);
     }
@@ -291,7 +292,7 @@ void PictureItem::fitHeight()
 
 void PictureItem::setLockMode(const int mode)
 {
-    m_data->setLockMode(mode);
+    m_lockMode = mode;
     this->updateLockMode();
 }
 
@@ -303,7 +304,7 @@ void PictureItem::updateLockMode()
         return;
     }
 
-    switch (m_data->getLockMode())
+    switch (m_lockMode)
     {
     case LockMode::Autofit:
         this->fitToScreen();

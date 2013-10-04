@@ -18,12 +18,6 @@ public:
     void setRotation(const qreal r);
     qreal getRotation() const;
 
-    void setLockMode(const int mode);
-    int getLockMode() const;
-
-    void setHardwareAcceleration(const bool b);
-    bool getHardwareAcceleration() const;
-
     bool isPixmapNull() const;
     void setPixmapNull(const bool value);
 
@@ -49,7 +43,6 @@ protected:
     bool m_pixmapNull;
     qreal m_zoom_value;
     qreal m_rotation_value;
-    int m_lockMode;
     QPoint m_point_drag;
 };
 
@@ -61,12 +54,6 @@ inline void PictureItemData::setPixmapNull(const bool value)
 
 inline qreal PictureItemData::getZoom() const
 { return m_zoom_value; }
-
-inline int PictureItemData::getLockMode() const
-{ return m_lockMode; }
-
-inline void PictureItemData::setLockMode(const int mode)
-{ m_lockMode = mode; }
 
 inline qreal PictureItemData::getRotation() const
 { return m_rotation_value; }

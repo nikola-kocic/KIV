@@ -65,6 +65,7 @@ private:
     bool m_opengl;
     PictureItemInterface *m_imageDisplay;
     QFutureWatcher< QImage > *m_loader_image;
+    int m_lockMode;
 
     bool m_dragging;
 

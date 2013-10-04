@@ -8,7 +8,6 @@ PictureItemData::PictureItemData()
     , m_pixmapNull(true)
     , m_zoom_value(1.0)
     , m_rotation_value(0.0)
-    , m_lockMode(LockMode::None)
     , m_point_drag(QPoint())
 {
 }
