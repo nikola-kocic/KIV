@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS += src/quazip \
-    src/kiv
+    src/kiv \
+    src/kiv_tests
 
 
 HEADERS += \
