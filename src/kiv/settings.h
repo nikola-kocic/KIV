@@ -62,7 +62,7 @@ public:
     QList<Bookmark *> getBookmarks() const;
 
     bool addBookmark(const QString &name, const QString &path);
-    void deleteBookmark(const QString &path);
+    bool deleteBookmark(const QString &path);
 
 private:
     void refreshBookmarks();
