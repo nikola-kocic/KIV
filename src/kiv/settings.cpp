@@ -12,10 +12,10 @@ Settings::Settings()
                                QSettings::UserScope,
                                QApplication::organizationName(),
                                QApplication::applicationName()))
-
-    , m_middleClick(m_settings->value("Mouse/MiddleClick", 1).toInt())
-    , m_wheel(m_settings->value("Mouse/Wheel", 1).toInt())
-
+    , m_middleClick(
+          m_settings->value("Mouse/MiddleClick",
+                            MiddleClickAction::Fullscreen).toInt())
+    , m_wheel(m_settings->value("Mouse/Wheel", WheelAction::ChangePage).toInt())
     , m_scrollPageByWidth(
           m_settings->value("Behavior/ScrollPageByWidth", false).toBool())
     , m_rightToLeft(m_settings->value("Behavior/RightToLeft", false).toBool())
