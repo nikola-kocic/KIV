@@ -7,11 +7,13 @@
 #include "helper.h"
 #endif
 
-Settings::Settings()
-    : m_settings(new QSettings(QSettings::IniFormat,
-                               QSettings::UserScope,
-                               QApplication::organizationName(),
-                               QApplication::applicationName()))
+Settings::Settings(QSettings *settings)
+    : m_settings((settings != NULL) ?
+                     settings :
+                     new QSettings(QSettings::IniFormat,
+                                   QSettings::UserScope,
+                                   QApplication::organizationName(),
+                                   QApplication::applicationName()))
     , m_middleClick(
           m_settings->value("Mouse/MiddleClick",
                             MiddleClickAction::Fullscreen).toInt())
