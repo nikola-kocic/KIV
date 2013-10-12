@@ -61,8 +61,8 @@ public:
     int getBookmarkCount() const;
     QList<Bookmark *> getBookmarks() const;
 
-    void addBookmark(const QString &name, const QString &path);
-    void deleteBookmark(const int index);
+    bool addBookmark(const QString &name, const QString &path);
+    void deleteBookmark(const QString &path);
 
 private:
     void refreshBookmarks();

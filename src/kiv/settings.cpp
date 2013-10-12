@@ -69,8 +69,16 @@ Settings::~Settings()
 }
 
 
-void Settings::addBookmark(const QString &name, const QString &path)
+bool Settings::addBookmark(const QString &name, const QString &path)
 {
+    // Don't allow multiple bookmarks with same path
+    for (int i = 0; i < m_bookmarks.size(); ++i)
+    {
+        if (m_bookmarks.at(i)->getPath() == path)
+        {
+            return false;
+        }
+    }
     const int oldcount = m_bookmarks.size();
     m_settings->setValue("Bookmarks/" + QString::number(oldcount) + "/Name",
                          name);
@@ -78,10 +86,18 @@ void Settings::addBookmark(const QString &name, const QString &path)
                          path);
 
     m_bookmarks.append(new Bookmark(name, path));
+    return true;
 }
 
-void Settings::deleteBookmark(const int index)
+void Settings::deleteBookmark(const QString &path)
 {
+    int index = 0;
+    while (index < m_bookmarks.size() &&
+           m_bookmarks.at(index)->getPath() != path)
+    {
+        ++index;
+    }
+
     delete m_bookmarks.at(index);
     m_bookmarks.removeAt(index);
     refreshBookmarks();

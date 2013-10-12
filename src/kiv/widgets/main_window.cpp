@@ -542,7 +542,7 @@ void MainWindow::populateBookmarks()
     {
         QAction *bookmark = new QAction(bookmarks.at(i)->getName(),
                                         m_menu_bookmarks);
-        bookmark->setData(i);
+        bookmark->setData(bookmarks.at(i)->getPath());
         m_menu_bookmarks->addAction(bookmark);
 #ifdef DEBUG_MAIN_WINDOW
         DEBUGOUT << "added bookmark" << bookmark->text()
@@ -572,7 +572,7 @@ void MainWindow::deleteBookmark()
     if (m_act_bookmark_active_item == NULL)
     { return; }
 
-    m_settings->deleteBookmark(m_act_bookmark_active_item->data().toInt());
+    m_settings->deleteBookmark(m_act_bookmark_active_item->data().toString());
     m_menu_bookmarks->removeAction(m_act_bookmark_active_item);
     delete m_act_bookmark_active_item;
     m_act_bookmark_active_item = NULL;
@@ -759,12 +759,20 @@ void MainWindow::addBookmark()
         return;
     }
     const QString bookmarkName = dialog.textValue();
-    m_settings->addBookmark(bookmarkName,
-                            m_view_files->getCurrentFileInfo().getPath());
-
-    QAction *bookmark = new QAction(bookmarkName, m_menu_bookmarks);
-    bookmark->setData(m_settings->getBookmarkCount() - 1);
-    m_menu_bookmarks->addAction(bookmark);
+    bool result = m_settings->addBookmark(
+                bookmarkName,
+                m_view_files->getCurrentFileInfo().getPath());
+    if (result == false)
+    {
+        QMessageBox::information(this, QApplication::applicationName(),
+                                 tr("Bookmark already exists"));
+    }
+    else
+    {
+        QAction *bookmark = new QAction(bookmarkName, m_menu_bookmarks);
+        bookmark->setData(m_settings->getBookmarkCount() - 1);
+        m_menu_bookmarks->addAction(bookmark);
+    }
 }
 
 void MainWindow::zoomReset()
