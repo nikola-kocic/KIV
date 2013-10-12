@@ -17,6 +17,11 @@ public:
 
     inline QString getName() const { return m_name; }
     inline QString getPath() const { return m_path; }
+    bool operator ==(const Bookmark &other) const
+    {
+        return (m_name == other.m_name &&
+                m_path == other.m_path);
+    }
 
 private:
     const QString m_name;
