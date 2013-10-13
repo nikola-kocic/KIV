@@ -113,7 +113,7 @@ void PictureItem::imageFinished(int num)
 
     this->afterPixmapLoad();
 
-    m_data->updateSize();
+    m_data->updateOffsets();
 
 //    m_imageDisplay->getWidget()->setUpdatesEnabled(true);
     emit imageChanged();
@@ -186,7 +186,7 @@ void PictureItem::resizeEvent(QResizeEvent *event)
     }
 
     m_data->setWidgetSize(m_imageDisplay->getWidget()->size());
-    m_data->updateSize();
+    m_data->updateOffsets();
     m_data->avoidOutOfScreen();
     this->updateLockMode();
 

@@ -172,7 +172,7 @@ void PictureItemGL::updateSize()
         return;
     }
 
-    m_data->updateSize();
+    m_data->updateOffsets();
 
     const QSizeF img_size_original = m_data->getImageSizeOriginal();
     m_scaleX = (img_size_original.width() * m_data->getZoom()) / this->width();

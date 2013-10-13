@@ -30,7 +30,7 @@ public:
     QColor m_color_clear;
 
     void avoidOutOfScreen();
-    void updateSize();
+    void updateOffsets();
     QPointF pointToOrigin() const;
 
     int fitToScreen(qreal &zoomVal) const;

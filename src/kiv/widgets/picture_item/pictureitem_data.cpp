@@ -130,7 +130,7 @@ int PictureItemData::fitHeight(qreal &zoomVal) const
     return 0;
 }
 
-void PictureItemData::updateSize()
+void PictureItemData::updateOffsets()
 {
     if (this->isPixmapNull())
     {

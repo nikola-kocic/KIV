@@ -92,7 +92,7 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
     const QPointF p = m_data->pointToOrigin();
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen();
-    m_data->updateSize();
+    m_data->updateOffsets();
     this->update();
 }
 
@@ -102,6 +102,6 @@ void PictureItemRaster::setZoom(const qreal current, const qreal /*previous*/)
     const QPointF p = m_data->pointToOrigin();
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen();
-    m_data->updateSize();
+    m_data->updateOffsets();
     this->update();
 }
