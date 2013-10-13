@@ -19,7 +19,6 @@ public:
     QWidget* getWidget();
 
 private:
-    QSizeF m_img_size;
     QPixmap m_pixmap;
     QPixmap m_pixmap_edited;
 

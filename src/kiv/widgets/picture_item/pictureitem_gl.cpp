@@ -58,8 +58,6 @@ void PictureItemGL::setImage(const QImage &img)
     this->setUpdatesEnabled(false);
 
     m_texImg->setImage(img);
-    m_img_size = img.size();
-    m_rotated_img_size = m_img_size;
 
     m_textures = QVector < QVector < GLuint > >(m_texImg->hTile->tileCount);
     QList<TexIndex *> indexes;
@@ -176,8 +174,9 @@ void PictureItemGL::updateSize()
 
     m_data->updateSize(this->size());
 
-    m_scaleX = (m_img_size.width() * m_data->getZoom()) / this->width();
-    m_scaleY = (m_img_size.height() * m_data->getZoom()) / this->height();
+    const QSizeF img_size_original = m_data->getImageSizeOriginal();
+    m_scaleX = (img_size_original.width() * m_data->getZoom()) / this->width();
+    m_scaleY = (img_size_original.height() * m_data->getZoom()) / this->height();
 }
 
 void PictureItemGL::paintGL()
@@ -193,6 +192,7 @@ void PictureItemGL::paintGL()
     glLoadIdentity();
 
     const QPointF offset = m_data->getOffset();
+    const QSizeF img_size_original = m_data->getImageSizeOriginal();
     glTranslated((m_data->m_boundingRect.x() + offset.x()
                   + m_data->m_boundingRect.width() / 2),
                  (m_data->m_boundingRect.y() + offset.y()
@@ -200,8 +200,8 @@ void PictureItemGL::paintGL()
                  0);
 
     glRotated(m_data->getRotation(), 0, 0, 1);
-    glTranslated(-(m_img_size.width() * m_data->getZoom()) / 2,
-                 -(m_img_size.height() * m_data->getZoom()) / 2,
+    glTranslated(-(img_size_original.width() * m_data->getZoom()) / 2,
+                 -(img_size_original.height() * m_data->getZoom()) / 2,
                  0);
     glScaled(m_scaleX, m_scaleY, 1);
 
@@ -211,7 +211,7 @@ void PictureItemGL::paintGL()
 
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
-        double texScale = (double)m_img_size.width()
+        double texScale = img_size_original.width()
                 / (double)m_texImg->hTile->tileSize.at(hIndex);
         double tx;
         double tx2;
@@ -237,7 +237,7 @@ void PictureItemGL::paintGL()
 
         for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
         {
-            texScale = (double)m_img_size.height()
+            texScale = img_size_original.height()
                     / (double)m_texImg->vTile->tileSize.at(vIndex);
             double ty;
             double ty2;
@@ -290,21 +290,7 @@ void PictureItemGL::resizeGL(int width, int height)
 
 void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 {
-    if (qRound(current) % 360 == 0)
-    {
-        m_rotated_img_size = m_img_size;
-    }
-    else
-    {
-        QTransform tRot;
-        tRot.rotate(current);
-        const QRectF transformedRot =
-                tRot.mapRect(QRectF(QPointF(0, 0), m_img_size));
-
-        m_rotated_img_size = transformedRot.size();
-    }
-
-    const QSizeF newSize = m_rotated_img_size * m_data->getZoom();
+    const QSizeF newSize = m_data->getImageSizeTransformed() * m_data->getZoom();
     const QPointF p = m_data->pointToOrigin(newSize, this->size());
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());
@@ -314,7 +300,7 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 
 void PictureItemGL::setZoom(const qreal current, const qreal)
 {
-    const QSizeF newSize = m_rotated_img_size * current;
+    const QSizeF newSize = m_data->getImageSizeTransformed() * current;
     const QPointF p = m_data->pointToOrigin(newSize, this->size());
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());

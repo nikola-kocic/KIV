@@ -1,4 +1,5 @@
 #include "pictureitem_data.h"
+#include <QTransform>
 
 PictureItemData::PictureItemData()
     : m_boundingRect(QRectF())
@@ -24,6 +25,24 @@ int PictureItemData::setZoom(const qreal desiredZoom, qreal &zoomVal)
                                               desiredZoom;
     zoomVal = m_zoom_value;
     return 0;
+}
+
+void PictureItemData::setRotation(const qreal r)
+{
+    if (qRound(r) % 360 == 0)
+    {
+        m_img_size_transformed = m_img_size_original;
+        m_rotation_value = 0;
+    }
+    else
+    {
+        QTransform tRot;
+        tRot.rotate(r);
+        const QRectF transformedRect = tRot.mapRect(
+                    QRectF(QPointF(0, 0), m_img_size_original));
+        m_img_size_transformed = transformedRect.size();
+        m_rotation_value = r;
+    }
 }
 
 /* Calculates zoom value needed for picture to fit to widget size.

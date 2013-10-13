@@ -20,8 +20,11 @@ public:
 
     bool isPixmapNull() const;
     void setPixmapNull(const bool value);
+    void setImageSize(const QSize &size);
 
     QPointF getOffset() const;
+    QSizeF getImageSizeOriginal() const;
+    QSizeF getImageSizeTransformed() const;
 
     QRectF m_boundingRect;
     QColor m_color_clear;
@@ -45,6 +48,9 @@ protected:
     qreal m_rotation_value;
     QPointF m_offset;
     QPoint m_point_drag;
+    QSizeF m_img_size_original;
+    QSizeF m_img_size_transformed; // Image size after transformation.
+                                   // e.g. rotation.
 };
 
 inline bool PictureItemData::isPixmapNull() const
@@ -53,16 +59,27 @@ inline bool PictureItemData::isPixmapNull() const
 inline void PictureItemData::setPixmapNull(const bool value)
 { m_pixmapNull = value; }
 
+inline void PictureItemData::setImageSize(const QSize &size)
+{
+    m_img_size_original = size;
+    m_img_size_transformed = size;
+    m_boundingRect = QRectF(0, 0, size.width(), size.height());
+}
+
 inline qreal PictureItemData::getZoom() const
 { return m_zoom_value; }
 
 inline qreal PictureItemData::getRotation() const
 { return m_rotation_value; }
 
-inline void PictureItemData::setRotation(const qreal r)
-{ m_rotation_value = r; }
-
 inline QPointF PictureItemData::getOffset() const
 { return m_offset; }
+
+inline QSizeF PictureItemData::getImageSizeOriginal() const
+{ return m_img_size_original; }
+
+inline QSizeF PictureItemData::getImageSizeTransformed() const
+{ return m_img_size_transformed; }
+
 
 #endif  // PICTUREITEMDATA_H

@@ -32,8 +32,6 @@ void PictureItemRaster::setImage(const QImage &img)
     this->setUpdatesEnabled(false);
 
     m_pixmap = QPixmap::fromImage(img);
-    m_img_size = m_pixmap.size();
-
     m_pixmap_edited = m_pixmap;
 
     this->setUpdatesEnabled(true);
@@ -66,36 +64,31 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
 
 void PictureItemRaster::setRotation(const qreal current, const qreal previous)
 {
-    if (qRound(current) % 360 == 0)
+    const QSizeF image_size_transformed = m_data->getImageSizeTransformed();
+    if (qFuzzyIsNull(m_data->getRotation()))
     {
-        m_img_size = m_pixmap.size();
         m_pixmap_edited = m_pixmap;
     }
     else if (!Helper::FuzzyCompare(current, previous))
     {
-        QTransform tRot;
-        tRot.rotate(current);
-        const QRect transformedRect = tRot.mapRect(QRect(QPoint(0, 0),
-                                                         m_pixmap.size()));
-
-        m_pixmap_edited = QPixmap(transformedRect.size());
-        m_img_size = m_pixmap_edited.size();
+        m_pixmap_edited = QPixmap(image_size_transformed.toSize());
 
         m_pixmap_edited.fill(m_data->m_color_clear);
         QPainter p(&m_pixmap_edited);
 
         p.setRenderHint(QPainter::SmoothPixmapTransform);
-        p.translate(transformedRect.width() / 2, transformedRect.height() / 2);
+        p.translate(image_size_transformed.width() / 2,
+                    image_size_transformed.height() / 2);
         p.rotate(current);
-        p.translate(-transformedRect.width() / 2,
-                    -transformedRect.height() / 2);
-        p.drawPixmap((transformedRect.width() - m_pixmap.width()) / 2,
-                     (transformedRect.height() - m_pixmap.height()) / 2,
+        p.translate(-image_size_transformed.width() / 2,
+                    -image_size_transformed.height() / 2);
+        p.drawPixmap((image_size_transformed.width() - m_pixmap.width()) / 2,
+                     (image_size_transformed.height() - m_pixmap.height()) / 2,
                      m_pixmap);
         p.end();
     }
 
-    const QSizeF newSize = m_img_size * m_data->getZoom();
+    const QSizeF newSize = image_size_transformed * m_data->getZoom();
     const QPointF p = m_data->pointToOrigin(newSize, this->size());
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());
@@ -105,7 +98,7 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
 
 void PictureItemRaster::setZoom(const qreal current, const qreal /*previous*/)
 {
-    const QSizeF newSize = m_img_size * current;
+    const QSizeF newSize = m_data->getImageSizeTransformed() * current;
     const QPointF p = m_data->pointToOrigin(newSize, this->size());
     m_data->m_boundingRect = QRectF(p, newSize);
     m_data->avoidOutOfScreen(this->size());

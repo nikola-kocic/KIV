@@ -108,8 +108,7 @@ void PictureItem::imageFinished(int num)
     m_imageDisplay->setBackgroundColor(getAverageColor(newImage));
 
     m_imageDisplay->setImage(newImage);
-
-    m_data->m_boundingRect = QRect(0, 0, newImage.width(), newImage.height());
+    m_data->setImageSize(newImage.size());
 
     this->afterPixmapLoad();
 

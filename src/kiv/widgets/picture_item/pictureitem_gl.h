@@ -36,8 +36,6 @@ private:
     qreal m_scaleY;
     QVector < QVector <GLuint> > m_textures;
     TexImg *m_texImg;
-    QSizeF m_rotated_img_size;
-    QSizeF m_img_size;
 
 protected:
     void initializeGL();
