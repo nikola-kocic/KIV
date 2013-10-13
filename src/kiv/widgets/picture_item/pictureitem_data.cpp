@@ -251,6 +251,25 @@ void PictureItemData::updateSize()
     updateOffsets();
 }
 
+int PictureItemData::resetImagePosition(bool rtl)
+{
+    if (m_boundingRect.width() > m_widget_size.width())
+    {
+        if (rtl == true)
+        {
+            m_boundingRect.moveLeft(
+                        -(m_boundingRect.width() - m_widget_size.width()));
+        }
+        else
+        {
+            m_boundingRect.moveLeft(0);
+        }
+    }
+
+     m_boundingRect.moveTop(0);
+     return 0;
+}
+
 void PictureItemData::beginDrag(const QPoint &pt)
 {
     if (this->isPixmapNull())

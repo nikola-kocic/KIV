@@ -131,18 +131,7 @@ void PictureItem::afterPixmapLoad()
     this->setRotation(0);
 
     this->updateLockMode();
-
-    if (m_data->m_boundingRect.width() > m_imageDisplay->getWidget()->width())
-    {
-        if (m_settings->getRightToLeft())
-        {
-            m_data->m_boundingRect.moveLeft(
-                        -(m_data->m_boundingRect.width()
-                          - m_imageDisplay->getWidget()->width()));
-        }
-    }
-
-     m_data->m_boundingRect.moveTop(0);
+    m_data->resetImagePosition(m_settings->getRightToLeft());
 }
 
 QColor PictureItem::getAverageColor(const QImage &img) const

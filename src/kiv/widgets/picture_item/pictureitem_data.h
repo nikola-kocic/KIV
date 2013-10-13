@@ -33,6 +33,7 @@ public:
     void updateOffsets();
     QPointF pointToOrigin() const;
     void updateSize();
+    int resetImagePosition(bool rtl);
 
     int fitToScreen(qreal &zoomVal) const;
     int fitWidth(qreal &zoomVal) const;
