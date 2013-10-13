@@ -108,11 +108,12 @@ void PictureItem::imageFinished(int num)
     m_imageDisplay->setBackgroundColor(getAverageColor(newImage));
 
     m_imageDisplay->setImage(newImage);
+    m_data->setWidgetSize(m_imageDisplay->getWidget()->size());
     m_data->setImageSize(newImage.size());
 
     this->afterPixmapLoad();
 
-    m_data->updateSize(m_imageDisplay->getWidget()->size());
+    m_data->updateSize();
 
 //    m_imageDisplay->getWidget()->setUpdatesEnabled(true);
     emit imageChanged();
@@ -184,9 +185,9 @@ void PictureItem::resizeEvent(QResizeEvent *event)
         return;
     }
 
-    m_data->updateSize(m_imageDisplay->getWidget()->size());
-
-    m_data->avoidOutOfScreen(m_imageDisplay->getWidget()->size());
+    m_data->setWidgetSize(m_imageDisplay->getWidget()->size());
+    m_data->updateSize();
+    m_data->avoidOutOfScreen();
     this->updateLockMode();
 
     return QWidget::resizeEvent(event);
@@ -262,7 +263,7 @@ void PictureItem::setZoom(const qreal value)
 void PictureItem::fitToScreen()
 {
     qreal zoomVal;
-    if (m_data->fitToScreen(m_imageDisplay->getWidget()->size(), zoomVal) != 0)
+    if (m_data->fitToScreen(zoomVal) != 0)
     {
         return;
     }
@@ -272,7 +273,7 @@ void PictureItem::fitToScreen()
 void PictureItem::fitWidth()
 {
     qreal zoomVal;
-    if (m_data->fitWidth(m_imageDisplay->getWidget()->size(), zoomVal) != 0)
+    if (m_data->fitWidth(zoomVal) != 0)
     {
         return;
     }
@@ -282,7 +283,7 @@ void PictureItem::fitWidth()
 void PictureItem::fitHeight()
 {
     qreal zoomVal;
-    if (m_data->fitHeight(m_imageDisplay->getWidget()->size(), zoomVal) != 0)
+    if (m_data->fitHeight(zoomVal) != 0)
     {
         return;
     }
@@ -349,8 +350,7 @@ void PictureItem::drag(const QPoint &pt)
         return;
     }
 
-    const QSize widgetSize = m_imageDisplay->getWidget()->size();
-    m_data->drag(pt, widgetSize);
+    m_data->drag(pt);
     m_imageDisplay->getWidget()->update();
 }
 

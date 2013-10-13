@@ -172,7 +172,7 @@ void PictureItemGL::updateSize()
         return;
     }
 
-    m_data->updateSize(this->size());
+    m_data->updateSize();
 
     const QSizeF img_size_original = m_data->getImageSizeOriginal();
     m_scaleX = (img_size_original.width() * m_data->getZoom()) / this->width();
@@ -291,9 +291,9 @@ void PictureItemGL::resizeGL(int width, int height)
 void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 {
     const QSizeF newSize = m_data->getImageSizeTransformed() * m_data->getZoom();
-    const QPointF p = m_data->pointToOrigin(newSize, this->size());
+    const QPointF p = m_data->pointToOrigin();
     m_data->m_boundingRect = QRectF(p, newSize);
-    m_data->avoidOutOfScreen(this->size());
+    m_data->avoidOutOfScreen();
     this->updateSize();
     this->updateGL();
 }
@@ -301,9 +301,9 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
 void PictureItemGL::setZoom(const qreal current, const qreal)
 {
     const QSizeF newSize = m_data->getImageSizeTransformed() * current;
-    const QPointF p = m_data->pointToOrigin(newSize, this->size());
+    const QPointF p = m_data->pointToOrigin();
     m_data->m_boundingRect = QRectF(p, newSize);
-    m_data->avoidOutOfScreen(this->size());
+    m_data->avoidOutOfScreen();
     this->updateSize();
     this->updateGL();
 }

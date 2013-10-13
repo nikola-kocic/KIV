@@ -29,18 +29,18 @@ public:
     QRectF m_boundingRect;
     QColor m_color_clear;
 
-    void avoidOutOfScreen(const QSize &widgetSize);
-    void updateSize(const QSize &widgetSize);
-    QPointF pointToOrigin(const QSizeF &pictureSize,
-                          const QSize &widgetSize) const;
+    void avoidOutOfScreen();
+    void updateSize();
+    QPointF pointToOrigin() const;
 
-    int fitToScreen(const QSize &widgetSize, qreal &zoomVal) const;
-    int fitWidth(const QSize &widgetSize, qreal &zoomVal) const;
-    int fitHeight(const QSize &widgetSize, qreal &zoomVal) const;
+    int fitToScreen(qreal &zoomVal) const;
+    int fitWidth(qreal &zoomVal) const;
+    int fitHeight(qreal &zoomVal) const;
 
-    void drag(const QPoint &pt,
-              const QSize &widgetSize);
+    void drag(const QPoint &pt);
     void beginDrag(const QPoint &pt);
+
+    void setWidgetSize(const QSize &size);
 
 protected:
     bool m_pixmapNull;
@@ -48,6 +48,7 @@ protected:
     qreal m_rotation_value;
     QPointF m_offset;
     QPoint m_point_drag;
+    QSize m_widget_size;
     QSizeF m_img_size_original;
     QSizeF m_img_size_transformed; // Image size after transformation.
                                    // e.g. rotation.
@@ -74,6 +75,9 @@ inline qreal PictureItemData::getRotation() const
 
 inline QPointF PictureItemData::getOffset() const
 { return m_offset; }
+
+inline void PictureItemData::setWidgetSize(const QSize &size)
+{ m_widget_size = size; }
 
 inline QSizeF PictureItemData::getImageSizeOriginal() const
 { return m_img_size_original; }

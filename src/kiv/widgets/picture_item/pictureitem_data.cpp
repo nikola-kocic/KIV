@@ -47,11 +47,10 @@ void PictureItemData::setRotation(const qreal r)
 
 /* Calculates zoom value needed for picture to fit to widget size.
  * If picture is smaller than widget, it's set to 100% zoom.
- * widgetSize: size of widget containing picture.
  * zoomVal: stores calculated zoom value.
  * return: 0 if successful.
  */
-int PictureItemData::fitToScreen(const QSize &widgetSize, qreal &zoomVal) const
+int PictureItemData::fitToScreen(qreal &zoomVal) const
 {
     if (this->isPixmapNull())
     {
@@ -60,15 +59,15 @@ int PictureItemData::fitToScreen(const QSize &widgetSize, qreal &zoomVal) const
 
     const QSizeF orig_size = m_boundingRect.size() / m_zoom_value;
 
-    const qreal x_ratio = (qreal)widgetSize.width() / orig_size.width();
-    const qreal y_ratio = (qreal)widgetSize.height() / orig_size.height();
+    const qreal x_ratio = (qreal)m_widget_size.width() / orig_size.width();
+    const qreal y_ratio = (qreal)m_widget_size.height() / orig_size.height();
 
-    if ((orig_size.width() <= widgetSize.width())
-        && (orig_size.height() <= widgetSize.height()))
+    if ((orig_size.width() <= m_widget_size.width())
+        && (orig_size.height() <= m_widget_size.height()))
     {
         zoomVal = 1;
     }
-    else if ((x_ratio * orig_size.height()) < widgetSize.height())
+    else if ((x_ratio * orig_size.height()) < m_widget_size.height())
     {
         zoomVal = x_ratio;
     }
@@ -80,11 +79,10 @@ int PictureItemData::fitToScreen(const QSize &widgetSize, qreal &zoomVal) const
 }
 
 /* Calculates zoom value needed for picture to fit to widget width.
- * widgetSize: size of widget containing picture.
  * zoomVal: stores calculated zoom value.
  * return: 0 if successful.
  */
-int PictureItemData::fitWidth(const QSize &widgetSize, qreal &zoomVal) const
+int PictureItemData::fitWidth(qreal &zoomVal) const
 {
     if (this->isPixmapNull())
     {
@@ -93,9 +91,9 @@ int PictureItemData::fitWidth(const QSize &widgetSize, qreal &zoomVal) const
 
     const qreal tw = m_boundingRect.width() / m_zoom_value;
 
-    const qreal x_ratio = (qreal)widgetSize.width() / tw;
+    const qreal x_ratio = (qreal)m_widget_size.width() / tw;
 
-    if (tw <= widgetSize.width())
+    if (tw <= m_widget_size.width())
     {
         zoomVal = 1;
     }
@@ -107,11 +105,10 @@ int PictureItemData::fitWidth(const QSize &widgetSize, qreal &zoomVal) const
 }
 
 /* Calculates zoom value needed for picture to fit to widget height.
- * widgetSize: size of widget containing picture.
  * zoomVal: stores calculated zoom value.
  * return: 0 if successful.
  */
-int PictureItemData::fitHeight(const QSize &widgetSize, qreal &zoomVal) const
+int PictureItemData::fitHeight(qreal &zoomVal) const
 {
     if (this->isPixmapNull())
     {
@@ -120,9 +117,9 @@ int PictureItemData::fitHeight(const QSize &widgetSize, qreal &zoomVal) const
 
     const qreal th = m_boundingRect.height() / m_zoom_value;
 
-    const qreal y_ratio = (qreal)widgetSize.height() / th;
+    const qreal y_ratio = (qreal)m_widget_size.height() / th;
 
-    if (th <= widgetSize.height())
+    if (th <= m_widget_size.height())
     {
         zoomVal = 1;
     }
@@ -133,16 +130,16 @@ int PictureItemData::fitHeight(const QSize &widgetSize, qreal &zoomVal) const
     return 0;
 }
 
-void PictureItemData::updateSize(const QSize &widgetSize)
+void PictureItemData::updateSize()
 {
     if (this->isPixmapNull())
     {
         return;
     }
 
-    if (widgetSize.width() > m_boundingRect.width())
+    if (m_widget_size.width() > m_boundingRect.width())
     {
-        const qreal offsetX = (widgetSize.width() - m_boundingRect.width()) / 2;
+        const qreal offsetX = (m_widget_size.width() - m_boundingRect.width()) / 2;
         m_offset.setX((m_zoom_value == 1) ? qRound(offsetX) : offsetX);
     }
     else
@@ -150,10 +147,10 @@ void PictureItemData::updateSize(const QSize &widgetSize)
         m_offset.setX(0);
     }
 
-    if (widgetSize.height() > m_boundingRect.height())
+    if (m_widget_size.height() > m_boundingRect.height())
     {
         const qreal offsetY =
-                (widgetSize.height() - m_boundingRect.height()) / 2;
+                (m_widget_size.height() - m_boundingRect.height()) / 2;
         m_offset.setY((m_zoom_value == 1) ? qRound(offsetY) : offsetY);
     }
     else
@@ -162,7 +159,7 @@ void PictureItemData::updateSize(const QSize &widgetSize)
     }
 }
 
-void PictureItemData::avoidOutOfScreen(const QSize &widgetSize)
+void PictureItemData::avoidOutOfScreen()
 {
     if (this->isPixmapNull())
     {
@@ -176,7 +173,7 @@ void PictureItemData::avoidOutOfScreen(const QSize &widgetSize)
     }
     else
     {
-        const qreal widthDiff = widgetSize.width() - m_boundingRect.width();
+        const qreal widthDiff = m_widget_size.width() - m_boundingRect.width();
         if ((m_boundingRect.x() <= widthDiff))
         {
             if (widthDiff <= 0)
@@ -199,7 +196,7 @@ void PictureItemData::avoidOutOfScreen(const QSize &widgetSize)
     }
     else
     {
-        const qreal heightDiff = widgetSize.height() - m_boundingRect.height();
+        const qreal heightDiff = m_widget_size.height() - m_boundingRect.height();
         if ((m_boundingRect.y() <= heightDiff))
         {
             if (heightDiff <= 0)
@@ -216,27 +213,27 @@ void PictureItemData::avoidOutOfScreen(const QSize &widgetSize)
     }
 }
 
-QPointF PictureItemData::pointToOrigin(const QSizeF &pictureSize,
-                                       const QSize &widgetSize) const
+QPointF PictureItemData::pointToOrigin() const
 {
+    QSizeF img_size_zoomed = m_img_size_transformed * m_zoom_value;
     qreal originX = 0;
     qreal originY = 0;
 
-    if (pictureSize.width() > widgetSize.width())
+    if (img_size_zoomed.width() > m_widget_size.width())
     {
-        const qreal zoomX = pictureSize.width() / m_boundingRect.width();
-        const qreal oldX = (widgetSize.width() / 2) - m_boundingRect.x();
+        const qreal zoomX = img_size_zoomed.width() / m_boundingRect.width();
+        const qreal oldX = (m_widget_size.width() / 2) - m_boundingRect.x();
         const qreal newX = oldX * zoomX;
-        originX = (widgetSize.width() / 2) - newX;
+        originX = (m_widget_size.width() / 2) - newX;
     }
 
-    if (pictureSize.width() > widgetSize.width()
-        || pictureSize.height() > widgetSize.height())
+    if (img_size_zoomed.width() > m_widget_size.width()
+        || img_size_zoomed.height() > m_widget_size.height())
     {
-        const qreal zoomY = pictureSize.height() / m_boundingRect.height();
-        const qreal oldY = (widgetSize.height() / 2) - m_boundingRect.y();
+        const qreal zoomY = img_size_zoomed.height() / m_boundingRect.height();
+        const qreal oldY = (m_widget_size.height() / 2) - m_boundingRect.y();
         const qreal newY = oldY * zoomY;
-        originY = (widgetSize.height() / 2) - newY;
+        originY = (m_widget_size.height() / 2) - newY;
     }
 
     return QPointF(originX, originY);
@@ -254,15 +251,14 @@ void PictureItemData::beginDrag(const QPoint &pt)
     m_point_drag.setY(pt.y() - m_boundingRect.y());
 }
 
-void PictureItemData::drag(const QPoint &pt,
-                           const QSize &widgetSize)
+void PictureItemData::drag(const QPoint &pt)
 {
     if (this->isPixmapNull())
     {
         return;
     }
 
-    const qreal widthDiff = widgetSize.width() - m_boundingRect.width();
+    const qreal widthDiff = m_widget_size.width() - m_boundingRect.width();
     const int xDiff = pt.x() - m_point_drag.x();
 
     /* Am I dragging it outside of the panel? */
@@ -287,7 +283,7 @@ void PictureItemData::drag(const QPoint &pt,
         }
     }
 
-    const qreal heightDiff = widgetSize.height() - m_boundingRect.height();
+    const qreal heightDiff = m_widget_size.height() - m_boundingRect.height();
     const int yDiff = pt.y() - m_point_drag.y();
 
     /* Am I dragging it outside of the panel? */
