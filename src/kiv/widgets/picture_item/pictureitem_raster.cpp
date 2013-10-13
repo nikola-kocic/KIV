@@ -17,6 +17,7 @@ PictureItemRaster::PictureItemRaster(PictureItemData *data, QWidget *parent)
     , m_pixmap(QPixmap())
     , m_pixmap_edited(m_pixmap)
 {
+    setAttribute(Qt::WA_OpaquePaintEvent);
     m_widget = this;
 }
 
@@ -45,18 +46,35 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
         return;
     }
 
-    const QRect boundingRect = event->rect();
     QPainter p(this);
-    p.setClipRect(boundingRect);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    p.fillRect(boundingRect, m_data->m_color_clear);
-    const qreal zoom = m_data->getZoom();
+    const QRect eventRect = event->rect();
+    p.setClipRect(eventRect);
     const QPointF offset = m_data->getOffset();
+    const QRectF targetRect = QRectF(
+                offset.x(),
+                offset.y(),
+                qMin(m_data->m_boundingRect.width(), (qreal)eventRect.width()),
+                qMin(m_data->m_boundingRect.height(), (qreal)eventRect.height())
+                );
+
+    /* Draw background */
+    const QRegion eventRegion = event->region();
+    const QRegion backgroundRegion = eventRegion.subtracted(
+                QRegion(targetRect.toRect().adjusted(1, 1, -1, -1)));
+    for (int i = 0; i < backgroundRegion.rectCount(); ++i)
+    {
+        p.fillRect(backgroundRegion.rects().at(i), m_data->m_color_clear);
+    }
+
+    /* Calculate source rect */
+    const qreal zoom = m_data->getZoom();
     const QRectF sourceRect = QRectF(-m_data->m_boundingRect.topLeft() / zoom,
-                                     boundingRect.size() / zoom);
-    const QRectF drawRect = QRectF(offset, boundingRect.size());
-    p.drawPixmap(drawRect, m_pixmap_edited, sourceRect);
+                                     targetRect.size() / zoom);
+
+    /* Draw image */
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    p.drawPixmap(targetRect, m_pixmap_edited, sourceRect);
     p.end();
 }
 
