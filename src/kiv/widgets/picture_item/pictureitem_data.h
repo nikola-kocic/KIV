@@ -32,6 +32,7 @@ public:
     void avoidOutOfScreen();
     void updateOffsets();
     QPointF pointToOrigin() const;
+    void updateSize();
 
     int fitToScreen(qreal &zoomVal) const;
     int fitWidth(qreal &zoomVal) const;

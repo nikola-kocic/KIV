@@ -53,10 +53,8 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
     p.fillRect(boundingRect, m_data->m_color_clear);
     const qreal zoom = m_data->getZoom();
     const QPointF offset = m_data->getOffset();
-    const QRectF sourceRect = QRectF(-m_data->m_boundingRect.x() / zoom,
-                                     -m_data->m_boundingRect.y() / zoom,
-                                     boundingRect.width() / zoom,
-                                     boundingRect.height() / zoom);
+    const QRectF sourceRect = QRectF(-m_data->m_boundingRect.topLeft() / zoom,
+                                     boundingRect.size() / zoom);
     const QRectF drawRect = QRectF(offset, boundingRect.size());
     p.drawPixmap(drawRect, m_pixmap_edited, sourceRect);
     p.end();
@@ -88,20 +86,10 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
         p.end();
     }
 
-    const QSizeF newSize = image_size_transformed * m_data->getZoom();
-    const QPointF p = m_data->pointToOrigin();
-    m_data->m_boundingRect = QRectF(p, newSize);
-    m_data->avoidOutOfScreen();
-    m_data->updateOffsets();
     this->update();
 }
 
-void PictureItemRaster::setZoom(const qreal current, const qreal /*previous*/)
+void PictureItemRaster::setZoom(const qreal, const qreal)
 {
-    const QSizeF newSize = m_data->getImageSizeTransformed() * current;
-    const QPointF p = m_data->pointToOrigin();
-    m_data->m_boundingRect = QRectF(p, newSize);
-    m_data->avoidOutOfScreen();
-    m_data->updateOffsets();
     this->update();
 }

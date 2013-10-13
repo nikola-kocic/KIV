@@ -24,6 +24,7 @@ int PictureItemData::setZoom(const qreal desiredZoom, qreal &zoomVal)
                                  (desiredZoom > 1000) ? 1000 :
                                               desiredZoom;
     zoomVal = m_zoom_value;
+    updateSize();
     return 0;
 }
 
@@ -43,6 +44,7 @@ void PictureItemData::setRotation(const qreal r)
         m_img_size_transformed = transformedRect.size();
         m_rotation_value = r;
     }
+    updateSize();
 }
 
 /* Calculates zoom value needed for picture to fit to widget size.
@@ -237,6 +239,16 @@ QPointF PictureItemData::pointToOrigin() const
     }
 
     return QPointF(originX, originY);
+}
+
+void PictureItemData::updateSize()
+{
+    const QSizeF img_size_zoomed_transformed = (m_img_size_transformed *
+                                                m_zoom_value);
+    const QPointF p = pointToOrigin();
+    m_boundingRect = QRectF(p, img_size_zoomed_transformed);
+    avoidOutOfScreen();
+    updateOffsets();
 }
 
 void PictureItemData::beginDrag(const QPoint &pt)
