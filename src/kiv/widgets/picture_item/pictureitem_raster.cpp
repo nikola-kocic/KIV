@@ -51,11 +51,12 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
     const QRect eventRect = event->rect();
     p.setClipRect(eventRect);
     const QPointF offset = m_data->getOffset();
+    const QRectF bounding_rect = m_data->getBoundingRect();
     const QRectF targetRect = QRectF(
                 offset.x(),
                 offset.y(),
-                qMin(m_data->m_boundingRect.width(), (qreal)eventRect.width()),
-                qMin(m_data->m_boundingRect.height(), (qreal)eventRect.height())
+                qMin(bounding_rect.width(), (qreal)eventRect.width()),
+                qMin(bounding_rect.height(), (qreal)eventRect.height())
                 );
 
     /* Draw background */
@@ -69,7 +70,7 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
 
     /* Calculate source rect */
     const qreal zoom = m_data->getZoom();
-    const QRectF sourceRect = QRectF(-m_data->m_boundingRect.topLeft() / zoom,
+    const QRectF sourceRect = QRectF(-bounding_rect.topLeft() / zoom,
                                      targetRect.size() / zoom);
 
     /* Draw image */

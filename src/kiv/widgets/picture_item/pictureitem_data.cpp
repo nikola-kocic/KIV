@@ -2,12 +2,12 @@
 #include <QTransform>
 
 PictureItemData::PictureItemData()
-    : m_boundingRect(QRectF())
-    , m_color_clear(Qt::lightGray)
+    : m_color_clear(Qt::lightGray)
+    , m_boundingRect(QRectF())
+    , m_offset(QPoint(0, 0))
     , m_pixmapNull(true)
     , m_zoom_value(1.0)
     , m_rotation_value(0.0)
-    , m_offset(QPoint(0, 0))
     , m_point_drag(QPoint())
 {
 }

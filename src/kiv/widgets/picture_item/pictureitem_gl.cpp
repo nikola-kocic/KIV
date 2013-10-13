@@ -191,10 +191,9 @@ void PictureItemGL::paintGL()
 
     const QPointF offset = m_data->getOffset();
     const QSizeF img_size_original = m_data->getImageSizeOriginal();
-    glTranslated((m_data->m_boundingRect.x() + offset.x()
-                  + m_data->m_boundingRect.width() / 2),
-                 (m_data->m_boundingRect.y() + offset.y()
-                  + m_data->m_boundingRect.height() / 2),
+    const QRectF bounding_rect = m_data->getBoundingRect();
+    glTranslated((bounding_rect.x() + offset.x() + bounding_rect.width() / 2),
+                 (bounding_rect.y() + offset.y() + bounding_rect.height() / 2),
                  0);
 
     glRotated(m_data->getRotation(), 0, 0, 1);
