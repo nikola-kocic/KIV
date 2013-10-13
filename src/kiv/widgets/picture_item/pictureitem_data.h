@@ -32,7 +32,6 @@ public:
 
     void avoidOutOfScreen();
     void updateOffsets();
-    QPointF pointToOrigin() const;
     void updateSize();
     int resetImagePosition(bool rtl);
 
@@ -67,6 +66,7 @@ protected:
     QSizeF m_img_size_original;
     QSizeF m_img_size_transformed; // Image size after transformation.
                                    // e.g. rotation.
+    QPointF pointToOrigin() const;
 };
 
 inline QRectF PictureItemData::getBoundingRect() const
