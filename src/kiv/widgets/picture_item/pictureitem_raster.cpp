@@ -78,8 +78,7 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
         const QRect transformedRect = tRot.mapRect(QRect(QPoint(0, 0),
                                                          m_pixmap.size()));
 
-        m_pixmap_edited = QPixmap(transformedRect.width(),
-                                  transformedRect.height());
+        m_pixmap_edited = QPixmap(transformedRect.size());
         m_img_size = m_pixmap_edited.size();
 
         m_pixmap_edited.fill(m_data->m_color_clear);

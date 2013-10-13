@@ -297,12 +297,7 @@ void PictureItemGL::setRotation(const qreal current, const qreal /*previous*/)
     else
     {
         QTransform tRot;
-        tRot.translate(m_data->m_boundingRect.x(), m_data->m_boundingRect.y());
-        tRot.translate((m_img_size.width() / 2),
-                       (m_img_size.height() / 2));
         tRot.rotate(current);
-        tRot.translate((-m_img_size.width() / 2),
-                       (-m_img_size.height() / 2));
         const QRectF transformedRot =
                 tRot.mapRect(QRectF(QPointF(0, 0), m_img_size));
 
