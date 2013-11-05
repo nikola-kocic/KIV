@@ -560,11 +560,10 @@ void MainWindow::on_bookmark_triggered(QAction *action)
 {
     if (action->data().isNull())
     { return; }
-    int bookmarkIndex = action->data().toInt();
 #ifdef DEBUG_MAIN_WINDOW
     DEBUGOUT;
 #endif
-    this->openFilePath(m_settings->getBookmarks().at(bookmarkIndex)->getPath());
+    this->openFilePath(action->data().toString());
 }
 
 void MainWindow::deleteBookmark()
@@ -759,9 +758,8 @@ void MainWindow::addBookmark()
         return;
     }
     const QString bookmarkName = dialog.textValue();
-    bool result = m_settings->addBookmark(
-                bookmarkName,
-                m_view_files->getCurrentFileInfo().getPath());
+    const QString bookmarkPath = m_view_files->getCurrentFileInfo().getPath();
+    bool result = m_settings->addBookmark(bookmarkName, bookmarkPath);
     if (result == false)
     {
         QMessageBox::information(this, QApplication::applicationName(),
@@ -770,7 +768,7 @@ void MainWindow::addBookmark()
     else
     {
         QAction *bookmark = new QAction(bookmarkName, m_menu_bookmarks);
-        bookmark->setData(m_settings->getBookmarkCount() - 1);
+        bookmark->setData(bookmarkPath);
         m_menu_bookmarks->addAction(bookmark);
     }
 }
