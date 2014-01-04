@@ -41,41 +41,43 @@ void PictureItemRaster::setImage(const QImage &img)
 
 void PictureItemRaster::paintEvent(QPaintEvent *event)
 {
+    QPainter p(this);
+    const QRect eventRect = event->rect();
+
     if (m_data->isPixmapNull())
     {
-        return;
+        p.fillRect(eventRect, m_data->m_color_clear);
     }
-
-    QPainter p(this);
-
-    const QRect eventRect = event->rect();
-    p.setClipRect(eventRect);
-    const QPointF offset = m_data->getOffset();
-    const QRectF bounding_rect = m_data->getBoundingRect();
-    const QRectF targetRect = QRectF(
-                offset.x(),
-                offset.y(),
-                qMin(bounding_rect.width(), (qreal)eventRect.width()),
-                qMin(bounding_rect.height(), (qreal)eventRect.height())
-                );
-
-    /* Draw background */
-    const QRegion eventRegion = event->region();
-    const QRegion backgroundRegion = eventRegion.subtracted(
-                QRegion(targetRect.toRect().adjusted(1, 1, -1, -1)));
-    for (int i = 0; i < backgroundRegion.rectCount(); ++i)
+    else
     {
-        p.fillRect(backgroundRegion.rects().at(i), m_data->m_color_clear);
+        p.setClipRect(eventRect);
+        const QPointF offset = m_data->getOffset();
+        const QRectF bounding_rect = m_data->getBoundingRect();
+        const QRectF targetRect = QRectF(
+                    offset.x(),
+                    offset.y(),
+                    qMin(bounding_rect.width(), (qreal)eventRect.width()),
+                    qMin(bounding_rect.height(), (qreal)eventRect.height())
+                    );
+
+        /* Draw background */
+        const QRegion eventRegion = event->region();
+        const QRegion backgroundRegion = eventRegion.subtracted(
+                    QRegion(targetRect.toRect().adjusted(1, 1, -1, -1)));
+        for (int i = 0; i < backgroundRegion.rectCount(); ++i)
+        {
+            p.fillRect(backgroundRegion.rects().at(i), m_data->m_color_clear);
+        }
+
+        /* Calculate source rect */
+        const qreal zoom = m_data->getZoom();
+        const QRectF sourceRect = QRectF(-bounding_rect.topLeft() / zoom,
+                                         targetRect.size() / zoom);
+
+        /* Draw image */
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        p.drawPixmap(targetRect, m_pixmap_edited, sourceRect);
     }
-
-    /* Calculate source rect */
-    const qreal zoom = m_data->getZoom();
-    const QRectF sourceRect = QRectF(-bounding_rect.topLeft() / zoom,
-                                     targetRect.size() / zoom);
-
-    /* Draw image */
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
-    p.drawPixmap(targetRect, m_pixmap_edited, sourceRect);
     p.end();
 }
 
