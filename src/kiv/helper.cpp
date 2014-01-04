@@ -3,6 +3,7 @@
 #include <QFileSystemModel>
 #include <QImageReader>
 #include <QLocale>
+#include <QProcess>
 
 QStringList Helper::m_filters_image = QStringList();
 
@@ -119,4 +120,36 @@ int Helper::naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensit
     }
     // The two strings are the same (02 == 2) so fall back to the normal sort
     return QString::compare(s1, s2, cs);
+}
+
+
+void Helper::showInFileBrowser(const QString& path)
+{
+#if defined(Q_OS_WIN)
+    const QString explorer = "explorer";
+    QStringList param;
+    if (!QFileInfo(path).isDir())
+        param << QLatin1String("/select,");
+    param << QDir::toNativeSeparators(path);
+    QProcess::startDetached(explorer, param);
+#elif defined(Q_OS_MAC)
+    QStringList scriptArgs;
+    scriptArgs << QLatin1String("-e")
+               << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+                  .arg(path);
+    QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+    scriptArgs.clear();
+    scriptArgs << QLatin1String("-e")
+               << QLatin1String("tell application \"Finder\" to activate");
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+#else
+    // we cannot select a file here, because no file browser really supports it...
+    const QFileInfo fileInfo(path);
+    const QString folder = fileInfo.isDir() ? fileInfo.absoluteFilePath() : fileInfo.absolutePath();
+    const QString app = QString("xdg-open \"%1\"").arg(folder);
+    QProcess browserProc;
+    bool success = browserProc.startDetached(app);
+    const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
+    success = success && error.isEmpty();
+#endif
 }

@@ -66,6 +66,7 @@ private:
     QAction *m_act_back;
     QAction *m_act_forward;
     QAction *m_act_refreshPath;
+    QAction *m_act_showInFileBrowser;
     QAction *m_act_exit;
 
     /* Bookmarks Menu Actions */
@@ -115,6 +116,7 @@ private slots:
     void saveAs();
     void goBack();
     void goForward();
+    void showInFileBrowser();
 
     /* Bookmark Menu Action Slots */
     void addBookmark();

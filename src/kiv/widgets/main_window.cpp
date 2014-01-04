@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
                                 tr("&Forward"), this))
     , m_act_refreshPath(new QAction(QIcon::fromTheme("view-refresh"),
                                     tr("&Refresh"), this))
+    , m_act_showInFileBrowser(new QAction(tr("Show in File Browser"), this))
     , m_act_exit(new QAction(QIcon::fromTheme("application-exit"),
                              tr("E&xit"), this))
     , m_act_bookmark_add(new QAction(tr("Bookmark &This Page"), this))
@@ -287,6 +288,7 @@ void MainWindow::createMenus()
     fileMenu->addAction(m_act_back);
     fileMenu->addAction(m_act_forward);
     fileMenu->addAction(m_act_refreshPath);
+    fileMenu->addAction(m_act_showInFileBrowser);
 
     fileMenu->addSeparator();
     fileMenu->addAction(m_act_exit);
@@ -497,6 +499,8 @@ void MainWindow::connectActions()
             m_picture_item, SLOT(setZoom(qreal)));
 
     connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
+    connect(m_act_showInFileBrowser, SIGNAL(triggered()),
+            this, SLOT(showInFileBrowser()));
     connect(m_act_dirUp, SIGNAL(triggered()), m_view_files, SLOT(dirUp()));
 
     connect(m_act_bookmark_delete, SIGNAL(triggered()),
@@ -743,6 +747,13 @@ void MainWindow::goBack()
 void MainWindow::goForward()
 {
     m_urlNavigator->goForward();
+}
+
+void MainWindow::showInFileBrowser()
+{
+    const FileInfo cfi = m_view_files->getCurrentFileInfo();
+    const QString path = cfi.getPath();
+    Helper::showInFileBrowser(path);
 }
 
 void MainWindow::addBookmark()

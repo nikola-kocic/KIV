@@ -35,6 +35,11 @@ public:
                               const QString &s2,
                               Qt::CaseSensitivity cs);
 
+    // Opens file browser (e.g. explorer) in file directory
+    // and if possible, selects file.
+    // Doesn't work reliably for files inside of archives.
+    static void showInFileBrowser(const QString &path);
+
 private:
     static QStringList m_filters_image;
 };
