@@ -11,7 +11,7 @@
 
 PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)    
     : QGLWidget(parent)
-    , PictureItemInterface(data, parent)
+    , PictureItemInterface(data)
     , m_returnTexCount(0)
     , m_loader_texture(new QFutureWatcher<QImage>(this))
     , m_scaleX(0)

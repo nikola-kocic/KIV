@@ -13,7 +13,7 @@
 
 PictureItemRaster::PictureItemRaster(PictureItemData *data, QWidget *parent)
     : QWidget(parent)
-    , PictureItemInterface(data, parent)
+    , PictureItemInterface(data)
     , m_pixmap(QPixmap())
     , m_pixmap_edited(m_pixmap)
 {

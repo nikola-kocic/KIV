@@ -4,12 +4,11 @@
 #include "widgets/picture_item/pictureitem_data.h"
 #include "fileinfo.h"
 #include <QImage>
-#include <QWidget>
 
 class PictureItemInterface
 {
 public:
-    explicit PictureItemInterface(PictureItemData *data, QWidget*)
+    explicit PictureItemInterface(PictureItemData *data)
         : m_data(data), m_widget(NULL)
     {}
     virtual ~PictureItemInterface() {}
