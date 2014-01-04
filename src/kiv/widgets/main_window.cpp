@@ -2,6 +2,7 @@
 
 #include <qglobal.h>
 #include <QAction>
+#include <QApplication>
 #include <QBoxLayout>
 #include <QDesktopServices>
 #include <QDesktopWidget>

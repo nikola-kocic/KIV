@@ -1,6 +1,6 @@
 #include "settings.h"
 
-#include <QApplication>
+#include <QCoreApplication>
 
 //#define SETTINGS_DEBUG
 #ifdef SETTINGS_DEBUG
@@ -12,8 +12,8 @@ Settings::Settings(QSettings *settings)
                      settings :
                      new QSettings(QSettings::IniFormat,
                                    QSettings::UserScope,
-                                   QApplication::organizationName(),
-                                   QApplication::applicationName()))
+                                   QCoreApplication::organizationName(),
+                                   QCoreApplication::applicationName()))
     , m_middleClick(
           m_settings->value("Mouse/MiddleClick",
                             MiddleClickAction::Fullscreen).toInt())

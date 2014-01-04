@@ -1,5 +1,6 @@
 #include "models/archive_model.h"
 
+#include <QApplication>
 #include <QFileIconProvider>
 #include <QFileSystemModel>
 #include <QStyle>

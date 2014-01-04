@@ -1,7 +1,6 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include <QApplication>
 #include <QDateTime>
 #include <QDebug>
 #include <QFileInfo>
