@@ -17,6 +17,7 @@ public:
     void setImage(const QImage &img);
     void setNullImage() {}
     QWidget* getWidget();
+    void paint(QPainter &p, const QPaintEvent * const event);
 
 private:
     QPixmap m_pixmap;

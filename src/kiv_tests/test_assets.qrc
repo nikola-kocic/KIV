@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/chess-pattern-transparent.png</file>
+        <file>assets/expected-zoomed-cropped.png</file>
+        <file>assets/expected-zoomed.png</file>
+        <file>assets/chess-pattern.png</file>
+        <file>assets/expected-normal.png</file>
+    </qresource>
+</RCC>

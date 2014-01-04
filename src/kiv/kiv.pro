@@ -21,7 +21,8 @@ SOURCES += \
     widgets/picture_item/teximg.cpp \
     widgets/settings_dialog.cpp \
     widgets/zoom_widget.cpp \
-    widgets/urlnavigator.cpp
+    widgets/urlnavigator.cpp \
+
 
 HEADERS += \
     enums.h \
@@ -45,7 +46,8 @@ HEADERS += \
     widgets/picture_item/teximg.h \
     widgets/settings_dialog.h \
     widgets/zoom_widget.h \
-    widgets/urlnavigator.h
+    widgets/urlnavigator.h \
+
 
 FORMS += \
     widgets/settings_dialog.ui
@@ -60,6 +62,7 @@ win32{
     else: INCLUDEPATH += $$PWD/../zlib
 }
 
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
 win32:CONFIG(release, debug|release) {

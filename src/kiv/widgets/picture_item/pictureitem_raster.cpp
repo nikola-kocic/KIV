@@ -39,9 +39,8 @@ void PictureItemRaster::setImage(const QImage &img)
     this->update();
 }
 
-void PictureItemRaster::paintEvent(QPaintEvent *event)
+void PictureItemRaster::paint(QPainter &p, QPaintEvent const * const event)
 {
-    QPainter p(this);
     const QRect eventRect = event->rect();
     const bool drawFullBackground = (m_data->isPixmapNull() ||
                                      m_pixmap_edited.hasAlpha());
@@ -84,6 +83,12 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
         p.setRenderHint(QPainter::SmoothPixmapTransform);
         p.drawPixmap(targetRect, m_pixmap_edited, sourceRect);
     }
+}
+
+void PictureItemRaster::paintEvent(QPaintEvent *event)
+{
+    QPainter p(this);
+    this->paint(p, event);
     p.end();
 }
 
