@@ -14,9 +14,14 @@ private:
 
 private Q_SLOTS:
     void init();
-    void testZoomIn();
+    void testZoomIn_FittedBefore_NotAfter();
+    void testZoomIn_FittedPerfectlyBefore();
+    void testZoomIn_DidntFitBefore();
+    void testZoomIn_FitsAfter();
+    void testZoomIn_DidntFitBefore_WasMoved();
     void testZoomOut();
     void testRotate();
+    void testZoomOutRotate();
 
 };
 

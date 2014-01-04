@@ -1,5 +1,6 @@
 #include "widgets/picture_item/pictureitem_data.h"
 #include <QTransform>
+#include <QtDebug>
 
 PictureItemData::PictureItemData()
     : m_color_clear(Qt::lightGray)
@@ -223,19 +224,33 @@ QPointF PictureItemData::pointToOrigin() const
 
     if (img_size_zoomed.width() > m_widget_size.width())
     {
-        const qreal zoomX = img_size_zoomed.width() / m_boundingRect.width();
-        const qreal oldX = (m_widget_size.width() / 2) - m_boundingRect.x();
-        const qreal newX = oldX * zoomX;
-        originX = (m_widget_size.width() / 2) - newX;
+        if (m_boundingRect.width() < m_widget_size.width())
+        {
+            originX = (m_widget_size.width() - img_size_zoomed.width()) / 2;
+        }
+        else
+        {
+            const qreal zoomX = img_size_zoomed.width() / m_boundingRect.width();
+            const qreal oldX = (m_widget_size.width() / 2) - m_boundingRect.x();
+            const qreal newX = oldX * zoomX;
+            originX = (m_widget_size.width() / 2) - newX;
+        }
     }
 
     if (img_size_zoomed.width() > m_widget_size.width()
         || img_size_zoomed.height() > m_widget_size.height())
     {
-        const qreal zoomY = img_size_zoomed.height() / m_boundingRect.height();
-        const qreal oldY = (m_widget_size.height() / 2) - m_boundingRect.y();
-        const qreal newY = oldY * zoomY;
-        originY = (m_widget_size.height() / 2) - newY;
+        if (m_boundingRect.height() < m_widget_size.height())
+        {
+            originY = (m_widget_size.height() - img_size_zoomed.height()) / 2;
+        }
+        else
+        {
+            const qreal zoomY = img_size_zoomed.height() / m_boundingRect.height();
+            const qreal oldY = (m_widget_size.height() / 2) - m_boundingRect.y();
+            const qreal newY = oldY * zoomY;
+            originY = (m_widget_size.height() / 2) - newY;
+        }
     }
 
     return QPointF(originX, originY);
