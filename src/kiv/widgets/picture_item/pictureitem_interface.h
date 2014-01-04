@@ -1,7 +1,7 @@
 #ifndef PICTUREITEM_INTERFACE_H
 #define PICTUREITEM_INTERFACE_H
 
-#include "pictureitem_data.h"
+#include "widgets/picture_item/pictureitem_data.h"
 #include "fileinfo.h"
 #include <QImage>
 #include <QWidget>

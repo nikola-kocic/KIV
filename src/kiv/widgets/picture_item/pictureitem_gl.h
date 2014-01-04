@@ -2,7 +2,7 @@
 #ifndef PICTUREITEM_GL_H
 #define PICTUREITEM_GL_H
 
-#include "pictureitem_interface.h"
+#include "widgets/picture_item/pictureitem_interface.h"
 
 #include <QFutureWatcher>
 #include <QGLWidget>

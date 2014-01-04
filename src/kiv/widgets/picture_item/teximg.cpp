@@ -1,4 +1,4 @@
-#include "teximg.h"
+#include "widgets/picture_item/teximg.h"
 
 #include <QSize>
 

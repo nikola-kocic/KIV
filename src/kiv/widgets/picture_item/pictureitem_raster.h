@@ -1,9 +1,9 @@
 #ifndef PICTUREITEM_RASTER_H
 #define PICTUREITEM_RASTER_H
 
-#include "pictureitem_interface.h"
 
 #include <QWidget>
+#include "widgets/picture_item/pictureitem_interface.h"
 
 class PictureItemRaster : private QWidget, public PictureItemInterface
 {

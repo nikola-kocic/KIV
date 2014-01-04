@@ -1,4 +1,4 @@
-#include "pictureitem_data.h"
+#include "widgets/picture_item/pictureitem_data.h"
 #include <QTransform>
 
 PictureItemData::PictureItemData()
