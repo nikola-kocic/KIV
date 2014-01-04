@@ -43,14 +43,15 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
     const QRect eventRect = event->rect();
+    const bool drawFullBackground = (m_data->isPixmapNull() ||
+                                     m_pixmap_edited.hasAlpha());
 
-    if (m_data->isPixmapNull())
+    if (drawFullBackground)
     {
         p.fillRect(eventRect, m_data->m_color_clear);
     }
-    else
+    if (! m_data->isPixmapNull())
     {
-        p.setClipRect(eventRect);
         const QPointF offset = m_data->getOffset();
         const QRectF bounding_rect = m_data->getBoundingRect();
         const QRectF targetRect = QRectF(
@@ -60,13 +61,17 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
                     qMin(bounding_rect.height(), (qreal)eventRect.height())
                     );
 
-        /* Draw background */
-        const QRegion eventRegion = event->region();
-        const QRegion backgroundRegion = eventRegion.subtracted(
-                    QRegion(targetRect.toRect().adjusted(1, 1, -1, -1)));
-        for (int i = 0; i < backgroundRegion.rectCount(); ++i)
+        if (! drawFullBackground)
         {
-            p.fillRect(backgroundRegion.rects().at(i), m_data->m_color_clear);
+            /* Draw background */
+            const QRegion eventRegion = event->region();
+            const QRegion backgroundRegion = eventRegion.subtracted(
+                        QRegion(targetRect.toRect().adjusted(1, 1, -1, -1)));
+            for (int i = 0; i < backgroundRegion.rectCount(); ++i)
+            {
+                p.fillRect(backgroundRegion.rects().at(i),
+                           m_data->m_color_clear);
+            }
         }
 
         /* Calculate source rect */
@@ -75,6 +80,7 @@ void PictureItemRaster::paintEvent(QPaintEvent *event)
                                          targetRect.size() / zoom);
 
         /* Draw image */
+        p.setClipRect(eventRect);
         p.setRenderHint(QPainter::SmoothPixmapTransform);
         p.drawPixmap(targetRect, m_pixmap_edited, sourceRect);
     }
