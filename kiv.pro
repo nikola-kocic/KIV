@@ -1,11 +1,11 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-SUBDIRS += src/quazip \
-    src/kiv_tests \
-    src/kiv
+SUBDIRS += quazip \
+    kiv_tests \
+    kiv
 
 
 HEADERS += \
-    src/zlib/zlib.h \
-    src/zlib/zconf.h
+    zlib/zlib.h \
+    zlib/zconf.h
