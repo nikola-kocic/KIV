@@ -27,6 +27,7 @@ private:
     void createActions();
     void createMenus();
     void connectActions();
+    void updateIcons();
     void updateSettings();
     void spreadUrl(const QUrl &url);
     inline bool isPosInPictureItem(const QPoint &pos) const
@@ -106,6 +107,8 @@ private:
     /* Help Menu Actions */
     QAction *m_act_webSite;
     QAction *m_act_about;
+
+    QHash<QAction*, QStringList> m_actions_icons;
 
 private slots:
 

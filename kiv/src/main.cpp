@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("KIV");
     app.setApplicationVersion("0.3");
 
-    QDir appdir(QApplication::applicationDirPath());
+    QDir appdir(QCoreApplication::applicationDirPath());
     QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths())
                                << appdir.path());
     static const char * GENERIC_ICON_TO_CHECK = "go-next";

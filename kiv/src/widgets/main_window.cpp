@@ -43,65 +43,43 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_menu_context_bookmark(new QMenu(this))
     , m_act_bookmark_delete(new QAction(tr("&Delete Bookmark"), this))
 
-    , m_act_open(new QAction(QIcon::fromTheme("document-open"),
-                             tr("&Open..."), this))
-    , m_act_save(new QAction(QIcon::fromTheme("document-save-as"),
-                             tr("&Save Page As..."), this))
-    , m_act_pageNext(new QAction(QIcon::fromTheme("media-skip-forward"),
-                                 tr("&Next"), this))
-    , m_act_pagePrevious(new QAction(QIcon::fromTheme("media-skip-backward"),
-                                     tr("&Previous"), this))
-    , m_act_dirUp(new QAction(QIcon::fromTheme("go-up"), tr("Go &Up"), this))
-    , m_act_back(new QAction(QIcon::fromTheme("go-previous"),
-                             tr("&Back"), this))
-    , m_act_forward(new QAction(QIcon::fromTheme("go-next"),
-                                tr("&Forward"), this))
-    , m_act_refreshPath(new QAction(QIcon::fromTheme("view-refresh"),
-                                    tr("&Refresh"), this))
+    , m_act_open(new QAction(tr("&Open..."), this))
+    , m_act_save(new QAction(tr("&Save Page As..."), this))
+    , m_act_pageNext(new QAction(tr("&Next"), this))
+    , m_act_pagePrevious(new QAction(tr("&Previous"), this))
+    , m_act_dirUp(new QAction(tr("Go &Up"), this))
+    , m_act_back(new QAction(tr("&Back"), this))
+    , m_act_forward(new QAction(tr("&Forward"), this))
+    , m_act_refreshPath(new QAction(tr("&Refresh"), this))
     , m_act_showInFileBrowser(new QAction(tr("Show in File Browser"), this))
-    , m_act_exit(new QAction(QIcon::fromTheme("application-exit"),
-                             tr("E&xit"), this))
+    , m_act_exit(new QAction(tr("E&xit"), this))
     , m_act_bookmark_add(new QAction(tr("Bookmark &This Page"), this))
     , m_act_bookmark_active_item(NULL)
 
-    , m_act_zoomIn(new QAction(QIcon::fromTheme("zoom-in"),
-                               tr("Zoom &In"), this))
-    , m_act_zoomOut(new QAction(QIcon::fromTheme("zoom-out"),
-                                tr("Zoom &Out"), this))
-    , m_act_zoomReset(new QAction(QIcon::fromTheme("zoom-original"),
-                                  tr("&Original Size (100%)"), this))
-    , m_act_rotateLeft(new QAction(QIcon::fromTheme("object-rotate-left"),
-                                   tr("Rotate &Left"), this))
-    , m_act_rotateRight(new QAction(QIcon::fromTheme("object-rotate-right"),
-                                    tr("Rotate &Right"), this))
+    , m_act_zoomIn(new QAction(tr("Zoom &In"), this))
+    , m_act_zoomOut(new QAction(tr("Zoom &Out"), this))
+    , m_act_zoomReset(new QAction(tr("&Original Size (100%)"), this))
+    , m_act_rotateLeft(new QAction(tr("Rotate &Left"), this))
+    , m_act_rotateRight(new QAction(tr("Rotate &Right"), this))
     , m_act_rotateReset(new QAction(tr("R&eset Rotation"), this))
-    , m_act_fitToWindow(new QAction(QIcon::fromTheme("zoom-fit-best"),
-                                    tr("&Fit to Window"), this))
-    , m_act_fitToWidth(new QAction(QIcon::fromTheme("zoom-fit-width"),
-                                   tr("Fit &Width"), this))
-    , m_act_fitToHeight(new QAction(QIcon::fromTheme("zoom-fit-height"),
-                                    tr("Fit &Height"), this))
+    , m_act_fitToWindow(new QAction(tr("&Fit to Window"), this))
+    , m_act_fitToWidth(new QAction(tr("Fit &Width"), this))
+    , m_act_fitToHeight(new QAction(tr("Fit &Height"), this))
     , m_act_lockNone(new QAction(tr("Lock &None"), this))
     , m_act_lockZoom(new QAction(tr("Lock Zoom &Value"), this))
     , m_act_lockAutofit(new QAction(tr("Lock Autofi&t"), this))
     , m_act_lockFitWidth(new QAction(tr("Lock Fit Wi&dth"), this))
     , m_act_lockFitHeight(new QAction(tr("Lock Fit Hei&ght"), this))
 
-    , m_act_thumbnails(new QAction(QIcon::fromTheme("image-x-generic"),
-                                   tr("&Thumbnails"), this))
+    , m_act_thumbnails(new QAction(tr("&Thumbnails"), this))
     , m_act_mode_list(new QAction(tr("&List"), this))
     , m_act_mode_details(new QAction(tr("&Details"), this))
     , m_act_mode_icons(new QAction(tr("&Icons"), this))
-    , m_act_sidebar(new QAction(QIcon::fromTheme("view-left-right"),
-                                tr("Side&bar"), this))
-    , m_act_fullscreen(new QAction(QIcon::fromTheme("view-fullscreen"),
-                                   tr("&Full Screen"), this))
+    , m_act_sidebar(new QAction(tr("Side&bar"), this))
+    , m_act_fullscreen(new QAction(tr("&Full Screen"), this))
 
     , m_act_largeIcons(new QAction(tr("Large Toolbar &Icons"), this))
-    , m_act_settings(new QAction(
-                         QIcon::fromTheme("configure",
-                                          QIcon::fromTheme("gtk-preferences")),
-                         tr("&Settings..."), this))
+    , m_act_settings(new QAction(tr("&Settings..."), this))
 
     , m_act_webSite(new QAction(tr("&Web Site"), this))
     , m_act_about(new QAction(tr("&About"), this))
@@ -157,6 +135,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
 
 MainWindow::~MainWindow()
 {
+    m_actions_icons.clear();
     delete m_settings;
 }
 
@@ -197,6 +176,30 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::createActions()
 {
+    m_actions_icons[m_act_open] = QStringList() << "document-open";
+    m_actions_icons[m_act_save] = QStringList() << "document-save-as";
+    m_actions_icons[m_act_pageNext] = QStringList() << "media-skip-forward";
+    m_actions_icons[m_act_pagePrevious] = QStringList() << "media-skip-backward";
+    m_actions_icons[m_act_dirUp] = QStringList() << "go-up";
+    m_actions_icons[m_act_back] = QStringList() << "go-previous";
+    m_actions_icons[m_act_forward] = QStringList() << "go-next";
+    m_actions_icons[m_act_refreshPath] = QStringList() << "view-refresh";
+    m_actions_icons[m_act_exit] = QStringList() << "application-exit";
+    m_actions_icons[m_act_zoomIn] = QStringList() << "zoom-in";
+    m_actions_icons[m_act_zoomOut] = QStringList() << "zoom-out";
+    m_actions_icons[m_act_zoomReset] = QStringList() << "zoom-original";
+    m_actions_icons[m_act_rotateLeft] = QStringList() << "object-rotate-left";
+    m_actions_icons[m_act_rotateRight] = QStringList() << "object-rotate-right";
+    m_actions_icons[m_act_fitToWindow] = QStringList() << "zoom-fit-best";
+    m_actions_icons[m_act_fitToWidth] = QStringList() << "zoom-fit-width";
+    m_actions_icons[m_act_fitToHeight] = QStringList() << "zoom-fit-height";
+    m_actions_icons[m_act_thumbnails] = QStringList() << "image-x-generic";
+    m_actions_icons[m_act_sidebar] = QStringList() << "view-left-right";
+    m_actions_icons[m_act_fullscreen] = QStringList() << "view-fullscreen";
+    m_actions_icons[m_act_settings] = QStringList() << "configure"
+                                                    << "gtk-preferences";
+    updateIcons();
+
     m_act_save->setEnabled(false);
     m_act_dirUp->setEnabled(false);
     m_act_back->setEnabled(false);
@@ -530,6 +533,48 @@ void MainWindow::connectActions()
         action_widget->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(action_widget, SIGNAL(customContextMenuRequested(QPoint)),
                 this, SLOT(on_historyMenuRequested(QPoint)));
+    }
+}
+
+void MainWindow::updateIcons()
+{
+    for (QHash<QAction*, QStringList>::iterator it = m_actions_icons.begin();
+         it != m_actions_icons.end();
+         ++it)
+    {
+        QAction *action = it.key();
+        QStringList icons = it.value();
+        QIcon icon;
+
+        for (QStringList::const_iterator icon_it = icons.constBegin();
+             icon_it != icons.constEnd();
+             ++icon_it)
+        {
+            icon = QIcon::fromTheme((*icon_it));
+            if (! icon.isNull())
+            {
+                action->setIcon(icon);
+                break;
+            }
+        }
+        if (action->icon().isNull())
+        {
+            const QString icon_path_template = QString("%1/icons/default/%3/%2.png")
+                    .arg(QCoreApplication::applicationDirPath())
+                    .arg(icons[0]);
+            const QString icon_path_22 = icon_path_template.arg("22x22");
+            const QString icon_path_16 = icon_path_template.arg("16x16");
+
+            if (QFile::exists(icon_path_22))
+            {
+                icon.addFile(icon_path_22, QSize(22, 22));
+            }
+            if (QFile::exists(icon_path_16))
+            {
+                icon.addFile(icon_path_16, QSize(16, 16));
+            }
+            action->setIcon(icon);
+        }
     }
 }
 
