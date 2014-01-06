@@ -16,12 +16,14 @@ SOURCES += \
     src/widgets/main_window.cpp \
     src/widgets/picture_item/pictureitem.cpp \
     src/widgets/picture_item/pictureitem_data.cpp \
-    src/widgets/picture_item/pictureitem_gl.cpp \
     src/widgets/picture_item/pictureitem_raster.cpp \
     src/widgets/picture_item/teximg.cpp \
     src/widgets/settings_dialog.cpp \
     src/widgets/zoom_widget.cpp \
     src/widgets/urlnavigator.cpp \
+
+lessThan(QT_MAJOR_VERSION, 5): SOURCES += \
+    src/widgets/picture_item/pictureitem_gl.cpp \
 
 
 HEADERS += \
@@ -41,12 +43,14 @@ HEADERS += \
     src/widgets/picture_item/pictureitem.h \
     src/widgets/picture_item/pictureitem_data.h \
     src/widgets/picture_item/pictureitem_interface.h \
-    src/widgets/picture_item/pictureitem_gl.h \
     src/widgets/picture_item/pictureitem_raster.h \
     src/widgets/picture_item/teximg.h \
     src/widgets/settings_dialog.h \
     src/widgets/zoom_widget.h \
     src/widgets/urlnavigator.h \
+
+lessThan(QT_MAJOR_VERSION, 5): HEADERS += \
+    src/widgets/picture_item/pictureitem_gl.h \
 
 
 FORMS += \
