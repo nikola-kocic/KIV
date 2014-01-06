@@ -76,6 +76,8 @@ win32:CONFIG(release, debug|release) {
 } else:unix {
     LIBS += -L$${OUT_PWD}/../quazip/ -lquazip
 }
+ANDROID_EXTRA_LIBS = $${OUT_PWD}/../quazip/libquazip.so
+
 
 INCLUDEPATH += $${PWD}/../quazip
 DEPENDPATH += $${PWD}/../quazip
