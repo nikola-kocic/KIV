@@ -559,9 +559,14 @@ void MainWindow::updateIcons()
         }
         if (action->icon().isNull())
         {
+#ifndef ANDROID
             const QString icon_path_template = QString("%1/icons/default/%3/%2.png")
                     .arg(QCoreApplication::applicationDirPath())
                     .arg(icons[0]);
+#else
+            const QString icon_path_template = QString(":/res/icons/default/%2/%1.png")
+                    .arg(icons[0]);
+#endif
             const QString icon_path_22 = icon_path_template.arg("22x22");
             const QString icon_path_16 = icon_path_template.arg("16x16");
 

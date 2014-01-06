@@ -93,20 +93,23 @@ win32:CONFIG(release, debug|release) {
 KIV_ROOT_DIR = $${PWD}
 KIV_LIBS_DIR = $${KIV_ROOT_DIR}$${QMAKE_DIR_SEP}libs
 
-
-!contains(QMAKE_HOST.arch, x86_64) {
-    win32 {
-        QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}$${QMAKE_DIR_SEP}windows$${QMAKE_DIR_SEP}x86$${QMAKE_DIR_SEP}unrar.dll\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
-    } else:unix {
-        QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}/linux/x86/libunrar.so\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
+isEmpty(ANDROID_TARGET_ARCH) {
+    !contains(QMAKE_HOST.arch, x86_64) {
+        win32 {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}$${QMAKE_DIR_SEP}windows$${QMAKE_DIR_SEP}x86$${QMAKE_DIR_SEP}unrar.dll\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
+        } else:unix {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}/linux/x86/libunrar.so\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
+        }
+    } else {
+        win32 {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}$${QMAKE_DIR_SEP}windows$${QMAKE_DIR_SEP}x86_64$${QMAKE_DIR_SEP}unrar.dll\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
+        } else:unix {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}/linux/x86_64/libunrar.so\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
+        }
     }
+    QMAKE_POST_LINK += $${QMAKE_COPY_DIR} \"$${KIV_ROOT_DIR}$${QMAKE_DIR_SEP}res$${QMAKE_DIR_SEP}icons\" \"$${BIN_DIR}$${QMAKE_DIR_SEP}icons\" $$escape_expand(\\n\\t)
 } else {
-    win32 {
-        QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}$${QMAKE_DIR_SEP}windows$${QMAKE_DIR_SEP}x86_64$${QMAKE_DIR_SEP}unrar.dll\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
-    } else:unix {
-        QMAKE_POST_LINK += $${QMAKE_COPY} \"$${KIV_LIBS_DIR}/linux/x86_64/libunrar.so\" \"$${BIN_DIR}\" $$escape_expand(\\n\\t)
-    }
+    RESOURCES += \
+        icons.qrc \
+
 }
-
-
-QMAKE_POST_LINK += $${QMAKE_COPY_DIR} \"$${KIV_ROOT_DIR}$${QMAKE_DIR_SEP}res$${QMAKE_DIR_SEP}icons\" \"$${BIN_DIR}$${QMAKE_DIR_SEP}icons\" $$escape_expand(\\n\\t)
