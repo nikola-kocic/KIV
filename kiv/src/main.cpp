@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setApplicationName("KIV");
     app.setOrganizationName("KIV");
-    app.setApplicationVersion("0.3");
+    app.setApplicationVersion("0.4");
 
     QDir appdir(QCoreApplication::applicationDirPath());
     QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths())
