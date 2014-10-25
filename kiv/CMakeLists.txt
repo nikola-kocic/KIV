@@ -2,11 +2,14 @@ cmake_minimum_required( VERSION 2.6 )
 set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall )
 find_package ( Qt4 REQUIRED )
+find_package ( QuaZip REQUIRED )
+find_package ( OpenGL REQUIRED )
 include ( ${QT_USE_FILE} )
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTOPENGL_INCLUDE_DIR}
-    $$PWD/../)
+    ${CMAKE_SOURCE_DIR}/../
+    ${QUAZIP_INCLUDE_DIR})
 set ( kiv_HDRS
     src/enums.h
     src/fileinfo.h
@@ -40,6 +43,7 @@ set ( kiv_SRCS
     src/widgets/main_window.cpp
     src/widgets/picture_item/pictureitem.cpp
     src/widgets/picture_item/pictureitem_data.cpp
+    src/widgets/picture_item/pictureitem_gl.cpp
     src/widgets/picture_item/pictureitem_raster.cpp
     src/widgets/picture_item/teximg.cpp
     src/widgets/settings_dialog.cpp
@@ -65,6 +69,7 @@ set ( kiv_MOCS
     src/widgets/files_view/view_files.h
     src/widgets/main_window.h
     src/widgets/picture_item/pictureitem.h
+    src/widgets/picture_item/pictureitem_gl.h
     src/widgets/picture_item/pictureitem_raster.h
     src/widgets/settings_dialog.h
     src/widgets/zoom_widget.h
@@ -74,4 +79,4 @@ set ( kiv_MOCS
 QT4_WRAP_CPP(MOCS ${kiv_MOCS})
 
 add_executable ( kiv ${kiv_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-target_link_libraries ( kiv  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
+target_link_libraries ( kiv  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})

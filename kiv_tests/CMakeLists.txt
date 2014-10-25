@@ -6,8 +6,8 @@ find_package ( Qt4 REQUIRED )
 include ( ${QT_USE_FILE} )
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
-    ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTTESTLIB_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR}
-    $${PWD}/../)
+    ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTTEST_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/../)
 set ( tst_kiv_teststest_HDRS
     ../kiv/src/enums.h
     ../kiv/src/settings.h
@@ -38,4 +38,4 @@ set ( tst_kiv_teststest_MOCS
 QT4_WRAP_CPP(MOCS ${tst_kiv_teststest_MOCS})
 
 add_executable ( tst_kiv_teststest ${tst_kiv_teststest_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-target_link_libraries ( tst_kiv_teststest  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTESTLIB_LIBRARY} ${QT_QTGUI_LIBRARY} )
+target_link_libraries ( tst_kiv_teststest  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY} )
