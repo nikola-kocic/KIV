@@ -64,8 +64,8 @@ class ViewFiles : public QWidget
     Q_OBJECT
 
 public:
-    explicit ViewFiles(IPictureLoader *picture_loader,
-                       IArchiveExtractor *archive_extractor,
+    explicit ViewFiles(const IPictureLoader *const picture_loader,
+                       const IArchiveExtractor *const archive_extractor,
                        FileSystemModel *model_filesystem,
                        QWidget *parent = 0);
     void setViewMode(const int mode);
@@ -123,8 +123,8 @@ private:
     void initViewItem();
     void showThumbnails();
 
-    IPictureLoader *m_picture_loader;
-    IArchiveExtractor *m_archive_extractor;
+    const IPictureLoader *const m_picture_loader;
+    const IArchiveExtractor *const m_archive_extractor;
     FileInfo m_fileinfo_current;
     int m_view_mode;
     bool m_show_thumbnails;

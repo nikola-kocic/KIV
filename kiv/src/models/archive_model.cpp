@@ -12,7 +12,7 @@
 #include "kiv/src/helper.h"
 #endif
 
-ArchiveModel::ArchiveModel(IArchiveExtractor *archive_extractor,
+ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
                            const QString &path,
                            QObject *parent)
     : QAbstractItemModel(parent)

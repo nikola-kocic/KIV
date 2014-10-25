@@ -16,7 +16,7 @@ class ThumbnailItemDelegate : public QStyledItemDelegate
 
 public:
     explicit ThumbnailItemDelegate(
-            IPictureLoader *picture_loader,
+            const IPictureLoader *const picture_loader,
             const QSize &thumbSize,
             QObject *parent = 0);
     ~ThumbnailItemDelegate();
@@ -80,7 +80,7 @@ private:
     QHash<QByteArray, ThumbImageDate *> m_thumbnails;
 
     QList<ProcessInfo *> m_files_to_process;
-    IPictureLoader *m_picture_loader;
+    const IPictureLoader *const m_picture_loader;
 
 signals:
     void thumbnailFinished(QModelIndex);

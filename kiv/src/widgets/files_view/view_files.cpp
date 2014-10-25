@@ -11,8 +11,8 @@
 #include "kiv/src/helper.h"
 #endif
 
-ViewFiles::ViewFiles(IPictureLoader *picture_loader,
-                     IArchiveExtractor *archive_extractor,
+ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
+                     const IArchiveExtractor *const archive_extractor,
                      FileSystemModel *model_filesystem,
                      QWidget *parent)
     : QWidget(parent)

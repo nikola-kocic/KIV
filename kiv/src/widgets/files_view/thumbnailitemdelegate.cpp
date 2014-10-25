@@ -20,9 +20,10 @@
 #endif
 
 
-ThumbnailItemDelegate::ThumbnailItemDelegate(IPictureLoader *picture_loader,
-                                             const QSize &thumbSize,
-                                             QObject *parent)
+ThumbnailItemDelegate::ThumbnailItemDelegate(
+        const IPictureLoader *const picture_loader,
+        const QSize &thumbSize,
+        QObject *parent)
     : QStyledItemDelegate(parent)
     , m_thumb_size(thumbSize)
     , m_watcherThumbnail(new QFutureWatcher<QImage>(this))

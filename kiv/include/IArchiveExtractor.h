@@ -10,13 +10,13 @@ public:
     virtual ~IArchiveExtractor() {}
 
     virtual int getFileInfoList(const QString &path,
-                                QList<ArchiveFileInfo> &list) = 0;
+                                QList<ArchiveFileInfo> &list) const = 0;
     virtual int extract(const QString &archiveName,
                         const QString &fileName,
-                        const QString &newFileName) = 0;
+                        const QString &newFileName) const = 0;
     virtual int readFile(const QString &archiveName,
                          const QString &fileName,
-                         QByteArray &buffer) = 0;
+                         QByteArray &buffer) const = 0;
 };
 
 #endif // IARCHIVEEXTRACTOR_H

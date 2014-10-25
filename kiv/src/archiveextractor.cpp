@@ -14,7 +14,7 @@ ArchiveExtractor::ArchiveExtractor(QObject *parent) :
 }
 
 int ArchiveExtractor::getFileInfoList(const QString &path,
-                                      QList<ArchiveFileInfo> &list)
+                                      QList<ArchiveFileInfo> &list) const
 {
     QFile archiveFile(path);
 
@@ -52,7 +52,7 @@ int ArchiveExtractor::getFileInfoList(const QString &path,
 
 int ArchiveExtractor::extract(const QString &archiveName,
                               const QString &fileName,
-                              const QString &newFileName)
+                              const QString &newFileName) const
 {
     QString success = JlCompress::extractFile(archiveName,
                                               fileName,
@@ -68,7 +68,7 @@ int ArchiveExtractor::extract(const QString &archiveName,
 
 int ArchiveExtractor::readFile(const QString &archiveName,
                                const QString &fileName,
-                               QByteArray &buffer)
+                               QByteArray &buffer) const
 {
     QFile zipFile(archiveName);
     QuaZip zip(&zipFile);

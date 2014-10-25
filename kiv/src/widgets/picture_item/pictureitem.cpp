@@ -2,7 +2,7 @@
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(IPictureLoader *picture_loader,
+PictureItem::PictureItem(const IPictureLoader * const picture_loader,
                          const Settings * const settings,
                          QWidget *parent,
                          Qt::WindowFlags f)

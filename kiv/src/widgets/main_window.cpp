@@ -22,8 +22,8 @@
 #include "kiv/src/widgets/settings_dialog.h"
 #include "kiv/src/settings.h"
 
-MainWindow::MainWindow(IPictureLoader *picture_loader,
-                       IArchiveExtractor *archive_extractor,
+MainWindow::MainWindow(const IPictureLoader *const picture_loader,
+                       const IArchiveExtractor *const archive_extractor,
                        QWidget *parent,
                        Qt::WindowFlags f)
     : QMainWindow(parent, f)

@@ -31,7 +31,7 @@ class PictureItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PictureItem(IPictureLoader *picture_loader,
+    explicit PictureItem(const IPictureLoader *const picture_loader,
                          Settings const * const settings,
                          QWidget *parent = 0,
                          Qt::WindowFlags f = 0);
@@ -61,7 +61,7 @@ private:
     void endDrag();
     void updateLockMode();
 
-    IPictureLoader *m_picture_loader;
+    const IPictureLoader *const m_picture_loader;
     PictureItemData *m_data;
     const Settings *m_settings;
     bool m_opengl;

@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
-    ArchiveExtractor ae;
-    PictureLoader pl(&ae);
+    const ArchiveExtractor ae;
+    const PictureLoader pl(&ae);
     MainWindow w(&pl, &ae);
     w.showMaximized();
     return app.exec();

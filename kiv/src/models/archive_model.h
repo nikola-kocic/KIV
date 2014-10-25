@@ -16,7 +16,7 @@ class ArchiveModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit ArchiveModel(IArchiveExtractor *archive_extractor,
+    explicit ArchiveModel(const IArchiveExtractor *const archive_extractor,
                           const QString &path,
                           QObject *parent = 0);
     ~ArchiveModel();
@@ -53,7 +53,7 @@ private:
     void populate(const QString &archive_path,
                   const QList<TFileInfo> &archive_files);
 
-    IArchiveExtractor *m_archive_extractor;
+    const IArchiveExtractor *const m_archive_extractor;
     ArchiveItem *rootItem;
 
     const QIcon m_icon_dir;

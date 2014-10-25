@@ -20,8 +20,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(IPictureLoader *picture_loader,
-                        IArchiveExtractor *archive_extractor,
+    explicit MainWindow(const IPictureLoader *const picture_loader,
+                        const IArchiveExtractor *const archive_extractor,
                         QWidget *parent = 0,
                         Qt::WindowFlags f = 0);
     ~MainWindow();
@@ -39,8 +39,8 @@ private:
                     m_picture_item->mapFromGlobal(pos));
     }
 
-    IPictureLoader *m_picture_loader;
-    IArchiveExtractor *m_archive_extractor;
+    const IPictureLoader *const m_picture_loader;
+    const IArchiveExtractor *const m_archive_extractor;
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

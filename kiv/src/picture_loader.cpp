@@ -11,7 +11,7 @@
 #endif
 
 
-PictureLoader::PictureLoader(IArchiveExtractor *archive_extractor)
+PictureLoader::PictureLoader(const IArchiveExtractor * const archive_extractor)
     : m_archive_extractor(archive_extractor)
 {
 }
