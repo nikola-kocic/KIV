@@ -4,36 +4,21 @@
 #include <QAbstractItemModel>
 #include <QImage>
 
+#include "kiv/include/IPictureLoader.h"
 #include "kiv/src/helper.h"
 
-class ThumbnailInfo
+class PictureLoader : public IPictureLoader
 {
 public:
-    explicit ThumbnailInfo(const FileInfo &info, const QSize &thumbSize)
-        : m_info(info)
-        , m_thumbSize(thumbSize)
-    {}
-
-    inline FileInfo getFileInfo() const { return m_info; }
-    inline QSize getThumbSize() const { return m_thumbSize; }
+    QImage getImage(const FileInfo &info) const;
+    QImage getThumbnail(const ThumbnailInfo &thumb_info) const;
+    QImage styleThumbnail(const QImage &img, const QSize &thumb_size) const;
 
 private:
-    const FileInfo m_info;
-    const QSize m_thumbSize;
-};
-
-class PictureLoader
-{
-public:
-    static QImage getImage(const FileInfo &info);
-    static QImage getThumbnail(const ThumbnailInfo &thumb_info);
-    static QImage styleThumbnail(const QImage &img, const QSize &thumb_size);
-
-private:
-    static QSize ThumbnailImageSize(const QSize &image_size,
-                                    const QSize &thumb_size);
-    static QImage getImageFromArchive(const ThumbnailInfo &thumb_info);
-    static QImage getImageFromFile(const ThumbnailInfo &thumb_info);
+    QSize ThumbnailImageSize(const QSize &image_size,
+                             const QSize &thumb_size) const;
+    QImage getImageFromArchive(const ThumbnailInfo &thumb_info) const;
+    QImage getImageFromFile(const ThumbnailInfo &thumb_info) const;
 };
 
 #endif  // PICTURELOADER_H

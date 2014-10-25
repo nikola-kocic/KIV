@@ -1,5 +1,7 @@
 #include <QApplication>
 
+#include "kiv/src/picture_loader.h"
+
 #include "kiv/src/widgets/main_window.h"
 
 int main(int argc, char *argv[])
@@ -22,7 +24,8 @@ int main(int argc, char *argv[])
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
-    MainWindow w;
+    PictureLoader pl;
+    MainWindow w(&pl);
     w.showMaximized();
     return app.exec();
 }

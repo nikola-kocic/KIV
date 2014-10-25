@@ -7,14 +7,18 @@
 #include <QPainter>
 #include <QStyledItemDelegate>
 
-#include "kiv/src/picture_loader.h"
+#include "kiv/include/IPictureLoader.h"
+#include "kiv/src/helper.h"
 
 class ThumbnailItemDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
-    explicit ThumbnailItemDelegate(const QSize &thumbSize, QObject *parent = 0);
+    explicit ThumbnailItemDelegate(
+            IPictureLoader *picture_loader,
+            const QSize &thumbSize,
+            QObject *parent = 0);
     ~ThumbnailItemDelegate();
     QSize sizeHint(const QStyleOptionViewItem &option,
                    const QModelIndex &index) const;
@@ -76,6 +80,7 @@ private:
     QHash<QByteArray, ThumbImageDate *> m_thumbnails;
 
     QList<ProcessInfo *> m_files_to_process;
+    IPictureLoader *m_picture_loader;
 
 signals:
     void thumbnailFinished(QModelIndex);

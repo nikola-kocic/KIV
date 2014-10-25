@@ -63,7 +63,7 @@ class ViewFiles : public QWidget
     Q_OBJECT
 
 public:
-    explicit ViewFiles(FileSystemModel *model_filesystem, QWidget *parent = 0);
+    explicit ViewFiles(IPictureLoader *picture_loader, FileSystemModel *model_filesystem, QWidget *parent = 0);
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
@@ -119,6 +119,7 @@ private:
     void initViewItem();
     void showThumbnails();
 
+    IPictureLoader *m_picture_loader;
     FileInfo m_fileinfo_current;
     int m_view_mode;
     bool m_show_thumbnails;

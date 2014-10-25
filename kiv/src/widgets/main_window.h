@@ -20,7 +20,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    explicit MainWindow(IPictureLoader *picture_loader,
+                        QWidget *parent = 0,
+                        Qt::WindowFlags f = 0);
     ~MainWindow();
 
 private:
@@ -36,6 +38,7 @@ private:
                     m_picture_item->mapFromGlobal(pos));
     }
 
+    IPictureLoader *m_picture_loader;
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

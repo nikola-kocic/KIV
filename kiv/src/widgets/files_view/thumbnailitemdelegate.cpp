@@ -20,11 +20,13 @@
 #endif
 
 
-ThumbnailItemDelegate::ThumbnailItemDelegate(const QSize &thumbSize,
+ThumbnailItemDelegate::ThumbnailItemDelegate(IPictureLoader *picture_loader,
+                                             const QSize &thumbSize,
                                              QObject *parent)
     : QStyledItemDelegate(parent)
     , m_thumb_size(thumbSize)
     , m_watcherThumbnail(new QFutureWatcher<QImage>(this))
+    , m_picture_loader(picture_loader)
 {
     connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)),
             this, SLOT(showThumbnail(int)));
@@ -128,14 +130,15 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info,
         if (m_files_to_process.size() == 1)
         {
             m_watcherThumbnail->setFuture(
-                        QtConcurrent::run(PictureLoader::getThumbnail,
+                        QtConcurrent::run(m_picture_loader,
+                                          &IPictureLoader::getThumbnail,
                                           ThumbnailInfo(info, m_thumb_size)));
         }
     }
     else
     {
         QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-        QImage thumb = PictureLoader::styleThumbnail(
+        QImage thumb = m_picture_loader->styleThumbnail(
                     icon.pixmap(icon.availableSizes().last()).toImage(),
                     m_thumb_size);
         icon = QIcon(QPixmap::fromImage(thumb));
@@ -205,7 +208,8 @@ void ThumbnailItemDelegate::showThumbnail(int num)
     {
         m_watcherThumbnail->setFuture(
                     QtConcurrent::run(
-                        PictureLoader::getThumbnail,
+                        m_picture_loader,
+                        &IPictureLoader::getThumbnail,
                         ThumbnailInfo(m_files_to_process.at(0)->getFileInfo(),
                                       m_thumb_size)));
     }

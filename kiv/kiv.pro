@@ -48,6 +48,7 @@ HEADERS += \
     src/widgets/settings_dialog.h \
     src/widgets/zoom_widget.h \
     src/widgets/urlnavigator.h \
+    include/IPictureLoader.h
 
 lessThan(QT_MAJOR_VERSION, 5): HEADERS += \
     src/widgets/picture_item/pictureitem_gl.h \

@@ -12,9 +12,10 @@
 #include "kiv/src/helper.h"
 #endif
 
-ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
+ViewFiles::ViewFiles(IPictureLoader *picture_loader, FileSystemModel *model_filesystem, QWidget *parent)
     : QWidget(parent)
 
+    , m_picture_loader(picture_loader)
     , m_fileinfo_current(FileInfo(""))
     , m_view_mode(FileViewMode::List)
     , m_show_thumbnails(false)
@@ -33,7 +34,8 @@ ViewFiles::ViewFiles(FileSystemModel *model_filesystem, QWidget *parent)
     , m_proxy_containers(new ContainersSortFilterProxyModel(this))
     , m_proxy_archive_dirs(new ArchiveDirsSortFilterProxyModel(this))
 
-    , m_thumbnail_delegate(new ThumbnailItemDelegate(m_thumb_size, this))
+    , m_thumbnail_delegate(new ThumbnailItemDelegate(
+                               m_picture_loader, m_thumb_size, this))
     , m_layout_files_list(new QVBoxLayout())
     , m_combobox_sort(new QComboBox(this))
 

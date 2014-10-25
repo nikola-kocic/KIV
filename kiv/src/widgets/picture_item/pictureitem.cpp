@@ -2,10 +2,13 @@
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(const Settings * const settings, QWidget *parent,
+PictureItem::PictureItem(IPictureLoader *picture_loader,
+                         const Settings * const settings,
+                         QWidget *parent,
                          Qt::WindowFlags f)
     : QWidget(parent, f)
 
+    , m_picture_loader(picture_loader)
     , m_data(new PictureItemData())
 
     , m_settings(settings)
@@ -93,8 +96,9 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
         t.start();
 #endif
-        m_loader_image->setFuture(QtConcurrent::run(PictureLoader::getImage,
-                                                    info));
+        m_loader_image->setFuture(
+                    QtConcurrent::run(
+                        m_picture_loader, &IPictureLoader::getImage, info));
     }
 }
 

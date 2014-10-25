@@ -15,7 +15,7 @@
 #include <QTimer>
 #include <QWheelEvent>
 
-#include "kiv/src/picture_loader.h"
+#include "kiv/include/IPictureLoader.h"
 #include "kiv/src/settings.h"
 #include "kiv/src/widgets/picture_item/pictureitem_data.h"
 #include "kiv/src/widgets/picture_item/pictureitem_gl.h"
@@ -31,7 +31,9 @@ class PictureItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PictureItem(Settings const * const settings, QWidget *parent = 0,
+    explicit PictureItem(IPictureLoader *picture_loader,
+                         Settings const * const settings,
+                         QWidget *parent = 0,
                          Qt::WindowFlags f = 0);
     ~PictureItem();
 
@@ -59,6 +61,7 @@ private:
     void endDrag();
     void updateLockMode();
 
+    IPictureLoader *m_picture_loader;
     PictureItemData *m_data;
     const Settings *m_settings;
     bool m_opengl;

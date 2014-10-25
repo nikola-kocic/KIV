@@ -16,7 +16,7 @@
 #endif
 
 
-QImage PictureLoader::getImage(const FileInfo &info)
+QImage PictureLoader::getImage(const FileInfo &info) const
 {
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << info.getPath();
@@ -27,18 +27,16 @@ QImage PictureLoader::getImage(const FileInfo &info)
     }
     else if (info.isInArchive())
     {
-        return PictureLoader::getImageFromArchive(ThumbnailInfo(info,
-                                                                QSize(0, 0)));
+        return getImageFromArchive(ThumbnailInfo(info, QSize(0, 0)));
     }
     else
     {
-        return PictureLoader::getImageFromFile(ThumbnailInfo(info,
-                                                             QSize(0, 0)));
+        return getImageFromFile(ThumbnailInfo(info, QSize(0, 0)));
     }
     return QImage(0,0);
 }
 
-QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
+QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
 {
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << thumb_info.getFileInfo().getPath() << thumb_info.getThumbSize();
@@ -49,20 +47,20 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info)
     }
     else if (thumb_info.getFileInfo().isInArchive())
     {
-        return PictureLoader::styleThumbnail(
-                    PictureLoader::getImageFromArchive(thumb_info),
+        return styleThumbnail(
+                    getImageFromArchive(thumb_info),
                     thumb_info.getThumbSize());
     }
     else
     {
-        return PictureLoader::styleThumbnail(
-                    PictureLoader::getImageFromFile(thumb_info),
+        return styleThumbnail(
+                    getImageFromFile(thumb_info),
                     thumb_info.getThumbSize());
     }
     return QImage(0,0);
 }
 
-QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
+QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size) const
 {
     QImage thumb(thumb_size.width() + 2,
                  thumb_size.height() + 2,
@@ -78,7 +76,7 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
     return thumb;
 }
 
-QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
+QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info) const
 {
     QImageReader image_reader(thumb_info.getFileInfo().getPath());
 #ifdef DEBUG_PICTURE_LOADER
@@ -99,7 +97,7 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info)
 }
 
 
-QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
+QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info) const
 {
     QByteArray buff;
 
@@ -169,7 +167,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info)
 }
 
 QSize PictureLoader::ThumbnailImageSize(const QSize &image_size,
-                                        const QSize &thumb_size)
+                                        const QSize &thumb_size) const
 {
     QSize result = image_size;
     result.scale(thumb_size, Qt::KeepAspectRatio);
