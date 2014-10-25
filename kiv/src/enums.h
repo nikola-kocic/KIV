@@ -50,34 +50,43 @@ struct SortDirection
 };
 
 struct ArchiveFileInfo {
-  /// File name.
-  QString name;
-  /// Version created by.
-//  quint16 versionCreated;
-//  /// Version needed to extract.
-//  quint16 versionNeeded;
-//  /// General purpose flags.
-//  quint16 flags;
-//  /// Compression method.
-//  quint16 method;
-  /// Last modification date and time.
-  QDateTime dateTime;
-//  /// CRC.
-//  quint32 crc;
-//  /// Compressed file size.
-//  quint32 compressedSize;
-  /// Uncompressed file size.
-  quint32 uncompressedSize;
-//  /// Disk number start.
-//  quint16 diskNumberStart;
-//  /// Internal file attributes.
-//  quint16 internalAttr;
-//  /// External file attributes.
-//  quint32 externalAttr;
-//  /// Comment.
-//  QString comment;
-//  /// Extra field.
-//  QByteArray extra;
+    /// File name.
+    QString name;
+//    /// Version created by.
+//    quint16 versionCreated;
+//    /// Version needed to extract.
+//    quint16 versionNeeded;
+//    /// General purpose flags.
+//    quint16 flags;
+//    /// Compression method.
+//    quint16 method;
+    /// Last modification date and time.
+    QDateTime dateTime;
+//    /// CRC.
+//    quint32 crc;
+//    /// Compressed file size.
+//    quint32 compressedSize;
+    /// Uncompressed file size.
+    quint32 uncompressedSize;
+//    /// Disk number start.
+//    quint16 diskNumberStart;
+//    /// Internal file attributes.
+//    quint16 internalAttr;
+//    /// External file attributes.
+//    quint32 externalAttr;
+//    /// Comment.
+//    QString comment;
+//    /// Extra field.
+//    QByteArray extra;
+    explicit ArchiveFileInfo() {}
+    explicit ArchiveFileInfo(QString name,
+                             QDateTime dateTime,
+                             quint32 uncompressedSize)
+        :name(name)
+        , dateTime(dateTime)
+        , uncompressedSize(uncompressedSize)
+    {
+    }
 };
 
 #endif  // ENUMS_H

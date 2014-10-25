@@ -1,5 +1,6 @@
 #include <QApplication>
 
+#include "kiv/src/archiveextractor.h"
 #include "kiv/src/picture_loader.h"
 
 #include "kiv/src/widgets/main_window.h"
@@ -24,8 +25,9 @@ int main(int argc, char *argv[])
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
-    PictureLoader pl;
-    MainWindow w(&pl);
+    ArchiveExtractor ae;
+    PictureLoader pl(&ae);
+    MainWindow w(&pl, &ae);
     w.showMaximized();
     return app.exec();
 }

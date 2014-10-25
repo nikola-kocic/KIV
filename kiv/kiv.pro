@@ -21,6 +21,7 @@ SOURCES += \
     src/widgets/settings_dialog.cpp \
     src/widgets/zoom_widget.cpp \
     src/widgets/urlnavigator.cpp \
+    src/archiveextractor.cpp
 
 lessThan(QT_MAJOR_VERSION, 5): SOURCES += \
     src/widgets/picture_item/pictureitem_gl.cpp \
@@ -48,6 +49,8 @@ HEADERS += \
     src/widgets/settings_dialog.h \
     src/widgets/zoom_widget.h \
     src/widgets/urlnavigator.h \
+    src/archiveextractor.h \
+    include/IArchiveExtractor.h \
     include/IPictureLoader.h
 
 lessThan(QT_MAJOR_VERSION, 5): HEADERS += \

@@ -5,25 +5,22 @@
 #include <QFileSystemModel>
 #include <QStyle>
 
-#include <quazip.h>
-#include <quazipfile.h>
-
 #include "kiv/src/helper.h"
 #include "kiv/src/models/archive_item.h"
-#include "kiv/src/models/unrar/archive_rar.h"
-
 //#define DEBUG_MODEL_FILES
 #ifdef DEBUG_MODEL_FILES
 #include "kiv/src/helper.h"
 #endif
 
-ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
+ArchiveModel::ArchiveModel(IArchiveExtractor *archive_extractor,
+                           const QString &path,
+                           QObject *parent)
     : QAbstractItemModel(parent)
+    , m_archive_extractor(archive_extractor)
     , rootItem(new ArchiveItem("", QDateTime(), 0, "",
                                ArchiveItem::TYPE_ARCHIVE))
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
     , m_icon_file(QIcon::fromTheme("image-x-generic"))
-    , m_type(ArchiveType::None)
 {
 #ifdef DEBUG_MODEL_FILES
     DEBUGOUT << path;
@@ -32,41 +29,10 @@ ArchiveModel::ArchiveModel(const QString &path, QObject *parent)
     {
         m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
     }
-    QFile archiveFile(path);
+    QList<ArchiveFileInfo> archive_files;
+    int success = m_archive_extractor->getFileInfoList(path, archive_files);
+    populate(path, archive_files);
 
-    // Try to open as ZIP
-    QuaZip zip(&archiveFile);
-    if (zip.open(QuaZip::mdUnzip))
-    {
-        zip.setFileNameCodec("UTF-8");
-
-        const QList<QuaZipFileInfo> archive_files = zip.getFileInfoList();
-
-        zip.close();
-        if (zip.getZipError() != UNZ_OK)
-        {
-            qWarning("testRead(): zip.close(): %d", zip.getZipError());
-            return;
-        }
-        populate(path, archive_files);
-#ifdef DEBUG_MODEL_FILES
-        DEBUGOUT << "ZIP";
-#endif
-        m_type = ArchiveType::Zip;
-        return;
-    }
-
-    // Try to open as RAR
-    if (ArchiveRar::loadlib())
-    {
-        QList<ArchiveFileInfo> archive_files;
-        if (ArchiveRar::getFileInfoList(path, archive_files) == 0)
-        {
-            populate(path, archive_files);
-            m_type = ArchiveType::Rar;
-            return;
-        }
-    }
 }
 
 template<class TFileInfo>

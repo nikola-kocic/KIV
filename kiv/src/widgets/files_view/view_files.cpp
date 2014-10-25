@@ -2,20 +2,23 @@
 
 #include <QHeaderView>
 #include <QLabel>
-#include <JlCompress.h>
 
 #include "kiv/src/models/archive_item.h"
-#include "kiv/src/models/unrar/archive_rar.h"
+#include "kiv/src/picture_loader.h"
 
 //#define DEBUG_VIEW_FILES
 #ifdef DEBUG_VIEW_FILES
 #include "kiv/src/helper.h"
 #endif
 
-ViewFiles::ViewFiles(IPictureLoader *picture_loader, FileSystemModel *model_filesystem, QWidget *parent)
+ViewFiles::ViewFiles(IPictureLoader *picture_loader,
+                     IArchiveExtractor *archive_extractor,
+                     FileSystemModel *model_filesystem,
+                     QWidget *parent)
     : QWidget(parent)
 
     , m_picture_loader(picture_loader)
+    , m_archive_extractor(archive_extractor)
     , m_fileinfo_current(FileInfo(""))
     , m_view_mode(FileViewMode::List)
     , m_show_thumbnails(false)
@@ -235,7 +238,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         m_proxy_archive_dirs->setSourceModel(0);
 
         delete m_model_archive_files;
-        m_model_archive_files = new ArchiveModel(info.getContainerPath());
+        m_model_archive_files = new ArchiveModel(
+                m_archive_extractor, info.getContainerPath());
 
         m_proxy_file_list->setSourceModel(m_model_archive_files);
         m_proxy_archive_dirs->setSourceModel(m_model_archive_files);
@@ -661,30 +665,12 @@ QFileSystemModel *ViewFiles::getFilesystemModel() const
 
 void ViewFiles::saveCurrentFile(const QString &fileName) const
 {
+    // TODO: Research error handling
     if (m_fileinfo_current.isInArchive())
     {
-        switch (m_model_archive_files->getType())
-        {
-        case ArchiveType::Zip:
-            JlCompress::extractFile(m_fileinfo_current.getContainerPath(),
-                                    m_fileinfo_current.getArchiveImagePath(),
-                                    fileName);
-            break;
-
-        case ArchiveType::Rar:
-        {
-            if (ArchiveRar::loadlib())
-            {
-                ArchiveRar::extract(m_fileinfo_current.getContainerPath(),
-                                    m_fileinfo_current.getArchiveImagePath(),
-                                    fileName);
-            }
-            break;
-        }
-
-        default:
-            break;
-        }
+        m_archive_extractor->extract(m_fileinfo_current.getContainerPath(),
+                                     m_fileinfo_current.getArchiveImagePath(),
+                                     fileName);
     }
     else
     {

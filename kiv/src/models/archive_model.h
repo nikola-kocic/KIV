@@ -6,16 +6,9 @@
 #include <QModelIndex>
 #include <QVariant>
 
+#include "kiv/include/IArchiveExtractor.h"
 #include "kiv/src/models/archive_item.h"
 #include "kiv/src/fileinfo.h"
-
-
-struct ArchiveType
-{
-    static const int None = 0;
-    static const int Zip = 1;
-    static const int Rar = 2;
-};
 
 
 class ArchiveModel : public QAbstractItemModel
@@ -23,7 +16,9 @@ class ArchiveModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit ArchiveModel(const QString &path, QObject *parent = 0);
+    explicit ArchiveModel(IArchiveExtractor *archive_extractor,
+                          const QString &path,
+                          QObject *parent = 0);
     ~ArchiveModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -58,14 +53,11 @@ private:
     void populate(const QString &archive_path,
                   const QList<TFileInfo> &archive_files);
 
+    IArchiveExtractor *m_archive_extractor;
     ArchiveItem *rootItem;
 
     const QIcon m_icon_dir;
     QIcon m_icon_file;
-    int m_type;
 };
-
-inline int ArchiveModel::getType() const
-{ return m_type; }
 
 #endif  // ARCHIVE_MODEL_H

@@ -5,16 +5,16 @@
 #include <QImageReader>
 #include <QPainter>
 
-#include <quazip.h>
-#include <quazipfile.h>
-
-#include "kiv/src/models/unrar/archive_rar.h"
-
 //#define DEBUG_PICTURE_LOADER
 #ifdef DEBUG_PICTURE_LOADER
 #include "kiv/src/helper.h"
 #endif
 
+
+PictureLoader::PictureLoader(IArchiveExtractor *archive_extractor)
+    : m_archive_extractor(archive_extractor)
+{
+}
 
 QImage PictureLoader::getImage(const FileInfo &info) const
 {
@@ -100,41 +100,10 @@ QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info) const
 QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info) const
 {
     QByteArray buff;
-
-    QFile zipFile(thumb_info.getFileInfo().getContainerPath());
-    QuaZip zip(&zipFile);
-    if (zip.open(QuaZip::mdUnzip))
-    {
-        zip.setFileNameCodec("UTF-8");
-
-        if (zip.setCurrentFile(thumb_info.getFileInfo().getArchiveImagePath()))
-        {
-            QuaZipFile file(&zip);
-            if (file.open(QIODevice::ReadOnly))
-            {
-                buff = file.readAll();
-            }
-            else
-            {
-                return QImage(0, 0);
-            }
-        }
-        else
-        {
-            return QImage(0, 0);
-        }
-    }
-
-    if (buff.isEmpty())
-    {
-        if (ArchiveRar::loadlib())
-        {
-            // TODO: Check return value
-            ArchiveRar::readFile(thumb_info.getFileInfo().getContainerPath(),
-                                 thumb_info.getFileInfo().getArchiveImagePath(),
-                                 buff);
-        }
-    }
+    int success = m_archive_extractor->readFile(
+                thumb_info.getFileInfo().getContainerPath(),
+                thumb_info.getFileInfo().getArchiveImagePath(),
+                buff);
 
     if (buff.isEmpty())
     {

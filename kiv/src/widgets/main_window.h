@@ -21,6 +21,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(IPictureLoader *picture_loader,
+                        IArchiveExtractor *archive_extractor,
                         QWidget *parent = 0,
                         Qt::WindowFlags f = 0);
     ~MainWindow();
@@ -39,6 +40,7 @@ private:
     }
 
     IPictureLoader *m_picture_loader;
+    IArchiveExtractor *m_archive_extractor;
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

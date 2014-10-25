@@ -17,6 +17,7 @@
 #include <QTreeView>
 #include <QUrl>
 
+#include "kiv/include/IArchiveExtractor.h"
 #include "kiv/src/helper.h"
 #include "kiv/src/models/archive_model.h"
 #include "kiv/src/models/filesystem_model.h"
@@ -63,7 +64,10 @@ class ViewFiles : public QWidget
     Q_OBJECT
 
 public:
-    explicit ViewFiles(IPictureLoader *picture_loader, FileSystemModel *model_filesystem, QWidget *parent = 0);
+    explicit ViewFiles(IPictureLoader *picture_loader,
+                       IArchiveExtractor *archive_extractor,
+                       FileSystemModel *model_filesystem,
+                       QWidget *parent = 0);
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
@@ -120,6 +124,7 @@ private:
     void showThumbnails();
 
     IPictureLoader *m_picture_loader;
+    IArchiveExtractor *m_archive_extractor;
     FileInfo m_fileinfo_current;
     int m_view_mode;
     bool m_show_thumbnails;

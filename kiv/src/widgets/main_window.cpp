@@ -23,15 +23,19 @@
 #include "kiv/src/settings.h"
 
 MainWindow::MainWindow(IPictureLoader *picture_loader,
+                       IArchiveExtractor *archive_extractor,
                        QWidget *parent,
                        Qt::WindowFlags f)
     : QMainWindow(parent, f)
     , m_picture_loader(picture_loader)
+    , m_archive_extractor(archive_extractor)
     , m_model_filesystem(new FileSystemModel(this))
 
     , m_settings(new Settings())
 
-    , m_view_files(new ViewFiles(m_picture_loader, m_model_filesystem, this))
+    , m_view_files(
+          new ViewFiles(
+              m_picture_loader, m_archive_extractor, m_model_filesystem, this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))
     , m_picture_item(new PictureItem(m_picture_loader, m_settings, this))

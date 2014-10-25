@@ -1,6 +1,7 @@
 #ifndef IPICTURELOADER_H
 #define IPICTURELOADER_H
 
+#include "kiv/include/IArchiveExtractor.h"
 #include "kiv/src/fileinfo.h"
 
 #include <QImage>
