@@ -66,25 +66,14 @@ INCLUDEPATH += $$PWD/../
 
 win32{
     RC_FILE = res/icons/kiv.rc
-    greaterThan(QT_MAJOR_VERSION, 4): INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
-    else: INCLUDEPATH += $$PWD/../zlib
 }
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
-win32:CONFIG(release, debug|release) {
-    LIBS += -L$${OUT_PWD}/../quazip/release/ -lquazip
-} else:win32:CONFIG(debug, debug|release) {
-    LIBS += -L$${OUT_PWD}/../quazip/debug/ -lquazip
-} else:unix {
-    LIBS += -L$${OUT_PWD}/../quazip/ -lquazip
-}
-ANDROID_EXTRA_LIBS = $${OUT_PWD}/../quazip/libquazip.so
+LIBS += -lquazip
+ANDROID_EXTRA_LIBS = libquazip.so
 
-
-INCLUDEPATH += $${PWD}/../quazip
-DEPENDPATH += $${PWD}/../quazip
 
 win32:CONFIG(release, debug|release) {
     BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}release
