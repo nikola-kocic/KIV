@@ -1,8 +1,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-SUBDIRS += quazip \
-    kiv_tests \
+SUBDIRS += kiv_tests \
     kiv
 
 

@@ -2,9 +2,9 @@
 
 #include <QFile>
 
-#include <JlCompress.h>
-#include <quazip.h>
-#include <quazipfile.h>
+#include <quazip/JlCompress.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
 #include "kiv/src/models/unrar/archive_rar.h"
 
 
