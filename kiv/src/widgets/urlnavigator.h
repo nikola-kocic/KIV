@@ -24,6 +24,7 @@ public:
 
 public slots:
     void setLocationUrl(const QUrl &url);
+    void focus();
 
 signals:
     void urlChanged(const QUrl &url);

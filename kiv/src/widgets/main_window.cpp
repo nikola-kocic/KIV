@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags f)
     , m_menu_context_picture(new QMenu(this))
     , m_menu_context_bookmark(new QMenu(this))
     , m_act_bookmark_delete(new QAction(tr("&Delete Bookmark"), this))
+    , m_act_focus_location(new QAction(tr("Fo&cus location bar"), this))
 
     , m_act_open(new QAction(tr("&Open..."), this))
     , m_act_save(new QAction(tr("&Save Page As..."), this))
@@ -233,6 +234,9 @@ void MainWindow::createActions()
     m_act_settings->setShortcut(QKeySequence::Preferences);
     m_act_about->setShortcut(QKeySequence::HelpContents);
 
+    m_act_focus_location->setShortcuts(QList<QKeySequence>()
+                                       << QKeySequence(Qt::ALT | Qt::Key_D)
+                                       << QKeySequence(Qt::CTRL | Qt::Key_L));
 
     m_act_lockNone->setCheckable(true);
     m_act_lockZoom->setCheckable(true);
@@ -423,6 +427,7 @@ void MainWindow::createMenus()
     /* End contextMenu */
 
     m_menu_context_bookmark->addAction(m_act_bookmark_delete);
+    this->addAction(m_act_focus_location);
 }
 
 void MainWindow::connectActions()
@@ -508,6 +513,8 @@ void MainWindow::connectActions()
 
     connect(m_act_bookmark_delete, SIGNAL(triggered()),
             this, SLOT(deleteBookmark()));
+    connect(m_act_focus_location, SIGNAL(triggered()),
+            m_urlNavigator, SLOT(focus()));
 
     connect(m_menu_history, SIGNAL(aboutToShow()),
             this, SLOT(populateHistoryMenu()));

@@ -57,6 +57,7 @@ private:
     QMenu *m_menu_context_bookmark;
 
     QAction *m_act_bookmark_delete;
+    QAction *m_act_focus_location;
 
     /* File Menu Actions */
     QAction *m_act_open;

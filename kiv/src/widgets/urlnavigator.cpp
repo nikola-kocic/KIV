@@ -55,6 +55,12 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
     emit historyChanged();
 }
 
+void UrlNavigator::focus()
+{
+    this->setFocus();
+    this->selectAll();
+}
+
 void UrlNavigator::focusOutEvent(QFocusEvent *event)
 {
     setLocationUrlInternal(m_currentUrl);
