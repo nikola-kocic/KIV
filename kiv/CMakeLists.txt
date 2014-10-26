@@ -108,3 +108,5 @@ else()
     target_link_libraries ( kiv Qt5::Widgets Qt5::Concurrent ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})
 endif()
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/icons/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/icons/)
+
