@@ -20,7 +20,7 @@ endif()
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTTEST_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/../)
+    ${CMAKE_CURRENT_SOURCE_DIR}/../)
 set ( tst_kiv_teststest_HDRS
     ../kiv/src/enums.h
     ../kiv/src/settings.h
