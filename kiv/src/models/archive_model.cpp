@@ -14,7 +14,7 @@
 
 ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
                            const QString &path,
-                           QObject *parent)
+                           QObject *const parent)
     : QAbstractItemModel(parent)
     , m_archive_extractor(archive_extractor)
     , rootItem(new ArchiveItem("", QDateTime(), 0, "",
@@ -105,14 +105,14 @@ int ArchiveModel::columnCount(const QModelIndex & /* parent */) const
 }
 
 
-QVariant ArchiveModel::data(const QModelIndex &index, int role) const
+QVariant ArchiveModel::data(const QModelIndex &index, const int role) const
 {
     if (!index.isValid())
     {
         return QVariant();
     }
 
-    ArchiveItem *item = getItem(index);
+    const ArchiveItem *const item = getItem(index);
 
     return item->data(role, index.column());
 }
@@ -140,9 +140,9 @@ ArchiveItem *ArchiveModel::getItem(const QModelIndex &index) const
     return rootItem;
 }
 
-QVariant ArchiveModel::headerData(int section,
-                                  Qt::Orientation orientation,
-                                  int role) const
+QVariant ArchiveModel::headerData(const int section,
+                                  const Qt::Orientation orientation,
+                                  const int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
@@ -160,8 +160,8 @@ QVariant ArchiveModel::headerData(int section,
     return QVariant();
 }
 
-QModelIndex ArchiveModel::index(int row,
-                                int column,
+QModelIndex ArchiveModel::index(const int row,
+                                const int column,
                                 const QModelIndex &parent) const
 {
     if (column < 0 || row < 0)
@@ -174,9 +174,9 @@ QModelIndex ArchiveModel::index(int row,
         return QModelIndex();
     }
 
-    ArchiveItem *parentItem = getItem(parent);
+    const ArchiveItem *const parentItem = getItem(parent);
 
-    ArchiveItem *childItem = parentItem->child(row);
+    ArchiveItem *const childItem = parentItem->child(row);
     if (childItem)
     {
         return createIndex(row, column, childItem);
@@ -194,8 +194,8 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
         return QModelIndex();
     }
 
-    ArchiveItem *childItem = getItem(index);
-    ArchiveItem *parentItem = childItem->parent();
+    const ArchiveItem *const childItem = getItem(index);
+    ArchiveItem *const parentItem = childItem->parent();
 
     if (parentItem == rootItem)
     {
@@ -212,7 +212,7 @@ int ArchiveModel::rowCount(const QModelIndex &parent) const
         return 0;
     }
 
-    ArchiveItem *parentItem = getItem(parent);
+    const ArchiveItem *const parentItem = getItem(parent);
 
     return parentItem->childCount();
 }
@@ -223,7 +223,7 @@ ArchiveItem *ArchiveModel::AddNode(
         const quint64 &bytes,
         const QString &path,
         const int type,
-        ArchiveItem *parent)
+        ArchiveItem *const parent)
 {
     for (int i = 0; i < parent->childCount(); ++i)
     {

@@ -18,16 +18,16 @@ class ArchiveModel : public QAbstractItemModel
 public:
     explicit ArchiveModel(const IArchiveExtractor *const archive_extractor,
                           const QString &path,
-                          QObject *parent = 0);
+                          QObject *const parent = 0);
     ~ArchiveModel();
 
-    QVariant data(const QModelIndex &index, int role) const;
+    QVariant data(const QModelIndex &index, const int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section,
-                        Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
-    QModelIndex index(int row,
-                      int column,
+    QVariant headerData(const int section,
+                        const Qt::Orientation orientation,
+                        const int role = Qt::DisplayRole) const;
+    QModelIndex index(const int row,
+                      const int column,
                       const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &index) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -46,7 +46,7 @@ private:
                          const quint64 &bytes,
                          const QString &path,
                          const int type,
-                         ArchiveItem *parent = 0);
+                         ArchiveItem *const parent = 0);
 
     void populate(const QString &archive_path,
                   const QList<ArchiveFileInfo> &archive_files);

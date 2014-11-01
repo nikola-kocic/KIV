@@ -603,12 +603,10 @@ void ViewFiles::showThumbnails()
              i < m_view_current->model()->rowCount(m_view_current->rootIndex());
              ++i)
         {
-            indexes.append(m_view_current->model()->index(
-                               i, 0, m_view_current->rootIndex()));
-            DEBUGOUT << "\t"
-                     << m_view_current->model()->
-                        index(i, 0, m_view_current->rootIndex()).data().
-                        toString();
+            const QModelIndex currIndex = m_view_current->model()->index(
+                        i, 0, m_view_current->rootIndex());
+            indexes.append(currIndex);
+            DEBUGOUT << "\t" << currIndex.data().toString();
         }
 
         on_rows_inserted(indexes);

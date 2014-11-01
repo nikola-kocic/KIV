@@ -14,15 +14,15 @@ public:
                          const QString &path,
                          const int type,
                          const QIcon &icon = QIcon(),
-                         ArchiveItem *parent = 0);
+                         ArchiveItem *const parent = 0);
     ~ArchiveItem();
-    void appendChild(ArchiveItem *child);
-    ArchiveItem *child(int row);
+    void appendChild(ArchiveItem *const child);
+    ArchiveItem *child(const int row) const;
     int childCount() const;
     static int columnCount();
-    QVariant data(int role, int column) const;
+    QVariant data(const int role, const int column) const;
     int row() const;
-    ArchiveItem *parent();
+    ArchiveItem *parent() const;
 
     static const int col_name = 0;
     static const int col_size = 1;
@@ -35,14 +35,14 @@ public:
 private:
     int indexToInsertByName(const ArchiveItem* const item);
     QList<ArchiveItem*> childItems;
-    ArchiveItem *parentItem;
+    ArchiveItem *const parentItem;
 
-    QString m_name;
-    QDateTime m_date;
-    quint64 m_bytes;
-    QString m_path;
-    int m_type;
-    QIcon m_icon;
+    const QString m_name;
+    const QDateTime m_date;
+    const quint64 m_bytes;
+    const QString m_path;
+    const int m_type;
+    const QIcon m_icon;
     QString m_tooltip;
 
     static const int col_count = 3;

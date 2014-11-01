@@ -16,7 +16,7 @@ ArchiveItem::ArchiveItem(const QString &name,
                          const QString &path,
                          const int type,
                          const QIcon &icon,
-                         ArchiveItem *parent)
+                         ArchiveItem *const parent)
     : parentItem(parent)
     , m_name(name)
     , m_date(date)
@@ -47,7 +47,7 @@ ArchiveItem::~ArchiveItem()
 #endif
 }
 
-void ArchiveItem::appendChild(ArchiveItem *item)
+void ArchiveItem::appendChild(ArchiveItem *const item)
 {
     childItems.insert(indexToInsertByName(item), item);
 }
@@ -87,7 +87,7 @@ int ArchiveItem::indexToInsertByName(const ArchiveItem* const item)
     return i;
 }
 
-ArchiveItem *ArchiveItem::child(int row)
+ArchiveItem *ArchiveItem::child(const int row) const
 {
     return childItems.value(row);
 }
@@ -102,7 +102,7 @@ int ArchiveItem::columnCount()
     return col_count;
 }
 
-QVariant ArchiveItem::data(int role, int column) const
+QVariant ArchiveItem::data(const int role, const int column) const
 {
     switch (role)
     {
@@ -159,7 +159,7 @@ QVariant ArchiveItem::data(int role, int column) const
     return QVariant();
 }
 
-ArchiveItem *ArchiveItem::parent()
+ArchiveItem *ArchiveItem::parent() const
 {
     return parentItem;
 }

@@ -1126,12 +1126,12 @@ void MainWindow::populateHistoryMenu()
     {
         return;
     }
-    QList<QUrl> history = m_urlNavigator->getHistory();
+    const QList<QUrl> history = m_urlNavigator->getHistory();
     for (int i = 0; i < history.size(); ++i)
     {
         const QString path = QDir::toNativeSeparators(
                     history.at(i).toLocalFile());
-        QAction* action = m_menu_history->addAction(path);
+        QAction *const action = m_menu_history->addAction(path);
         action->setData(i);
         if (i == m_urlNavigator->historyIndex())
         {

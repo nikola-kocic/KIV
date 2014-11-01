@@ -118,10 +118,10 @@ void Settings::refreshBookmarks()
 {
     for (int i = 0; ; ++i)
     {
-        QVariant varName = m_settings->value("Bookmarks/" + QString::number(i)
-                                             + "/Name");
-        QVariant varPath = m_settings->value("Bookmarks/" + QString::number(i)
-                                             + "/Path");
+        const QVariant varName = m_settings->value(
+                    "Bookmarks/" + QString::number(i) + "/Name");
+        const QVariant varPath = m_settings->value(
+                    "Bookmarks/" + QString::number(i) + "/Path");
         if (varName.isValid() && varPath.isValid())
         {
             m_settings->remove("Bookmarks/" + QString::number(i));

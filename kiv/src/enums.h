@@ -79,9 +79,9 @@ struct ArchiveFileInfo {
 //    /// Extra field.
 //    QByteArray extra;
     explicit ArchiveFileInfo() {}
-    explicit ArchiveFileInfo(QString name,
-                             QDateTime dateTime,
-                             quint32 uncompressedSize)
+    explicit ArchiveFileInfo(const QString name,
+                             const QDateTime dateTime,
+                             const quint32 uncompressedSize)
         :name(name)
         , dateTime(dateTime)
         , uncompressedSize(uncompressedSize)
