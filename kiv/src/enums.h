@@ -51,7 +51,7 @@ struct SortDirection
 
 struct ArchiveFileInfo {
     /// File name.
-    QString name;
+    const QString name;
 //    /// Version created by.
 //    quint16 versionCreated;
 //    /// Version needed to extract.
@@ -61,13 +61,13 @@ struct ArchiveFileInfo {
 //    /// Compression method.
 //    quint16 method;
     /// Last modification date and time.
-    QDateTime dateTime;
+    const QDateTime dateTime;
 //    /// CRC.
 //    quint32 crc;
 //    /// Compressed file size.
 //    quint32 compressedSize;
     /// Uncompressed file size.
-    quint32 uncompressedSize;
+    const quint32 uncompressedSize;
 //    /// Disk number start.
 //    quint16 diskNumberStart;
 //    /// Internal file attributes.
@@ -78,7 +78,6 @@ struct ArchiveFileInfo {
 //    QString comment;
 //    /// Extra field.
 //    QByteArray extra;
-    explicit ArchiveFileInfo() {}
     explicit ArchiveFileInfo(const QString name,
                              const QDateTime dateTime,
                              const quint32 uncompressedSize)

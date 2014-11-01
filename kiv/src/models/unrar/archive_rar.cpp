@@ -26,6 +26,8 @@ RARSetProcessDataProcT RARSetProcessDataProc = 0;
 RARSetPasswordT        RARSetPassword = 0;
 RARGetDllVersionT      RARGetDllVersion = 0;
 
+struct RAROpenArchiveDataEx;
+
 QLibrary *ArchiveRar::Lib = 0;
 
 bool ArchiveRar::loadlib()
@@ -69,7 +71,7 @@ unsigned int ArchiveRar::extract(const QString &archiveName,
     const std::wstring arcNameW = archiveName.toStdWString();
     unsigned int returnCode = 1000;
 
-    struct RAROpenArchiveDataEx OpenArchiveData;
+    RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
     OpenArchiveData.ArcNameW = arcNameW.c_str();
     OpenArchiveData.CmtBufSize = 0;
@@ -85,7 +87,7 @@ unsigned int ArchiveRar::extract(const QString &archiveName,
     }
 
     int RHCode, PFCode;
-    struct RARHeaderDataEx HeaderData;
+    RARHeaderDataEx HeaderData;
 
     HeaderData.CmtBuf = NULL;
     memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
@@ -151,7 +153,7 @@ unsigned int ArchiveRar::readFile(const QString &archiveName,
     const std::wstring arcNameW = archiveName.toStdWString();
     unsigned int returnCode = 1000;
 
-    struct RAROpenArchiveDataEx OpenArchiveData;
+    RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
     OpenArchiveData.ArcNameW = arcNameW.c_str();
     OpenArchiveData.CmtBufSize = 0;
@@ -167,7 +169,7 @@ unsigned int ArchiveRar::readFile(const QString &archiveName,
     char *callBackBuffer = 0;
     RARSetCallback(hArcData, CallbackProc, (LPARAM)&callBackBuffer);
 
-    struct RARHeaderDataEx HeaderData;
+    RARHeaderDataEx HeaderData;
     HeaderData.CmtBuf = NULL;
     memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
@@ -215,12 +217,34 @@ QDateTime ArchiveRar::dateFromDos(const uint dosTime)
     return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
 
+
+const ArchiveFileInfo *ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx HeaderData)
+{
+    QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
+    fileName = QDir::fromNativeSeparators(fileName);
+    quint32 uncompressedSize = 0;
+    if ((HeaderData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY)
+    {
+        fileName.append(QDir::separator());
+        uncompressedSize = 0;
+    }
+    else
+    {
+        qint64 unpSize = HeaderData.UnpSize
+                + (((qint64)HeaderData.UnpSizeHigh) << 32);
+        uncompressedSize = unpSize;
+    }
+    const ArchiveFileInfo* newArchiveFileInfo = new ArchiveFileInfo(
+                fileName, dateFromDos(HeaderData.FileTime), uncompressedSize);
+    return newArchiveFileInfo;
+}
+
 unsigned int ArchiveRar::getFileInfoList(const QString &path,
-                                         QList<ArchiveFileInfo> &list)
+                                         QList<const ArchiveFileInfo*> &list)
 {
     std::wstring path_wstr = path.toStdWString();
 
-    struct RAROpenArchiveDataEx OpenArchiveData;
+    RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
     OpenArchiveData.ArcNameW = path_wstr.c_str();
     OpenArchiveData.CmtBufSize = 0;
@@ -235,31 +259,14 @@ unsigned int ArchiveRar::getFileInfoList(const QString &path,
     }
 
     int RHCode, PFCode;
-    struct RARHeaderDataEx HeaderData;
+    RARHeaderDataEx HeaderData;
 
     HeaderData.CmtBuf = NULL;
     memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
     while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
     {
-        ArchiveFileInfo newArchiveFileInfo;
-        QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
-        fileName = QDir::fromNativeSeparators(fileName);
-        if ((HeaderData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY)
-        {
-            fileName.append(QDir::separator());
-            newArchiveFileInfo.uncompressedSize = 0;
-        }
-        else
-        {
-            qint64 unpSize = HeaderData.UnpSize
-                    + (((qint64)HeaderData.UnpSizeHigh) << 32);
-            newArchiveFileInfo.uncompressedSize = unpSize;
-        }
-        newArchiveFileInfo.name = fileName;
-        newArchiveFileInfo.dateTime = dateFromDos(HeaderData.FileTime);
-
-        list.append(newArchiveFileInfo);
+        list.append(createArchiveFileInfo(HeaderData));
 
 //#ifdef DEBUG_MODEL_FILES
 //        DEBUGOUT << fileName;

@@ -6,6 +6,8 @@
 
 #include "kiv/src/enums.h"
 
+struct RARHeaderDataEx;
+
 class ArchiveRar
 {
 public:
@@ -17,7 +19,8 @@ public:
                                  const QString &fileName,
                                  QByteArray &buffer);
     static unsigned int getFileInfoList(const QString &path,
-                                        QList<ArchiveFileInfo> &list);
+                                        QList<const ArchiveFileInfo *> &list);
+    static const ArchiveFileInfo *createArchiveFileInfo(const RARHeaderDataEx HeaderData);
 
 private:
     static QDateTime dateFromDos(const uint dosTime);

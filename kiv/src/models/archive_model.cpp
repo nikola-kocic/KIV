@@ -29,14 +29,17 @@ ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
     {
         m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
     }
-    QList<ArchiveFileInfo> archive_files;
+    QList<const ArchiveFileInfo*> archive_files;
     int success = m_archive_extractor->getFileInfoList(path, archive_files);
     populate(path, archive_files);
-
+    for (int i = 0; i < archive_files.size(); ++i)
+    {
+        delete archive_files.at(i);
+    }
 }
 
 void ArchiveModel::populate(const QString &archive_path,
-                            const QList<ArchiveFileInfo> &archive_files)
+                            const QList<const ArchiveFileInfo*> &archive_files)
 {
     /* Populate model */
     const QFileIconProvider fip;
@@ -58,17 +61,19 @@ void ArchiveModel::populate(const QString &archive_path,
         DEBUGOUT << archive_files.at(i).name;
 #endif
         ArchiveItem *node = rootArchiveItem;
-        const QStringList file_path_parts = archive_files.at(i).name.split('/');
+        const ArchiveFileInfo *currentArchiveFile = archive_files.at(i);
+        const QStringList file_path_parts = currentArchiveFile->name.split('/');
         QString folderPath = path + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
-            if (file_path_parts.at(j).size() > 0)
+            const QString currentFilePathPart = file_path_parts.at(j);
+            if (currentFilePathPart.size() > 0)
             {
-                folderPath.append(file_path_parts.at(j) + "/");
+                folderPath.append(currentFilePathPart + "/");
                 if (j < file_path_parts.size() - 1)
                 {
-                    node = AddNode(file_path_parts.at(j),
-                                   archive_files.at(i).dateTime,
+                    node = AddNode(currentFilePathPart,
+                                   currentArchiveFile->dateTime,
                                    0,
                                    folderPath,
                                    ArchiveItem::TYPE_ARCHIVE_DIR,
@@ -76,14 +81,14 @@ void ArchiveModel::populate(const QString &archive_path,
                 }
                 else
                 {
-                    const QFileInfo fi(archive_files.at(i).name);
+                    const QFileInfo fi(currentArchiveFile->name);
                     if (Helper::isImageFile(fi))
                     {
                         const QString nodeFilePath = path + "/"
-                                + archive_files.at(i).name;
-                        node = AddNode(file_path_parts.at(j),
-                                       archive_files.at(i).dateTime,
-                                       archive_files.at(i).uncompressedSize,
+                                + currentArchiveFile->name;
+                        node = AddNode(currentFilePathPart,
+                                       currentArchiveFile->dateTime,
+                                       currentArchiveFile->uncompressedSize,
                                        nodeFilePath,
                                        ArchiveItem::TYPE_ARCHIVE_FILE,
                                        node);
