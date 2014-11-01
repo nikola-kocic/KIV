@@ -35,9 +35,8 @@ ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
 
 }
 
-template<class TFileInfo>
 void ArchiveModel::populate(const QString &archive_path,
-                            const QList<TFileInfo> &archive_files)
+                            const QList<ArchiveFileInfo> &archive_files)
 {
     /* Populate model */
     const QFileIconProvider fip;
