@@ -68,6 +68,7 @@ public:
                        const IArchiveExtractor *const archive_extractor,
                        FileSystemModel *model_filesystem,
                        QWidget *parent = 0);
+    ~ViewFiles();
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);

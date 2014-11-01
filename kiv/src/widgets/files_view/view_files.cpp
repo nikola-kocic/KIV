@@ -135,6 +135,14 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     initViewItem();
 }
 
+ViewFiles::~ViewFiles()
+{
+    if (m_model_archive_files)
+    {
+        delete m_model_archive_files;
+    }
+}
+
 FileInfo ViewFiles::getCurrentFileInfo() const
 {
     return m_fileinfo_current;
