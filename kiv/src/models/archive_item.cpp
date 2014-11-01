@@ -164,16 +164,6 @@ ArchiveItem *ArchiveItem::parent()
     return parentItem;
 }
 
-void ArchiveItem::setDate(const QDateTime &date)
-{
-    m_date = date;
-}
-
-void ArchiveItem::setSize(const quint64 &bytes)
-{
-    m_bytes = bytes;
-}
-
 int ArchiveItem::row() const
 {
     if (parentItem)

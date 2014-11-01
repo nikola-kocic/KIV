@@ -46,8 +46,7 @@ private:
                          const quint64 &bytes,
                          const QString &path,
                          const int type,
-                         ArchiveItem *parent = 0,
-                         const bool updateData = false);
+                         ArchiveItem *parent = 0);
 
     void populate(const QString &archive_path,
                   const QList<ArchiveFileInfo> &archive_files);

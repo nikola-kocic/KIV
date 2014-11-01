@@ -223,17 +223,12 @@ ArchiveItem *ArchiveModel::AddNode(
         const quint64 &bytes,
         const QString &path,
         const int type,
-        ArchiveItem *parent,
-        const bool updateDate)
+        ArchiveItem *parent)
 {
     for (int i = 0; i < parent->childCount(); ++i)
     {
         if (parent->child(i)->data(Qt::EditRole, ArchiveItem::col_name) == name)
         {
-            if (updateDate == true)
-            {
-                parent->child(i)->setDate(date);
-            }
             return parent->child(i);
         }
     }
