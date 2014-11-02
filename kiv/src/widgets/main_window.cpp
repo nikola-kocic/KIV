@@ -606,13 +606,12 @@ void MainWindow::populateBookmarks()
         return;
     }
 
-    const QList<Bookmark *> bookmarks = m_settings->getBookmarks();
-    for (int i = 0; i < bookmarks.size(); ++i)
+    for (const Bookmark *bookmark : m_settings->getBookmarks())
     {
-        QAction *bookmark = new QAction(bookmarks.at(i)->getName(),
-                                        m_menu_bookmarks);
-        bookmark->setData(bookmarks.at(i)->getPath());
-        m_menu_bookmarks->addAction(bookmark);
+        QAction *act_bookmark = new QAction(bookmark->getName(),
+                                            m_menu_bookmarks);
+        act_bookmark->setData(bookmark->getPath());
+        m_menu_bookmarks->addAction(act_bookmark);
 #ifdef DEBUG_MAIN_WINDOW
         DEBUGOUT << "added bookmark" << bookmark->text()
                  << bookmark->data().toString();

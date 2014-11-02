@@ -19,6 +19,7 @@ public:
     void appendChild(ArchiveItem *const child);
     ArchiveItem *child(const int row) const;
     int childCount() const;
+    QList<ArchiveItem *> children() const;
     static int columnCount();
     QVariant data(const int role, const int column) const;
     int row() const;

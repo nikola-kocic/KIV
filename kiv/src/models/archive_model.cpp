@@ -32,9 +32,9 @@ ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
     QList<const ArchiveFileInfo*> archive_files;
     int success = m_archive_extractor->getFileInfoList(path, archive_files);
     populate(path, archive_files);
-    for (int i = 0; i < archive_files.size(); ++i)
+    for (const ArchiveFileInfo *const archive_file_info : archive_files)
     {
-        delete archive_files.at(i);
+        delete archive_file_info;
     }
 }
 
@@ -55,13 +55,12 @@ void ArchiveModel::populate(const QString &archive_path,
                 rootItem);
     rootItem->appendChild(rootArchiveItem);
 
-    for (int i = 0; i < archive_files.size(); ++i)
+    for (const ArchiveFileInfo *const currentArchiveFile : archive_files)
     {
 #ifdef DEBUG_MODEL_FILES
-        DEBUGOUT << archive_files.at(i).name;
+        DEBUGOUT << currentArchiveFile.name;
 #endif
         ArchiveItem *node = rootArchiveItem;
-        const ArchiveFileInfo *currentArchiveFile = archive_files.at(i);
         const QStringList file_path_parts = currentArchiveFile->name.split('/');
         QString folderPath = path + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
@@ -230,11 +229,11 @@ ArchiveItem *ArchiveModel::AddNode(
         const int type,
         ArchiveItem *const parent)
 {
-    for (int i = 0; i < parent->childCount(); ++i)
+    for (ArchiveItem *const sibling : parent->children())
     {
-        if (parent->child(i)->data(Qt::EditRole, ArchiveItem::col_name) == name)
+        if (sibling->data(Qt::EditRole, ArchiveItem::col_name) == name)
         {
-            return parent->child(i);
+            return sibling;
         }
     }
 
@@ -257,9 +256,9 @@ QModelIndex ArchiveModel::getDirectory(const QString &path)
 
     const QStringList file_path_parts = path.split('/',
                                                    QString::SkipEmptyParts);
-    for (int j = 0; j < file_path_parts.size(); ++j)
+    for (const QString &file_path_part : file_path_parts)
     {
-        cri = findIndexChild(file_path_parts.at(j), cri);
+        cri = findIndexChild(file_path_part, cri);
         if (!cri.isValid())
         {
             return QModelIndex();

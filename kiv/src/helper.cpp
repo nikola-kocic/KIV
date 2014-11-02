@@ -14,9 +14,9 @@ QStringList Helper::getFiltersImage()
 {
     if (m_filters_image.isEmpty())
     {
-        for (int i = 0; i < QImageReader::supportedImageFormats().size(); ++i)
+        for (const QByteArray &format : QImageReader::supportedImageFormats())
         {
-            m_filters_image.append(QImageReader::supportedImageFormats().at(i));
+            m_filters_image.append(format);
         }
     }
     return m_filters_image;

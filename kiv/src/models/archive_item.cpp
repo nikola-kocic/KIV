@@ -97,6 +97,11 @@ int ArchiveItem::childCount() const
     return childItems.size();
 }
 
+QList<ArchiveItem *> ArchiveItem::children() const
+{
+    return childItems;
+}
+
 int ArchiveItem::columnCount()
 {
     return col_count;

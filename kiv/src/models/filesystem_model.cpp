@@ -11,14 +11,14 @@ FileSystemModel::FileSystemModel(QObject *parent)
     /* Start modelFilesystem */
     QStringList filters;
     const QStringList filtersArchive = Helper::filtersArchive;
-    for (int i = 0; i < filtersArchive.size(); ++i)
+    for (const QString &filterArchive : filtersArchive)
     {
-        filters.append("*." + filtersArchive.at(i));
+        filters.append("*." + filterArchive);
     }
     const QStringList filtersImage = Helper::getFiltersImage();
-    for (int i = 0; i < filtersImage.size(); ++i)
+    for (const QString &filterImage : filtersImage)
     {
-        filters.append("*." + filtersImage.at(i));
+        filters.append("*." + filterImage);
     }
 
     setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);

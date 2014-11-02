@@ -74,9 +74,9 @@ Settings::~Settings()
 bool Settings::addBookmark(const QString &name, const QString &path)
 {
     // Don't allow multiple bookmarks with same path
-    for (int i = 0; i < m_bookmarks.size(); ++i)
+    for (const Bookmark *const bookmark : m_bookmarks)
     {
-        if (m_bookmarks.at(i)->getPath() == path)
+        if (bookmark->getPath() == path)
         {
             return false;
         }

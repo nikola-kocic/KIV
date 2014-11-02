@@ -66,10 +66,9 @@ void PictureItemRaster::paint(QPainter &p, QPaintEvent const * const event)
             const QRegion eventRegion = event->region();
             const QRegion backgroundRegion = eventRegion.subtracted(
                         QRegion(targetRect.toRect().adjusted(1, 1, -1, -1)));
-            for (int i = 0; i < backgroundRegion.rectCount(); ++i)
+            for (const QRect &backgroundRect : backgroundRegion.rects())
             {
-                p.fillRect(backgroundRegion.rects().at(i),
-                           m_data->m_color_clear);
+                p.fillRect(backgroundRect, m_data->m_color_clear);
             }
         }
 

@@ -633,10 +633,9 @@ void ViewFiles::on_rows_inserted(const QModelIndexList &indexes)
         return;
     }
 
-    for (int i = 0; i < indexes.size(); ++i)
+    for (const QModelIndex &index : indexes)
     {
-        const QModelIndex fixed_index =
-                m_proxy_file_list->mapToSource(indexes.at(i));
+        const QModelIndex fixed_index = m_proxy_file_list->mapToSource(index);
         m_thumbnail_delegate->updateThumbnail(
                     FileInfo(
                         fixed_index.data(QFileSystemModel::FilePathRole).

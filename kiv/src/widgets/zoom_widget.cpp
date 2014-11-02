@@ -27,9 +27,8 @@ ZoomWidget::ZoomWidget(QWidget *parent)
     setFocusPolicy(Qt::StrongFocus);
     lineEdit()->setCompleter(nullptr);
 
-    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    for (const qreal &z : m_defaultZoomSizes)
     {
-        const qreal &z = m_defaultZoomSizes.at(i);
         addItem(QString::number((z * 100), 'f', 0) + "%", z);
         if (qFuzzyCompare(z, 1) == true)
         {
@@ -143,11 +142,11 @@ void ZoomWidget::focusOutEvent(QFocusEvent *event)
 
 void ZoomWidget::zoomIn()
 {
-    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    for (const qreal &z : m_defaultZoomSizes)
     {
-        if (m_defaultZoomSizes.at(i) > m_zoomValue)
+        if (z > m_zoomValue)
         {
-            setZoom(m_defaultZoomSizes.at(i));
+            setZoom(z);
             return;
         }
     }
