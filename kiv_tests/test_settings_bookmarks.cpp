@@ -15,7 +15,7 @@ void TestSettingsBookmarks::init()
 void TestSettingsBookmarks::cleanup()
 {
     m_qsettings->clear();
-    delete m_qsettings;
+    delete m_settings;
 }
 
 void TestSettingsBookmarks::testBookmarkAdd()
@@ -27,6 +27,10 @@ void TestSettingsBookmarks::testBookmarkAdd()
     expected.append(new Bookmark("b1name", "B:\\img1.jpg"));
     QCOMPARE(bookmarks.size(), 1);
     QCOMPARE(*(bookmarks.first()), *(expected.first()));
+    for (const Bookmark *const bookmark : expected)
+    {
+        delete bookmark;
+    }
 }
 
 void TestSettingsBookmarks::testBookmarkAddDuplicate()
