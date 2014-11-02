@@ -8,7 +8,7 @@ class FileSystemModel : public QFileSystemModel
     Q_OBJECT
 public:
     explicit FileSystemModel(QObject *parent = 0);
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 };
 
 #endif  // FILESYSTEM_MODEL_H

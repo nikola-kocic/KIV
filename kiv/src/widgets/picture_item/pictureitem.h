@@ -35,7 +35,7 @@ public:
                          Settings const * const settings,
                          QWidget *parent = 0,
                          Qt::WindowFlags f = 0);
-    ~PictureItem();
+    ~PictureItem() override;
 
     qreal getZoom() const;
 
@@ -91,11 +91,11 @@ private slots:
     void imageFinished(int num);
 
 protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void resizeEvent(QResizeEvent *event);
-    void keyPressEvent(QKeyEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 inline bool PictureItem::getHardwareAcceleration() const

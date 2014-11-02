@@ -37,7 +37,7 @@ public:
     void setViewMode(const int mode);
 
 protected slots:
-    void rowsInserted(const QModelIndex &parent, int start, int end);
+    void rowsInserted(const QModelIndex &parent, int start, int end) override;
 
 signals:
     void rowsInserted(const QModelIndexList &indexes);
@@ -52,7 +52,7 @@ public:
     explicit TreeViewFiles(QWidget *parent = 0);
 
 protected slots:
-    void rowsInserted(const QModelIndex &parent, int start, int end);
+    void rowsInserted(const QModelIndex &parent, int start, int end) override;
 
 signals:
     void rowsInserted(const QModelIndexList &indexes);
@@ -68,7 +68,7 @@ public:
                        const IArchiveExtractor *const archive_extractor,
                        FileSystemModel *model_filesystem,
                        QWidget *parent = 0);
-    ~ViewFiles();
+    ~ViewFiles() override;
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
@@ -91,7 +91,7 @@ private:
             : QSortFilterProxyModel(parent)
         {}
     protected:
-        bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+        bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
     };
 
     class ContainersSortFilterProxyModel : public QSortFilterProxyModel
@@ -102,9 +102,9 @@ private:
         {}
     protected:
         bool filterAcceptsColumn(int source_column,
-                                 const QModelIndex &source_parent) const;
+                                 const QModelIndex &source_parent) const override;
         bool filterAcceptsRow(int source_row,
-                              const QModelIndex &source_parent) const;
+                              const QModelIndex &source_parent) const override;
     };
 
     class ArchiveDirsSortFilterProxyModel : public QSortFilterProxyModel
@@ -116,9 +116,9 @@ private:
 
     protected:
         bool filterAcceptsColumn(int source_column,
-                                 const QModelIndex &source_parent) const;
+                                 const QModelIndex &source_parent) const override;
         bool filterAcceptsRow(int sourceRow,
-                              const QModelIndex &sourceParent) const;
+                              const QModelIndex &sourceParent) const override;
     };
 
     void initViewItem();

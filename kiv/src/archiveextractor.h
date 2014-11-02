@@ -12,13 +12,13 @@ public:
     explicit ArchiveExtractor(QObject *parent = 0);
 
     virtual int getFileInfoList(const QString &path,
-                                QList<ArchiveFileInfo> &list) const;
+                                QList<const ArchiveFileInfo *> &list) const override;
     virtual int extract(const QString &archiveName,
                         const QString &fileName,
-                        const QString &newFileName) const;
+                        const QString &newFileName) const override;
     virtual int readFile(const QString &archiveName,
                          const QString &fileName,
-                         QByteArray &buffer) const;
+                         QByteArray &buffer) const override;
 signals:
 
 public slots:

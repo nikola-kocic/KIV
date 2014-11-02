@@ -19,16 +19,16 @@ public:
             const IPictureLoader *const picture_loader,
             const QSize &thumbSize,
             QObject *parent = 0);
-    ~ThumbnailItemDelegate();
+    ~ThumbnailItemDelegate() override;
     QSize sizeHint(const QStyleOptionViewItem &option,
-                   const QModelIndex &index) const;
+                   const QModelIndex &index) const override;
     void updateThumbnail(const FileInfo &info, const QModelIndex &index);
     void setThumbnailSize(const QSize &size);
     void cancelThumbnailGeneration();
 
 protected:
     void initStyleOption(QStyleOptionViewItem *option,
-                         const QModelIndex &index) const;
+                         const QModelIndex &index) const override;
 
 private:
 

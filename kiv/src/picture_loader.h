@@ -11,9 +11,9 @@ class PictureLoader : public IPictureLoader
 {
 public:
     PictureLoader(const IArchiveExtractor *const archive_extractor);
-    QImage getImage(const FileInfo &info) const;
-    QImage getThumbnail(const ThumbnailInfo &thumb_info) const;
-    QImage styleThumbnail(const QImage &img, const QSize &thumb_size) const;
+    QImage getImage(const FileInfo &info) const override;
+    QImage getThumbnail(const ThumbnailInfo &thumb_info) const override;
+    QImage styleThumbnail(const QImage &img, const QSize &thumb_size) const override;
 
 private:
     QSize ThumbnailImageSize(const QSize &image_size,

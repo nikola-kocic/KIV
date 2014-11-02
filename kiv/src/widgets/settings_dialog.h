@@ -15,7 +15,7 @@ class Settings_Dialog : public QDialog
 
 public:
     explicit Settings_Dialog(Settings *settings, QWidget *parent = 0);
-    ~Settings_Dialog();
+    ~Settings_Dialog() override;
 
 private slots:
     void on_buttonBox_accepted();

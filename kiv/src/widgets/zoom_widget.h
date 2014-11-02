@@ -12,8 +12,8 @@ public:
     qreal getZoom();
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
-    void focusOutEvent(QFocusEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
 
 private:
     qreal m_zoomValue;

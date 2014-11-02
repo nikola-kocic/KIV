@@ -31,8 +31,8 @@ signals:
     void historyChanged();
 
 protected:
-    void focusOutEvent(QFocusEvent *event);
-    void keyPressEvent(QKeyEvent *event);
+    void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void setLocationUrlInternal(const QUrl &url);

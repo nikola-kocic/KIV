@@ -11,11 +11,11 @@ class PictureItemRaster : private QWidget, public PictureItemInterface
 
 public:
     explicit PictureItemRaster(PictureItemData *data, QWidget* parent);
-    ~PictureItemRaster();
-    void setRotation(const qreal current, const qreal previous);
-    void setZoom(const qreal current, const qreal previous);
-    void setImage(const QImage &img);
-    void setNullImage() {}
+    ~PictureItemRaster() override;
+    void setRotation(const qreal current, const qreal previous) override;
+    void setZoom(const qreal current, const qreal previous) override;
+    void setImage(const QImage &img) override;
+    void setNullImage() override {}
     QWidget* getWidget();
     void paint(QPainter &p, const QPaintEvent * const event);
 
@@ -24,7 +24,7 @@ private:
     QPixmap m_pixmap_edited;
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 
 };
 

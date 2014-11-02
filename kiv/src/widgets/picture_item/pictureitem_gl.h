@@ -16,13 +16,13 @@ class PictureItemGL : private QGLWidget, public PictureItemInterface
 
 public:
     explicit PictureItemGL(PictureItemData *data, QWidget *parent);
-    ~PictureItemGL();
-    void setRotation(const qreal current, const qreal previous);
-    void setBackgroundColor(const QColor &color);
-    void setImage(const QImage &img);
-    void setNullImage();
+    ~PictureItemGL() override;
+    void setRotation(const qreal current, const qreal previous) override;
+    void setBackgroundColor(const QColor &color) override;
+    void setImage(const QImage &img) override;
+    void setNullImage() override;
     void setTexture(const QImage &tex, const int num);
-    void setZoom(const qreal current, const qreal previous);
+    void setZoom(const qreal current, const qreal previous) override;
     QWidget *getWidget();
 
 private:
@@ -38,9 +38,9 @@ private:
     TexImg *m_texImg;
 
 protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
+    void initializeGL() override;
+    void paintGL() override;
+    void resizeGL(int width, int height) override;
 
 private slots:
     void textureFinished(int num);
