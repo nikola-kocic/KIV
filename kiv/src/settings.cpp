@@ -93,25 +93,18 @@ bool Settings::addBookmark(const QString &name, const QString &path)
 
 bool Settings::deleteBookmark(const QString &path)
 {
-    bool found = false;
-    int index = 0;
-    for (; index < m_bookmarks.size(); ++index)
+    bool success = false;
+    for (Bookmark *const bookmark : m_bookmarks)
     {
-        if (m_bookmarks.at(index)->getPath() == path)
+        if (bookmark->getPath() == path)
         {
-            found = true;
-            break;
+            m_bookmarks.removeAll(bookmark);
+            delete bookmark;
+            refreshBookmarks();
+            success = true;
         }
     }
-    if (found == false)
-    {
-        return false;
-    }
-
-    delete m_bookmarks.at(index);
-    m_bookmarks.removeAt(index);
-    refreshBookmarks();
-    return true;
+    return success;
 }
 
 void Settings::refreshBookmarks()
