@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(const IPictureLoader *const picture_loader,
                         const IArchiveExtractor *const archive_extractor,
-                        QWidget *parent = 0,
+                        QWidget *parent = nullptr,
                         Qt::WindowFlags f = 0);
     ~MainWindow() override;
 

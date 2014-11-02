@@ -33,7 +33,7 @@ class PictureItem : public QWidget
 public:
     explicit PictureItem(const IPictureLoader *const picture_loader,
                          Settings const * const settings,
-                         QWidget *parent = 0,
+                         QWidget *parent = nullptr,
                          Qt::WindowFlags f = 0);
     ~PictureItem() override;
 

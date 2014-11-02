@@ -18,7 +18,7 @@ class ArchiveModel : public QAbstractItemModel
 public:
     explicit ArchiveModel(const IArchiveExtractor *const archive_extractor,
                           const QString &path,
-                          QObject *const parent = 0);
+                          QObject *const parent = nullptr);
     ~ArchiveModel() override;
 
     QVariant data(const QModelIndex &index, const int role) const override;
@@ -46,7 +46,7 @@ private:
                          const quint64 &bytes,
                          const QString &path,
                          const int type,
-                         ArchiveItem *const parent = 0);
+                         ArchiveItem *const parent = nullptr);
 
     void populate(const QString &archive_path,
                   const QList<const ArchiveFileInfo *> &archive_files);

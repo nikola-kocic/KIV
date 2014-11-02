@@ -28,7 +28,7 @@ RARGetDllVersionT      RARGetDllVersion = 0;
 
 struct RAROpenArchiveDataEx;
 
-QLibrary *ArchiveRar::Lib = 0;
+QLibrary *ArchiveRar::Lib = nullptr;
 
 bool ArchiveRar::loadlib()
 {
@@ -40,7 +40,7 @@ bool ArchiveRar::loadlib()
     Lib = new QLibrary("unrar");
     if (!Lib->load())
     {
-        Lib = 0;
+        Lib = nullptr;
         return false;
     }
 
@@ -166,7 +166,7 @@ unsigned int ArchiveRar::readFile(const QString &archiveName,
         return OpenArchiveData.OpenResult;
     }
 
-    char *callBackBuffer = 0;
+    char *callBackBuffer = nullptr;
     RARSetCallback(hArcData, CallbackProc, (LPARAM)&callBackBuffer);
 
     RARHeaderDataEx HeaderData;

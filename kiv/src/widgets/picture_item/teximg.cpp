@@ -3,8 +3,8 @@
 #include <QSize>
 
 TexImg::TexImg()
-    : hTile(0)
-    , vTile(0)
+    : hTile(nullptr)
+    , vTile(nullptr)
     , m_texMaxSize(2048)
 {
 }

@@ -32,7 +32,7 @@ class ListViewFiles : public QListView
     Q_OBJECT
 
 public:
-    explicit ListViewFiles(QWidget *parent = 0);
+    explicit ListViewFiles(QWidget *parent = nullptr);
 
     void setViewMode(const int mode);
 
@@ -49,7 +49,7 @@ class TreeViewFiles : public QTreeView
     Q_OBJECT
 
 public:
-    explicit TreeViewFiles(QWidget *parent = 0);
+    explicit TreeViewFiles(QWidget *parent = nullptr);
 
 protected slots:
     void rowsInserted(const QModelIndex &parent, int start, int end) override;
@@ -67,7 +67,7 @@ public:
     explicit ViewFiles(const IPictureLoader *const picture_loader,
                        const IArchiveExtractor *const archive_extractor,
                        FileSystemModel *model_filesystem,
-                       QWidget *parent = 0);
+                       QWidget *parent = nullptr);
     ~ViewFiles() override;
     void setViewMode(const int mode);
     void setCurrentFile(const FileInfo &info);
@@ -87,7 +87,7 @@ private:
     class FileListSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
-        explicit FileListSortFilterProxyModel(QObject *parent = 0)
+        explicit FileListSortFilterProxyModel(QObject *parent = nullptr)
             : QSortFilterProxyModel(parent)
         {}
     protected:
@@ -97,7 +97,7 @@ private:
     class ContainersSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
-        explicit ContainersSortFilterProxyModel(QObject *parent = 0)
+        explicit ContainersSortFilterProxyModel(QObject *parent = nullptr)
             : QSortFilterProxyModel(parent)
         {}
     protected:
@@ -110,7 +110,7 @@ private:
     class ArchiveDirsSortFilterProxyModel : public QSortFilterProxyModel
     {
     public:
-        explicit ArchiveDirsSortFilterProxyModel(QObject *parent = 0)
+        explicit ArchiveDirsSortFilterProxyModel(QObject *parent = nullptr)
             : QSortFilterProxyModel(parent)
         {}
 

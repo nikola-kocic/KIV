@@ -25,7 +25,7 @@ ZoomWidget::ZoomWidget(QWidget *parent)
     setMinimumContentsLength(8);
     setEditable(true);
     setFocusPolicy(Qt::StrongFocus);
-    lineEdit()->setCompleter(0);
+    lineEdit()->setCompleter(nullptr);
 
     for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
     {

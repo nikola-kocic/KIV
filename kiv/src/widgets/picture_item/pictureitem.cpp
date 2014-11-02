@@ -13,7 +13,7 @@ PictureItem::PictureItem(const IPictureLoader * const picture_loader,
 
     , m_settings(settings)
     , m_opengl(settings->getHardwareAcceleration())
-    , m_imageDisplay(0)
+    , m_imageDisplay(nullptr)
     , m_loader_image(new QFutureWatcher<QImage>(this))
 
     , m_lockMode(LockMode::None)

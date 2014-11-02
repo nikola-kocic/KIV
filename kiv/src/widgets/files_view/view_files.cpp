@@ -27,11 +27,11 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
 
     , m_view_archiveDirs(new QTreeView(this))
     , m_view_filesystem(new QTreeView(this))
-    , m_treeView_files(0)
-    , m_listView_files(0)
-    , m_view_current(0)
+    , m_treeView_files(nullptr)
+    , m_listView_files(nullptr)
+    , m_view_current(nullptr)
 
-    , m_model_archive_files(0)
+    , m_model_archive_files(nullptr)
     , m_model_filesystem(model_filesystem)
     , m_proxy_file_list(new FileListSortFilterProxyModel(this))
     , m_proxy_containers(new ContainersSortFilterProxyModel(this))
@@ -157,7 +157,7 @@ void ViewFiles::initViewItem()
     if (m_view_mode == FileViewMode::Details)
     {
         m_treeView_files = new TreeViewFiles(this);
-        m_listView_files = 0;
+        m_listView_files = nullptr;
         m_view_current = qobject_cast<QAbstractItemView *>(m_treeView_files);
         connect(m_treeView_files, SIGNAL(rowsInserted(QModelIndexList)),
                 this, SLOT(on_rows_inserted(QModelIndexList)));
@@ -166,7 +166,7 @@ void ViewFiles::initViewItem()
     {
         m_listView_files = new ListViewFiles(this);
         m_listView_files->setViewMode(m_view_mode);
-        m_treeView_files = 0;
+        m_treeView_files = nullptr;
         m_view_current = qobject_cast<QAbstractItemView *>(m_listView_files);
         connect(m_listView_files, SIGNAL(rowsInserted(QModelIndexList)),
                 this, SLOT(on_rows_inserted(QModelIndexList)));
@@ -213,7 +213,7 @@ void ViewFiles::setViewMode(const int mode)
         }
         else
         {
-            m_view_current->setModel(0);
+            m_view_current->setModel(nullptr);
             m_view_current->disconnect();
             m_view_current->deleteLater();
             m_view_mode = mode;
@@ -242,8 +242,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 
     if (info.isInArchive())
     {
-        m_proxy_file_list->setSourceModel(0);
-        m_proxy_archive_dirs->setSourceModel(0);
+        m_proxy_file_list->setSourceModel(nullptr);
+        m_proxy_archive_dirs->setSourceModel(nullptr);
 
         delete m_model_archive_files;
         m_model_archive_files = new ArchiveModel(
@@ -274,8 +274,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
     {
         if (m_fileinfo_current.isInArchive() || !m_fileinfo_current.isValid())
         {
-            m_proxy_file_list->setSourceModel(0);
-            m_proxy_archive_dirs->setSourceModel(0);
+            m_proxy_file_list->setSourceModel(nullptr);
+            m_proxy_archive_dirs->setSourceModel(nullptr);
             m_view_archiveDirs->hide();
             delete m_model_archive_files;
 

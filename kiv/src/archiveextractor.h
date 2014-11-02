@@ -9,7 +9,7 @@ class ArchiveExtractor : public QObject, public IArchiveExtractor
 {
     Q_OBJECT
 public:
-    explicit ArchiveExtractor(QObject *parent = 0);
+    explicit ArchiveExtractor(QObject *parent = nullptr);
 
     virtual int getFileInfoList(const QString &path,
                                 QList<const ArchiveFileInfo *> &list) const override;

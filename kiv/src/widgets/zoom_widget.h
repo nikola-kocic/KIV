@@ -8,7 +8,7 @@ class ZoomWidget : public QComboBox
 {
     Q_OBJECT
 public:
-    explicit ZoomWidget(QWidget *parent = 0);
+    explicit ZoomWidget(QWidget *parent = nullptr);
     qreal getZoom();
 
 protected:

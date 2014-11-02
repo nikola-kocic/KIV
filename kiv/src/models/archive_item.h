@@ -14,7 +14,7 @@ public:
                          const QString &path,
                          const int type,
                          const QIcon &icon = QIcon(),
-                         ArchiveItem *const parent = 0);
+                         ArchiveItem *const parent = nullptr);
     ~ArchiveItem();
     void appendChild(ArchiveItem *const child);
     ArchiveItem *child(const int row) const;

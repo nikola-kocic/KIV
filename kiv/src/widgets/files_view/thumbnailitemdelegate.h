@@ -18,7 +18,7 @@ public:
     explicit ThumbnailItemDelegate(
             const IPictureLoader *const picture_loader,
             const QSize &thumbSize,
-            QObject *parent = 0);
+            QObject *parent = nullptr);
     ~ThumbnailItemDelegate() override;
     QSize sizeHint(const QStyleOptionViewItem &option,
                    const QModelIndex &index) const override;

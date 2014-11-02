@@ -14,7 +14,7 @@ class Settings_Dialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit Settings_Dialog(Settings *settings, QWidget *parent = 0);
+    explicit Settings_Dialog(Settings *settings, QWidget *parent = nullptr);
     ~Settings_Dialog() override;
 
 private slots:
