@@ -685,7 +685,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
     if (event->mimeData()->hasUrls())
     {
         if (Helper::checkFileExtension(
-                QFileInfo(event->mimeData()->urls().at(0).toLocalFile())))
+                QFileInfo(event->mimeData()->urls().first().toLocalFile())))
         {
             event->acceptProposedAction();
         }
@@ -710,7 +710,7 @@ void MainWindow::dropEvent(QDropEvent *event)
 {
     if (event->proposedAction() == Qt::CopyAction)
     {
-        this->openUrl(event->mimeData()->urls().at(0));
+        this->openUrl(event->mimeData()->urls().first());
     }
     event->acceptProposedAction();
     return QMainWindow::dropEvent(event);

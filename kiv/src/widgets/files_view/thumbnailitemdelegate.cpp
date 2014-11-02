@@ -60,7 +60,7 @@ void ThumbnailItemDelegate::cancelThumbnailGeneration()
 {
     if (!m_files_to_process.isEmpty())
     {
-        ProcessInfo *oldIndex = m_files_to_process.at(0);
+        ProcessInfo *oldIndex = m_files_to_process.first();
         m_files_to_process.clear();
         m_files_to_process.append(oldIndex);
     }
@@ -191,7 +191,7 @@ void ThumbnailItemDelegate::showThumbnail(int num)
         return;
     }
 #ifdef DEBUG_THUMBNAIL_ITEM_DELEGATE
-    DEBUGOUT << m_files_to_process.at(0)->getFileInfo().getPath();
+    DEBUGOUT << m_files_to_process.first()->getFileInfo().getPath();
 #endif
 
     ThumbImageDate *tid = new ThumbImageDate(
@@ -211,7 +211,7 @@ void ThumbnailItemDelegate::showThumbnail(int num)
                     QtConcurrent::run(
                         m_picture_loader,
                         &IPictureLoader::getThumbnail,
-                        ThumbnailInfo(m_files_to_process.at(0)->getFileInfo(),
+                        ThumbnailInfo(m_files_to_process.first()->getFileInfo(),
                                       m_thumb_size)));
     }
     else

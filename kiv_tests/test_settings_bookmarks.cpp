@@ -26,7 +26,7 @@ void TestSettingsBookmarks::testBookmarkAdd()
     QList<Bookmark*> expected;
     expected.append(new Bookmark("b1name", "B:\\img1.jpg"));
     QCOMPARE(bookmarks.size(), 1);
-    QCOMPARE(*(bookmarks.at(0)), *(expected.at(0)));
+    QCOMPARE(*(bookmarks.first()), *(expected.first()));
 }
 
 void TestSettingsBookmarks::testBookmarkAddDuplicate()
