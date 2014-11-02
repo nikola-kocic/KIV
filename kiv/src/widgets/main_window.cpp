@@ -42,7 +42,11 @@ MainWindow::MainWindow(const IPictureLoader *const picture_loader,
 
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
-    , m_comboBox_zoom(new ZoomWidget(this))
+    , m_comboBox_zoom(new ZoomWidget(
+                          QVector<qreal>({0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5,
+                                          2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
+                                          9.0, 10.0}),
+                          this))
 
     , m_menu_bookmarks(new QMenu(tr("&Bookmarks"), this))
     , m_menu_history(new QMenu(tr("&History"), this))
