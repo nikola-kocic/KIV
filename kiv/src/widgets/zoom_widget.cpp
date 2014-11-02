@@ -140,37 +140,45 @@ void ZoomWidget::focusOutEvent(QFocusEvent *event)
 
 void ZoomWidget::zoomIn()
 {
-    for (const qreal &z : m_defaultZoomSizes)
+    qreal zoomToApply = m_zoomValue * 1.25;
+    if (!m_defaultZoomSizes.isEmpty()
+            && zoomToApply > m_defaultZoomSizes.first()
+            && m_zoomValue < m_defaultZoomSizes.last())
     {
-        if (z > m_zoomValue)
+        const auto it = std::find_if(
+                    m_defaultZoomSizes.constBegin(),
+                    m_defaultZoomSizes.constEnd(),
+                    [this] (const qreal &z) { return z > m_zoomValue; } );
+        if (it != m_defaultZoomSizes.end())
         {
-            setZoom(z);
-            return;
+            zoomToApply = *it;
         }
     }
 
-    setZoom(m_zoomValue * 1.25);
+    setZoom(zoomToApply);
 }
 
 void ZoomWidget::zoomOut()
 {
-    for (int i = 0; i < m_defaultZoomSizes.size(); ++i)
+    qreal zoomToApply = m_zoomValue / 1.25;
+    if (!m_defaultZoomSizes.isEmpty()
+            && m_zoomValue > m_defaultZoomSizes.first()
+            && zoomToApply < m_defaultZoomSizes.last())
     {
-        if (m_defaultZoomSizes.at(i) >= m_zoomValue)
+        std::reverse_iterator<QVector<qreal>::const_iterator> rbegin(
+                    m_defaultZoomSizes.constEnd());
+        std::reverse_iterator<QVector<qreal>::const_iterator> rend(
+                    m_defaultZoomSizes.constBegin());
+        const auto it = std::find_if(
+                    rbegin,
+                    rend,
+                    [this] (const qreal &z) { return z < m_zoomValue; } );
+        if (it != rend)
         {
-            if (i != 0)
-            {
-                setZoom(m_defaultZoomSizes.at(i - 1));
-            }
-            else
-            {
-                setZoom(m_zoomValue / 1.25);
-            }
-            return;
+            zoomToApply = *it;
         }
     }
-
-    setZoom(m_zoomValue / 1.25);
+    setZoom(zoomToApply);
 }
 
 void ZoomWidget::setZoom(qreal value)
