@@ -9,7 +9,7 @@ ListViewFiles::ListViewFiles(QWidget *parent)
     this->setUniformItemSizes(true);
 }
 
-void ListViewFiles::setViewMode(const int mode)
+void ListViewFiles::setViewMode(const FileViewMode mode)
 {
     if (mode == FileViewMode::Icons)
     {

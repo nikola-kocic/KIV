@@ -4,13 +4,13 @@
 #include <QDateTime>
 #include <QString>
 
-struct LockMode
+enum class LockMode: int
 {
-    static const int None = 0;
-    static const int Autofit = 1;
-    static const int FitWidth = 2;
-    static const int FitHeight = 3;
-    static const int Zoom = 4;
+    None = 0,
+    Autofit = 1,
+    FitWidth = 2,
+    FitHeight = 3,
+    Zoom = 4,
 };
 
 struct MiddleClickAction
@@ -32,11 +32,11 @@ struct WheelAction
     static const int Zoom = 3;
 };
 
-struct FileViewMode
+enum class FileViewMode: int
 {
-    static const int List = 0;
-    static const int Details = 1;
-    static const int Icons = 2;
+    List = 0,
+    Details = 1,
+    Icons = 2,
 };
 
 struct SortDirection

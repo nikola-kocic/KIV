@@ -42,7 +42,7 @@ public:
     void setRotation(const qreal value);
     qreal getRotation() const;
 
-    void setLockMode(const int mode);
+    void setLockMode(const LockMode mode);
 
     void setHardwareAcceleration(const bool b);
     bool getHardwareAcceleration() const;
@@ -67,7 +67,7 @@ private:
     bool m_opengl;
     PictureItemInterface *m_imageDisplay;
     QFutureWatcher< QImage > *m_loader_image;
-    int m_lockMode;
+    LockMode m_lockMode;
 
     bool m_dragging;
 

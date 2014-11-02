@@ -195,7 +195,7 @@ void ViewFiles::initViewItem()
     setShowThumbnails(m_show_thumbnails);
 }
 
-void ViewFiles::setViewMode(const int mode)
+void ViewFiles::setViewMode(const FileViewMode mode)
 {
 #ifdef DEBUG_VIEW_FILES
     DEBUGOUT << mode;

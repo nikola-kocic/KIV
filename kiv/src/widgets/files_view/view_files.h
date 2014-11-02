@@ -34,7 +34,7 @@ class ListViewFiles : public QListView
 public:
     explicit ListViewFiles(QWidget *parent = nullptr);
 
-    void setViewMode(const int mode);
+    void setViewMode(const FileViewMode mode);
 
 protected slots:
     void rowsInserted(const QModelIndex &parent, int start, int end) override;
@@ -69,7 +69,7 @@ public:
                        FileSystemModel *model_filesystem,
                        QWidget *parent = nullptr);
     ~ViewFiles() override;
-    void setViewMode(const int mode);
+    void setViewMode(const FileViewMode mode);
     void setCurrentFile(const FileInfo &info);
     void setThumbnailsSize(const QSize &size);
     FileInfo getCurrentFileInfo() const;
@@ -127,7 +127,7 @@ private:
     const IPictureLoader *const m_picture_loader;
     const IArchiveExtractor *const m_archive_extractor;
     FileInfo m_fileinfo_current;
-    int m_view_mode;
+    FileViewMode m_view_mode;
     bool m_show_thumbnails;
     bool m_flag_opening;
     QSize m_thumb_size;

@@ -283,7 +283,7 @@ void PictureItem::fitHeight()
     this->setZoom(zoomVal);
 }
 
-void PictureItem::setLockMode(const int mode)
+void PictureItem::setLockMode(const LockMode mode)
 {
     m_lockMode = mode;
     this->updateLockMode();
