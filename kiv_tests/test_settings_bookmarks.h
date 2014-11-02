@@ -16,7 +16,9 @@ private Q_SLOTS:
     void cleanup();
     void testBookmarkAdd();
     void testBookmarkAddDuplicate();
-    void testBookmarkDelete();
+    void testBookmarkDeleteFromMiddle();
+    void testBookmarkDeleteFromEnd();
+    void testBookmarkDeleteFromStart();
     void testBookmarkDeleteNotExisting();
 };
 

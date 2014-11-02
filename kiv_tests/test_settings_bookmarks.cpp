@@ -37,15 +37,49 @@ void TestSettingsBookmarks::testBookmarkAddDuplicate()
     QCOMPARE(addResult, false);
 }
 
-void TestSettingsBookmarks::testBookmarkDelete()
+void TestSettingsBookmarks::testBookmarkDeleteFromMiddle()
 {
-    bool addResult = m_settings->addBookmark("b1name", "B:\\img1.jpg");
-    QCOMPARE(addResult, true);
+    m_settings->addBookmark("b1name", "B:\\img1.jpg");
+    m_settings->addBookmark("b1name", "B:\\img2.jpg");
+    m_settings->addBookmark("b1name", "B:\\img3.jpg");
+
+    bool delResult = m_settings->deleteBookmark("B:\\img2.jpg");
+    QCOMPARE(delResult, true);
+    QList<Bookmark*> bookmarks = m_settings->getBookmarks();
+    QCOMPARE(bookmarks.size(), 2);
+    QCOMPARE(m_settings->getBookmarkCount(), 2);
+    QCOMPARE(bookmarks.at(0)->getPath(), QString("B:\\img1.jpg"));
+    QCOMPARE(bookmarks.at(1)->getPath(), QString("B:\\img3.jpg"));
+}
+
+void TestSettingsBookmarks::testBookmarkDeleteFromEnd()
+{
+    m_settings->addBookmark("b1name", "B:\\img1.jpg");
+    m_settings->addBookmark("b1name", "B:\\img2.jpg");
+    m_settings->addBookmark("b1name", "B:\\img3.jpg");
+
+    bool delResult = m_settings->deleteBookmark("B:\\img3.jpg");
+    QCOMPARE(delResult, true);
+    QList<Bookmark*> bookmarks = m_settings->getBookmarks();
+    QCOMPARE(bookmarks.size(), 2);
+    QCOMPARE(m_settings->getBookmarkCount(), 2);
+    QCOMPARE(bookmarks.at(0)->getPath(), QString("B:\\img1.jpg"));
+    QCOMPARE(bookmarks.at(1)->getPath(), QString("B:\\img2.jpg"));
+}
+
+void TestSettingsBookmarks::testBookmarkDeleteFromStart()
+{
+    m_settings->addBookmark("b1name", "B:\\img1.jpg");
+    m_settings->addBookmark("b1name", "B:\\img2.jpg");
+    m_settings->addBookmark("b1name", "B:\\img3.jpg");
+
     bool delResult = m_settings->deleteBookmark("B:\\img1.jpg");
     QCOMPARE(delResult, true);
     QList<Bookmark*> bookmarks = m_settings->getBookmarks();
-    QCOMPARE(bookmarks.size(), 0);
-    QCOMPARE(m_settings->getBookmarkCount(), 0);
+    QCOMPARE(bookmarks.size(), 2);
+    QCOMPARE(m_settings->getBookmarkCount(), 2);
+    QCOMPARE(bookmarks.at(0)->getPath(), QString("B:\\img2.jpg"));
+    QCOMPARE(bookmarks.at(1)->getPath(), QString("B:\\img3.jpg"));
 }
 
 void TestSettingsBookmarks::testBookmarkDeleteNotExisting()
