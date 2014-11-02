@@ -37,3 +37,5 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 RESOURCES += \
     test_assets.qrc
+
+DEPENDPATH *= $${INCLUDEPATH}

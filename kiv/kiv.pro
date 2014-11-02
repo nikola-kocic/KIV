@@ -106,3 +106,5 @@ isEmpty(ANDROID_TARGET_ARCH) {
         icons.qrc \
 
 }
+
+DEPENDPATH *= $${INCLUDEPATH}
