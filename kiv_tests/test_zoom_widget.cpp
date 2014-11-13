@@ -3,7 +3,7 @@
 
 void TestZoomWidget::init()
 {
-    m_defaultZoomValues = QVector<qreal>({0.5, 1, 2, 3, 4});
+    m_defaultZoomValues = QVector<qreal>() << 0.5 << 1 << 2 << 3 << 4;
     m_zoomWidget = new ZoomWidget(m_defaultZoomValues);
 }
 
