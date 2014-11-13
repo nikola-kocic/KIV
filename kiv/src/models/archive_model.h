@@ -21,13 +21,13 @@ public:
                           QObject *const parent = nullptr);
     ~ArchiveModel() override;
 
-    QVariant data(const QModelIndex &index, const int role) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-    QVariant headerData(const int section,
-                        const Qt::Orientation orientation,
-                        const int role = Qt::DisplayRole) const override;
-    QModelIndex index(const int row,
-                      const int column,
+    QVariant headerData(int section,
+                        Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row,
+                      int column,
                       const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
