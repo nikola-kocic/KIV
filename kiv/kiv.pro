@@ -1,4 +1,6 @@
-QMAKE_CXXFLAGS += -std=c++11
+!*msvc* {
+    QMAKE_CXXFLAGS += -std=c++11
+}
 
 SOURCES += \
     src/fileinfo.cpp \
