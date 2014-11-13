@@ -1,4 +1,3 @@
-#ifndef QT5
 #include "kiv/src/widgets/picture_item/pictureitem_gl.h"
 
 #include "kiv/src/settings.h"
@@ -149,8 +148,9 @@ void PictureItemGL::initializeGL()
 
     qglClearColor(m_data->m_color_clear);
 
-
+#ifndef QT5
     QGL::setPreferredPaintEngine(QPaintEngine::OpenGL2);
+#endif
 
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
@@ -296,5 +296,3 @@ void PictureItemGL::setZoom(const qreal, const qreal)
     this->updateSize();
     this->updateGL();
 }
-
-#endif // QT5

@@ -24,9 +24,7 @@ SOURCES += \
     src/widgets/settings_dialog.cpp \
     src/widgets/zoom_widget.cpp \
     src/widgets/urlnavigator.cpp \
-    src/archiveextractor.cpp
-
-lessThan(QT_MAJOR_VERSION, 5): SOURCES += \
+    src/archiveextractor.cpp \
     src/widgets/picture_item/pictureitem_gl.cpp \
 
 
@@ -54,9 +52,7 @@ HEADERS += \
     src/widgets/urlnavigator.h \
     src/archiveextractor.h \
     include/IArchiveExtractor.h \
-    include/IPictureLoader.h
-
-lessThan(QT_MAJOR_VERSION, 5): HEADERS += \
+    include/IPictureLoader.h \
     src/widgets/picture_item/pictureitem_gl.h \
 
 
@@ -71,7 +67,7 @@ win32{
     RC_FILE = res/icons/kiv.rc
 }
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets concurrent
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
 LIBS += -lquazip

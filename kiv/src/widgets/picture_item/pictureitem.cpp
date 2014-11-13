@@ -41,13 +41,11 @@ PictureItem::~PictureItem()
 
 void PictureItem::initPictureItem()
 {
-#ifndef QT5
     if (m_opengl)
     {
         m_imageDisplay = new PictureItemGL(m_data, this);
     }
     else
-#endif
     {
         m_imageDisplay = new PictureItemRaster(m_data, this);
     }

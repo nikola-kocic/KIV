@@ -1,4 +1,3 @@
-#ifndef QT5
 #ifndef PICTUREITEM_GL_H
 #define PICTUREITEM_GL_H
 
@@ -6,7 +5,11 @@
 
 #include <QFutureWatcher>
 #include <QGLWidget>
+#ifdef QT5
+#include <QtConcurrent/QtConcurrentMap>
+#else
 #include <QtConcurrentMap>
+#endif
 
 #include "kiv/src/widgets/picture_item/teximg.h"
 
@@ -47,4 +50,3 @@ private slots:
 };
 
 #endif  // PICTUREITEM_GL_H
-#endif  // QT5
