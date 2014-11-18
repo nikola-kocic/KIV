@@ -13,12 +13,9 @@
 #define  LHD_DIRECTORY      0x00e0
 #define  LONG_BLOCK         0x8000
 
-RAROpenArchiveT        RAROpenArchive = 0;
 RAROpenArchiveExT      RAROpenArchiveEx = 0;
 RARCloseArchiveT       RARCloseArchive = 0;
-RARReadHeaderT         RARReadHeader = 0;
 RARReadHeaderExT       RARReadHeaderEx = 0;
-RARProcessFileT        RARProcessFile = 0;
 RARProcessFileWT       RARProcessFileW = 0;
 RARSetCallbackT        RARSetCallback = 0;
 RARSetChangeVolProcT   RARSetChangeVolProc = 0;
@@ -44,12 +41,9 @@ bool ArchiveRar::loadlib()
         return false;
     }
 
-    RAROpenArchive = (RAROpenArchiveT)Lib->resolve("RAROpenArchive");
     RAROpenArchiveEx = (RAROpenArchiveExT)Lib->resolve("RAROpenArchiveEx");
     RARCloseArchive = (RARCloseArchiveT)Lib->resolve("RARCloseArchive");
-    RARReadHeader = (RARReadHeaderT)Lib->resolve("RARReadHeader");
     RARReadHeaderEx = (RARReadHeaderExT)Lib->resolve("RARReadHeaderEx");
-    RARProcessFile = (RARProcessFileT)Lib->resolve("RARProcessFile");
     RARProcessFileW = (RARProcessFileWT)Lib->resolve("RARProcessFileW");
     RARSetCallback = (RARSetCallbackT)Lib->resolve("RARSetCallback");
     RARSetChangeVolProc =

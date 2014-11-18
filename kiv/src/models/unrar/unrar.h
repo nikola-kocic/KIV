@@ -149,12 +149,9 @@ typedef int (PASCAL *PROCESSDATAPROC)(unsigned char *Addr,int Size);
 extern "C" {
 #endif
 
-typedef Qt::HANDLE (PASCAL *RAROpenArchiveT)(struct RAROpenArchiveData *ArchiveData);
 typedef Qt::HANDLE (PASCAL *RAROpenArchiveExT)(struct RAROpenArchiveDataEx *ArchiveData);
 typedef int    (PASCAL *RARCloseArchiveT)(Qt::HANDLE hArcData);
-typedef int    (PASCAL *RARReadHeaderT)(Qt::HANDLE hArcData,struct RARHeaderData *HeaderData);
 typedef int    (PASCAL *RARReadHeaderExT)(Qt::HANDLE hArcData,struct RARHeaderDataEx *HeaderData);
-typedef int    (PASCAL *RARProcessFileT)(Qt::HANDLE hArcData,int Operation,char *DestPath,char *DestName);
 typedef int    (PASCAL *RARProcessFileWT)(Qt::HANDLE hArcData,int Operation,wchar_t *DestPath,const wchar_t *DestName);
 typedef void   (PASCAL *RARSetCallbackT)(Qt::HANDLE hArcData,UNRARCALLBACK Callback,LPARAM UserData);
 typedef void   (PASCAL *RARSetChangeVolProcT)(Qt::HANDLE hArcData,CHANGEVOLPROC ChangeVolProc);
@@ -162,12 +159,9 @@ typedef void   (PASCAL *RARSetProcessDataProcT)(Qt::HANDLE hArcData,PROCESSDATAP
 typedef void   (PASCAL *RARSetPasswordT)(Qt::HANDLE hArcData,char *Password);
 typedef int    (PASCAL *RARGetDllVersionT)();
 
-extern RAROpenArchiveT        RAROpenArchive;
 extern RAROpenArchiveExT      RAROpenArchiveEx;
 extern RARCloseArchiveT       RARCloseArchive;
-extern RARReadHeaderT         RARReadHeader;
 extern RARReadHeaderExT       RARReadHeaderEx;
-extern RARProcessFileT        RARProcessFile;
 extern RARProcessFileWT       RARProcessFileW;
 extern RARSetCallbackT        RARSetCallback;
 extern RARSetChangeVolProcT   RARSetChangeVolProc;
