@@ -545,7 +545,8 @@ void ViewFiles::pagePrevious()
 void ViewFiles::on_item_activated(const QModelIndex &index)
 {
 #ifdef DEBUG_VIEW_FILES
-    DEBUGOUT<< index.internalId() << index.data().toString();
+    const QString name = index.data().toString();
+    DEBUGOUT<< index.internalId() << name;
 #endif
     // Index is from FileListSortFilterProxyModel
 
@@ -614,7 +615,9 @@ void ViewFiles::showThumbnails()
             const QModelIndex currIndex = m_view_current->model()->index(
                         i, 0, m_view_current->rootIndex());
             indexes.append(currIndex);
+#ifdef DEBUG_VIEW_FILES
             DEBUGOUT << "\t" << currIndex.data().toString();
+#endif
         }
 
         on_rows_inserted(indexes);
