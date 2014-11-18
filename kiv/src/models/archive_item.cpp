@@ -142,10 +142,12 @@ QVariant ArchiveItem::data(const int role, const int column) const
 
     case Qt::DecorationRole:
     {
-        if (column == col_name)
+        if (column == 0)
         {
             return m_icon;
         }
+
+        return QVariant();
     }
 
     case Qt::ToolTipRole:
