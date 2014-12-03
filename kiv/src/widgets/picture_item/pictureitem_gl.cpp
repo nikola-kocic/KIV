@@ -91,11 +91,18 @@ void PictureItemGL::setNullImage()
     this->updateGL();
 }
 
+QImage CreatePow2Bitmap(const TexIndex *const index)
+{
+    const QImage i = TexImg::CreatePow2Bitmap(index);
+    delete index;
+    return i;
+}
+
 void PictureItemGL::loadTextures(QList<TexIndex *> indexes)
 {
     m_returnTexCount = indexes.size();
     m_loader_texture->setFuture(QtConcurrent::mapped(indexes,
-                                                     TexImg::CreatePow2Bitmap));
+                                                     CreatePow2Bitmap));
 }
 
 void PictureItemGL::textureFinished(int num)
