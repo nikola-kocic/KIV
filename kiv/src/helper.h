@@ -8,7 +8,7 @@
 
 #include "kiv/src/fileinfo.h"
 
-#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString(Qt::ISODate)\
+#define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")\
                           << Q_FUNC_INFO << "\n\t"
 
 class Helper
