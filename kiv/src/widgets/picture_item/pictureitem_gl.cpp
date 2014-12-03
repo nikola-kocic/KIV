@@ -54,6 +54,7 @@ void PictureItemGL::clearTextures()
 
 void PictureItemGL::setImage(const QImage &img)
 {
+    m_loader_texture->cancel();
     this->setUpdatesEnabled(false);
 
     m_texImg->setImage(img);
@@ -82,6 +83,7 @@ void PictureItemGL::setImage(const QImage &img)
 
 void PictureItemGL::setNullImage()
 {
+    m_loader_texture->cancel();
     m_returnTexCount = 0;
     clearTextures();
     m_texImg->setImage(QImage());
