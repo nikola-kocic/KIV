@@ -77,6 +77,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
     DEBUGOUT << info.getPath();
 #endif
+    m_loader_image->cancel();
     m_imageDisplay->getWidget()->setUpdatesEnabled(false);
     m_imageDisplay->setNullImage();
     if (!info.fileExists())
