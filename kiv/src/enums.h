@@ -86,6 +86,7 @@ struct ArchiveFileInfo {
         , uncompressedSize(uncompressedSize)
     {
     }
+    bool isDir() const { return uncompressedSize == 0; }
 };
 
 #endif  // ENUMS_H
