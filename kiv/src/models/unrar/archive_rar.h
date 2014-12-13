@@ -1,6 +1,8 @@
 #ifndef ARCHIVE_RAR_H
 #define ARCHIVE_RAR_H
 
+#include <memory>
+#include <vector>
 #include <QLibrary>
 #include <QBuffer>
 
@@ -18,9 +20,11 @@ public:
     static unsigned int readFile(const QString &archiveName,
                                  const QString &fileName,
                                  QByteArray &buffer);
-    static unsigned int getFileInfoList(const QString &path,
-                                        QList<ArchiveFileInfo> &list);
-    static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);
+    static unsigned int getFileInfoList(
+            const QString &path,
+            std::vector<std::unique_ptr<const ArchiveFileInfo> > &list);
+    static std::unique_ptr<const ArchiveFileInfo> createArchiveFileInfo(
+            const RARHeaderDataEx HeaderData);
 
 private:
     static QDateTime dateFromDos(const uint dosTime);

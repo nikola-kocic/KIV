@@ -17,31 +17,32 @@ DirStructureFixture::DirStructureFixture(
 
 }
 
-QList<ArchiveFileInfo> DirStructureFixture::getDirs() const {
-    return QList<ArchiveFileInfo>()
-            << get(DirStructureFixtureElement::rf1)
-            << get(DirStructureFixtureElement::rf2)
-            << get(DirStructureFixtureElement::rf3)
-            << get(DirStructureFixtureElement::sf1)
-            << get(DirStructureFixtureElement::sf2)
-            << get(DirStructureFixtureElement::sf3)
-               ;
+std::vector<std::unique_ptr<const ArchiveFileInfo> > DirStructureFixture::getDirs() const {
+    std::vector<std::unique_ptr<const ArchiveFileInfo> > v;
+    v.push_back(get(DirStructureFixtureElement::rf1));
+    v.push_back(get(DirStructureFixtureElement::rf1));
+    v.push_back(get(DirStructureFixtureElement::rf2));
+    v.push_back(get(DirStructureFixtureElement::rf3));
+    v.push_back(get(DirStructureFixtureElement::sf1));
+    v.push_back(get(DirStructureFixtureElement::sf2));
+    v.push_back(get(DirStructureFixtureElement::sf3));
+    return v;
 }
 
-QList<ArchiveFileInfo> DirStructureFixture::getFiles() const {
-    return QList<ArchiveFileInfo>()
-            << get(DirStructureFixtureElement::f1)
-            << get(DirStructureFixtureElement::f2)
-            << get(DirStructureFixtureElement::f3)
-            << get(DirStructureFixtureElement::f4)
-            << get(DirStructureFixtureElement::f5)
-            << get(DirStructureFixtureElement::f6)
-            << get(DirStructureFixtureElement::f7)
-            << get(DirStructureFixtureElement::f8)
-            << get(DirStructureFixtureElement::f9)
-            << get(DirStructureFixtureElement::f10)
-            << get(DirStructureFixtureElement::fcontent)
-               ;
+std::vector<std::unique_ptr<const ArchiveFileInfo> > DirStructureFixture::getFiles() const {
+    std::vector<std::unique_ptr<const ArchiveFileInfo> > v;
+    v.push_back(get(DirStructureFixtureElement::f1));
+    v.push_back(get(DirStructureFixtureElement::f2));
+    v.push_back(get(DirStructureFixtureElement::f3));
+    v.push_back(get(DirStructureFixtureElement::f4));
+    v.push_back(get(DirStructureFixtureElement::f5));
+    v.push_back(get(DirStructureFixtureElement::f6));
+    v.push_back(get(DirStructureFixtureElement::f7));
+    v.push_back(get(DirStructureFixtureElement::f8));
+    v.push_back(get(DirStructureFixtureElement::f9));
+    v.push_back(get(DirStructureFixtureElement::f10));
+    v.push_back(get(DirStructureFixtureElement::fcontent));
+    return v;
 }
 
 QString DirStructureFixture::getPath() const
@@ -49,12 +50,12 @@ QString DirStructureFixture::getPath() const
     return QDir::cleanPath(m_baseDir + QDir::separator() + m_pathGiver->getDirName());
 }
 
-ArchiveFileInfo DirStructureFixture::get(DirStructureFixtureElement element) const
+std::unique_ptr<const ArchiveFileInfo> DirStructureFixture::get(DirStructureFixtureElement element) const
 {
-    return ArchiveFileInfo(
+    return std::unique_ptr<const ArchiveFileInfo>(new ArchiveFileInfo(
                 m_pathGiver->getPath(element),
                 m_dateGiver->getDateTime(element),
-                m_sizeGiver->getSize(element));
+                m_sizeGiver->getSize(element)));
 }
 
 

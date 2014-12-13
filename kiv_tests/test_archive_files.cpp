@@ -16,13 +16,13 @@ TestArchiveFiles::TestArchiveFiles(const IArchiveExtractor *const archive_extrac
 
 void TestArchiveFiles::readExtractedFiles()
 {
-    for (const ArchiveFileInfo afi : m_tds.getFiles())
+    for (std::unique_ptr<const ArchiveFileInfo> &afi : m_tds.getFiles())
     {
-        const QString path = m_tds.getPath() + QDir::separator() + afi.name;
+        const QString path = m_tds.getPath() + QDir::separator() + afi->name;
         QFile f(path);
         QVERIFY2(f.open(QIODevice::ReadOnly), path.toUtf8());
-        m_file_content[afi.name] = f.readAll();
-        QVERIFY2(m_file_content[afi.name].size() > 0, path.toUtf8());
+        m_file_content[afi->name] = f.readAll();
+        QVERIFY2(m_file_content[afi->name].size() > 0, path.toUtf8());
     }
 }
 
@@ -30,16 +30,16 @@ void TestArchiveFiles::commonCheck(const QString &archiveName, const DirStructur
 {
     const QString archivePath = QDir::cleanPath(
                 m_tds.getBaseDir() + QDir::separator() + archiveName);
-    for(const ArchiveFileInfo afi : tds.getFiles())
+    for(std::unique_ptr<const ArchiveFileInfo> &afi : tds.getFiles())
     {
         QByteArray buffer;
-        m_archive_extractor->readFile(archivePath, afi.name, buffer);
-        QString fileContentKey = afi.name;
-        QVERIFY2(buffer.size() > 0, QString(archivePath + "\n\n" + afi.name).toUtf8());
-        QVERIFY2(m_file_content[fileContentKey].size() > 0, QString(archivePath + "\n\n" + afi.name).toUtf8());
+        m_archive_extractor->readFile(archivePath, afi->name, buffer);
+        QString fileContentKey = afi->name;
+        QVERIFY2(buffer.size() > 0, QString(archivePath + "\n\n" + afi->name).toUtf8());
+        QVERIFY2(m_file_content[fileContentKey].size() > 0, QString(archivePath + "\n\n" + afi->name).toUtf8());
         if (buffer != m_file_content[fileContentKey])
         {
-            qDebug() << afi.name;
+            qDebug() << afi->name;
             qDebug() << QString(buffer);
             qDebug() << QString(m_file_content[fileContentKey]);
         }

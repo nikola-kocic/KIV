@@ -2,6 +2,8 @@
 #define INIT_TEST_DATA_H
 
 #include <functional>
+#include <memory>
+#include <vector>
 #include <QString>
 
 #include "fixtures.h"
@@ -42,10 +44,11 @@ protected:
     bool generateFolderContentFile(const QString &path) const;
     const QString getImageCompressCommand(const QString &path) const;
     const QString getDateSetCommand(const QString &path, const QDateTime &dt) const;
-    void createFiles(const QList<ArchiveFileInfo> &folders
-                  , const QList<ArchiveFileInfo> &files
-                  , std::function<QString(ArchiveFileInfo)> f
-                     , std::function<QString()> fWorkingDir) const;
+    void createFiles(
+            const std::vector<std::unique_ptr<const ArchiveFileInfo> > &folders
+            , const std::vector<std::unique_ptr<const ArchiveFileInfo> > &files
+            , std::function<QString(ArchiveFileInfo)> f
+            , std::function<QString()> fWorkingDir) const;
 };
 
 

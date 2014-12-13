@@ -1,6 +1,8 @@
 #ifndef IARCHIVEEXTRACTOR_H
 #define IARCHIVEEXTRACTOR_H
 
+#include <memory>
+#include <vector>
 #include "kiv/src/enums.h"
 
 class IArchiveExtractor
@@ -10,7 +12,7 @@ public:
     virtual ~IArchiveExtractor() {}
 
     virtual int getFileInfoList(const QString &path,
-                                QList<ArchiveFileInfo> &list) const = 0;
+                                std::vector<std::unique_ptr<const ArchiveFileInfo> > &list) const = 0;
     virtual int extract(const QString &archiveName,
                         const QString &fileName,
                         const QString &newFileName) const = 0;
