@@ -212,7 +212,7 @@ QDateTime ArchiveRar::dateFromDos(const uint dosTime)
 }
 
 
-const ArchiveFileInfo *ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx HeaderData)
+ArchiveFileInfo ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx HeaderData)
 {
     QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
     fileName = QDir::fromNativeSeparators(fileName);
@@ -228,13 +228,13 @@ const ArchiveFileInfo *ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx H
                 + (((qint64)HeaderData.UnpSizeHigh) << 32);
         uncompressedSize = unpSize;
     }
-    const ArchiveFileInfo* newArchiveFileInfo = new ArchiveFileInfo(
+    ArchiveFileInfo newArchiveFileInfo = ArchiveFileInfo(
                 fileName, dateFromDos(HeaderData.FileTime), uncompressedSize);
     return newArchiveFileInfo;
 }
 
 unsigned int ArchiveRar::getFileInfoList(const QString &path,
-                                         QList<const ArchiveFileInfo*> &list)
+                                         QList<ArchiveFileInfo> &list)
 {
     std::wstring path_wstr = path.toStdWString();
 

@@ -14,7 +14,7 @@ ArchiveExtractor::ArchiveExtractor(QObject *parent) :
 }
 
 int ArchiveExtractor::getFileInfoList(const QString &path,
-                                      QList<const ArchiveFileInfo*> &list) const
+                                      QList<ArchiveFileInfo> &list) const
 {
     QFile archiveFile(path);
 
@@ -27,7 +27,7 @@ int ArchiveExtractor::getFileInfoList(const QString &path,
         while(!zipList.empty())
         {
             const QuaZipFileInfo fi = zipList.takeLast();
-            list.append(new ArchiveFileInfo(
+            list.append(ArchiveFileInfo(
                             fi.name, fi.dateTime, fi.uncompressedSize));
         }
         zip.close();

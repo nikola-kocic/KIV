@@ -49,7 +49,7 @@ private:
                          ArchiveItem *const parent = nullptr);
 
     void populate(const QString &archive_path,
-                  const QList<const ArchiveFileInfo *> &archive_files);
+                  const QList<ArchiveFileInfo> &archive_files);
 
     const IArchiveExtractor *const m_archive_extractor;
     ArchiveItem *rootItem;

@@ -12,7 +12,7 @@ public:
     explicit ArchiveExtractor(QObject *parent = nullptr);
 
     virtual int getFileInfoList(const QString &path,
-                                QList<const ArchiveFileInfo *> &list) const override;
+                                QList<ArchiveFileInfo> &list) const override;
     virtual int extract(const QString &archiveName,
                         const QString &fileName,
                         const QString &newFileName) const override;

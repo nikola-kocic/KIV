@@ -19,8 +19,8 @@ public:
                                  const QString &fileName,
                                  QByteArray &buffer);
     static unsigned int getFileInfoList(const QString &path,
-                                        QList<const ArchiveFileInfo *> &list);
-    static const ArchiveFileInfo *createArchiveFileInfo(const RARHeaderDataEx HeaderData);
+                                        QList<ArchiveFileInfo> &list);
+    static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);
 
 private:
     static QDateTime dateFromDos(const uint dosTime);

@@ -10,7 +10,7 @@ public:
     virtual ~IArchiveExtractor() {}
 
     virtual int getFileInfoList(const QString &path,
-                                QList<const ArchiveFileInfo*> &list) const = 0;
+                                QList<ArchiveFileInfo> &list) const = 0;
     virtual int extract(const QString &archiveName,
                         const QString &fileName,
                         const QString &newFileName) const = 0;
