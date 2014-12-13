@@ -25,6 +25,7 @@ if(NOT Qt4_FOUND)
 endif()
 
 
+find_package ( QuaZip REQUIRED )
 if(Qt4_FOUND)
     include ( ${QT_USE_FILE} )
 endif()
@@ -45,10 +46,13 @@ set ( tst_kiv_teststest_SRCS
     test_picture_item_raster.cpp
     test_zoom_widget.cpp
     test_zoom_widget_no_defaults.cpp
+    test_archive_file_list.cpp
     ../kiv/src/settings.cpp
     ../kiv/src/widgets/picture_item/pictureitem_data.cpp
     ../kiv/src/widgets/picture_item/pictureitem_raster.cpp
     ../kiv/src/widgets/zoom_widget.cpp
+    ../kiv/src/archiveextractor.cpp
+    ../kiv/src/models/unrar/archive_rar.cpp
     )
 
 set ( tst_kiv_teststest_RSCS
@@ -66,8 +70,11 @@ set ( tst_kiv_teststest_MOCS
     test_picture_item_raster.h
     test_zoom_widget.h
     test_zoom_widget_no_defaults.h
+    test_archive_file_list.h
     ../kiv/src/widgets/picture_item/pictureitem_raster.h
     ../kiv/src/widgets/zoom_widget.h
+    ../kiv/src/archiveextractor.h
+    ../kiv/src/models/unrar/archive_rar.h
     )
 if(Qt4_FOUND)
     QT4_WRAP_CPP(MOCS ${tst_kiv_teststest_MOCS})
@@ -78,8 +85,9 @@ endif()
 
 add_executable ( tst_kiv_teststest ${tst_kiv_teststest_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
 if (Qt4_FOUND)
-    target_link_libraries ( tst_kiv_teststest  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY} )
+    target_link_libraries ( tst_kiv_teststest  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY} ${QUAZIP_LIBRARIES} )
 else()
-    target_link_libraries ( tst_kiv_teststest  Qt5::Widgets Qt5::Gui Qt5::Test )
+    target_link_libraries ( tst_kiv_teststest  Qt5::Widgets Qt5::Gui Qt5::Test ${QUAZIP_LIBRARIES} )
 endif()
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)

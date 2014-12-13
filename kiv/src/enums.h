@@ -86,6 +86,12 @@ struct ArchiveFileInfo {
         , uncompressedSize(uncompressedSize)
     {
     }
+    bool operator==(const ArchiveFileInfo& other) const {
+        return (name == other.name &&
+                dateTime == other.dateTime &&
+                uncompressedSize == other.uncompressedSize);
+    }
+
     bool isDir() const { return uncompressedSize == 0; }
 };
 
