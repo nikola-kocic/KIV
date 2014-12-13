@@ -217,7 +217,7 @@ const ArchiveFileInfo *ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx H
     QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
     fileName = QDir::fromNativeSeparators(fileName);
     quint32 uncompressedSize = 0;
-    if ((HeaderData.Flags & LHD_WINDOWMASK) == LHD_DIRECTORY)
+    if ((HeaderData.Flags & RHDF_DIRECTORY) == RHDF_DIRECTORY)
     {
         fileName.append(QDir::separator());
         uncompressedSize = 0;
