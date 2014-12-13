@@ -16,15 +16,14 @@ public:
     int historyIndex() const;
     bool setHistoryIndex(int index);
 
-    bool goBack();
-    bool goForward();
-
     int historySize() const;
     QList<QUrl> getHistory() const;
 
 public slots:
     void setLocationUrl(const QUrl &url);
     void focus();
+    bool goBack();
+    bool goForward();
 
 signals:
     void urlChanged(const QUrl &url);

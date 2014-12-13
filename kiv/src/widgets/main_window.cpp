@@ -447,8 +447,8 @@ void MainWindow::connectActions()
     connect(m_act_open, SIGNAL(triggered()), this, SLOT(openFileDialog()));
     connect(m_act_save, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(m_act_exit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(m_act_back, SIGNAL(triggered()), this, SLOT(goBack()));
-    connect(m_act_forward, SIGNAL(triggered()), this, SLOT(goForward()));
+    connect(m_act_back, SIGNAL(triggered()), m_urlNavigator, SLOT(goBack()));
+    connect(m_act_forward, SIGNAL(triggered()), m_urlNavigator, SLOT(goForward()));
 
     connect(m_act_bookmark_add, SIGNAL(triggered()), this, SLOT(addBookmark()));
 
@@ -805,16 +805,6 @@ void MainWindow::saveAs()
 #endif
 
     return;
-}
-
-void MainWindow::goBack()
-{
-    m_urlNavigator->goBack();
-}
-
-void MainWindow::goForward()
-{
-    m_urlNavigator->goForward();
 }
 
 void MainWindow::showInFileBrowser()

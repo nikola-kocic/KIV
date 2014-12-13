@@ -123,8 +123,6 @@ private slots:
     /* File Menu Actions Slots */
     void openFileDialog();
     void saveAs();
-    void goBack();
-    void goForward();
     void showInFileBrowser();
 
     /* Bookmark Menu Action Slots */
