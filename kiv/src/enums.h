@@ -53,6 +53,13 @@ enum class SortOrder
     Desc,
 };
 
+enum class NodeType
+{
+    Directory,
+    Image,
+    Archive,
+};
+
 class ColumnSort {
 public:
     ColumnSort(Column column, SortOrder order)

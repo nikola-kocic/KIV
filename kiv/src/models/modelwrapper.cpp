@@ -5,6 +5,90 @@
 #include "kiv/src/helper.h"
 #include "kiv/src/models/archive_model.h"
 
+
+ArchiveModelWrapper::ArchiveModelWrapper(ArchiveModel *model)
+    : m_model(model)
+{}
+
+NodeType ArchiveModelWrapper::getNodeType(const QModelIndex &index) const
+{
+    const int type = index.data(Helper::ROLE_TYPE).toInt();
+    if (type == ArchiveItem::TYPE_ARCHIVE)
+    {
+        return NodeType::Archive;
+    }
+    else if (type == ArchiveItem::TYPE_ARCHIVE_DIR)
+    {
+        return NodeType::Directory;
+    }
+    else //if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
+    {
+        return NodeType::Image;
+    }
+}
+
+QAbstractItemModel *ArchiveModelWrapper::getModel()
+{ return m_model; }
+
+QModelIndex ArchiveModelWrapper::getContainer(const FileInfo &info) const
+{ return m_model->getDirectory(info.getArchiveContainerPath()); }
+
+QModelIndex ArchiveModelWrapper::getFile(const FileInfo &info, const QModelIndex& container) const
+{ return m_model->findIndexChild(info.getImageFileName(), container); }
+
+QString ArchiveModelWrapper::filePath(const QModelIndex &index) const
+{ return index.data(QFileSystemModel::FilePathRole).toString(); }
+
+bool ArchiveModelWrapper::isDir(const QModelIndex &index) const
+{ return getNodeType(index) == NodeType::Directory; }
+
+QFileInfo ArchiveModelWrapper::fileInfo(const QModelIndex &index) const
+{ return QFileInfo(this->filePath(index)); }
+
+
+
+
+FileSystemModelWrapper::FileSystemModelWrapper(FileSystemModel *model)
+    : m_model(model)
+{}
+
+NodeType FileSystemModelWrapper::getNodeType(const QModelIndex &index) const
+{
+    const QFileInfo indexFileInfo = m_model->fileInfo(index);
+    if (Helper::isImageFile(indexFileInfo))
+    {
+        return NodeType::Image;
+    }
+    else if (Helper::isArchiveFile(indexFileInfo))
+    {
+        return NodeType::Archive;
+    }
+    else
+    {
+        return NodeType::Directory;
+    }
+}
+
+QAbstractItemModel *FileSystemModelWrapper::getModel()
+{ return m_model; }
+
+QModelIndex FileSystemModelWrapper::getContainer(const FileInfo &info) const
+{ return m_model->index(info.getContainerPath()); }
+
+QModelIndex FileSystemModelWrapper::getFile(const FileInfo &info, const QModelIndex& /*container*/) const
+{ return m_model->index(info.getPath()); }
+
+QString FileSystemModelWrapper::filePath(const QModelIndex &index) const
+{ return m_model->filePath(index); }
+
+bool FileSystemModelWrapper::isDir(const QModelIndex &index) const
+{ return m_model->isDir(index); }
+
+QFileInfo FileSystemModelWrapper::fileInfo(const QModelIndex &index) const
+{ return m_model->fileInfo(index); }
+
+
+
 bool FileListSortFilterProxyModel::lessThan(
         const QModelIndex &left, const QModelIndex &right) const
 {
@@ -216,16 +300,3 @@ bool ArchiveDirsSortFilterProxyModel::filterAcceptsRow(
     return !(index0.data(Helper::ROLE_TYPE).toInt()
              == ArchiveItem::TYPE_ARCHIVE_FILE);
 }
-
-
-
-ModelWrapper::ModelWrapper(QObject *parent) : QObject(parent)
-{
-
-}
-
-ModelWrapper::~ModelWrapper()
-{
-
-}
-
