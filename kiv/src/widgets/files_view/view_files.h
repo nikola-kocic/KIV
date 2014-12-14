@@ -37,7 +37,7 @@ class ViewFiles : public QWidget
 public:
     explicit ViewFiles(const IPictureLoader *const picture_loader,
                        std::unique_ptr<const IArchiveExtractor> archive_extractor,
-                       FileSystemModel *model_filesystem,
+                       IModelWrapper *model_filesystem,
                        QWidget *parent = nullptr);
     ~ViewFiles() override;
     void setViewMode(const FileViewMode mode);
@@ -55,7 +55,7 @@ public slots:
 private:
     void initViewItem();
     void showThumbnails();
-    ArchiveModel *createArchiveModel(const FileInfo &info);
+    IModelWrapper *createArchiveModel(const FileInfo &info);
 
     const IPictureLoader *const m_picture_loader;
     const std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
@@ -72,8 +72,8 @@ private:
     ListViewFiles *m_listView_files;
     QAbstractItemView *m_view_current;
 
-    QPointer<ArchiveModel> m_model_archive_files;
-    FileSystemModel *m_model_filesystem;
+    std::shared_ptr<IModelWrapper> m_model_archive_files;
+    IModelWrapper *m_model_filesystem;
 
     /* source model is FileSystemModel or ArchiveModel */
     FileListSortFilterProxyModel *m_proxy_file_list;

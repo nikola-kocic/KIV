@@ -36,7 +36,7 @@ MainWindow::MainWindow(const IPictureLoader *const picture_loader,
           new ViewFiles(
               m_picture_loader,
               std::move(archive_extractor),
-              m_model_filesystem,
+              new FileSystemModelWrapper(m_model_filesystem),
               this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))

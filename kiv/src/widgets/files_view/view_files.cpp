@@ -13,7 +13,7 @@
 
 ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
                      std::unique_ptr<const IArchiveExtractor> archive_extractor,
-                     FileSystemModel *model_filesystem,
+                     IModelWrapper *model_filesystem,
                      QWidget *parent)
     : QWidget(parent)
 
@@ -55,7 +55,7 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
                           , this
                           ))
 {
-    m_proxy_containers->setSourceModel(m_model_filesystem);
+    m_proxy_containers->setSourceModel(m_model_filesystem->getModel());
 
     connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)),
             this, SLOT(on_thumbnail_finished(QModelIndex)));
@@ -132,10 +132,6 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
 
 ViewFiles::~ViewFiles()
 {
-    if (m_model_archive_files)
-    {
-        delete m_model_archive_files;
-    }
 }
 
 FileInfo ViewFiles::getCurrentFileInfo() const
@@ -223,12 +219,12 @@ void ViewFiles::setLocationUrl(const QUrl &url)
     return setCurrentFile(fileinfo);
 }
 
-ArchiveModel *ViewFiles::createArchiveModel(const FileInfo &info)
+IModelWrapper *ViewFiles::createArchiveModel(const FileInfo &info)
 {
     const QString archive_path = info.getContainerPath();
     std::vector<std::unique_ptr<const ArchiveFileInfo>> archive_files;
     int success = m_archive_extractor->getFileInfoList(archive_path, archive_files);
-    return new ArchiveModel(archive_files, archive_path);
+    return new ArchiveModelWrapper(new ArchiveModel(archive_files, archive_path));
 }
 
 void ViewFiles::setCurrentFile(const FileInfo &info)
@@ -241,34 +237,30 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
 
     m_view_filesystem->setCurrentIndex(
                 m_proxy_containers->mapFromSource(
-                    m_model_filesystem->index(info.getContainerPath())));
+                    m_model_filesystem->getContainer(info)));
 
     if (info.isInArchive())
     {
         m_proxy_file_list->setSourceModel(nullptr);
         m_view_archiveDirs->setModel(nullptr);
 
-        delete m_model_archive_files;
+        m_model_archive_files = std::shared_ptr<IModelWrapper>(createArchiveModel(info));
 
-        m_model_archive_files = createArchiveModel(info);
-
-        m_proxy_file_list->setSourceModel(m_model_archive_files);
-        m_view_archiveDirs->setModel(m_model_archive_files);
+        m_proxy_file_list->setSourceModel(m_model_archive_files->getModel());
+        m_view_archiveDirs->setModel(m_model_archive_files->getModel());
 
         if (!m_fileinfo_current.isInArchive() || !m_fileinfo_current.isValid())
         {
             m_view_archiveDirs->getWidget()->show();
         }
-        const QModelIndex dirIndex = m_model_archive_files->getDirectory(
-                    info.getArchiveContainerPath());
+        const QModelIndex dirIndex = m_model_archive_files->getContainer(info);
         m_view_archiveDirs->setCurrentIndex(dirIndex);
 
         if (info.fileExists())
         {
             m_view_current->setCurrentIndex(
                         m_proxy_file_list->mapFromSource(
-                            m_model_archive_files->findIndexChild(
-                                info.getImageFileName(), dirIndex)));
+                            m_model_archive_files->getFile(info, dirIndex)));
         }
     }
     else
@@ -278,16 +270,15 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
             m_proxy_file_list->setSourceModel(nullptr);
             m_view_archiveDirs->setModel(nullptr);
             m_view_archiveDirs->getWidget()->hide();
-            delete m_model_archive_files;
 
-            m_proxy_file_list->setSourceModel(m_model_filesystem);
+            m_proxy_file_list->setSourceModel(m_model_filesystem->getModel());
         }
+        const QModelIndex dirIndex = m_model_filesystem->getContainer(info);
         m_view_current->setRootIndex(
-                    m_proxy_file_list->mapFromSource(
-                        m_model_filesystem->index(info.getContainerPath())));
+                    m_proxy_file_list->mapFromSource(dirIndex));
         m_view_current->setCurrentIndex(
                     m_proxy_file_list->mapFromSource(
-                        m_model_filesystem->index(info.getPath())));
+                        m_model_filesystem->getFile(info, dirIndex)));
     }
 
     m_view_current->scrollTo(m_view_current->currentIndex());
@@ -307,7 +298,7 @@ void ViewFiles::on_filesystemView_currentRowChanged(
     const QModelIndex index0 = m_proxy_containers->mapToSource(current);
     if (m_model_filesystem->isDir(index0))
     {
-        m_model_filesystem->fetchMore(index0);
+        m_model_filesystem->getModel()->fetchMore(index0);
     }
     m_view_filesystem->scrollTo(current);
 
@@ -402,8 +393,7 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current)
     {
         return;
     }
-    const QString filePath = current.data(
-                QFileSystemModel::FilePathRole).toString();
+    const QString filePath = m_model_archive_files->filePath(current);
     m_fileinfo_current = FileInfo(filePath);
     emit urlChanged(QUrl::fromLocalFile(filePath));
 }
@@ -441,38 +431,18 @@ void ViewFiles::pageNext()
         return;
     }
 
-    // TODO: Refactor
-    if (m_fileinfo_current.isInArchive())
+    IModelWrapper *m = (m_fileinfo_current.isInArchive() ? m_model_archive_files.get() : m_model_filesystem);
+    for (int i = m_view_current->currentIndex().row() + 1;
+         i < m_view_current->model()->rowCount(m_view_current->rootIndex());
+         ++i)
     {
-        for (int i = m_view_current->currentIndex().row() + 1;
-             i < m_view_current->model()->rowCount(m_view_current->rootIndex());
-             ++i)
+        const QModelIndex index = m_view_current->model()->index(
+                    i, 0, m_view_current->rootIndex());
+        const QModelIndex source_index = m_proxy_file_list->mapToSource(index);
+        if (m->getNodeType(source_index) == NodeType::Image)
         {
-            const QModelIndex index = m_view_current->model()->index(
-                        i, 0, m_view_current->rootIndex());
-            const int type = index.data(Helper::ROLE_TYPE).toInt();
-            if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
-            {
-                m_view_current->setCurrentIndex(index);
-                break;
-            }
-        }
-    }
-    else
-    {
-        for (int i = m_view_current->currentIndex().row() + 1;
-             i < m_view_current->model()->rowCount(m_view_current->rootIndex());
-             ++i)
-        {
-            const QModelIndex index = m_view_current->model()->index(
-                        i, 0, m_view_current->rootIndex());
-            const QFileInfo indexFileInfo = m_model_filesystem->fileInfo(
-                        m_proxy_file_list->mapToSource(index));
-            if (Helper::isImageFile(indexFileInfo))
-            {
-                m_view_current->setCurrentIndex(index);
-                break;
-            }
+            m_view_current->setCurrentIndex(index);
+            break;
         }
     }
 }
@@ -484,34 +454,16 @@ void ViewFiles::pagePrevious()
         return;
     }
 
-    // TODO: Refactor
-    if (m_fileinfo_current.isInArchive())
+    IModelWrapper *m = (m_fileinfo_current.isInArchive() ? m_model_archive_files.get() : m_model_filesystem);
+    for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
     {
-        for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
+        const QModelIndex index = m_view_current->model()->index(
+                    i, 0, m_view_current->rootIndex());
+        const QModelIndex source_index = m_proxy_file_list->mapToSource(index);
+        if (m->getNodeType(source_index) == NodeType::Image)
         {
-            const QModelIndex index = m_view_current->model()->index(
-                        i, 0, m_view_current->rootIndex());
-            const int type = index.data(Helper::ROLE_TYPE).toInt();
-            if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
-            {
-                m_view_current->setCurrentIndex(index);
-                break;
-            }
-        }
-    }
-    else
-    {
-        for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
-        {
-            const QModelIndex index = m_view_current->model()->index(
-                        i, 0, m_view_current->rootIndex());
-            const QFileInfo indexFileInfo = m_model_filesystem->fileInfo(
-                        m_proxy_file_list->mapToSource(index));
-            if (Helper::isImageFile(indexFileInfo))
-            {
-                m_view_current->setCurrentIndex(index);
-                break;
-            }
+            m_view_current->setCurrentIndex(index);
+            break;
         }
     }
 }
@@ -531,8 +483,7 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
 
     if (m_fileinfo_current.isInArchive())
     {
-        if (fixed_index.data(Helper::ROLE_TYPE).toInt() ==
-            ArchiveItem::TYPE_ARCHIVE_DIR)
+        if (m_model_archive_files->isDir(fixed_index))
         {
             m_view_archiveDirs->setCurrentIndex(
                             m_proxy_file_list->mapToSource(fixed_index));
