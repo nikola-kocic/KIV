@@ -639,11 +639,6 @@ void ViewFiles::setShowThumbnails(const bool b)
     m_view_current->doItemsLayout();
 }
 
-QFileSystemModel *ViewFiles::getFilesystemModel() const
-{
-    return m_model_filesystem;
-}
-
 void ViewFiles::saveCurrentFile(const QString &fileName) const
 {
     // TODO: Research error handling
