@@ -18,11 +18,10 @@ public:
 signals:
     void currentSortChanged(ColumnSort);
 
-public slots:
-
 protected:
     QList<ColumnSort> m_items;
-    QString getSortText(ColumnSort sort);
+    QString getSortText(ColumnSort sort) const;
+
 protected slots:
     void on_currentIndexChanged(int index);
 };

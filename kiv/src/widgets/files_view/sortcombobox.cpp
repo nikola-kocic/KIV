@@ -24,7 +24,7 @@ void SortComboBox::on_currentIndexChanged(int index)
     emit currentSortChanged(sort);
 }
 
-QString SortComboBox::getSortText(ColumnSort sort)
+QString SortComboBox::getSortText(ColumnSort sort) const
 {
     switch(sort.getColumn())
     {

@@ -59,8 +59,8 @@ public:
         : m_column(column)
         , m_order(order)
     {}
-    Column getColumn() { return m_column; }
-    SortOrder getOrder() { return m_order; }
+    Column getColumn() const { return m_column; }
+    SortOrder getOrder() const { return m_order; }
 
     bool operator ==(const ColumnSort &b) const
     {
