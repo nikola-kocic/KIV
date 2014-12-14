@@ -26,7 +26,8 @@ SOURCES += \
     src/widgets/urlnavigator.cpp \
     src/archiveextractor.cpp \
     src/widgets/picture_item/pictureitem_gl.cpp \
-    src/widgets/files_view/sortcombobox.cpp
+    src/widgets/files_view/sortcombobox.cpp \
+    src/models/modelwrapper.cpp
 
 
 HEADERS += \
@@ -55,7 +56,8 @@ HEADERS += \
     include/IArchiveExtractor.h \
     include/IPictureLoader.h \
     src/widgets/picture_item/pictureitem_gl.h \
-    src/widgets/files_view/sortcombobox.h
+    src/widgets/files_view/sortcombobox.h \
+    src/models/modelwrapper.h
 
 
 FORMS += \

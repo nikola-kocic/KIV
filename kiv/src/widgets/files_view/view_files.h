@@ -21,6 +21,7 @@
 #include "kiv/src/helper.h"
 #include "kiv/src/models/archive_model.h"
 #include "kiv/src/models/filesystem_model.h"
+#include "kiv/src/models/modelwrapper.h"
 #include "kiv/src/settings.h"
 #include "kiv/src/widgets/files_view/sortcombobox.h"
 #include "kiv/src/widgets/files_view/thumbnailitemdelegate.h"
@@ -85,43 +86,6 @@ public slots:
     void setLocationUrl(const QUrl &url);
 
 private:
-    class FileListSortFilterProxyModel : public QSortFilterProxyModel
-    {
-    public:
-        explicit FileListSortFilterProxyModel(QObject *parent = nullptr)
-            : QSortFilterProxyModel(parent)
-        {}
-    protected:
-        bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    };
-
-    class ContainersSortFilterProxyModel : public QSortFilterProxyModel
-    {
-    public:
-        explicit ContainersSortFilterProxyModel(QObject *parent = nullptr)
-            : QSortFilterProxyModel(parent)
-        {}
-    protected:
-        bool filterAcceptsColumn(int source_column,
-                                 const QModelIndex &source_parent) const override;
-        bool filterAcceptsRow(int source_row,
-                              const QModelIndex &source_parent) const override;
-    };
-
-    class ArchiveDirsSortFilterProxyModel : public QSortFilterProxyModel
-    {
-    public:
-        explicit ArchiveDirsSortFilterProxyModel(QObject *parent = nullptr)
-            : QSortFilterProxyModel(parent)
-        {}
-
-    protected:
-        bool filterAcceptsColumn(int source_column,
-                                 const QModelIndex &source_parent) const override;
-        bool filterAcceptsRow(int sourceRow,
-                              const QModelIndex &sourceParent) const override;
-    };
-
     void initViewItem();
     void showThumbnails();
 
