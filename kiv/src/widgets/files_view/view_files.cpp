@@ -45,13 +45,13 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
                                m_picture_loader, m_thumb_size, this))
     , m_layout_files_list(new QVBoxLayout())
     , m_combobox_sort(new SortComboBox(
-                          QList<SortDirection>()
-                          << SortDirection::NameAsc
-                          << SortDirection::NameDesc
-                          << SortDirection::DateAsc
-                          << SortDirection::DateDesc
-                          << SortDirection::SizeAsc
-                          << SortDirection::SizeDesc
+                          QList<ColumnSort>()
+                          << ColumnSort(Column::Name, SortOrder::Asc)
+                          << ColumnSort(Column::Name, SortOrder::Desc)
+                          << ColumnSort(Column::Date, SortOrder::Asc)
+                          << ColumnSort(Column::Date, SortOrder::Desc)
+                          << ColumnSort(Column::Size, SortOrder::Asc)
+                          << ColumnSort(Column::Size, SortOrder::Desc)
                           , this
                           ))
 {
@@ -72,7 +72,7 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     /* End filesystemView */
 
 
-    m_combobox_sort->setSort(SortDirection::NameAsc);
+    m_combobox_sort->setSort(ColumnSort(Column::Name, SortOrder::Asc));
 
 
     /* Start Layout */
@@ -124,8 +124,8 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
             SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
             this,
             SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_combobox_sort, SIGNAL(currentSortChanged(SortDirection)),
-            this, SLOT(on_combobox_sort_currentSortChanged(SortDirection)));
+    connect(m_combobox_sort, SIGNAL(currentSortChanged(ColumnSort)),
+            this, SLOT(on_combobox_sort_currentSortChanged(ColumnSort)));
 
     initViewItem();
 }
@@ -319,61 +319,40 @@ void ViewFiles::on_filesystemView_currentRowChanged(
     this->setCurrentFile(info);
 }
 
-void ViewFiles::on_combobox_sort_currentSortChanged(SortDirection sort)
+void ViewFiles::on_combobox_sort_currentSortChanged(ColumnSort sort)
 {
-    switch (sort)
+    Qt::SortOrder sortOrder = sort.getOrder() == SortOrder::Asc ?
+                Qt::AscendingOrder: Qt::DescendingOrder;
+    switch (sort.getColumn())
     {
-    case SortDirection::NameAsc:
-        m_proxy_file_list->sort(-1);
-        break;
-    case SortDirection::NameDesc:
+    case Column::Name:
         if (m_fileinfo_current.isInArchive())
         {
-            m_proxy_file_list->sort(ArchiveItem::col_name, Qt::DescendingOrder);
+            m_proxy_file_list->sort(ArchiveItem::col_name, sortOrder);
         }
         else
         {
-            m_proxy_file_list->sort(0, Qt::DescendingOrder);
+            m_proxy_file_list->sort(0, sortOrder);
         }
         break;
-    case SortDirection::DateAsc:
+    case Column::Date:
         if (m_fileinfo_current.isInArchive())
         {
-            m_proxy_file_list->sort(ArchiveItem::col_date, Qt::AscendingOrder);
+            m_proxy_file_list->sort(ArchiveItem::col_date, sortOrder);
         }
         else
         {
-            m_proxy_file_list->sort(3, Qt::AscendingOrder);
+            m_proxy_file_list->sort(3, sortOrder);
         }
         break;
-    case SortDirection::DateDesc:
+    case Column::Size:
         if (m_fileinfo_current.isInArchive())
         {
-            m_proxy_file_list->sort(ArchiveItem::col_date, Qt::DescendingOrder);
+            m_proxy_file_list->sort(ArchiveItem::col_size, sortOrder);
         }
         else
         {
-            m_proxy_file_list->sort(3, Qt::DescendingOrder);
-        }
-        break;
-    case SortDirection::SizeAsc:
-        if (m_fileinfo_current.isInArchive())
-        {
-            m_proxy_file_list->sort(ArchiveItem::col_size, Qt::AscendingOrder);
-        }
-        else
-        {
-            m_proxy_file_list->sort(1, Qt::AscendingOrder);
-        }
-        break;
-    case SortDirection::SizeDesc:
-        if (m_fileinfo_current.isInArchive())
-        {
-            m_proxy_file_list->sort(ArchiveItem::col_size, Qt::DescendingOrder);
-        }
-        else
-        {
-            m_proxy_file_list->sort(1, Qt::DescendingOrder);
+            m_proxy_file_list->sort(1, sortOrder);
         }
         break;
     }

@@ -1,12 +1,11 @@
 #include "sortcombobox.h"
 
-SortComboBox::SortComboBox(
-        const QList<SortDirection> &items,
+SortComboBox::SortComboBox(const QList<ColumnSort> &items,
         QWidget *parent)
     : QComboBox(parent)
     , m_items(items)
 {
-    for (const SortDirection &sort : m_items)
+    for (const ColumnSort &sort : m_items)
     {
         this->addItem(this->getSortText(sort));
     }
@@ -21,31 +20,28 @@ SortComboBox::~SortComboBox()
 
 void SortComboBox::on_currentIndexChanged(int index)
 {
-    const SortDirection sort = m_items.at(index);
+    const ColumnSort sort = m_items.at(index);
     emit currentSortChanged(sort);
 }
 
-QString SortComboBox::getSortText(SortDirection sort)
+QString SortComboBox::getSortText(ColumnSort sort)
 {
-    switch(sort)
+    switch(sort.getColumn())
     {
-    case SortDirection::NameAsc:
-        return tr("Name Ascending");
-    case SortDirection::NameDesc:
-        return tr("Name Descending");
-    case SortDirection::DateAsc:
-        return tr("Date Ascending");
-    case SortDirection::DateDesc:
-        return tr("Date Descending");
-    case SortDirection::SizeAsc:
-        return tr("Size Ascending");
-    case SortDirection::SizeDesc:
-        return tr("Size Descending");
+    case Column::Name:
+        return sort.getOrder() == SortOrder::Asc ? tr("Name Ascending"):
+                                                   tr("Name Descending");
+    case Column::Date:
+        return sort.getOrder() == SortOrder::Asc ? tr("Date Ascending"):
+                                                   tr("Date Descending");
+    case Column::Size:
+        return sort.getOrder() == SortOrder::Asc ? tr("Size Ascending"):
+                                                   tr("Size Descending");
     }
     return QString();
 }
 
-bool SortComboBox::setSort(SortDirection sort)
+bool SortComboBox::setSort(ColumnSort sort)
 {
     const int index = std::distance(
                 m_items.constBegin(),

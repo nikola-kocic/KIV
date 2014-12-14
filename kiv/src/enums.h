@@ -39,14 +39,36 @@ enum class FileViewMode: int
     Icons = 2,
 };
 
-enum class SortDirection
+
+enum class Column
 {
-    NameAsc,
-    NameDesc,
-    DateAsc,
-    DateDesc,
-    SizeAsc,
-    SizeDesc,
+    Name,
+    Date,
+    Size,
+};
+
+enum class SortOrder
+{
+    Asc,
+    Desc,
+};
+
+class ColumnSort {
+public:
+    ColumnSort(Column column, SortOrder order)
+        : m_column(column)
+        , m_order(order)
+    {}
+    Column getColumn() { return m_column; }
+    SortOrder getOrder() { return m_order; }
+
+    bool operator ==(const ColumnSort &b) const
+    {
+        return this->m_column == b.m_column && this->m_order == b.m_order;
+    }
+private:
+    Column m_column;
+    SortOrder m_order;
 };
 
 struct ArchiveFileInfo {

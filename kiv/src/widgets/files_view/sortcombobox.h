@@ -10,19 +10,19 @@ class SortComboBox : public QComboBox
     Q_OBJECT
 public:
     explicit SortComboBox(
-            const QList<SortDirection> &items,
+            const QList<ColumnSort> &items,
             QWidget *parent = nullptr);
     ~SortComboBox();
-    bool setSort(SortDirection sort);
+    bool setSort(ColumnSort sort);
 
 signals:
-    void currentSortChanged(SortDirection);
+    void currentSortChanged(ColumnSort);
 
 public slots:
 
 protected:
-    QList<SortDirection> m_items;
-    QString getSortText(SortDirection sort);
+    QList<ColumnSort> m_items;
+    QString getSortText(ColumnSort sort);
 protected slots:
     void on_currentIndexChanged(int index);
 };

@@ -100,7 +100,7 @@ private slots:
     void on_archiveDirsView_currentRowChanged(const QModelIndex &current);
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);
-    void on_combobox_sort_currentSortChanged(SortDirection sort);
+    void on_combobox_sort_currentSortChanged(ColumnSort sort);
 
 signals:
     void urlChanged(const QUrl &url);
