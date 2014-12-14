@@ -9,7 +9,7 @@ class IFileView : public QObject
 {
     Q_OBJECT
 public:
-    explicit IFileView(QObject *parent = 0) : QObject(parent) {}
+    explicit IFileView(QObject *parent = nullptr) : QObject(parent) {}
     virtual ~IFileView() {}
     virtual QWidget *getWidget() = 0;
     virtual void setModel(QAbstractItemModel *model) = 0;
