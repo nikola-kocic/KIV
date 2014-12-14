@@ -36,7 +36,7 @@ class ViewFiles : public QWidget
 
 public:
     explicit ViewFiles(const IPictureLoader *const picture_loader,
-                       const IArchiveExtractor *const archive_extractor,
+                       std::unique_ptr<const IArchiveExtractor> archive_extractor,
                        FileSystemModel *model_filesystem,
                        QWidget *parent = nullptr);
     ~ViewFiles() override;
@@ -60,7 +60,7 @@ private:
     ArchiveModel *createArchiveModel(const FileInfo &info);
 
     const IPictureLoader *const m_picture_loader;
-    const IArchiveExtractor *const m_archive_extractor;
+    const std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
     FileInfo m_fileinfo_current;
     FileViewMode m_view_mode;
     bool m_show_thumbnails;

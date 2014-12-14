@@ -21,7 +21,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(const IPictureLoader *const picture_loader,
-                        const IArchiveExtractor *const archive_extractor,
+                        std::unique_ptr<const IArchiveExtractor> archive_extractor,
                         QWidget *parent = nullptr,
                         Qt::WindowFlags f = 0);
     ~MainWindow() override;
@@ -40,7 +40,6 @@ private:
     }
 
     const IPictureLoader *const m_picture_loader;
-    const IArchiveExtractor *const m_archive_extractor;
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

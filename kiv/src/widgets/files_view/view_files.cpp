@@ -12,13 +12,13 @@
 #endif
 
 ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
-                     const IArchiveExtractor *const archive_extractor,
+                     std::unique_ptr<const IArchiveExtractor> archive_extractor,
                      FileSystemModel *model_filesystem,
                      QWidget *parent)
     : QWidget(parent)
 
     , m_picture_loader(picture_loader)
-    , m_archive_extractor(archive_extractor)
+    , m_archive_extractor(std::move(archive_extractor))
     , m_fileinfo_current(FileInfo(""))
     , m_view_mode(FileViewMode::List)
     , m_show_thumbnails(false)

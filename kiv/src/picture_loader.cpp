@@ -11,8 +11,8 @@
 #endif
 
 
-PictureLoader::PictureLoader(const IArchiveExtractor * const archive_extractor)
-    : m_archive_extractor(archive_extractor)
+PictureLoader::PictureLoader(std::unique_ptr<const IArchiveExtractor> archive_extractor)
+    : m_archive_extractor(std::move(archive_extractor))
 {
 }
 
