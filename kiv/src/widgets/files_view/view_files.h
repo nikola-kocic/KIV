@@ -57,6 +57,7 @@ public slots:
 private:
     void initViewItem();
     void showThumbnails();
+    ArchiveModel *createArchiveModel(const FileInfo &info);
 
     const IPictureLoader *const m_picture_loader;
     const IArchiveExtractor *const m_archive_extractor;

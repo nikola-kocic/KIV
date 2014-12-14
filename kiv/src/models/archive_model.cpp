@@ -12,11 +12,10 @@
 #include "kiv/src/helper.h"
 #endif
 
-ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
+ArchiveModel::ArchiveModel(const std::vector<std::unique_ptr<const ArchiveFileInfo> > &archive_files,
                            const QString &path,
                            QObject *const parent)
     : QAbstractItemModel(parent)
-    , m_archive_extractor(archive_extractor)
     , rootItem(new ArchiveItem("", QDateTime(), 0, "",
                                ArchiveItem::TYPE_ARCHIVE))
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
@@ -29,8 +28,6 @@ ArchiveModel::ArchiveModel(const IArchiveExtractor *const archive_extractor,
     {
         m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
     }
-    std::vector<std::unique_ptr<const ArchiveFileInfo>> archive_files;
-    int success = m_archive_extractor->getFileInfoList(path, archive_files);
     populate(path, archive_files);
 }
 

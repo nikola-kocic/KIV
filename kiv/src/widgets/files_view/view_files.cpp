@@ -223,6 +223,14 @@ void ViewFiles::setLocationUrl(const QUrl &url)
     return setCurrentFile(fileinfo);
 }
 
+ArchiveModel *ViewFiles::createArchiveModel(const FileInfo &info)
+{
+    const QString archive_path = info.getContainerPath();
+    std::vector<std::unique_ptr<const ArchiveFileInfo>> archive_files;
+    int success = m_archive_extractor->getFileInfoList(archive_path, archive_files);
+    return new ArchiveModel(archive_files, archive_path);
+}
+
 void ViewFiles::setCurrentFile(const FileInfo &info)
 {
 #ifdef DEBUG_VIEW_FILES
@@ -241,8 +249,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         m_view_archiveDirs->setModel(nullptr);
 
         delete m_model_archive_files;
-        m_model_archive_files = new ArchiveModel(
-                m_archive_extractor, info.getContainerPath());
+
+        m_model_archive_files = createArchiveModel(info);
 
         m_proxy_file_list->setSourceModel(m_model_archive_files);
         m_view_archiveDirs->setModel(m_model_archive_files);

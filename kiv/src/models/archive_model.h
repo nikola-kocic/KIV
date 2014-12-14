@@ -1,12 +1,14 @@
 #ifndef ARCHIVE_MODEL_H
 #define ARCHIVE_MODEL_H
 
+#include <memory>
+
 #include <QAbstractItemModel>
 #include <QIcon>
 #include <QModelIndex>
 #include <QVariant>
 
-#include "kiv/include/IArchiveExtractor.h"
+#include "kiv/src/enums.h"
 #include "kiv/src/models/archive_item.h"
 #include "kiv/src/fileinfo.h"
 
@@ -16,7 +18,7 @@ class ArchiveModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit ArchiveModel(const IArchiveExtractor *const archive_extractor,
+    explicit ArchiveModel(const std::vector<std::unique_ptr<const ArchiveFileInfo>> &archive_files,
                           const QString &path,
                           QObject *const parent = nullptr);
     ~ArchiveModel() override;
@@ -52,7 +54,6 @@ private:
             const QString &archive_path,
             const std::vector<std::unique_ptr<const ArchiveFileInfo> > &archive_files);
 
-    const IArchiveExtractor *const m_archive_extractor;
     ArchiveItem *rootItem;
 
     const QIcon m_icon_dir;
