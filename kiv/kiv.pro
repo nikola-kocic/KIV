@@ -27,7 +27,9 @@ SOURCES += \
     src/archiveextractor.cpp \
     src/widgets/picture_item/pictureitem_gl.cpp \
     src/widgets/files_view/sortcombobox.cpp \
-    src/models/modelwrapper.cpp
+    src/models/modelwrapper.cpp \
+    src/widgets/files_view/view_archive_dirs.cpp \
+    src/widgets/files_view/fileviewwithproxy.cpp
 
 
 HEADERS += \
@@ -57,7 +59,12 @@ HEADERS += \
     include/IPictureLoader.h \
     src/widgets/picture_item/pictureitem_gl.h \
     src/widgets/files_view/sortcombobox.h \
-    src/models/modelwrapper.h
+    src/models/modelwrapper.h \
+    src/widgets/files_view/view_archive_dirs.h \
+    src/widgets/files_view/ifileview.h \
+    src/widgets/files_view/fileviewwithproxy.h \
+    src/widgets/files_view/view_files_list.h \
+    src/widgets/files_view/view_files_tree.h
 
 
 FORMS += \

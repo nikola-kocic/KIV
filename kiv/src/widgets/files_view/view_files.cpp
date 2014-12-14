@@ -25,7 +25,12 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     , m_flag_opening(false)
     , m_thumb_size(QSize(100, 100))
 
-    , m_view_archiveDirs(new QTreeView(this))
+    , m_view_archiveDirs(new ViewArchiveDirs(
+                             std::unique_ptr<QTreeView>(new QTreeView())
+                             , std::unique_ptr<QAbstractProxyModel>(
+                                 new ArchiveDirsSortFilterProxyModel())
+                             , this
+                             ))
     , m_view_filesystem(new QTreeView(this))
     , m_treeView_files(nullptr)
     , m_listView_files(nullptr)
@@ -35,7 +40,6 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     , m_model_filesystem(model_filesystem)
     , m_proxy_file_list(new FileListSortFilterProxyModel(this))
     , m_proxy_containers(new ContainersSortFilterProxyModel(this))
-    , m_proxy_archive_dirs(new ArchiveDirsSortFilterProxyModel(this))
 
     , m_thumbnail_delegate(new ThumbnailItemDelegate(
                                m_picture_loader, m_thumb_size, this))
@@ -57,16 +61,7 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
             this, SLOT(on_thumbnail_finished(QModelIndex)));
 
     /* Start archiveDirsView */
-    m_view_archiveDirs->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    m_view_archiveDirs->setUniformRowHeights(true);
-#ifdef QT5
-    m_view_archiveDirs->header()->setSectionResizeMode(QHeaderView::Stretch);
-#else
-    m_view_archiveDirs->header()->setResizeMode(QHeaderView::Stretch);
-#endif
-    m_view_archiveDirs->setHeaderHidden(true);
-    m_view_archiveDirs->hide();
-    m_view_archiveDirs->setModel(m_proxy_archive_dirs);
+    m_view_archiveDirs->getWidget()->hide();
     /* End archiveDirsView */
 
     /* Start filesystemView */
@@ -103,7 +98,7 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
 
 
     QSplitter *m_splitter = new QSplitter(Qt::Vertical, this);
-    m_splitter->addWidget(m_view_archiveDirs);
+    m_splitter->addWidget(m_view_archiveDirs->getWidget());
     m_splitter->setSizes(QList<int>() << 100);
     m_splitter->addWidget(widget_files_list);
 
@@ -121,11 +116,10 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
 
     /* End Layout */
 
-    connect(m_view_archiveDirs->selectionModel(),
-            SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+    connect(m_view_archiveDirs,
+            SIGNAL(currentRowChanged(QModelIndex)),
             this,
-            SLOT(on_archiveDirsView_currentRowChanged(QModelIndex,
-                                                      QModelIndex)));
+            SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
     connect(m_view_filesystem->selectionModel(),
             SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
             this,
@@ -244,24 +238,22 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
     if (info.isInArchive())
     {
         m_proxy_file_list->setSourceModel(nullptr);
-        m_proxy_archive_dirs->setSourceModel(nullptr);
+        m_view_archiveDirs->setModel(nullptr);
 
         delete m_model_archive_files;
         m_model_archive_files = new ArchiveModel(
                 m_archive_extractor, info.getContainerPath());
 
         m_proxy_file_list->setSourceModel(m_model_archive_files);
-        m_proxy_archive_dirs->setSourceModel(m_model_archive_files);
+        m_view_archiveDirs->setModel(m_model_archive_files);
 
         if (!m_fileinfo_current.isInArchive() || !m_fileinfo_current.isValid())
         {
-            m_view_archiveDirs->show();
+            m_view_archiveDirs->getWidget()->show();
         }
         const QModelIndex dirIndex = m_model_archive_files->getDirectory(
                     info.getArchiveContainerPath());
-        m_view_archiveDirs->setCurrentIndex(
-                    m_proxy_archive_dirs->mapFromSource(dirIndex));
-        m_view_archiveDirs->expand(m_view_archiveDirs->currentIndex());
+        m_view_archiveDirs->setCurrentIndex(dirIndex);
 
         if (info.fileExists())
         {
@@ -276,8 +268,8 @@ void ViewFiles::setCurrentFile(const FileInfo &info)
         if (m_fileinfo_current.isInArchive() || !m_fileinfo_current.isValid())
         {
             m_proxy_file_list->setSourceModel(nullptr);
-            m_proxy_archive_dirs->setSourceModel(nullptr);
-            m_view_archiveDirs->hide();
+            m_view_archiveDirs->setModel(nullptr);
+            m_view_archiveDirs->getWidget()->hide();
             delete m_model_archive_files;
 
             m_proxy_file_list->setSourceModel(m_model_filesystem);
@@ -389,21 +381,20 @@ void ViewFiles::on_combobox_sort_currentSortChanged(SortDirection sort)
 
 void ViewFiles::dirUp()
 {
-    if (m_fileinfo_current.isInArchive()
-        && m_view_archiveDirs->currentIndex().parent().isValid())
-    {
-        m_view_archiveDirs->setCurrentIndex(
-                    m_view_archiveDirs->currentIndex().parent());
-    }
-    else if (m_view_filesystem->currentIndex().parent().isValid())
-    {
-        m_view_filesystem->setCurrentIndex(
-                    m_view_filesystem->currentIndex().parent());
-    }
+//    if (m_fileinfo_current.isInArchive()
+//        && m_view_archiveDirs->currentIndex().parent().isValid())
+//    {
+//        m_view_archiveDirs->setCurrentIndex(
+//                    m_view_archiveDirs->currentIndex().parent());
+//    }
+//    else if (m_view_filesystem->currentIndex().parent().isValid())
+//    {
+//        m_view_filesystem->setCurrentIndex(
+//                    m_view_filesystem->currentIndex().parent());
+//    }
 }
 
-void ViewFiles::on_archiveDirsView_currentRowChanged(
-        const QModelIndex &current, const QModelIndex &/*previous*/)
+void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current)
 {
     // Indexes are from ArchiveDirsSortFilterProxyModel
 #ifdef DEBUG_VIEW_FILES
@@ -415,9 +406,7 @@ void ViewFiles::on_archiveDirsView_currentRowChanged(
         return;
     }
 
-    m_view_current->setRootIndex(
-                m_proxy_file_list->mapFromSource(
-                    m_proxy_archive_dirs->mapToSource(current)));
+    m_view_current->setRootIndex(m_proxy_file_list->mapFromSource(current));
     m_view_current->selectionModel()->clear();
     m_view_current->scrollToTop();
     showThumbnails();
@@ -559,9 +548,7 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
             ArchiveItem::TYPE_ARCHIVE_DIR)
         {
             m_view_archiveDirs->setCurrentIndex(
-                        m_proxy_archive_dirs->mapFromSource(
-                            m_proxy_file_list->mapToSource(fixed_index)));
-            m_view_archiveDirs->expand(m_view_archiveDirs->currentIndex());
+                            m_proxy_file_list->mapToSource(fixed_index));
         }
     }
     else
@@ -700,4 +687,3 @@ void ViewFiles::on_thumbnail_finished(const QModelIndex &index)
 }
 
 /* End Thumbnails */
-

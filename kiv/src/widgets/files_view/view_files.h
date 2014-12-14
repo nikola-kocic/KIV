@@ -25,41 +25,10 @@
 #include "kiv/src/settings.h"
 #include "kiv/src/widgets/files_view/sortcombobox.h"
 #include "kiv/src/widgets/files_view/thumbnailitemdelegate.h"
-
-class ListViewFiles;
-class TreeViewFiles;
-
-class ListViewFiles : public QListView
-{
-    Q_OBJECT
-
-public:
-    explicit ListViewFiles(QWidget *parent = nullptr);
-
-    void setViewMode(const FileViewMode mode);
-
-protected slots:
-    void rowsInserted(const QModelIndex &parent, int start, int end) override;
-
-signals:
-    void rowsInserted(const QModelIndexList &indexes);
-};
-
-
-class TreeViewFiles : public QTreeView
-{
-    Q_OBJECT
-
-public:
-    explicit TreeViewFiles(QWidget *parent = nullptr);
-
-protected slots:
-    void rowsInserted(const QModelIndex &parent, int start, int end) override;
-
-signals:
-    void rowsInserted(const QModelIndexList &indexes);
-};
-
+#include "kiv/src/widgets/files_view/view_archive_dirs.h"
+#include "kiv/src/widgets/files_view/view_files_list.h"
+#include "kiv/src/widgets/files_view/view_files_tree.h"
+#include "kiv/src/widgets/files_view/ifileview.h"
 
 class ViewFiles : public QWidget
 {
@@ -97,7 +66,7 @@ private:
     bool m_flag_opening;
     QSize m_thumb_size;
 
-    QTreeView *m_view_archiveDirs;
+    IFileView *m_view_archiveDirs;
     QTreeView *m_view_filesystem;
 
     TreeViewFiles *m_treeView_files;
@@ -112,9 +81,6 @@ private:
 
     /* source model is FileSystemModel */
     ContainersSortFilterProxyModel *m_proxy_containers;
-
-    /* source model is ArchiveModel */
-    ArchiveDirsSortFilterProxyModel *m_proxy_archive_dirs;
 
     ThumbnailItemDelegate *m_thumbnail_delegate;
 
@@ -131,8 +97,7 @@ private slots:
     void on_thumbnail_finished(const QModelIndex &index);
     void on_rows_inserted(const QModelIndexList &indexes);
 
-    void on_archiveDirsView_currentRowChanged(const QModelIndex &current,
-                                              const QModelIndex &previous);
+    void on_archiveDirsView_currentRowChanged(const QModelIndex &current);
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);
     void on_combobox_sort_currentSortChanged(SortDirection sort);

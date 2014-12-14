@@ -1,4 +1,4 @@
-#include "kiv/src/widgets/files_view/view_files.h"
+#include "kiv/src/widgets/files_view/view_files_list.h"
 
 ListViewFiles::ListViewFiles(QWidget *parent)
     : QListView(parent)
