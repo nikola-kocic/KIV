@@ -13,6 +13,7 @@ public:
     virtual ~IFileView() {}
     virtual QWidget *getWidget() = 0;
     virtual void setModel(QAbstractItemModel *model) = 0;
+    virtual QModelIndex currentIndex () const = 0;
 
 public slots:
     virtual void setCurrentIndex(const QModelIndex &index) = 0;

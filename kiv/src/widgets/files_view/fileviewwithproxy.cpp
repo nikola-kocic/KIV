@@ -27,6 +27,11 @@ void FileViewWithProxy::setModel(QAbstractItemModel *model)
     m_proxy->setSourceModel(model);
 }
 
+QModelIndex FileViewWithProxy::currentIndex() const
+{
+    return m_proxy->mapToSource(m_view->currentIndex());
+}
+
 void FileViewWithProxy::currentChanged(
         const QModelIndex &current,
         const QModelIndex &/*previous*/)

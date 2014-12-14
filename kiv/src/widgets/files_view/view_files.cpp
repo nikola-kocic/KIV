@@ -359,17 +359,17 @@ void ViewFiles::on_combobox_sort_currentSortChanged(ColumnSort sort)
 
 void ViewFiles::dirUp()
 {
-//    if (m_fileinfo_current.isInArchive()
-//        && m_view_archiveDirs->currentIndex().parent().isValid())
-//    {
-//        m_view_archiveDirs->setCurrentIndex(
-//                    m_view_archiveDirs->currentIndex().parent());
-//    }
-//    else if (m_view_filesystem->currentIndex().parent().isValid())
-//    {
-//        m_view_filesystem->setCurrentIndex(
-//                    m_view_filesystem->currentIndex().parent());
-//    }
+    if (m_fileinfo_current.isInArchive()
+        && m_view_archiveDirs->currentIndex().parent().isValid())
+    {
+        m_view_archiveDirs->setCurrentIndex(
+                    m_view_archiveDirs->currentIndex().parent());
+    }
+    else if (m_view_filesystem->currentIndex().parent().isValid())
+    {
+        m_view_filesystem->setCurrentIndex(
+                    m_view_filesystem->currentIndex().parent());
+    }
 }
 
 void ViewFiles::on_archiveDirsView_currentRowChanged(const QModelIndex &current)

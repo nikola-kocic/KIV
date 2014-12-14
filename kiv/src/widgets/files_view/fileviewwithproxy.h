@@ -19,6 +19,7 @@ public:
             QWidget *parent = nullptr);
     virtual QWidget *getWidget() override;
     void setModel(QAbstractItemModel *model) override;
+    QModelIndex currentIndex() const override;
 
 public slots:
     void setCurrentIndex(const QModelIndex &index);
