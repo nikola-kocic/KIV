@@ -472,12 +472,12 @@ void ViewFiles::pageNext()
              i < m_view_current->model()->rowCount(m_view_current->rootIndex());
              ++i)
         {
-            const QModelIndex iIndex = m_view_current->model()->index(
+            const QModelIndex index = m_view_current->model()->index(
                         i, 0, m_view_current->rootIndex());
-            const int type = iIndex.data(Helper::ROLE_TYPE).toInt();
+            const int type = index.data(Helper::ROLE_TYPE).toInt();
             if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
             {
-                m_view_current->setCurrentIndex(iIndex);
+                m_view_current->setCurrentIndex(index);
                 break;
             }
         }
