@@ -62,11 +62,11 @@ private:
     void updateLockMode();
 
     const IPictureLoader *const m_picture_loader;
-    PictureItemData *m_data;
-    const Settings *m_settings;
+    PictureItemData *const m_data;
+    const Settings *const m_settings;
     bool m_opengl;
     PictureItemInterface *m_imageDisplay;
-    QFutureWatcher< QImage > *m_loader_image;
+    QFutureWatcher< QImage > *const m_loader_image;
     LockMode m_lockMode;
 
     bool m_dragging;
