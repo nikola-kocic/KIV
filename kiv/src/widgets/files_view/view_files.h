@@ -22,6 +22,7 @@
 #include "kiv/src/models/archive_model.h"
 #include "kiv/src/models/filesystem_model.h"
 #include "kiv/src/settings.h"
+#include "kiv/src/widgets/files_view/sortcombobox.h"
 #include "kiv/src/widgets/files_view/thumbnailitemdelegate.h"
 
 class ListViewFiles;
@@ -154,7 +155,7 @@ private:
     ThumbnailItemDelegate *m_thumbnail_delegate;
 
     QVBoxLayout *m_layout_files_list;
-    QComboBox *m_combobox_sort;
+    SortComboBox *m_combobox_sort;
 
 public slots:
     void dirUp();
@@ -170,7 +171,7 @@ private slots:
                                               const QModelIndex &previous);
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);
-    void on_combobox_sort_currentIndexChanged(int index);
+    void on_combobox_sort_currentSortChanged(SortDirection sort);
 
 signals:
     void urlChanged(const QUrl &url);

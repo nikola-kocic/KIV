@@ -39,14 +39,14 @@ enum class FileViewMode: int
     Icons = 2,
 };
 
-struct SortDirection
+enum class SortDirection
 {
-    static const int NameAsc = 0;
-    static const int NameDesc = 1;
-    static const int DateAsc = 2;
-    static const int DateDesc = 3;
-    static const int SizeAsc = 4;
-    static const int SizeDesc = 5;
+    NameAsc,
+    NameDesc,
+    DateAsc,
+    DateDesc,
+    SizeAsc,
+    SizeDesc,
 };
 
 struct ArchiveFileInfo {

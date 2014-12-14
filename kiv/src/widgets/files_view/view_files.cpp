@@ -40,8 +40,16 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     , m_thumbnail_delegate(new ThumbnailItemDelegate(
                                m_picture_loader, m_thumb_size, this))
     , m_layout_files_list(new QVBoxLayout())
-    , m_combobox_sort(new QComboBox(this))
-
+    , m_combobox_sort(new SortComboBox(
+                          QList<SortDirection>()
+                          << SortDirection::NameAsc
+                          << SortDirection::NameDesc
+                          << SortDirection::DateAsc
+                          << SortDirection::DateDesc
+                          << SortDirection::SizeAsc
+                          << SortDirection::SizeDesc
+                          , this
+                          ))
 {
     m_proxy_containers->setSourceModel(m_model_filesystem);
 
@@ -68,15 +76,8 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     m_view_filesystem->setModel(m_proxy_containers);
     /* End filesystemView */
 
-    m_combobox_sort->addItem(tr("Name Ascending"), SortDirection::NameAsc);
-    m_combobox_sort->addItem(tr("Name Descending"), SortDirection::NameDesc);
-    m_combobox_sort->addItem(tr("Date Ascending"), SortDirection::DateAsc);
-    m_combobox_sort->addItem(tr("Date Descending"), SortDirection::DateDesc);
-    m_combobox_sort->addItem(tr("Size Ascending"), SortDirection::SizeAsc);
-    m_combobox_sort->addItem(tr("Size Descending"), SortDirection::SizeDesc);
 
-    m_combobox_sort->setCurrentIndex(m_combobox_sort->findData(
-                                         SortDirection::NameAsc));
+    m_combobox_sort->setSort(SortDirection::NameAsc);
 
 
     /* Start Layout */
@@ -129,8 +130,8 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
             SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
             this,
             SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_combobox_sort, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(on_combobox_sort_currentIndexChanged(int)));
+    connect(m_combobox_sort, SIGNAL(currentSortChanged(SortDirection)),
+            this, SLOT(on_combobox_sort_currentSortChanged(SortDirection)));
 
     initViewItem();
 }
@@ -326,10 +327,8 @@ void ViewFiles::on_filesystemView_currentRowChanged(
     this->setCurrentFile(info);
 }
 
-void ViewFiles::on_combobox_sort_currentIndexChanged(int index)
+void ViewFiles::on_combobox_sort_currentSortChanged(SortDirection sort)
 {
-    const int sort = m_combobox_sort->itemData(index).toInt();
-
     switch (sort)
     {
     case SortDirection::NameAsc:
