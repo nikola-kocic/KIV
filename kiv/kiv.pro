@@ -81,7 +81,10 @@ win32{
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets concurrent
 greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
 
-LIBS += -lquazip
+greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip5
+!greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip
+
+
 ANDROID_EXTRA_LIBS = libquazip.so
 
 

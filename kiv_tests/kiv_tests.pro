@@ -62,7 +62,8 @@ RESOURCES += \
 
 DEPENDPATH *= $${INCLUDEPATH}
 
-LIBS += -lquazip
+greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip5
+!greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip
 
 win32:CONFIG(release, debug|release) {
     BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}release

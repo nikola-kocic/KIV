@@ -22,10 +22,12 @@ if(NOT Qt4_FOUND)
     add_definitions(-DQT5)
 endif()
 
-find_package ( QuaZip REQUIRED )
 find_package ( OpenGL REQUIRED )
 if(Qt4_FOUND)
     include ( ${QT_USE_FILE} )
+    find_package ( QuaZip REQUIRED )
+else
+    find_package ( QuaZip5 REQUIRED )
 endif()
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
