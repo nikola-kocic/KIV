@@ -1,6 +1,7 @@
 !*msvc* {
     QMAKE_CXXFLAGS += -std=c++11
 }
+QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
 
 QT       += testlib gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

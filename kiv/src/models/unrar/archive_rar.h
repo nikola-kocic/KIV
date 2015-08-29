@@ -14,12 +14,14 @@ class ArchiveRar
 {
 public:
     static bool loadlib();
-    static unsigned int extract(const QString &archiveName,
-                                const QString &fileName,
-                                const QString &newFileName);
-    static unsigned int readFile(const QString &archiveName,
-                                 const QString &fileName,
-                                 QByteArray &buffer);
+    static int extract(
+            const QString &archiveName,
+            const QString &fileName,
+            const QString &newFileName);
+    static int readFile(
+            const QString &archiveName,
+            const QString &fileName,
+            QByteArray &buffer);
     static unsigned int getFileInfoList(const QString &path,
                                         std::vector<ArchiveFileInfo> &list);
     static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);

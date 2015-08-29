@@ -56,14 +56,14 @@ bool ArchiveRar::loadlib()
     return true;
 }
 
-unsigned int ArchiveRar::extract(const QString &archiveName,
+int ArchiveRar::extract(const QString &archiveName,
                                  const QString &fileName,
                                  const QString &newFileName)
 {
     const std::wstring fileNameW =
             QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
-    unsigned int returnCode = 1000;
+    int returnCode = 1000;
 
     RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
@@ -138,14 +138,14 @@ static int CALLBACK CallbackProc(unsigned int msg,
     return 0;
 }
 
-unsigned int ArchiveRar::readFile(const QString &archiveName,
+int ArchiveRar::readFile(const QString &archiveName,
                                   const QString &fileName,
                                   QByteArray &buffer)
 {
     const std::wstring fileNameW =
             QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
-    unsigned int returnCode = 1000;
+    int returnCode = 1000;
 
     RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
