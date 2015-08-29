@@ -38,13 +38,15 @@ ThumbnailItemDelegate::~ThumbnailItemDelegate()
     clearThumbnailsCache();
 }
 
-void ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
+bool ThumbnailItemDelegate::setThumbnailSize(const QSize &size)
 {
-    if (size != m_thumb_size)
+    bool updated = (size != m_thumb_size);
+    if (updated)
     {
         m_thumb_size = size;
         clearThumbnailsCache();
     }
+    return updated;
 }
 
 QSize ThumbnailItemDelegate::sizeHint(const QStyleOptionViewItem &option,

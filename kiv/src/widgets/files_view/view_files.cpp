@@ -11,19 +11,17 @@
 #include "kiv/src/helper.h"
 #endif
 
-ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
+ViewFiles::ViewFiles(ThumbnailItemDelegate *const thumbnail_item_delegate,
                      std::unique_ptr<const IArchiveExtractor> archive_extractor,
                      IModelWrapper *model_filesystem,
                      QWidget *parent)
     : QWidget(parent)
 
-    , m_picture_loader(picture_loader)
     , m_archive_extractor(std::move(archive_extractor))
     , m_fileinfo_current(FileInfo(""))
     , m_view_mode(FileViewMode::List)
     , m_show_thumbnails(false)
     , m_flag_opening(false)
-    , m_thumb_size(QSize(100, 100))
 
     , m_view_archiveDirs(new ViewArchiveDirs(
                              std::unique_ptr<QTreeView>(new QTreeView())
@@ -41,8 +39,7 @@ ViewFiles::ViewFiles(const IPictureLoader *const picture_loader,
     , m_proxy_file_list(new FileListSortFilterProxyModel(this))
     , m_proxy_containers(new ContainersSortFilterProxyModel(this))
 
-    , m_thumbnail_delegate(new ThumbnailItemDelegate(
-                               m_picture_loader, m_thumb_size, this))
+    , m_thumbnail_delegate(thumbnail_item_delegate)
     , m_layout_files_list(new QVBoxLayout())
     , m_combobox_sort(new SortComboBox(
                           QList<ColumnSort>()
@@ -508,10 +505,8 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
 
 void ViewFiles::setThumbnailsSize(const QSize &size)
 {
-    if (m_thumb_size != size)
+    if (m_thumbnail_delegate->setThumbnailSize(size))
     {
-        m_thumb_size = size;
-        m_thumbnail_delegate->setThumbnailSize(size);
         showThumbnails();
     }
 }

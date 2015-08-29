@@ -23,7 +23,7 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &option,
                    const QModelIndex &index) const override;
     void updateThumbnail(const FileInfo &info, const QModelIndex &index);
-    void setThumbnailSize(const QSize &size);
+    bool setThumbnailSize(const QSize &size);
     void cancelThumbnailGeneration();
 
 protected:

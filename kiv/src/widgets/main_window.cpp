@@ -34,7 +34,7 @@ MainWindow::MainWindow(const IPictureLoader *const picture_loader,
 
     , m_view_files(
           new ViewFiles(
-              m_picture_loader,
+              new ThumbnailItemDelegate(m_picture_loader,QSize(100, 100), this),
               std::move(archive_extractor),
               new FileSystemModelWrapper(m_model_filesystem),
               this))

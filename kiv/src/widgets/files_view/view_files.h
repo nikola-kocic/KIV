@@ -35,7 +35,7 @@ class ViewFiles : public QWidget
     Q_OBJECT
 
 public:
-    explicit ViewFiles(const IPictureLoader *const picture_loader,
+    explicit ViewFiles(ThumbnailItemDelegate * const thumbnail_item_delegate,
                        std::unique_ptr<const IArchiveExtractor> archive_extractor,
                        IModelWrapper *model_filesystem,
                        QWidget *parent = nullptr);
@@ -57,13 +57,11 @@ private:
     void showThumbnails();
     IModelWrapper *createArchiveModel(const FileInfo &info);
 
-    const IPictureLoader *const m_picture_loader;
     const std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
     FileInfo m_fileinfo_current;
     FileViewMode m_view_mode;
     bool m_show_thumbnails;
     bool m_flag_opening;
-    QSize m_thumb_size;
 
     IFileView *m_view_archiveDirs;
     QTreeView *m_view_filesystem;
@@ -81,7 +79,7 @@ private:
     /* source model is FileSystemModel */
     ContainersSortFilterProxyModel *m_proxy_containers;
 
-    ThumbnailItemDelegate *m_thumbnail_delegate;
+    ThumbnailItemDelegate *const m_thumbnail_delegate;
 
     QVBoxLayout *m_layout_files_list;
     SortComboBox *m_combobox_sort;
