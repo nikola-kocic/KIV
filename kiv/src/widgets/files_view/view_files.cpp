@@ -480,10 +480,11 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
     // TODO see if fixed_index is necessary
     const QModelIndex fixed_index = (index.column() > 0
                                      ? index.sibling(index.row(), 0) : index);
+    const QModelIndex source_index = m_proxy_file_list->mapToSource(fixed_index);
 
     if (m_fileinfo_current.isInArchive())
     {
-        if (m_model_archive_files->isDir(fixed_index))
+        if (m_model_archive_files->isDir(source_index))
         {
             m_view_archiveDirs->setCurrentIndex(
                             m_proxy_file_list->mapToSource(fixed_index));
@@ -491,8 +492,6 @@ void ViewFiles::on_item_activated(const QModelIndex &index)
     }
     else
     {
-        const QModelIndex source_index =
-                m_proxy_file_list->mapToSource(fixed_index);
         if (m_model_filesystem->isDir(source_index)
             || Helper::isArchiveFile(m_model_filesystem->fileInfo(
                                          source_index))

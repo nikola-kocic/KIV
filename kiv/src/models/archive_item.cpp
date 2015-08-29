@@ -14,7 +14,7 @@ ArchiveItem::ArchiveItem(const QString &name,
                          const QDateTime &date,
                          const quint64 &bytes,
                          const QString &path,
-                         const int type,
+                         const NodeType type,
                          const QIcon &icon,
                          ArchiveItem *const parent)
     : parentItem(parent)
@@ -28,7 +28,7 @@ ArchiveItem::ArchiveItem(const QString &name,
                 + QFileSystemModel::tr("Date Modified") + ": "
                 + m_date.toString(Qt::SystemLocaleShortDate))
 {
-    if (m_type == TYPE_ARCHIVE_FILE)
+    if (m_type == NodeType::Image)
     {
         m_tooltip.append("\n" + QFileSystemModel::tr("Size") + ": "
                          + Helper::size(m_bytes));
@@ -54,14 +54,14 @@ void ArchiveItem::appendChild(ArchiveItem *const item)
 
 int ArchiveItem::indexToInsertByName(const ArchiveItem* const item)
 {
-    const int type = item->data(Helper::ROLE_TYPE, 0).toInt();
+    const NodeType type = item->getType();
     const QString itemName = item->data(Qt::EditRole, col_name).toString();
     int i = 0;
 
     for (; i < childCount(); ++i)
     {
-        int currentItemType = child(i)->data(Helper::ROLE_TYPE, 0).toInt();
-        if (type == TYPE_ARCHIVE)
+        const NodeType currentItemType = child(i)->getType();
+        if (type == NodeType::Archive)
         {
             // TODO: Allow archive in archive
             continue;
@@ -77,7 +77,7 @@ int ArchiveItem::indexToInsertByName(const ArchiveItem* const item)
                 return i;
             }
         }
-        else if (type == TYPE_ARCHIVE_DIR)
+        else if (type == NodeType::Directory)
             // Directories go above files
         {
             return i;
@@ -155,9 +155,6 @@ QVariant ArchiveItem::data(const int role, const int column) const
 
     case QFileSystemModel::FilePathRole:
         return m_path;
-
-    case Helper::ROLE_TYPE:
-        return m_type;
 
     case Helper::ROLE_FILE_DATE:
         return m_date;

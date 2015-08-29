@@ -12,19 +12,8 @@ ArchiveModelWrapper::ArchiveModelWrapper(ArchiveModel *model)
 
 NodeType ArchiveModelWrapper::getNodeType(const QModelIndex &index) const
 {
-    const int type = index.data(Helper::ROLE_TYPE).toInt();
-    if (type == ArchiveItem::TYPE_ARCHIVE)
-    {
-        return NodeType::Archive;
-    }
-    else if (type == ArchiveItem::TYPE_ARCHIVE_DIR)
-    {
-        return NodeType::Directory;
-    }
-    else //if (type == ArchiveItem::TYPE_ARCHIVE_FILE)
-    {
-        return NodeType::Image;
-    }
+    const ArchiveItem *ai = m_model->getItem(index);
+    return ai->getType();
 }
 
 QAbstractItemModel *ArchiveModelWrapper::getModel()
@@ -92,10 +81,13 @@ QFileInfo FileSystemModelWrapper::fileInfo(const QModelIndex &index) const
 bool FileListSortFilterProxyModel::lessThan(
         const QModelIndex &left, const QModelIndex &right) const
 {
-    if (qobject_cast<const ArchiveModel*>(left.model()))
+    const ArchiveModel *am = qobject_cast<const ArchiveModel*>(left.model());
+    if (am)
     {
-        const int left_type = left.data(Helper::ROLE_TYPE).toInt();
-        const int right_type = right.data(Helper::ROLE_TYPE).toInt();
+        const ArchiveItem *left_item = am->getItem(left);
+        const ArchiveItem *right_item = am->getItem(right);
+        const NodeType left_type = left_item->getType();
+        const NodeType right_type = right_item->getType();
 
         const QString left_name =
                 left.sibling(left.row(),ArchiveItem::col_name).
@@ -165,11 +157,11 @@ bool FileListSortFilterProxyModel::lessThan(
             }
         }
 
-        if (left_type == ArchiveItem::TYPE_ARCHIVE_DIR)
+        if (left_type == NodeType::Directory)
         {
             return (this->sortOrder() == Qt::AscendingOrder);
         }
-        else if (right_type == ArchiveItem::TYPE_ARCHIVE_DIR)
+        else if (right_type == NodeType::Directory)
         {
             return (this->sortOrder() == Qt::DescendingOrder);
         }
@@ -297,6 +289,7 @@ bool ArchiveDirsSortFilterProxyModel::filterAcceptsRow(
 {
     const QModelIndex index0 = this->sourceModel()->index(sourceRow, 0,
                                                           sourceParent);
-    return !(index0.data(Helper::ROLE_TYPE).toInt()
-             == ArchiveItem::TYPE_ARCHIVE_FILE);
+    const ArchiveModel *am = qobject_cast<const ArchiveModel*>(this->sourceModel());
+    Q_ASSERT(am);
+    return (am->getItem(index0)->getType() != NodeType::Image);
 }

@@ -17,7 +17,7 @@ ArchiveModel::ArchiveModel(const std::vector<ArchiveFileInfo> &archive_files,
                            QObject *const parent)
     : QAbstractItemModel(parent)
     , rootItem(new ArchiveItem("", QDateTime(), 0, "",
-                               ArchiveItem::TYPE_ARCHIVE))
+                               NodeType::Archive))
     , m_icon_dir(QApplication::style()->standardIcon(QStyle::SP_DirIcon))
     , m_icon_file(QIcon::fromTheme("image-x-generic"))
 {
@@ -44,7 +44,7 @@ void ArchiveModel::populate(
                 archive_info.lastModified(),
                 archive_info.size(),
                 archive_info.absoluteFilePath(),
-                ArchiveItem::TYPE_ARCHIVE,
+                NodeType::Archive,
                 fip.icon(archive_info),
                 rootItem);
     rootItem->appendChild(rootArchiveItem);
@@ -69,7 +69,7 @@ void ArchiveModel::populate(
                                    currentArchiveFile.dateTime,
                                    0,
                                    folderPath,
-                                   ArchiveItem::TYPE_ARCHIVE_DIR,
+                                   NodeType::Directory,
                                    node);
                 }
                 else
@@ -83,7 +83,7 @@ void ArchiveModel::populate(
                                        currentArchiveFile.dateTime,
                                        currentArchiveFile.uncompressedSize,
                                        nodeFilePath,
-                                       ArchiveItem::TYPE_ARCHIVE_FILE,
+                                       NodeType::Image,
                                        node);
                     }
                 }
@@ -220,7 +220,7 @@ ArchiveItem *ArchiveModel::AddNode(
         const QDateTime &date,
         const quint64 &bytes,
         const QString &path,
-        const int type,
+        const NodeType type,
         ArchiveItem *const parent)
 {
     for (ArchiveItem *const sibling : parent->children())
@@ -236,7 +236,7 @@ ArchiveItem *ArchiveModel::AddNode(
                                         bytes,
                                         path,
                                         type,
-                                        (type == ArchiveItem::TYPE_ARCHIVE_FILE
+                                        (type == NodeType::Image
                                          ? m_icon_file : m_icon_dir),
                                         parent);
     parent->appendChild(ntvi);

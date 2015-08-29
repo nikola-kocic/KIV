@@ -5,6 +5,9 @@
 #include <QIcon>
 #include <QVariant>
 
+#include "src/enums.h"
+
+
 class ArchiveItem
 {
 public:
@@ -12,7 +15,7 @@ public:
                          const QDateTime &date,
                          const quint64 &bytes,
                          const QString &path,
-                         const int type,
+                         const NodeType type,
                          const QIcon &icon = QIcon(),
                          ArchiveItem *const parent = nullptr);
     ~ArchiveItem();
@@ -24,14 +27,11 @@ public:
     QVariant data(const int role, const int column) const;
     int row() const;
     ArchiveItem *parent() const;
+    NodeType getType() const { return m_type; }
 
     static const int col_name = 0;
     static const int col_size = 1;
     static const int col_date = 2;
-
-    static const int TYPE_ARCHIVE = 1;
-    static const int TYPE_ARCHIVE_DIR = 2;
-    static const int TYPE_ARCHIVE_FILE = 3;
 
 private:
     int indexToInsertByName(const ArchiveItem* const item);
@@ -42,7 +42,7 @@ private:
     const QDateTime m_date;
     const quint64 m_bytes;
     const QString m_path;
-    const int m_type;
+    const NodeType m_type;
     const QIcon m_icon;
     QString m_tooltip;
 

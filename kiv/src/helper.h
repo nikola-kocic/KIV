@@ -14,7 +14,6 @@
 class Helper
 {
 public:
-    static const int ROLE_TYPE = Qt::UserRole + 1000;
     static const int ROLE_FILE_DATE = Qt::UserRole + 1001;
 
 
