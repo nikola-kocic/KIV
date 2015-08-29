@@ -12,7 +12,7 @@ public:
     virtual ~IArchiveExtractor() {}
 
     virtual int getFileInfoList(const QString &path,
-                                std::vector<std::unique_ptr<const ArchiveFileInfo> > &list) const = 0;
+                                std::vector<ArchiveFileInfo> &list) const = 0;
     virtual int extract(const QString &archiveName,
                         const QString &fileName,
                         const QString &newFileName) const = 0;

@@ -107,8 +107,8 @@ public:
             , std::unique_ptr<IDirStructureFixtureSize> sizeGiver
             , const QString &baseDir
             );
-    std::vector<std::unique_ptr<const ArchiveFileInfo> > getDirs() const;
-    std::vector<std::unique_ptr<const ArchiveFileInfo> > getFiles() const;
+    std::vector<ArchiveFileInfo> getDirs() const;
+    std::vector<ArchiveFileInfo> getFiles() const;
     QString getPath() const;
     QString getBaseDir() const { return m_baseDir; }
 
@@ -117,7 +117,7 @@ protected:
     const std::unique_ptr<IDirStructureFixtureDateTimes> m_dateGiver;
     const std::unique_ptr<IDirStructureFixtureSize> m_sizeGiver;
     const QString m_baseDir;
-    std::unique_ptr<const ArchiveFileInfo> get(DirStructureFixtureElement element) const;
+    ArchiveFileInfo get(DirStructureFixtureElement element) const;
 };
 
 

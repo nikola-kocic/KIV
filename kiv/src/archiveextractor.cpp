@@ -14,7 +14,7 @@ ArchiveExtractor::ArchiveExtractor(QObject *parent) :
 }
 
 int ArchiveExtractor::getFileInfoList(const QString &path,
-                                      std::vector<std::unique_ptr<const ArchiveFileInfo> > &list) const
+                                      std::vector<ArchiveFileInfo> &list) const
 {
     QFile archiveFile(path);
 
@@ -27,9 +27,7 @@ int ArchiveExtractor::getFileInfoList(const QString &path,
         while(!zipList.empty())
         {
             const QuaZipFileInfo fi = zipList.takeLast();
-            list.push_back(std::unique_ptr<const ArchiveFileInfo>(
-                               new ArchiveFileInfo(
-                                   fi.name, fi.dateTime, fi.uncompressedSize)));
+            list.emplace_back(fi.name, fi.dateTime, fi.uncompressedSize);
         }
         zip.close();
         if (zip.getZipError() != UNZ_OK)

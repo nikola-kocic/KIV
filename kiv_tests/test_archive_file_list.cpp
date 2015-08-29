@@ -27,36 +27,30 @@ TestArchiveFileList::TestArchiveFileList(
 {
 
 }
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
 
 void TestArchiveFileList::commonCheck(const QString &archiveName, const DirStructureFixture &tds)
 {
-    std::vector<std::unique_ptr<const ArchiveFileInfo> > list;
+    std::vector<ArchiveFileInfo> list;
     const QString archivePath = QDir::cleanPath(
                 m_archives_dir + QDir::separator() + archiveName);
     int success = m_archive_extractor->getFileInfoList(archivePath, list);
     QCOMPARE(success, 0);
 
-    std::vector<std::unique_ptr<const std::vector<std::unique_ptr<const ArchiveFileInfo> > > > dirsAndFiles;
-    dirsAndFiles.push_back(make_unique<const std::vector<std::unique_ptr<const ArchiveFileInfo> > >(tds.getFiles()));
-    dirsAndFiles.push_back(make_unique<const std::vector<std::unique_ptr<const ArchiveFileInfo> > >(tds.getDirs()));
+    const std::vector<ArchiveFileInfo> files = tds.getFiles();
+    const std::vector<ArchiveFileInfo> dirs = tds.getDirs();
 
-    for (const std::unique_ptr<const std::vector<std::unique_ptr<const ArchiveFileInfo> > > &c : dirsAndFiles)
+    for (auto c : {files, dirs})
     {
-        for (const std::unique_ptr<const ArchiveFileInfo> &e : *c)
+        for (const ArchiveFileInfo &e : c)
         {
             const auto aIt = std::find_if(
                         list.cbegin(),
                         list.cend(),
-                        [&e] (const std::unique_ptr<const ArchiveFileInfo> &c){ return c->name == e->name; }
+                        [&e] (const ArchiveFileInfo &c){ return c.name == e.name; }
             );
-            QVERIFY2(aIt != list.end(), e->name.toUtf8());
-            QCOMPARE((*aIt)->dateTime, e->dateTime);
-            QCOMPARE(*(*aIt), *e);
+            QVERIFY2(aIt != list.end(), e.name.toUtf8());
+            QCOMPARE((*aIt).dateTime, e.dateTime);
+            QCOMPARE((*aIt), e);
         }
     }
 }

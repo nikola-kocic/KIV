@@ -76,32 +76,32 @@ void InitTestCommon::executeCommands(const QStringList &commands, const QString 
 }
 
 void InitTestData::createFiles(
-        const std::vector<std::unique_ptr<const ArchiveFileInfo> > &folders
-        , const std::vector<std::unique_ptr<const ArchiveFileInfo> > &files
+        const std::vector<ArchiveFileInfo> &folders
+        , const std::vector<ArchiveFileInfo> &files
         , std::function<QString(ArchiveFileInfo)> fFilePath
         , std::function<QString()> fWorkingDir
         ) const
 {
     QStringList image_create_commands;
     QStringList date_set_commands;
-    for (const std::unique_ptr<const ArchiveFileInfo> &afi : folders)
+    for (const ArchiveFileInfo &afi : folders)
     {
-        const QString path = fFilePath(*afi);
+        const QString path = fFilePath(afi);
         Q_ASSERT_X(QDir().mkpath(path),
                    QString("makeTestData folders").toUtf8(),
                    path.toUtf8());
-        date_set_commands.append(getDateSetCommand(path, afi->dateTime));
+        date_set_commands.append(getDateSetCommand(path, afi.dateTime));
     }
 
-    for (const std::unique_ptr<const ArchiveFileInfo> &afi : files)
+    for (const ArchiveFileInfo &afi : files)
     {
-        const QString path = fFilePath(*afi);
-        if (!afi->name.endsWith(".txt"))
+        const QString path = fFilePath(afi);
+        if (!afi.name.endsWith(".txt"))
         {
             image_create_commands.append(getImageCreateCommand(path));
             image_create_commands.append(getImageCompressCommand(path));
         }
-        date_set_commands.append(getDateSetCommand(path, afi->dateTime));
+        date_set_commands.append(getDateSetCommand(path, afi.dateTime));
     }
     const QString extracted_dir = fWorkingDir();
     executeCommands(image_create_commands, extracted_dir);
@@ -112,8 +112,8 @@ void InitTestData::createFiles(
 
 InitTestArchives InitTestData::makeTestData(const DirStructureFixture &dsf) const
 {
-    const std::vector<std::unique_ptr<const ArchiveFileInfo> > folders = dsf.getDirs();
-    const std::vector<std::unique_ptr<const ArchiveFileInfo> > files = dsf.getFiles();
+    const std::vector<ArchiveFileInfo> folders = dsf.getDirs();
+    std::vector<ArchiveFileInfo> files = dsf.getFiles();
     const QString &dir = dsf.getPath();
     createFiles(folders,
              files,

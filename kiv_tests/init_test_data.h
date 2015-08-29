@@ -44,9 +44,8 @@ protected:
     bool generateFolderContentFile(const QString &path) const;
     const QString getImageCompressCommand(const QString &path) const;
     const QString getDateSetCommand(const QString &path, const QDateTime &dt) const;
-    void createFiles(
-            const std::vector<std::unique_ptr<const ArchiveFileInfo> > &folders
-            , const std::vector<std::unique_ptr<const ArchiveFileInfo> > &files
+    void createFiles(const std::vector<ArchiveFileInfo> &folders
+            , const std::vector<ArchiveFileInfo> &files
             , std::function<QString(ArchiveFileInfo)> f
             , std::function<QString()> fWorkingDir) const;
 };

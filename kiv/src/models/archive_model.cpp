@@ -12,7 +12,7 @@
 #include "kiv/src/helper.h"
 #endif
 
-ArchiveModel::ArchiveModel(const std::vector<std::unique_ptr<const ArchiveFileInfo> > &archive_files,
+ArchiveModel::ArchiveModel(const std::vector<ArchiveFileInfo> &archive_files,
                            const QString &path,
                            QObject *const parent)
     : QAbstractItemModel(parent)
@@ -33,7 +33,7 @@ ArchiveModel::ArchiveModel(const std::vector<std::unique_ptr<const ArchiveFileIn
 
 void ArchiveModel::populate(
         const QString &archive_path,
-        const std::vector<std::unique_ptr<const ArchiveFileInfo> > &archive_files)
+        const std::vector<ArchiveFileInfo> &archive_files)
 {
     /* Populate model */
     const QFileIconProvider fip;
@@ -49,13 +49,13 @@ void ArchiveModel::populate(
                 rootItem);
     rootItem->appendChild(rootArchiveItem);
 
-    for (const std::unique_ptr<const ArchiveFileInfo> &currentArchiveFile : archive_files)
+    for (const ArchiveFileInfo &currentArchiveFile : archive_files)
     {
 #ifdef DEBUG_MODEL_FILES
         DEBUGOUT << currentArchiveFile.name;
 #endif
         ArchiveItem *node = rootArchiveItem;
-        const QStringList file_path_parts = currentArchiveFile->name.split('/');
+        const QStringList file_path_parts = currentArchiveFile.name.split('/');
         QString folderPath = path + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
@@ -66,7 +66,7 @@ void ArchiveModel::populate(
                 if (j < file_path_parts.size() - 1)
                 {
                     node = AddNode(currentFilePathPart,
-                                   currentArchiveFile->dateTime,
+                                   currentArchiveFile.dateTime,
                                    0,
                                    folderPath,
                                    ArchiveItem::TYPE_ARCHIVE_DIR,
@@ -74,14 +74,14 @@ void ArchiveModel::populate(
                 }
                 else
                 {
-                    const QFileInfo fi(currentArchiveFile->name);
+                    const QFileInfo fi(currentArchiveFile.name);
                     if (Helper::isImageFile(fi))
                     {
                         const QString nodeFilePath = path + "/"
-                                + currentArchiveFile->name;
+                                + currentArchiveFile.name;
                         node = AddNode(currentFilePathPart,
-                                       currentArchiveFile->dateTime,
-                                       currentArchiveFile->uncompressedSize,
+                                       currentArchiveFile.dateTime,
+                                       currentArchiveFile.uncompressedSize,
                                        nodeFilePath,
                                        ArchiveItem::TYPE_ARCHIVE_FILE,
                                        node);
