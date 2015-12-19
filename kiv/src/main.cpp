@@ -13,8 +13,7 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("0.4");
 
     QDir appdir(QCoreApplication::applicationDirPath());
-    QIcon::setThemeSearchPaths(QStringList(QIcon::themeSearchPaths())
-                               << appdir.path());
+    QIcon::setThemeSearchPaths(QIcon::themeSearchPaths() << appdir.path());
     const QString GENERIC_ICON_TO_CHECK = "go-next";
     if (!QIcon::hasThemeIcon(GENERIC_ICON_TO_CHECK)) {
         /* If there is no default working icon theme then we should

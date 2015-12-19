@@ -41,17 +41,17 @@ bool ArchiveRar::loadlib()
         return false;
     }
 
-    RAROpenArchiveEx = (RAROpenArchiveExT)Lib->resolve("RAROpenArchiveEx");
-    RARCloseArchive = (RARCloseArchiveT)Lib->resolve("RARCloseArchive");
-    RARReadHeaderEx = (RARReadHeaderExT)Lib->resolve("RARReadHeaderEx");
-    RARProcessFileW = (RARProcessFileWT)Lib->resolve("RARProcessFileW");
-    RARSetCallback = (RARSetCallbackT)Lib->resolve("RARSetCallback");
-    RARSetChangeVolProc =
-            (RARSetChangeVolProcT)Lib->resolve("RARSetChangeVolProc");
-    RARSetProcessDataProc =
-            (RARSetProcessDataProcT)Lib->resolve("RARSetProcessDataProc");
-    RARSetPassword = (RARSetPasswordT)Lib->resolve("RARSetPassword");
-    RARGetDllVersion = (RARGetDllVersionT)Lib->resolve("RARGetDllVersion");
+    RAROpenArchiveEx = reinterpret_cast<RAROpenArchiveExT>(Lib->resolve("RAROpenArchiveEx"));
+    RARCloseArchive = reinterpret_cast<RARCloseArchiveT>(Lib->resolve("RARCloseArchive"));
+    RARReadHeaderEx = reinterpret_cast<RARReadHeaderExT>(Lib->resolve("RARReadHeaderEx"));
+    RARProcessFileW = reinterpret_cast<RARProcessFileWT>(Lib->resolve("RARProcessFileW"));
+    RARSetCallback = reinterpret_cast<RARSetCallbackT>(Lib->resolve("RARSetCallback"));
+    RARSetChangeVolProc = reinterpret_cast<RARSetChangeVolProcT>(
+                Lib->resolve("RARSetChangeVolProc"));
+    RARSetProcessDataProc = reinterpret_cast<RARSetProcessDataProcT>(
+                Lib->resolve("RARSetProcessDataProc"));
+    RARSetPassword = reinterpret_cast<RARSetPasswordT>(Lib->resolve("RARSetPassword"));
+    RARGetDllVersion = reinterpret_cast<RARGetDllVersionT>(Lib->resolve("RARGetDllVersion"));
 
     return true;
 }
@@ -127,9 +127,12 @@ static int CALLBACK CallbackProc(unsigned int msg,
         return -1;
 
     case UCM_PROCESSDATA:
-        memcpy(*(char**)myBufferPtr, (char*)rarBuffer, bytesProcessed);
-        *(char**)myBufferPtr += bytesProcessed;
+    {
+        char* buf = *reinterpret_cast<char**>(myBufferPtr);
+        memcpy(buf, reinterpret_cast<char*>(rarBuffer), static_cast<size_t>(bytesProcessed));
+        buf += bytesProcessed;
         return 1;
+    }
 
     case UCM_NEEDPASSWORD:
         return -1;
@@ -161,7 +164,7 @@ int ArchiveRar::readFile(const QString &archiveName,
     }
 
     char *callBackBuffer = nullptr;
-    RARSetCallback(hArcData, CallbackProc, (LPARAM)&callBackBuffer);
+    RARSetCallback(hArcData, CallbackProc, reinterpret_cast<LPARAM>(&callBackBuffer));
 
     RARHeaderDataEx HeaderData;
     HeaderData.CmtBuf = nullptr;
@@ -173,7 +176,7 @@ int ArchiveRar::readFile(const QString &archiveName,
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
             qint64 UnpSize = HeaderData.UnpSize
-                    + (((qint64)HeaderData.UnpSizeHigh) << 32);
+                    + (static_cast<qint64>(HeaderData.UnpSizeHigh) << 32);
             buffer.resize(UnpSize);
             callBackBuffer = buffer.data();
 
@@ -225,7 +228,7 @@ ArchiveFileInfo ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx HeaderDa
     else
     {
         qint64 unpSize = HeaderData.UnpSize
-                + (((qint64)HeaderData.UnpSizeHigh) << 32);
+                + (static_cast<qint64>(HeaderData.UnpSizeHigh) << 32);
         uncompressedSize = unpSize;
     }
     return ArchiveFileInfo(fileName, dateFromDos(HeaderData.FileTime), uncompressedSize);
