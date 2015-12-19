@@ -13,15 +13,15 @@
 #define  LHD_DIRECTORY      0x00e0
 #define  LONG_BLOCK         0x8000
 
-RAROpenArchiveExT      RAROpenArchiveEx = 0;
-RARCloseArchiveT       RARCloseArchive = 0;
-RARReadHeaderExT       RARReadHeaderEx = 0;
-RARProcessFileWT       RARProcessFileW = 0;
-RARSetCallbackT        RARSetCallback = 0;
-RARSetChangeVolProcT   RARSetChangeVolProc = 0;
-RARSetProcessDataProcT RARSetProcessDataProc = 0;
-RARSetPasswordT        RARSetPassword = 0;
-RARGetDllVersionT      RARGetDllVersion = 0;
+RAROpenArchiveExT      RAROpenArchiveEx = nullptr;
+RARCloseArchiveT       RARCloseArchive = nullptr;
+RARReadHeaderExT       RARReadHeaderEx = nullptr;
+RARProcessFileWT       RARProcessFileW = nullptr;
+RARSetCallbackT        RARSetCallback = nullptr;
+RARSetChangeVolProcT   RARSetChangeVolProc = nullptr;
+RARSetProcessDataProcT RARSetProcessDataProc = nullptr;
+RARSetPasswordT        RARSetPassword = nullptr;
+RARGetDllVersionT      RARGetDllVersion = nullptr;
 
 struct RAROpenArchiveDataEx;
 
@@ -70,7 +70,7 @@ int ArchiveRar::extract(const QString &archiveName,
     OpenArchiveData.ArcNameW = arcNameW.c_str();
     OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
-    OpenArchiveData.Callback = 0;
+    OpenArchiveData.Callback = nullptr;
     OpenArchiveData.UserData = 0;
 
     Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
@@ -83,7 +83,7 @@ int ArchiveRar::extract(const QString &archiveName,
     int RHCode, PFCode;
     RARHeaderDataEx HeaderData;
 
-    HeaderData.CmtBuf = NULL;
+    HeaderData.CmtBuf = nullptr;
     memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
     while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
@@ -92,12 +92,12 @@ int ArchiveRar::extract(const QString &archiveName,
         {
             std::wstring newFileNameW =
                     QDir::toNativeSeparators(newFileName).toStdWString();
-            PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, NULL,
+            PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, nullptr,
                                      newFileNameW.c_str());
             returnCode = PFCode;
             break;
         }
-        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL))
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr))
                  != 0)
         {
             qWarning("%d", PFCode);
@@ -164,7 +164,7 @@ int ArchiveRar::readFile(const QString &archiveName,
     RARSetCallback(hArcData, CallbackProc, (LPARAM)&callBackBuffer);
 
     RARHeaderDataEx HeaderData;
-    HeaderData.CmtBuf = NULL;
+    HeaderData.CmtBuf = nullptr;
     memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
     int RHCode, PFCode;
@@ -177,11 +177,11 @@ int ArchiveRar::readFile(const QString &archiveName,
             buffer.resize(UnpSize);
             callBackBuffer = buffer.data();
 
-            PFCode = RARProcessFileW(hArcData, RAR_TEST, NULL, NULL);
+            PFCode = RARProcessFileW(hArcData, RAR_TEST, nullptr, nullptr);
             returnCode = PFCode;
             break;
         }
-        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL))
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr))
                  != 0)
         {
             qWarning("%d", PFCode);
@@ -242,7 +242,7 @@ unsigned int ArchiveRar::getFileInfoList(
     OpenArchiveData.ArcNameW = path_wstr.c_str();
     OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_LIST;
-    OpenArchiveData.Callback = NULL;
+    OpenArchiveData.Callback = nullptr;
 
     Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
 
@@ -254,7 +254,7 @@ unsigned int ArchiveRar::getFileInfoList(
     int RHCode, PFCode;
     RARHeaderDataEx HeaderData;
 
-    HeaderData.CmtBuf = NULL;
+    HeaderData.CmtBuf = nullptr;
     memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
 
     while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
@@ -265,7 +265,7 @@ unsigned int ArchiveRar::getFileInfoList(
 //        DEBUGOUT << fileName;
 //#endif
 
-        if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, NULL, NULL)) != 0)
+        if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr)) != 0)
         {
             qWarning("%d", PFCode);
             break;

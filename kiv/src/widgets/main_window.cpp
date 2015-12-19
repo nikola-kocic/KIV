@@ -69,7 +69,7 @@ MainWindow::MainWindow(const IPictureLoader *const picture_loader,
     , m_act_showInFileBrowser(new QAction(tr("Show in File Browser"), this))
     , m_act_exit(new QAction(tr("E&xit"), this))
     , m_act_bookmark_add(new QAction(tr("Bookmark &This Page"), this))
-    , m_act_bookmark_active_item(NULL)
+    , m_act_bookmark_active_item(nullptr)
 
     , m_act_zoomIn(new QAction(tr("Zoom &In"), this))
     , m_act_zoomOut(new QAction(tr("Zoom &Out"), this))
@@ -643,13 +643,13 @@ void MainWindow::on_bookmark_triggered(QAction *action)
 
 void MainWindow::deleteBookmark()
 {
-    if (m_act_bookmark_active_item == NULL)
+    if (m_act_bookmark_active_item == nullptr)
     { return; }
 
     m_settings->deleteBookmark(m_act_bookmark_active_item->data().toString());
     m_menu_bookmarks->removeAction(m_act_bookmark_active_item);
     delete m_act_bookmark_active_item;
-    m_act_bookmark_active_item = NULL;
+    m_act_bookmark_active_item = nullptr;
 }
 
 void MainWindow::spreadUrl(const QUrl &url)
@@ -989,7 +989,7 @@ void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::on_bookmark_menu_aboutToHide()
 {
-    m_act_bookmark_active_item = NULL;
+    m_act_bookmark_active_item = nullptr;
 }
 
 void MainWindow::on_view_mode_list_triggered()

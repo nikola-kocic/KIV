@@ -32,7 +32,7 @@ class Settings
 {
 
 public:
-    explicit Settings(QSettings *settings = NULL);
+    explicit Settings(QSettings *settings = nullptr);
     ~Settings();
 
     /* Behaviour */

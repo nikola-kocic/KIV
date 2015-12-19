@@ -34,7 +34,7 @@ public:
     explicit PictureItem(const IPictureLoader *const picture_loader,
                          Settings const * const settings,
                          QWidget *parent = nullptr,
-                         Qt::WindowFlags f = 0);
+                         Qt::WindowFlags f = nullptr);
     ~PictureItem() override;
 
     qreal getZoom() const;

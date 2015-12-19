@@ -8,7 +8,7 @@
 #endif
 
 Settings::Settings(QSettings *settings)
-    : m_settings((settings != NULL) ?
+    : m_settings((settings != nullptr) ?
                      settings :
                      new QSettings(QSettings::IniFormat,
                                    QSettings::UserScope,

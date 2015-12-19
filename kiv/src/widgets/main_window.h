@@ -23,7 +23,7 @@ public:
     explicit MainWindow(const IPictureLoader *const picture_loader,
                         std::unique_ptr<const IArchiveExtractor> archive_extractor,
                         QWidget *parent = nullptr,
-                        Qt::WindowFlags f = 0);
+                        Qt::WindowFlags f = nullptr);
     ~MainWindow() override;
 
 private:

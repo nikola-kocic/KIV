@@ -23,7 +23,7 @@ QImage PictureLoader::getImage(const FileInfo &info) const
 #endif
     if (!info.fileExists())
     {
-        return QImage(0,0);
+        return QImage(0,0, QImage::Format_RGB32);
     }
     else if (info.isInArchive())
     {
@@ -33,7 +33,7 @@ QImage PictureLoader::getImage(const FileInfo &info) const
     {
         return getImageFromFile(ThumbnailInfo(info, QSize(0, 0)));
     }
-    return QImage(0,0);
+    return QImage(0, 0, QImage::Format_RGB32);
 }
 
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
@@ -43,7 +43,7 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
 #endif
     if (!thumb_info.getFileInfo().fileExists())
     {
-        return QImage(0,0);
+        return QImage(0, 0, QImage::Format_RGB32);
     }
     else if (thumb_info.getFileInfo().isInArchive())
     {
@@ -57,7 +57,7 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
                     getImageFromFile(thumb_info),
                     thumb_info.getThumbSize());
     }
-    return QImage(0,0);
+    return QImage(0, 0, QImage::Format_RGB32);
 }
 
 QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size) const
@@ -107,7 +107,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info) const
 
     if (buff.isEmpty())
     {
-        return QImage(0, 0);
+        return QImage(0, 0, QImage::Format_RGB32);
     }
 
 #ifdef DEBUG_PICTURE_LOADER

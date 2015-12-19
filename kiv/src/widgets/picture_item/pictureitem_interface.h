@@ -9,7 +9,7 @@ class PictureItemInterface
 {
 public:
     explicit PictureItemInterface(PictureItemData *data)
-        : m_data(data), m_widget(NULL)
+        : m_data(data), m_widget(nullptr)
     {}
     virtual ~PictureItemInterface() {}
     virtual void setRotation(const qreal current, const qreal previous) = 0;

@@ -123,7 +123,7 @@ void TexImg::InitTiles(TileDim *tileDim)
 
 void TexImg::setImage(const QImage &img)
 {
-    if (this->hTile != 0)
+    if (this->hTile != nullptr)
     {
         delete this->hTile;
         delete this->vTile;
