@@ -98,7 +98,7 @@ void ZoomWidget::on_textChanged()
 
     if (ok)
     {
-        m_zoomValue = qreal(dec) / 100;
+        m_zoomValue = dec / 100.0;
         emit zoomChanged(m_zoomValue);
     }
     else

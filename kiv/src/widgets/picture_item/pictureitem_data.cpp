@@ -62,8 +62,8 @@ int PictureItemData::fitToScreen(qreal &zoomVal) const
 
     const QSizeF orig_size = m_boundingRect.size() / m_zoom_value;
 
-    const qreal x_ratio = (qreal)m_widget_size.width() / orig_size.width();
-    const qreal y_ratio = (qreal)m_widget_size.height() / orig_size.height();
+    const qreal x_ratio = 1.0 * m_widget_size.width() / orig_size.width();
+    const qreal y_ratio = 1.0 * m_widget_size.height() / orig_size.height();
 
     if ((orig_size.width() <= m_widget_size.width())
         && (orig_size.height() <= m_widget_size.height()))
@@ -94,7 +94,7 @@ int PictureItemData::fitWidth(qreal &zoomVal) const
 
     const qreal tw = m_boundingRect.width() / m_zoom_value;
 
-    const qreal x_ratio = (qreal)m_widget_size.width() / tw;
+    const qreal x_ratio = 1.0 * m_widget_size.width() / tw;
 
     if (tw <= m_widget_size.width())
     {
@@ -120,7 +120,7 @@ int PictureItemData::fitHeight(qreal &zoomVal) const
 
     const qreal th = m_boundingRect.height() / m_zoom_value;
 
-    const qreal y_ratio = (qreal)m_widget_size.height() / th;
+    const qreal y_ratio = 1.0 * m_widget_size.height() / th;
 
     if (th <= m_widget_size.height())
     {

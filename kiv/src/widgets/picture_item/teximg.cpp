@@ -114,10 +114,10 @@ void TexImg::InitTiles(TileDim *tileDim)
     tileDim->switchBorder[tileDim->tileCount] = tileDim->bmpSize;
     for (int j = 0; j <= tileDim->tileCount; ++j)
     {
-        tileDim->offsetBorderNorm[j] = (double)tileDim->offsetBorder.at(j)
-                / (double)tileDim->bmpSize;
-        tileDim->switchBorderNorm[j] = (double)tileDim->switchBorder.at(j)
-                / (double)tileDim->bmpSize;
+        tileDim->offsetBorderNorm[j] = 1.0 * tileDim->offsetBorder.at(j)
+                / tileDim->bmpSize;
+        tileDim->switchBorderNorm[j] = 1.0 * tileDim->switchBorder.at(j)
+                / tileDim->bmpSize;
     }
 }
 

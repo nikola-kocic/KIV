@@ -56,8 +56,8 @@ void PictureItemRaster::paint(QPainter &p, QPaintEvent const * const event)
         const QRectF targetRect = QRectF(
                     offset.x(),
                     offset.y(),
-                    qMin(bounding_rect.width(), (qreal)eventRect.width()),
-                    qMin(bounding_rect.height(), (qreal)eventRect.height())
+                    qMin(bounding_rect.width(), 1.0 * eventRect.width()),
+                    qMin(bounding_rect.height(), 1.0 * eventRect.height())
                     );
 
         if (! drawFullBackground)

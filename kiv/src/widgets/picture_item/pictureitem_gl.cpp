@@ -217,8 +217,7 @@ void PictureItemGL::paintGL()
 
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
-        double texScale = img_size_original.width()
-                / (double)m_texImg->hTile->tileSize.at(hIndex);
+        double texScale = 1.0 * img_size_original.width() / m_texImg->hTile->tileSize.at(hIndex);
         double tx;
         double tx2;
         double qx;
@@ -243,8 +242,7 @@ void PictureItemGL::paintGL()
 
         for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
         {
-            texScale = img_size_original.height()
-                    / (double)m_texImg->vTile->tileSize.at(vIndex);
+            texScale = 1.0 * img_size_original.height() / m_texImg->vTile->tileSize.at(vIndex);
             double ty;
             double ty2;
             double qy;
