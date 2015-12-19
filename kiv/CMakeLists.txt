@@ -41,8 +41,15 @@ set ( kiv_HDRS
     src/picture_loader.h
     src/settings.h
     src/models/archive_item.h
+    src/models/modelwrapper.h
     src/models/unrar/archive_rar.h
     src/models/unrar/unrar.h
+    src/widgets/files_view/view_archive_dirs.h
+    src/widgets/files_view/ifileview.h
+    src/widgets/files_view/fileviewwithproxy.h
+    src/widgets/files_view/view_files_list.h
+    src/widgets/files_view/view_files_tree.h
+    src/widgets/files_view/sortcombobox.h
     src/widgets/picture_item/pictureitem_data.h
     src/widgets/picture_item/pictureitem_interface.h
     src/widgets/picture_item/teximg.h
@@ -59,8 +66,12 @@ set ( kiv_SRCS
     src/models/archive_item.cpp
     src/models/archive_model.cpp
     src/models/filesystem_model.cpp
+    src/models/modelwrapper.cpp
     src/models/unrar/archive_rar.cpp
     src/widgets/files_view/thumbnailitemdelegate.cpp
+    src/widgets/files_view/sortcombobox.cpp
+    src/widgets/files_view/view_archive_dirs.cpp
+    src/widgets/files_view/fileviewwithproxy.cpp
     src/widgets/files_view/view_files.cpp
     src/widgets/files_view/view_files_list.cpp
     src/widgets/files_view/view_files_tree.cpp
@@ -97,8 +108,14 @@ endif()
 set ( kiv_MOCS
     src/models/archive_model.h
     src/models/filesystem_model.h
+    src/widgets/files_view/fileviewwithproxy.h
+    src/widgets/files_view/ifileview.h
+    src/widgets/files_view/sortcombobox.h
     src/widgets/files_view/thumbnailitemdelegate.h
+    src/widgets/files_view/view_archive_dirs.h
     src/widgets/files_view/view_files.h
+    src/widgets/files_view/view_files_list.h
+    src/widgets/files_view/view_files_tree.h
     src/widgets/main_window.h
     src/widgets/picture_item/pictureitem.h
     src/widgets/picture_item/pictureitem_gl.h
