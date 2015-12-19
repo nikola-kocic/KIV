@@ -26,12 +26,13 @@ find_package ( OpenGL REQUIRED )
 if(Qt4_FOUND)
     include ( ${QT_USE_FILE} )
     find_package ( QuaZip REQUIRED )
-else
+else()
     find_package ( QuaZip5 REQUIRED )
 endif()
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTOPENGL_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../
     ${QUAZIP_INCLUDE_DIR})
 set ( kiv_HDRS
