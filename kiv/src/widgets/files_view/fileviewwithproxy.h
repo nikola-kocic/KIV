@@ -22,7 +22,7 @@ public:
     QModelIndex currentIndex() const override;
 
 public slots:
-    void setCurrentIndex(const QModelIndex &index);
+    void setCurrentIndex(const QModelIndex &index) override;
 
 private:
 
