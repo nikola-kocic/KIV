@@ -46,9 +46,10 @@ int main(int argc, char **argv)
                                 QDir::separator() + "assets" +
                                 QDir::separator() + "images"));
     DirStructureFixture dsf(
-                std::unique_ptr<IDirStructureFixturePaths>(new DirStructureFixturePathsUnicodeOutsideBMP())
-                , std::unique_ptr<IDirStructureFixtureDateTimes>(new DirStructureFixtureDateTimes())
-                , std::unique_ptr<IDirStructureFixtureSize>(new DirStructureFixtureSize())
+                DirStructureFixturePathsUnicodeOutsideBMP::getPath
+                , DirStructureFixturePathsUnicodeOutsideBMP::getDirName
+                , DirStructureFixtureDateTimes::getDateTime
+                , DirStructureFixtureSize::getSize
                 , base_dir
                 );
 //    InitTestData itd;
@@ -60,9 +61,10 @@ int main(int argc, char **argv)
         err = qMax(err, QTest::qExec(&testArchiveFileListRar5, app.arguments()));
     }
     DirStructureFixture dsfZip(
-                std::unique_ptr<IDirStructureFixturePaths>(new DirStructureFixturePathsUnicodeOutsideBMP())
-                , std::unique_ptr<IDirStructureFixtureDateTimes>(new DirStructureFixtureDateTimesLocal())
-                , std::unique_ptr<IDirStructureFixtureSize>(new DirStructureFixtureSize())
+                DirStructureFixturePathsUnicodeOutsideBMP::getPath
+                , DirStructureFixturePathsUnicodeOutsideBMP::getDirName
+                , DirStructureFixtureDateTimesLocal::getDateTime
+                , DirStructureFixtureSize::getSize
                 , base_dir
                 );
     {
@@ -74,9 +76,10 @@ int main(int argc, char **argv)
         err = qMax(err, QTest::qExec(&testArchiveFiles, app.arguments()));
     }
     DirStructureFixture dsfRar4(
-                std::unique_ptr<IDirStructureFixturePaths>(new DirStructureFixturePathsUnicodeInsideBMP())
-                , std::unique_ptr<IDirStructureFixtureDateTimes>(new DirStructureFixtureDateTimesLocal())
-                , std::unique_ptr<IDirStructureFixtureSize>(new DirStructureFixtureSizeUnicodeInsideBMP())
+                DirStructureFixturePathsUnicodeInsideBMP::getPath
+                , DirStructureFixturePathsUnicodeInsideBMP::getDirName
+                , DirStructureFixtureDateTimesLocal::getDateTime
+                , DirStructureFixtureSizeUnicodeInsideBMP::getSize
                 , base_dir
                 );
 //    ita = itd.makeTestData(dsfRar4);

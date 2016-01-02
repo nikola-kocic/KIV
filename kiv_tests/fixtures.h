@@ -34,70 +34,46 @@ enum class DirStructureFixtureElement
 
 
 
-class IDirStructureFixturePaths
+class DirStructureFixturePathsUnicodeOutsideBMP
 {
 public:
-    virtual ~IDirStructureFixturePaths() {}
-    virtual QString getPath(DirStructureFixtureElement element) const = 0;
-    virtual QString getDirName() const = 0;
-};
-
-class DirStructureFixturePathsUnicodeOutsideBMP : public IDirStructureFixturePaths
-{
-public:
-    QString getPath(DirStructureFixtureElement element) const override final;
-    QString getDirName() const override final;
+    static QString getPath(DirStructureFixtureElement element);
+    static QString getDirName();
 };
 
 
-class DirStructureFixturePathsUnicodeInsideBMP : public IDirStructureFixturePaths
+class DirStructureFixturePathsUnicodeInsideBMP
 {
 public:
-    QString getPath(DirStructureFixtureElement element) const override final;
-    QString getDirName() const override final;
+    static QString getPath(DirStructureFixtureElement element);
+    static QString getDirName();
 };
 
 
 
-
-class IDirStructureFixtureDateTimes
+class DirStructureFixtureDateTimes
 {
 public:
-    virtual ~IDirStructureFixtureDateTimes() {}
-    virtual QDateTime getDateTime(DirStructureFixtureElement element) const = 0;
+    static QDateTime getDateTime(DirStructureFixtureElement element);
 };
 
-class DirStructureFixtureDateTimes : public IDirStructureFixtureDateTimes
+class DirStructureFixtureDateTimesLocal
 {
 public:
-    QDateTime getDateTime(DirStructureFixtureElement element) const override;
-};
-
-class DirStructureFixtureDateTimesLocal : public DirStructureFixtureDateTimes
-{
-public:
-    QDateTime getDateTime(DirStructureFixtureElement element) const override final;
+    static QDateTime getDateTime(DirStructureFixtureElement element);
 };
 
 
-
-class IDirStructureFixtureSize
+class DirStructureFixtureSize
 {
 public:
-    virtual ~IDirStructureFixtureSize() {}
-    virtual quint32 getSize(DirStructureFixtureElement element) const = 0;
+    static quint32 getSize(DirStructureFixtureElement element);
 };
 
-class DirStructureFixtureSize : public IDirStructureFixtureSize
+class DirStructureFixtureSizeUnicodeInsideBMP
 {
 public:
-    quint32 getSize(DirStructureFixtureElement element) const override;
-};
-
-class DirStructureFixtureSizeUnicodeInsideBMP : public DirStructureFixtureSize
-{
-public:
-    quint32 getSize(DirStructureFixtureElement element) const override final;
+    static quint32 getSize(DirStructureFixtureElement element);
 };
 
 
@@ -105,9 +81,10 @@ class DirStructureFixture
 {
 public:
     DirStructureFixture(
-            std::unique_ptr<IDirStructureFixturePaths> pathGiver
-            , std::unique_ptr<IDirStructureFixtureDateTimes> dateGiver
-            , std::unique_ptr<IDirStructureFixtureSize> sizeGiver
+            std::function<QString(DirStructureFixtureElement)> pathGiver
+            , std::function<QString()> dirNameGiver
+            , std::function<QDateTime(DirStructureFixtureElement)> dateGiver
+            , std::function<quint32(DirStructureFixtureElement)> sizeGiver
             , const QString &baseDir
             );
     std::vector<ArchiveFileInfo> getDirs() const;
@@ -116,9 +93,10 @@ public:
     QString getBaseDir() const { return m_baseDir; }
 
 protected:
-    const std::unique_ptr<IDirStructureFixturePaths> m_pathGiver;
-    const std::unique_ptr<IDirStructureFixtureDateTimes> m_dateGiver;
-    const std::unique_ptr<IDirStructureFixtureSize> m_sizeGiver;
+    const std::function<QString(DirStructureFixtureElement)> m_pathGiver;
+    const std::function<QString()> m_dirNameGiver;
+    const std::function<QDateTime(DirStructureFixtureElement)> m_dateGiver;
+    const std::function<quint32(DirStructureFixtureElement)> m_sizeGiver;
     const QString m_baseDir;
     ArchiveFileInfo get(DirStructureFixtureElement element) const;
 };

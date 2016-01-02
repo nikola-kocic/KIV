@@ -4,14 +4,16 @@
 
 
 DirStructureFixture::DirStructureFixture(
-        std::unique_ptr<IDirStructureFixturePaths> pathGiver
-        , std::unique_ptr<IDirStructureFixtureDateTimes> dateGiver
-        , std::unique_ptr<IDirStructureFixtureSize> sizeGiver
+        std::function<QString(DirStructureFixtureElement)> pathGiver
+        , std::function<QString()> dirNameGiver
+        , std::function<QDateTime(DirStructureFixtureElement)> dateGiver
+        , std::function<quint32(DirStructureFixtureElement)> sizeGiver
         , const QString &baseDir
         )
-    : m_pathGiver(std::move(pathGiver))
-    , m_dateGiver(std::move(dateGiver))
-    , m_sizeGiver(std::move(sizeGiver))
+    : m_pathGiver(pathGiver)
+    , m_dirNameGiver(dirNameGiver)
+    , m_dateGiver(dateGiver)
+    , m_sizeGiver(sizeGiver)
     , m_baseDir(baseDir)
 {
 
@@ -49,19 +51,19 @@ std::vector<ArchiveFileInfo> DirStructureFixture::getFiles() const {
 
 QString DirStructureFixture::getPath() const
 {
-    return QDir::cleanPath(m_baseDir + QDir::separator() + m_pathGiver->getDirName());
+    return QDir::cleanPath(m_baseDir + QDir::separator() + m_dirNameGiver());
 }
 
 ArchiveFileInfo DirStructureFixture::get(DirStructureFixtureElement element) const
 {
     return ArchiveFileInfo(
-                m_pathGiver->getPath(element),
-                m_dateGiver->getDateTime(element),
-                m_sizeGiver->getSize(element));
+                m_pathGiver(element),
+                m_dateGiver(element),
+                m_sizeGiver(element));
 }
 
 
-QString DirStructureFixturePathsUnicodeOutsideBMP::getPath(DirStructureFixtureElement element) const
+QString DirStructureFixturePathsUnicodeOutsideBMP::getPath(DirStructureFixtureElement element)
 {
     switch (element)
     {
@@ -103,14 +105,14 @@ QString DirStructureFixturePathsUnicodeOutsideBMP::getPath(DirStructureFixtureEl
     return QString();
 }
 
-QString DirStructureFixturePathsUnicodeOutsideBMP::getDirName() const
+QString DirStructureFixturePathsUnicodeOutsideBMP::getDirName()
 {
     return QString::fromUtf8(u8"extracted 🙂");
 }
 
 
 
-QString DirStructureFixturePathsUnicodeInsideBMP::getPath(DirStructureFixtureElement element) const
+QString DirStructureFixturePathsUnicodeInsideBMP::getPath(DirStructureFixtureElement element)
 {
     switch (element)
     {
@@ -152,13 +154,13 @@ QString DirStructureFixturePathsUnicodeInsideBMP::getPath(DirStructureFixtureEle
     return QString();
 }
 
-QString DirStructureFixturePathsUnicodeInsideBMP::getDirName() const
+QString DirStructureFixturePathsUnicodeInsideBMP::getDirName()
 {
     return QString::fromUtf8(u8"extracted");
 }
 
 
-QDateTime DirStructureFixtureDateTimes::getDateTime(DirStructureFixtureElement element) const
+QDateTime DirStructureFixtureDateTimes::getDateTime(DirStructureFixtureElement element)
 {
     /*
      * (Used seconds divisible by 2 because unrar public functions expose only
@@ -206,7 +208,7 @@ QDateTime DirStructureFixtureDateTimes::getDateTime(DirStructureFixtureElement e
 
 
 
-quint32 DirStructureFixtureSize::getSize(DirStructureFixtureElement element) const
+quint32 DirStructureFixtureSize::getSize(DirStructureFixtureElement element)
 {
 
     switch (element)
@@ -245,7 +247,7 @@ quint32 DirStructureFixtureSize::getSize(DirStructureFixtureElement element) con
 }
 
 
-QDateTime DirStructureFixtureDateTimesLocal::getDateTime(DirStructureFixtureElement element) const
+QDateTime DirStructureFixtureDateTimesLocal::getDateTime(DirStructureFixtureElement element)
 {
     const QDateTime dt = DirStructureFixtureDateTimes::getDateTime(element);
     QDateTime localDateTime= dt.addSecs(60 * 60); // Archives were created in UTC+1 timezone
@@ -254,7 +256,7 @@ QDateTime DirStructureFixtureDateTimesLocal::getDateTime(DirStructureFixtureElem
 }
 
 
-quint32 DirStructureFixtureSizeUnicodeInsideBMP::getSize(DirStructureFixtureElement element) const
+quint32 DirStructureFixtureSizeUnicodeInsideBMP::getSize(DirStructureFixtureElement element)
 {
     switch (element)
     {
