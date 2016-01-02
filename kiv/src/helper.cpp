@@ -5,9 +5,8 @@
 #include <QLocale>
 #include <QProcess>
 
-constexpr decltype(Helper::filtersArchive) Helper::filtersArchive;
-
-const QStringList& Helper::getFiltersImage()
+namespace Helper {
+const QStringList& getFiltersImage()
 {
     static QStringList filters_image{};
     if (filters_image.isEmpty())
@@ -20,7 +19,7 @@ const QStringList& Helper::getFiltersImage()
     return filters_image;
 }
 
-QString Helper::size(const qint64 bytes)
+QString size(const qint64 bytes)
 {
     // According to the Si standard KB is 1000 bytes, KiB is 1024
     // but on windows sizes are calculated by dividing by 1024 so we do what they do.
@@ -59,7 +58,7 @@ static inline QChar getNextChar(const QString &s, int location)
 
     Slower then QString::compare() (of course)
   */
-int Helper::naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs)
+int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs)
 {
     for (int l1 = 0, l2 = 0; l1 <= s1.count() && l2 <= s2.count(); ++l1, ++l2) {
         // skip spaces, tabs and 0's
@@ -121,7 +120,7 @@ int Helper::naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensit
 }
 
 
-void Helper::showInFileBrowser(const QString& path)
+void showInFileBrowser(const QString& path)
 {
 #if defined(Q_OS_WIN)
     const QString explorer = "explorer";
@@ -150,4 +149,5 @@ void Helper::showInFileBrowser(const QString& path)
     const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
     success = success && error.isEmpty();
 #endif
+}
 }

@@ -12,37 +12,29 @@
 #define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")\
                           << Q_FUNC_INFO << "\n\t"
 
-class Helper
+namespace Helper
 {
-public:
-    static const int ROLE_FILE_DATE = Qt::UserRole + 1001;
+    constexpr int ROLE_FILE_DATE = Qt::UserRole + 1001;
+    constexpr auto filtersArchive = make_array("zip", "cbz", "rar", "cbr");
 
+    const QStringList& getFiltersImage();
+    QString size(const qint64 bytes);
 
-    static const QStringList& getFiltersImage();
+    bool isArchiveFile(const QFileInfo &fi);
+    bool isImageFile(const QFileInfo &fi);
+    bool checkFileExtension(const QFileInfo &info);
 
-    static constexpr auto filtersArchive = make_array("zip", "cbz", "rar", "cbr");
+    bool FuzzyCompare(const double p1, const double p2);
+    bool FuzzyCompare(const float p1, const float p2);
 
-    static QString size(const qint64 bytes);
-
-    static bool isArchiveFile(const QFileInfo &fi);
-    static bool isImageFile(const QFileInfo &fi);
-    static bool checkFileExtension(const QFileInfo &info);
-
-    static bool FuzzyCompare(const double p1, const double p2);
-    static bool FuzzyCompare(const float p1, const float p2);
-
-    static int naturalCompare(const QString &s1,
-                              const QString &s2,
-                              Qt::CaseSensitivity cs);
+    int naturalCompare(
+        const QString &s1, const QString &s2, Qt::CaseSensitivity cs);
 
     // Opens file browser (e.g. explorer) in file directory
     // and if possible, selects file.
     // Doesn't work reliably for files inside of archives.
-    static void showInFileBrowser(const QString &path);
-
-private:
-    static QStringList m_filters_image;
-};
+    void showInFileBrowser(const QString &path);
+}
 
 inline bool Helper::isArchiveFile(const QFileInfo &fi)
 { return contains(Helper::filtersArchive, fi.suffix().toLower()); }
