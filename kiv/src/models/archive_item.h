@@ -13,7 +13,7 @@ class ArchiveItem
 public:
     explicit ArchiveItem(const QString &name,
                          const QDateTime &date,
-                         const quint64 &bytes,
+                         const qint64 &bytes,
                          const QString &path,
                          const NodeType type,
                          const QIcon &icon = QIcon(),
@@ -40,7 +40,7 @@ private:
 
     const QString m_name;
     const QDateTime m_date;
-    const quint64 m_bytes;
+    const qint64 m_bytes;
     const QString m_path;
     const NodeType m_type;
     const QIcon m_icon;

@@ -218,7 +218,7 @@ int ArchiveModel::rowCount(const QModelIndex &parent) const
 ArchiveItem *ArchiveModel::AddNode(
         const QString &name,
         const QDateTime &date,
-        const quint64 &bytes,
+        const qint64 &bytes,
         const QString &path,
         const NodeType type,
         ArchiveItem *const parent)

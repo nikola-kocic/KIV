@@ -12,7 +12,7 @@
 
 ArchiveItem::ArchiveItem(const QString &name,
                          const QDateTime &date,
-                         const quint64 &bytes,
+                         const qint64 &bytes,
                          const QString &path,
                          const NodeType type,
                          const QIcon &icon,
