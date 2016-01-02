@@ -103,7 +103,7 @@ QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info) const
                 thumb_info.getFileInfo().getArchiveImagePath(),
                 buff);
 
-    if (buff.isEmpty())
+    if (success != 0 || buff.isEmpty())
     {
         return QImage(0, 0, QImage::Format_RGB32);
     }

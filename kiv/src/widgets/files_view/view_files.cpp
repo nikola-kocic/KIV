@@ -220,7 +220,8 @@ IModelWrapper *ViewFiles::createArchiveModel(const FileInfo &info)
 {
     const QString archive_path = info.getContainerPath();
     std::vector<ArchiveFileInfo> archive_files;
-    int success = m_archive_extractor->getFileInfoList(archive_path, archive_files);
+    const int success = m_archive_extractor->getFileInfoList(archive_path, archive_files);
+    Q_UNUSED(success);
     return new ArchiveModelWrapper(new ArchiveModel(archive_files, archive_path));
 }
 
