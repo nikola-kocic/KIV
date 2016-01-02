@@ -37,6 +37,7 @@ enum class DirStructureFixtureElement
 class IDirStructureFixturePaths
 {
 public:
+    virtual ~IDirStructureFixturePaths() {}
     virtual QString getPath(DirStructureFixtureElement element) const = 0;
     virtual QString getDirName() const = 0;
 };
@@ -62,6 +63,7 @@ public:
 class IDirStructureFixtureDateTimes
 {
 public:
+    virtual ~IDirStructureFixtureDateTimes() {}
     virtual QDateTime getDateTime(DirStructureFixtureElement element) const = 0;
 };
 
@@ -82,6 +84,7 @@ public:
 class IDirStructureFixtureSize
 {
 public:
+    virtual ~IDirStructureFixtureSize() {}
     virtual quint32 getSize(DirStructureFixtureElement element) const = 0;
 };
 
