@@ -36,12 +36,10 @@ void TestArchiveFileList::commonCheck(const QString &archiveName, const DirStruc
     int success = m_archive_extractor->getFileInfoList(archivePath, list);
     QCOMPARE(success, 0);
 
-    const std::vector<ArchiveFileInfo> files = tds.getFiles();
-    const std::vector<ArchiveFileInfo> dirs = tds.getDirs();
-
-    for (auto c : {files, dirs})
+    const auto cc = {tds.getFiles(), tds.getDirs()};
+    for (const auto &c : cc)
     {
-        for (const ArchiveFileInfo &e : c)
+        for (const auto &e : c)
         {
             const auto aIt = std::find_if(
                         list.cbegin(),
