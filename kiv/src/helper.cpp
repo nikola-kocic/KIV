@@ -5,11 +5,9 @@
 #include <QLocale>
 #include <QProcess>
 
+constexpr decltype(Helper::filtersArchive) Helper::filtersArchive;
 QStringList Helper::m_filters_image = QStringList();
 
-QStringList Helper::filtersArchive = QStringList() << "zip" << "cbz"
-                                                   << "rar" << "cbr"
-                                                      ;
 QStringList Helper::getFiltersImage()
 {
     if (m_filters_image.isEmpty())

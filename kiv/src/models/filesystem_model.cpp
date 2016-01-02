@@ -10,10 +10,9 @@ FileSystemModel::FileSystemModel(QObject *parent)
 {
     /* Start modelFilesystem */
     QStringList filters;
-    const QStringList filtersArchive = Helper::filtersArchive;
-    for (const QString &filterArchive : filtersArchive)
+    for (const auto &filterArchive : Helper::filtersArchive)
     {
-        filters.append("*." + filterArchive);
+        filters.append(QString::fromLatin1("*.") + filterArchive);
     }
     const QStringList filtersImage = Helper::getFiltersImage();
     for (const QString &filterImage : filtersImage)

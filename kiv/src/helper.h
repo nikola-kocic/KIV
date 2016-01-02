@@ -7,6 +7,7 @@
 #include <QStringList>
 
 #include "kiv/src/fileinfo.h"
+#include "kiv/src/polyfill.h"
 
 #define DEBUGOUT qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz")\
                           << Q_FUNC_INFO << "\n\t"
@@ -19,7 +20,7 @@ public:
 
     static QStringList getFiltersImage();
 
-    static QStringList filtersArchive;
+    static constexpr auto filtersArchive = make_array("zip", "cbz", "rar", "cbr");
 
     static QString size(const qint64 bytes);
 
@@ -44,7 +45,7 @@ private:
 };
 
 inline bool Helper::isArchiveFile(const QFileInfo &fi)
-{ return Helper::filtersArchive.contains(fi.suffix().toLower()); }
+{ return contains(Helper::filtersArchive, fi.suffix().toLower()); }
 
 inline bool Helper::isImageFile(const QFileInfo &fi)
 { return getFiltersImage().contains(fi.suffix().toLower()); }
