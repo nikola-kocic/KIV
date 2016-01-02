@@ -6,18 +6,18 @@
 #include <QProcess>
 
 constexpr decltype(Helper::filtersArchive) Helper::filtersArchive;
-QStringList Helper::m_filters_image = QStringList();
 
-QStringList Helper::getFiltersImage()
+const QStringList& Helper::getFiltersImage()
 {
-    if (m_filters_image.isEmpty())
+    static QStringList filters_image{};
+    if (filters_image.isEmpty())
     {
-        for (const QByteArray &format : QImageReader::supportedImageFormats())
+        for (const auto &format : QImageReader::supportedImageFormats())
         {
-            m_filters_image.append(format);
+            filters_image.append(QString::fromLatin1(format));
         }
     }
-    return m_filters_image;
+    return filters_image;
 }
 
 QString Helper::size(const qint64 bytes)

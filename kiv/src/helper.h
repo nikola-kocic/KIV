@@ -18,7 +18,7 @@ public:
     static const int ROLE_FILE_DATE = Qt::UserRole + 1001;
 
 
-    static QStringList getFiltersImage();
+    static const QStringList& getFiltersImage();
 
     static constexpr auto filtersArchive = make_array("zip", "cbz", "rar", "cbr");
 
