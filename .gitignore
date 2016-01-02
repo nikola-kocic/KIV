@@ -46,3 +46,7 @@ build-*
 *.exe
 *.out
 *.app
+
+# KDevelop
+*.kdev4
+.kdev4/
