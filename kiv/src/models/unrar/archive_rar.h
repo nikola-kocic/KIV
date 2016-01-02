@@ -27,7 +27,7 @@ public:
     static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);
 
 private:
-    static QDateTime dateFromDos(const uint dosTime);
+    static QDateTime dateFromDos(const uint32_t dosTime);
     static QLibrary *Lib;
 };
 

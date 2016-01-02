@@ -203,14 +203,14 @@ int ArchiveRar::readFile(const QString &archiveName,
     return returnCode;
 }
 
-QDateTime ArchiveRar::dateFromDos(const uint dosTime)
+QDateTime ArchiveRar::dateFromDos(const uint32_t dosTime)
 {
-    const uint second = (dosTime & 0x1f) * 2;
-    const uint minute = (dosTime >> 5)  & 0x3f;
-    const uint hour   = (dosTime >> 11) & 0x1f;
-    const uint day    = (dosTime >> 16) & 0x1f;
-    const uint month  = (dosTime >> 21) & 0x0f;
-    const uint year   = (dosTime >> 25) + 1980;
+    const int second = static_cast<int>(dosTime & 0x1f) * 2;
+    const int minute = static_cast<int>(dosTime >> 5)  & 0x3f;
+    const int hour   = static_cast<int>(dosTime >> 11) & 0x1f;
+    const int day    = static_cast<int>(dosTime >> 16) & 0x1f;
+    const int month  = static_cast<int>(dosTime >> 21) & 0x0f;
+    const int year   = static_cast<int>(dosTime >> 25) + 1980;
     return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
 
