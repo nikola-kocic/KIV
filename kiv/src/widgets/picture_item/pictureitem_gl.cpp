@@ -8,7 +8,9 @@
 #include "kiv/src/helper.h"
 #endif
 
-PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)    
+QImage CreatePow2Bitmap(const TexIndex *const index);
+
+PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
     : QGLWidget(parent)
     , PictureItemInterface(data)
     , m_returnTexCount(0)
