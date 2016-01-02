@@ -22,11 +22,11 @@ ArchiveItem::ArchiveItem(const QString &name,
     , m_date(date)
     , m_bytes(bytes)
     , m_path(path)
-    , m_type(type)
     , m_icon(icon)
     , m_tooltip(QFileSystemModel::tr("Name") + ": " + m_name + "\n"
                 + QFileSystemModel::tr("Date Modified") + ": "
                 + m_date.toString(Qt::SystemLocaleShortDate))
+    , m_type(type)
 {
     if (m_type == NodeType::Image)
     {

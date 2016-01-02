@@ -58,7 +58,6 @@ protected:
     */
     QPointF m_offset;
 
-    bool m_pixmapNull;
     qreal m_zoom_value;
     qreal m_rotation_value;
     QPointF m_point_drag;
@@ -66,6 +65,8 @@ protected:
     QSizeF m_img_size_original;
     QSizeF m_img_size_transformed; // Image size after transformation.
                                    // e.g. rotation.
+    bool m_pixmapNull;
+
     QPointF pointToOrigin() const;
 };
 

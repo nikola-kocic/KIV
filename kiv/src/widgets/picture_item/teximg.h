@@ -23,13 +23,13 @@ struct TileDim
     int pow2BaseSize;
     int pow2BaseCount;
     int pow2LastSize;
-    bool doTiling;
     int tileCount;
     QVector<int> tileSize;
     QVector<int> switchBorder;
     QVector<int> offsetBorder;
     QVector<double> switchBorderNorm;
     QVector<double> offsetBorderNorm;
+    bool doTiling;
 };
 
 class TexImg

@@ -14,28 +14,28 @@ Settings::Settings(QSettings *settings)
                                    QSettings::UserScope,
                                    QCoreApplication::organizationName(),
                                    QCoreApplication::applicationName()))
+    , m_thumbSize(
+          m_settings->value("Interface/ThumbnailSize", QSize(100, 100)).toSize()
+          )
+    , m_lastPath(m_settings->value("Interface/LastPath", "").toString())
     , m_middleClick(
           m_settings->value("Mouse/MiddleClick",
                             MiddleClickAction::Fullscreen).toInt())
     , m_wheel(m_settings->value("Mouse/Wheel", WheelAction::ChangePage).toInt())
+    , m_pageChangeTimeout(
+          m_settings->value("Behavior/PageChangeTimeout", 300).toInt())
     , m_scrollPageByWidth(
           m_settings->value("Behavior/ScrollPageByWidth", false).toBool())
     , m_rightToLeft(m_settings->value("Behavior/RightToLeft", false).toBool())
     , m_scrollChangesPage(
           m_settings->value("Behavior/ScrollChangesPage", true).toBool())
-    , m_pageChangeTimeout(
-          m_settings->value("Behavior/PageChangeTimeout", 300).toInt())
     , m_jumpToEnd(m_settings->value("Behavior/JumpToBottom", false).toBool())
 
     , m_calculateAverageColor(
           m_settings->value("Interface/CalculateAverageColor", false).toBool())
     , m_hardwareAcceleration(
           m_settings->value("Interface/HardwareAcceleration", false).toBool())
-    , m_thumbSize(
-          m_settings->value("Interface/ThumbnailSize", QSize(100, 100)).toSize()
-          )
     , m_largeIcons(m_settings->value("Interface/LargeIcons", false).toBool())
-    , m_lastPath(m_settings->value("Interface/LastPath", "").toString())
 {
 #ifdef SETTINGS_DEBUG
     DEBUGOUT << "filename" << m_settings->fileName();

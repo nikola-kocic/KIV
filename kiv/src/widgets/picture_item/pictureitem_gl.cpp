@@ -13,12 +13,12 @@ QImage CreatePow2Bitmap(const TexIndex *const index);
 PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
     : QGLWidget(parent)
     , PictureItemInterface(data)
-    , m_returnTexCount(0)
     , m_loader_texture(new QFutureWatcher<QImage>(this))
     , m_scaleX(0)
     , m_scaleY(0)
     , m_textures(QVector < QVector < GLuint > >(0))
     , m_texImg(new TexImg())
+    , m_returnTexCount(0)
 {
     m_widget = this;
     QGLContext::setTextureCacheLimit(0);

@@ -18,10 +18,6 @@ ViewFiles::ViewFiles(ThumbnailItemDelegate *const thumbnail_item_delegate,
     : QWidget(parent)
 
     , m_archive_extractor(std::move(archive_extractor))
-    , m_fileinfo_current(FileInfo(""))
-    , m_view_mode(FileViewMode::List)
-    , m_show_thumbnails(false)
-    , m_flag_opening(false)
 
     , m_view_archiveDirs(new ViewArchiveDirs(
                              std::unique_ptr<QTreeView>(new QTreeView())
@@ -51,6 +47,10 @@ ViewFiles::ViewFiles(ThumbnailItemDelegate *const thumbnail_item_delegate,
                           << ColumnSort(Column::Size, SortOrder::Desc)
                           , this
                           ))
+    , m_fileinfo_current(FileInfo(""))
+    , m_view_mode(FileViewMode::List)
+    , m_show_thumbnails(false)
+    , m_flag_opening(false)
 {
     m_proxy_containers->setSourceModel(m_model_filesystem->getModel());
 

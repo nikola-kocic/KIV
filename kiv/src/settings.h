@@ -74,23 +74,21 @@ private:
 
     QSettings *m_settings;
 
+    QSize m_thumbSize;
+    QString m_lastPath;
+    QList<Bookmark *> m_bookmarks;
+
     int m_middleClick;
     int m_wheel;
+    int m_pageChangeTimeout;
 
     bool m_scrollPageByWidth;
     bool m_rightToLeft;
     bool m_scrollChangesPage;
-    int m_pageChangeTimeout;
     bool m_jumpToEnd;
-
     bool m_calculateAverageColor;
-
     bool m_hardwareAcceleration;
-    QSize m_thumbSize;
     bool m_largeIcons;
-    QString m_lastPath;
-
-    QList<Bookmark *> m_bookmarks;
 };
 
 

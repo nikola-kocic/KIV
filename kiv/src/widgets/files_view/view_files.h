@@ -58,10 +58,6 @@ private:
     IModelWrapper *createArchiveModel(const FileInfo &info);
 
     const std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
-    FileInfo m_fileinfo_current;
-    FileViewMode m_view_mode;
-    bool m_show_thumbnails;
-    bool m_flag_opening;
 
     IFileView *m_view_archiveDirs;
     QTreeView *m_view_filesystem;
@@ -83,6 +79,12 @@ private:
 
     QVBoxLayout *m_layout_files_list;
     SortComboBox *m_combobox_sort;
+
+    FileInfo m_fileinfo_current;
+    FileViewMode m_view_mode;
+
+    bool m_show_thumbnails;
+    bool m_flag_opening;
 
 public slots:
     void dirUp();

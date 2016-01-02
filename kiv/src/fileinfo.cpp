@@ -12,11 +12,11 @@
 
 FileInfo::FileInfo(const QString &path, const bool isContainer)
     : m_container(QFileInfo())
-    , m_hasValidContainer(false)
     , m_image(QFileInfo())
-    , m_fileExists(false)
     , m_zipPath("")
     , m_zipImageFileName("")
+    , m_hasValidContainer(false)
+    , m_fileExists(false)
     , m_isInArchive(false)
 {
 #ifdef DEBUG_FILE_INFO

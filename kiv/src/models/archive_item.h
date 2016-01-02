@@ -42,9 +42,9 @@ private:
     const QDateTime m_date;
     const qint64 m_bytes;
     const QString m_path;
-    const NodeType m_type;
     const QIcon m_icon;
     QString m_tooltip;
+    const NodeType m_type;
 
     static const int col_count = 3;
 };

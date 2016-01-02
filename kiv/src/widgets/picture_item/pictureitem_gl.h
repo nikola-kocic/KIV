@@ -33,12 +33,12 @@ private:
     void updateSize();
     void clearTextures();
 
-    int m_returnTexCount;
     QFutureWatcher< QImage > *m_loader_texture;
     qreal m_scaleX;
     qreal m_scaleY;
     QVector < QVector <GLuint> > m_textures;
     TexImg *m_texImg;
+    int m_returnTexCount;
 
 protected:
     void initializeGL() override;

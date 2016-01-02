@@ -64,11 +64,11 @@ private:
     const IPictureLoader *const m_picture_loader;
     PictureItemData *const m_data;
     const Settings *const m_settings;
-    bool m_opengl;
     PictureItemInterface *m_imageDisplay;
     QFutureWatcher< QImage > *const m_loader_image;
     LockMode m_lockMode;
 
+    bool m_opengl;
     bool m_dragging;
 
 #ifdef DEBUG_PICTUREITEM

@@ -35,13 +35,13 @@ public:
 
 private:
     QFileInfo m_container;
-    bool m_hasValidContainer;
-
     QFileInfo m_image;
-    bool m_fileExists;
 
     QString m_zipPath;
     QString m_zipImageFileName;
+
+    bool m_hasValidContainer;
+    bool m_fileExists;
     bool m_isInArchive;
 };
 
