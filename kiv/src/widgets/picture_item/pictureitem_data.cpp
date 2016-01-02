@@ -9,7 +9,7 @@ PictureItemData::PictureItemData()
     , m_pixmapNull(true)
     , m_zoom_value(1.0)
     , m_rotation_value(0.0)
-    , m_point_drag(QPoint())
+    , m_point_drag(QPointF())
 {
 }
 
@@ -143,7 +143,7 @@ void PictureItemData::updateOffsets()
     if (m_widget_size.width() > m_boundingRect.width())
     {
         const qreal offsetX = (m_widget_size.width() - m_boundingRect.width()) / 2;
-        m_offset.setX((m_zoom_value == 1) ? qRound(offsetX) : offsetX);
+        m_offset.setX(qFuzzyCompare(m_zoom_value, 1.0) ? qRound(offsetX) : offsetX);
     }
     else
     {
@@ -154,7 +154,7 @@ void PictureItemData::updateOffsets()
     {
         const qreal offsetY =
                 (m_widget_size.height() - m_boundingRect.height()) / 2;
-        m_offset.setY((m_zoom_value == 1) ? qRound(offsetY) : offsetY);
+        m_offset.setY(qFuzzyCompare(m_zoom_value, 1.0) ? qRound(offsetY) : offsetY);
     }
     else
     {
@@ -305,7 +305,7 @@ void PictureItemData::drag(const QPoint &pt)
     }
 
     const qreal widthDiff = m_widget_size.width() - m_boundingRect.width();
-    const int xDiff = pt.x() - m_point_drag.x();
+    const qreal xDiff = pt.x() - m_point_drag.x();
 
     /* Am I dragging it outside of the panel? */
     if ((xDiff >= widthDiff) && (xDiff <= 0))
@@ -330,7 +330,7 @@ void PictureItemData::drag(const QPoint &pt)
     }
 
     const qreal heightDiff = m_widget_size.height() - m_boundingRect.height();
-    const int yDiff = pt.y() - m_point_drag.y();
+    const qreal yDiff = pt.y() - m_point_drag.y();
 
     /* Am I dragging it outside of the panel? */
     if (yDiff >= heightDiff && (yDiff <= 0))

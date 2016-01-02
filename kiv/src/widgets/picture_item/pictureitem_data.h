@@ -61,7 +61,7 @@ protected:
     bool m_pixmapNull;
     qreal m_zoom_value;
     qreal m_rotation_value;
-    QPoint m_point_drag;
+    QPointF m_point_drag;
     QSize m_widget_size;
     QSizeF m_img_size_original;
     QSizeF m_img_size_transformed; // Image size after transformation.

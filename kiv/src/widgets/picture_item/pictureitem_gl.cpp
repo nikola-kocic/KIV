@@ -270,14 +270,14 @@ void PictureItemGL::paintGL()
             glBindTexture(GL_TEXTURE_2D, m_textures.at(hIndex).at(vIndex));
             glBegin(GL_QUADS);
 
-            glTexCoord2f(tx, ty);
-            glVertex2f(qx, qy);
-            glTexCoord2f(tx, ty2);
-            glVertex2f(qx, qy2);
-            glTexCoord2f(tx2, ty2);
-            glVertex2f(qx2, qy2);
-            glTexCoord2f(tx2, ty);
-            glVertex2f(qx2, qy);
+            glTexCoord2d(tx, ty);
+            glVertex2d(qx, qy);
+            glTexCoord2d(tx, ty2);
+            glVertex2d(qx, qy2);
+            glTexCoord2d(tx2, ty2);
+            glVertex2d(qx2, qy2);
+            glTexCoord2d(tx2, ty);
+            glVertex2d(qx2, qy);
             glEnd();
         }
     }

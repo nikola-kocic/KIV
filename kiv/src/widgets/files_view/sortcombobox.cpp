@@ -37,9 +37,9 @@ QString SortComboBox::getSortText(ColumnSort sort) const
 
 bool SortComboBox::setSort(ColumnSort sort)
 {
-    const int index = std::distance(
+    const auto index = static_cast<int>(std::distance(
                 m_items.constBegin(),
-                std::find(m_items.constBegin(), m_items.constEnd(), sort));
+                std::find(m_items.constBegin(), m_items.constEnd(), sort)));
     if (index == m_items.size())
     {
         return false;

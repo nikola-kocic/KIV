@@ -111,9 +111,11 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
         p.rotate(current);
         p.translate(-image_size_transformed.width() / 2,
                     -image_size_transformed.height() / 2);
-        p.drawPixmap((image_size_transformed.width() - m_pixmap.width()) / 2,
-                     (image_size_transformed.height() - m_pixmap.height()) / 2,
-                     m_pixmap);
+        p.drawPixmap(
+            QPointF((image_size_transformed.width() - m_pixmap.width()) / 2,
+                    (image_size_transformed.height() - m_pixmap.height()) / 2),
+            m_pixmap);
+
         p.end();
     }
 
