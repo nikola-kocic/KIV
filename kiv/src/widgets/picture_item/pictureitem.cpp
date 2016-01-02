@@ -209,8 +209,9 @@ void PictureItem::keyPressEvent(QKeyEvent *event)
         this->scrollPageHorizontal(-120);
         event->accept();
         break;
+    default:
+        return QWidget::keyPressEvent(event);
     }
-    return QWidget::keyPressEvent(event);
 }
 
 /* Region Rotation */

@@ -12,7 +12,6 @@ public:
     explicit SortComboBox(
             const QList<ColumnSort> &items,
             QWidget *parent = nullptr);
-    ~SortComboBox();
     bool setSort(ColumnSort sort);
 
 signals:

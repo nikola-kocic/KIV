@@ -13,11 +13,6 @@ SortComboBox::SortComboBox(const QList<ColumnSort> &items,
             this, SLOT(on_currentIndexChanged(int)));
 }
 
-SortComboBox::~SortComboBox()
-{
-
-}
-
 void SortComboBox::on_currentIndexChanged(int index)
 {
     const ColumnSort sort = m_items.at(index);
@@ -38,7 +33,6 @@ QString SortComboBox::getSortText(ColumnSort sort) const
         return sort.getOrder() == SortOrder::Asc ? tr("Size Ascending"):
                                                    tr("Size Descending");
     }
-    return QString();
 }
 
 bool SortComboBox::setSort(ColumnSort sort)

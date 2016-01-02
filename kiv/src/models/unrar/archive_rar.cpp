@@ -136,9 +136,9 @@ static int CALLBACK CallbackProc(unsigned int msg,
 
     case UCM_NEEDPASSWORD:
         return -1;
+    default:
+        return 0;
     }
-
-    return 0;
 }
 
 int ArchiveRar::readFile(const QString &archiveName,

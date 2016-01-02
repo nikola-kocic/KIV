@@ -263,5 +263,4 @@ quint32 DirStructureFixtureSizeUnicodeInsideBMP::getSize(DirStructureFixtureElem
     default:
         return DirStructureFixtureSize::getSize(element);
     }
-    return 0;
 }

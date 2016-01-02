@@ -33,7 +33,6 @@ QImage PictureLoader::getImage(const FileInfo &info) const
     {
         return getImageFromFile(ThumbnailInfo(info, QSize(0, 0)));
     }
-    return QImage(0, 0, QImage::Format_RGB32);
 }
 
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
@@ -57,7 +56,6 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
                     getImageFromFile(thumb_info),
                     thumb_info.getThumbSize());
     }
-    return QImage(0, 0, QImage::Format_RGB32);
 }
 
 QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size) const

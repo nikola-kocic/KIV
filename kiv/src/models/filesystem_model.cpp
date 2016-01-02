@@ -31,7 +31,6 @@ QVariant FileSystemModel::data(const QModelIndex &index, int role) const
 {
     switch (role)
     {
-
     case Qt::TextAlignmentRole:
     {
         if (index.column() == 1)
@@ -41,6 +40,7 @@ QVariant FileSystemModel::data(const QModelIndex &index, int role) const
         break;
     }
     case Qt::ToolTipRole:
+    {
         const QFileInfo fi = this->fileInfo(index);
         QString tooltip = (QFileSystemModel::tr("Name") + ": " + fi.fileName()
                            + "\n" + QFileSystemModel::tr("Date Modified") + ": "
@@ -53,6 +53,8 @@ QVariant FileSystemModel::data(const QModelIndex &index, int role) const
         }
         return tooltip;
     }
-
+    default:
+        break;
+    }
     return QFileSystemModel::data(index, role);
 }

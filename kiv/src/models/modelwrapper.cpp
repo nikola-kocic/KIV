@@ -154,6 +154,9 @@ bool FileListSortFilterProxyModel::lessThan(
                         return (name_comparison > 0);
                 }
             }
+	    default:
+	      Q_ASSERT(false);
+	      break;
             }
         }
 
@@ -239,6 +242,8 @@ bool FileListSortFilterProxyModel::lessThan(
                     }
                 }
             }
+	    default:
+	      break;
             }
         }
 

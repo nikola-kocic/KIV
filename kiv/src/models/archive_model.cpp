@@ -152,6 +152,8 @@ QVariant ArchiveModel::headerData(const int section,
             return QFileSystemModel::tr("Size");
         case 2:
             return QFileSystemModel::tr("Date Modified");
+        default:
+            Q_ASSERT(false);
         }
     }
 

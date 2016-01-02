@@ -123,6 +123,9 @@ QVariant ArchiveItem::data(const int role, const int column) const
 
         case col_date:
             return m_date;
+        default:
+            Q_ASSERT(false);
+            return QVariant();
         }
     }
     case Qt::DisplayRole:
@@ -137,6 +140,10 @@ QVariant ArchiveItem::data(const int role, const int column) const
 
         case col_date:
             return m_date.toString(Qt::SystemLocaleShortDate);
+
+        default:
+            Q_ASSERT(false);
+            return QVariant();
         }
     }
 
@@ -158,9 +165,10 @@ QVariant ArchiveItem::data(const int role, const int column) const
 
     case Helper::ROLE_FILE_DATE:
         return m_date;
-    }
 
-    return QVariant();
+    default:
+        return QVariant();
+    }
 }
 
 ArchiveItem *ArchiveItem::parent() const
