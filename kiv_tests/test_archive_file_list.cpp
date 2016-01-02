@@ -7,9 +7,9 @@ namespace QTest {
     char *toString(const ArchiveFileInfo &afi)
     {
         QByteArray ba = "ArchiveFileInfo(";
-        ba += afi.name.toUtf8() + ", ";
-        ba += QByteArray::number(afi.uncompressedSize) + ", ";
-        ba += toString(afi.dateTime);
+        ba += afi.m_name.toUtf8() + ", ";
+        ba += QByteArray::number(afi.m_uncompressedSize) + ", ";
+        ba += toString(afi.m_dateTime);
         ba += ")";
         return qstrdup(ba.data());
     }
@@ -45,10 +45,10 @@ void TestArchiveFileList::commonCheck(const QString &archiveName, const DirStruc
             const auto aIt = std::find_if(
                         list.cbegin(),
                         list.cend(),
-                        [&e] (const ArchiveFileInfo &c){ return c.name == e.name; }
+                        [&e] (const ArchiveFileInfo &x){ return x.m_name == e.m_name; }
             );
-            QVERIFY2(aIt != list.end(), e.name.toUtf8());
-            QCOMPARE((*aIt).dateTime, e.dateTime);
+            QVERIFY2(aIt != list.end(), e.m_name.toUtf8());
+            QCOMPARE((*aIt).m_dateTime, e.m_dateTime);
             QCOMPARE((*aIt), e);
         }
     }

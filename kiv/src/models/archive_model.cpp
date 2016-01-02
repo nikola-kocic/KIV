@@ -55,7 +55,7 @@ void ArchiveModel::populate(
         DEBUGOUT << currentArchiveFile.name;
 #endif
         ArchiveItem *node = rootArchiveItem;
-        const QStringList file_path_parts = currentArchiveFile.name.split('/');
+        const QStringList file_path_parts = currentArchiveFile.m_name.split('/');
         QString folderPath = path + "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
@@ -66,7 +66,7 @@ void ArchiveModel::populate(
                 if (j < file_path_parts.size() - 1)
                 {
                     node = AddNode(currentFilePathPart,
-                                   currentArchiveFile.dateTime,
+                                   currentArchiveFile.m_dateTime,
                                    0,
                                    folderPath,
                                    NodeType::Directory,
@@ -74,14 +74,14 @@ void ArchiveModel::populate(
                 }
                 else
                 {
-                    const QFileInfo fi(currentArchiveFile.name);
+                    const QFileInfo fi(currentArchiveFile.m_name);
                     if (Helper::isImageFile(fi))
                     {
                         const QString nodeFilePath = path + "/"
-                                + currentArchiveFile.name;
+                                + currentArchiveFile.m_name;
                         node = AddNode(currentFilePathPart,
-                                       currentArchiveFile.dateTime,
-                                       currentArchiveFile.uncompressedSize,
+                                       currentArchiveFile.m_dateTime,
+                                       currentArchiveFile.m_uncompressedSize,
                                        nodeFilePath,
                                        NodeType::Image,
                                        node);

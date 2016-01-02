@@ -80,7 +80,7 @@ private:
 
 struct ArchiveFileInfo {
     /// File name.
-    const QString name;
+    const QString m_name;
 //    /// Version created by.
 //    quint16 versionCreated;
 //    /// Version needed to extract.
@@ -90,13 +90,13 @@ struct ArchiveFileInfo {
 //    /// Compression method.
 //    quint16 method;
     /// Last modification date and time.
-    const QDateTime dateTime;
+    const QDateTime m_dateTime;
 //    /// CRC.
 //    quint32 crc;
 //    /// Compressed file size.
 //    quint32 compressedSize;
     /// Uncompressed file size.
-    const quint32 uncompressedSize;
+    const quint32 m_uncompressedSize;
 //    /// Disk number start.
 //    quint16 diskNumberStart;
 //    /// Internal file attributes.
@@ -110,18 +110,18 @@ struct ArchiveFileInfo {
     explicit ArchiveFileInfo(const QString name,
                              const QDateTime dateTime,
                              const quint32 uncompressedSize)
-        :name(name)
-        , dateTime(dateTime)
-        , uncompressedSize(uncompressedSize)
+        : m_name(name)
+        , m_dateTime(dateTime)
+        , m_uncompressedSize(uncompressedSize)
     {
     }
-    bool operator==(const ArchiveFileInfo& other) const {
-        return (name == other.name &&
-                dateTime == other.dateTime &&
-                uncompressedSize == other.uncompressedSize);
+    bool operator==(const ArchiveFileInfo& rhs) const {
+        return (m_name == rhs.m_name &&
+                m_dateTime == rhs.m_dateTime &&
+                m_uncompressedSize == rhs.m_uncompressedSize);
     }
 
-    bool isDir() const { return uncompressedSize == 0; }
+    bool isDir() const { return m_uncompressedSize == 0; }
 };
 
 #endif  // ENUMS_H
