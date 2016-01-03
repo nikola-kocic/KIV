@@ -1,6 +1,6 @@
 #include "test_archive_file_list.h"
 #include <QtTest>
-#include "kiv/src/polyfill.h"
+#include "kiv/src/helper.h"
 
 namespace QTest {
     template<>
@@ -37,7 +37,7 @@ void TestArchiveFileList::commonCheck(const QString &archiveName, const DirStruc
     int success = m_archive_extractor->getFileInfoList(archivePath, list);
     QCOMPARE(success, 0);
 
-    const auto cc = make_array(tds.getFiles(), tds.getDirs());
+    const auto cc = Helper::make_array(tds.getFiles(), tds.getDirs());
     for (const auto &c : cc)
     {
         for (const auto &e : c)

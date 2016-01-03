@@ -1,18 +1,15 @@
-template <typename... T>
-constexpr auto make_array(T&&... values) ->
-        std::array<
-            typename std::decay<
-                typename std::common_type<T...>::type>::type,
-            sizeof...(T)> {
-    return std::array<
-        typename std::decay<
-            typename std::common_type<T...>::type>::type,
-        sizeof...(T)>{{std::forward<T>(values)...}};
-}
+#ifndef POLYFILL_H
+#define POLYFILL_H
 
-template<class C, class T>
-auto contains(const C& v, const T& x)
--> decltype(std::end(v), true)
-{
-    return std::end(v) != std::find(std::begin(v), std::end(v), x);
+#pragma once
+
+#include <memory>
+
+namespace cpp14 {
+    template<typename T, typename ...Args>
+    std::unique_ptr<T> make_unique( Args&& ...args )
+    {
+        return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+    }
 }
+#endif  // POLYFILL_H
