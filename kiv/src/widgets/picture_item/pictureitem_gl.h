@@ -4,7 +4,7 @@
 #include "kiv/src/widgets/picture_item/pictureitem_interface.h"
 
 #include <QFutureWatcher>
-#include <QGLWidget>
+#include <QtOpenGL/QGLWidget>
 #ifdef QT5
 #include <QtConcurrent/QtConcurrentMap>
 #else
