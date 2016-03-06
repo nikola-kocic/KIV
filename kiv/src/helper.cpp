@@ -5,11 +5,18 @@
 #include <QLocale>
 #include <QProcess>
 
+#ifdef KIV_USE_DBUS
+    #include <QtDBus/QtDBus>
+#endif
+
 namespace Helper {
 
 void windowsExplorerOpen(const FileInfo& fi);
 void osxFinderOpen(const FileInfo& fi);
 bool xdgOpen(const FileInfo& fi);
+#ifdef KIV_USE_DBUS
+    bool dbusOpen(const FileInfo& fi);
+#endif
 
 
 const QStringList& getFiltersImage()
@@ -164,14 +171,37 @@ bool xdgOpen(const FileInfo& fi)
     return success;
 }
 
+#ifdef KIV_USE_DBUS
+bool dbusOpen(const FileInfo& fi)
+{
+    const QString filepath = fi.isInArchive() ? fi.getContainerPath() : fi.getPath();
+    const QUrl fileurl = QUrl::fromLocalFile(filepath);
+    const QStringList args(fileurl.toString());
+    QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.FileManager1",
+                                                      "/org/freedesktop/FileManager1",
+                                                      "org.freedesktop.FileManager1",
+                                                      "ShowItems");
+    msg << args << "";
+    const QDBusMessage response = QDBusConnection::sessionBus().call(msg);
+    const bool success = (response.type() != QDBusMessage::MessageType::ErrorMessage);
+    return success;
+}
+#endif
+
 void showInFileBrowser(const FileInfo& fi)
 {
 #if defined(Q_OS_WIN)
     windowsExplorerOpen(fi);
 #elif defined(Q_OS_MAC)
     osxFinderOpen(fi);
-#else
-    xdgOpen(fi);
+#else // Linux
+#ifdef KIV_USE_DBUS
+    // Prefer to use D-Bus because that way file selection works
+    if (dbusOpen(fi) == false)
+#endif // KIV_USE_DBUS
+    {
+        xdgOpen(fi);
+    }
 #endif
 }
 }

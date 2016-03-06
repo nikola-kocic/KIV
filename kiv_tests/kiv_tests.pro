@@ -8,6 +8,9 @@ QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
 QT       += testlib gui
 !defined(KIV_USE_QT4): QT += widgets
 
+#DEFINES += KIV_USE_DBUS
+defined(KIV_USE_DBUS): QT += -dbus
+
 TARGET = tst_kiv_teststest
 #CONFIG   += console
 CONFIG   -= app_bundle

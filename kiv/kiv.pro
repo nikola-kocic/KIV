@@ -71,13 +71,13 @@ HEADERS += \
 FORMS += \
     src/widgets/settings_dialog.ui
 
-QT += opengl
-
 INCLUDEPATH += $$PWD/../
 
 win32{
     RC_FILE = res/icons/kiv.rc
 }
+
+QT += opengl
 
 #DEFINES += KIV_USE_QT4
 !defined(KIV_USE_QT4): QT += widgets concurrent
@@ -85,6 +85,8 @@ win32{
 defined(KIV_USE_QT4): LIBS += -lquazip
 !defined(KIV_USE_QT4): LIBS += -lquazip5
 
+#DEFINES += KIV_USE_DBUS
+defined(KIV_USE_DBUS): QT += -dbus
 
 ANDROID_EXTRA_LIBS = libquazip.so
 
