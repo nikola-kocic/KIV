@@ -33,6 +33,7 @@ QString SortComboBox::getSortText(ColumnSort sort) const
         return sort.getOrder() == SortOrder::Asc ? tr("Size Ascending"):
                                                    tr("Size Descending");
     }
+    return QString();
 }
 
 bool SortComboBox::setSort(ColumnSort sort)
