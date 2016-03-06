@@ -812,8 +812,7 @@ void MainWindow::saveAs()
 void MainWindow::showInFileBrowser()
 {
     const FileInfo cfi = m_view_files->getCurrentFileInfo();
-    const QString path = cfi.getPath();
-    Helper::showInFileBrowser(path);
+    Helper::showInFileBrowser(cfi);
 }
 
 void MainWindow::addBookmark()

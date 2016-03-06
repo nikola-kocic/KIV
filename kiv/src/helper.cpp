@@ -6,6 +6,12 @@
 #include <QProcess>
 
 namespace Helper {
+
+void windowsExplorerOpen(const FileInfo& fi);
+void osxFinderOpen(const FileInfo& fi);
+bool xdgOpen(const FileInfo& fi);
+
+
 const QStringList& getFiltersImage()
 {
     static QStringList filters_image{};
@@ -119,35 +125,53 @@ int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs
     return QString::compare(s1, s2, cs);
 }
 
-
-void showInFileBrowser(const QString& path)
+void windowsExplorerOpen(const FileInfo& fi)
 {
-#if defined(Q_OS_WIN)
+    const QString containerPath = fi.getContainerPath();
     const QString explorer = "explorer";
     QStringList param;
-    if (!QFileInfo(path).isDir())
+    if (!QFileInfo(containerPath).isDir())
+    {
         param << QLatin1String("/select,");
-    param << QDir::toNativeSeparators(path);
+    }
+    param << QDir::toNativeSeparators(containerPath);
     QProcess::startDetached(explorer, param);
-#elif defined(Q_OS_MAC)
+}
+
+void osxFinderOpen(const FileInfo& fi)
+{
+    const QString containerPath = fi.getContainerPath();
     QStringList scriptArgs;
     scriptArgs << QLatin1String("-e")
                << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
-                  .arg(path);
+                  .arg(containerPath);
     QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
     scriptArgs.clear();
     scriptArgs << QLatin1String("-e")
                << QLatin1String("tell application \"Finder\" to activate");
     QProcess::execute("/usr/bin/osascript", scriptArgs);
-#else
+}
+
+bool xdgOpen(const FileInfo& fi)
+{
+    const QString containerPath = fi.getContainerPath();
     // we cannot select a file here, because no file browser really supports it...
-    const QFileInfo fileInfo(path);
+    const QFileInfo fileInfo(containerPath);
     const QString folder = fileInfo.isDir() ? fileInfo.absoluteFilePath() : fileInfo.absolutePath();
-    const QString app = QString("xdg-open \"%1\"").arg(folder);
-    QProcess browserProc;
-    bool success = browserProc.startDetached(app);
-    const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
-    success = success && error.isEmpty();
+    const QString app = QString("xdg-open");
+    const QStringList args(folder);
+    const bool success = QProcess::startDetached(app, args);
+    return success;
+}
+
+void showInFileBrowser(const FileInfo& fi)
+{
+#if defined(Q_OS_WIN)
+    windowsExplorerOpen(fi);
+#elif defined(Q_OS_MAC)
+    osxFinderOpen(fi);
+#else
+    xdgOpen(fi);
 #endif
 }
 }
