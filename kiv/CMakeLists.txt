@@ -13,18 +13,21 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-find_package ( Qt4 QUIET )
-if(NOT Qt4_FOUND)
+option(KIV_USE_QT4 "Use Qt4" OFF)
+
+if(KIV_USE_QT4)
+    find_package(Qt4 REQUIRED)
+    add_definitions(-DKIV_USE_QT4)
+else()
     find_package(Qt5Core REQUIRED)
     find_package(Qt5Gui REQUIRED)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Concurrent REQUIRED)
     find_package(Qt5OpenGL REQUIRED)
-    add_definitions(-DQT5)
 endif()
 
 find_package ( OpenGL REQUIRED )
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     include ( ${QT_USE_FILE} )
     find_package ( QuaZip REQUIRED )
 else()
@@ -92,7 +95,7 @@ set ( kiv_SRCS
 set ( kiv_UIS
     src/widgets/settings_dialog.ui
     )
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     QT4_WRAP_UI(UIS ${kiv_UIS})
 else()
     qt5_wrap_ui(UIS ${kiv_UIS})
@@ -101,7 +104,7 @@ endif()
 set ( kiv_RSCS
     icons.qrc
     )
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     QT4_ADD_RESOURCES(RSCS ${kiv_RSCS})
 else()
     qt5_add_resources(RSCS ${kiv_RSCS})
@@ -127,14 +130,14 @@ set ( kiv_MOCS
     src/widgets/urlnavigator.h
     src/archiveextractor.h
     )
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     QT4_WRAP_CPP(MOCS ${kiv_MOCS})
 else()
     qt5_wrap_cpp(MOCS ${kiv_MOCS})
 endif()
 
 add_executable ( kiv ${kiv_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-if (Qt4_FOUND)
+if (KIV_USE_QT4)
     target_link_libraries ( kiv ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})
 else()
     target_link_libraries ( kiv Qt5::Widgets Qt5::Concurrent Qt5::OpenGL ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})

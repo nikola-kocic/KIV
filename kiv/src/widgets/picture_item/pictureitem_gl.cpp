@@ -159,7 +159,7 @@ void PictureItemGL::initializeGL()
 
     qglClearColor(m_data->m_color_clear);
 
-#ifndef QT5
+#ifdef KIV_USE_QT4
     QGL::setPreferredPaintEngine(QPaintEngine::OpenGL2);
 #endif
 

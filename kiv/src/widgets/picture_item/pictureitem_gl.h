@@ -5,10 +5,10 @@
 
 #include <QFutureWatcher>
 #include <QtOpenGL/QGLWidget>
-#ifdef QT5
-#include <QtConcurrent/QtConcurrentMap>
+#ifdef KIV_USE_QT4
+    #include <QtConcurrentMap>
 #else
-#include <QtConcurrentMap>
+    #include <QtConcurrent/QtConcurrentMap>
 #endif
 
 #include "kiv/src/widgets/picture_item/teximg.h"

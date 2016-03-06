@@ -14,18 +14,21 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-find_package ( Qt4 QUIET )
-if(NOT Qt4_FOUND)
+option(KIV_USE_QT4 "Use Qt4" OFF)
+
+if(KIV_USE_QT4)
+    find_package(Qt4 REQUIRED)
+    add_definitions(-DKIV_USE_QT4)
+else()
     find_package(Qt5Core REQUIRED)
     find_package(Qt5Gui REQUIRED)
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Concurrent REQUIRED)
     find_package(Qt5Test REQUIRED)
-    add_definitions(-DQT5)
 endif()
 
 
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     include ( ${QT_USE_FILE} )
     find_package ( QuaZip REQUIRED )
 else()
@@ -64,7 +67,7 @@ set ( tst_kiv_teststest_SRCS
 set ( tst_kiv_teststest_RSCS
     test_assets.qrc
     )
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     QT4_ADD_RESOURCES(RSCS ${tst_kiv_teststest_RSCS})
 else()
     qt5_add_resources(RSCS ${tst_kiv_teststest_RSCS})
@@ -84,7 +87,7 @@ set ( tst_kiv_teststest_MOCS
     ../kiv/src/archiveextractor.h
     ../kiv/src/models/unrar/archive_rar.h
     )
-if(Qt4_FOUND)
+if(KIV_USE_QT4)
     QT4_WRAP_CPP(MOCS ${tst_kiv_teststest_MOCS})
 else()
     qt5_wrap_cpp(MOCS ${tst_kiv_teststest_MOCS})
@@ -92,7 +95,7 @@ endif()
 
 
 add_executable ( tst_kiv_teststest ${tst_kiv_teststest_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-if (Qt4_FOUND)
+if (KIV_USE_QT4)
     target_link_libraries ( tst_kiv_teststest  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY} ${QUAZIP_LIBRARIES} )
 else()
     target_link_libraries ( tst_kiv_teststest  Qt5::Widgets Qt5::Gui Qt5::Test ${QUAZIP_LIBRARIES} )

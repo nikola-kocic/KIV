@@ -6,12 +6,12 @@
 #include <QFileIconProvider>
 #include <QFileSystemModel>
 #include <QPixmap>
-#ifdef QT5
-#include <QtConcurrent/QtConcurrentMap>
-#include <QtConcurrent/QtConcurrentRun>
+#ifdef KIV_USE_QT4
+    #include <QtConcurrentMap>
+    #include <QtConcurrentRun>
 #else
-#include <QtConcurrentMap>
-#include <QtConcurrentRun>
+    #include <QtConcurrent/QtConcurrentMap>
+    #include <QtConcurrent/QtConcurrentRun>
 #endif
 
 //#define DEBUG_THUMBNAIL_ITEM_DELEGATE

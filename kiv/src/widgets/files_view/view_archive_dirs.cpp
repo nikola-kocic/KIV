@@ -17,10 +17,10 @@ ViewArchiveDirs::ViewArchiveDirs(
     QTreeView *const t = static_cast<QTreeView*>(m_view.get());
     t->setEditTriggers(QAbstractItemView::NoEditTriggers);
     t->setUniformRowHeights(true);
-#ifdef QT5
-    t->header()->setSectionResizeMode(QHeaderView::Stretch);
-#else
+#ifdef KIV_USE_QT4
     t->header()->setResizeMode(QHeaderView::Stretch);
+#else
+    t->header()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     t->setHeaderHidden(true);
 }

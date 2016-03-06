@@ -3,8 +3,10 @@
 }
 QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
 
+#DEFINES += KIV_USE_QT4
+
 QT       += testlib gui
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+!defined(KIV_USE_QT4): QT += widgets
 
 TARGET = tst_kiv_teststest
 #CONFIG   += console
@@ -63,8 +65,8 @@ RESOURCES += \
 
 DEPENDPATH *= $${INCLUDEPATH}
 
-greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip5
-!greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip
+defined(KIV_USE_QT4): LIBS += -lquazip
+!defined(KIV_USE_QT4): LIBS += -lquazip5
 
 win32:CONFIG(release, debug|release) {
     BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}release

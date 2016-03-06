@@ -79,11 +79,11 @@ win32{
     RC_FILE = res/icons/kiv.rc
 }
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets concurrent
-greaterThan(QT_MAJOR_VERSION, 4): DEFINES += QT5
+#DEFINES += KIV_USE_QT4
+!defined(KIV_USE_QT4): QT += widgets concurrent
 
-greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip5
-!greaterThan(QT_MAJOR_VERSION, 4): LIBS += -lquazip
+defined(KIV_USE_QT4): LIBS += -lquazip
+!defined(KIV_USE_QT4): LIBS += -lquazip5
 
 
 ANDROID_EXTRA_LIBS = libquazip.so
