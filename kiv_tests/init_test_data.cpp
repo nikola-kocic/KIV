@@ -90,18 +90,18 @@ void InitTestData::createFiles(
         Q_ASSERT_X(QDir().mkpath(path),
                    QString("makeTestData folders").toUtf8(),
                    path.toUtf8());
-        date_set_commands.append(getDateSetCommand(path, afi.dateTime));
+        date_set_commands.append(getDateSetCommand(path, afi.m_dateTime));
     }
 
     for (const ArchiveFileInfo &afi : files)
     {
         const QString path = fFilePath(afi);
-        if (!afi.name.endsWith(".txt"))
+        if (!afi.m_name.endsWith(".txt"))
         {
             image_create_commands.append(getImageCreateCommand(path));
             image_create_commands.append(getImageCompressCommand(path));
         }
-        date_set_commands.append(getDateSetCommand(path, afi.dateTime));
+        date_set_commands.append(getDateSetCommand(path, afi.m_dateTime));
     }
     const QString extracted_dir = fWorkingDir();
     executeCommands(image_create_commands, extracted_dir);
@@ -117,7 +117,7 @@ InitTestArchives InitTestData::makeTestData(const DirStructureFixture &dsf) cons
     const QString &dir = dsf.getPath();
     createFiles(folders,
              files,
-             [&dir](ArchiveFileInfo afi) { return QDir::cleanPath(dir + QDir::separator() + afi.name); },
+             [&dir](ArchiveFileInfo afi) { return QDir::cleanPath(dir + QDir::separator() + afi.m_name); },
              [&dir]() { return dir; }
     );
     return InitTestArchives(dir);

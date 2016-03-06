@@ -52,6 +52,7 @@ set ( tst_kiv_teststest_SRCS
     test_zoom_widget_no_defaults.cpp
     test_archive_files.cpp
     test_archive_file_list.cpp
+    init_test_data.cpp
     ../kiv/src/settings.cpp
     ../kiv/src/widgets/picture_item/pictureitem_data.cpp
     ../kiv/src/widgets/picture_item/pictureitem_raster.cpp
@@ -77,6 +78,7 @@ set ( tst_kiv_teststest_MOCS
     test_zoom_widget_no_defaults.h
     test_archive_files.h
     test_archive_file_list.h
+    init_test_data.h
     ../kiv/src/widgets/picture_item/pictureitem_raster.h
     ../kiv/src/widgets/zoom_widget.h
     ../kiv/src/archiveextractor.h
