@@ -56,7 +56,17 @@ namespace Helper
 }
 
 inline bool Helper::isArchiveFile(const QFileInfo &fi)
-{ return contains(Helper::filtersArchive, fi.suffix().toLower()); }
+{
+    for (auto &ext : Helper::filtersArchive)
+    {
+        // TODO: Use MIME
+        if (fi.suffix().toLower().endsWith(ext))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 inline bool Helper::isImageFile(const QFileInfo &fi)
 { return getFiltersImage().contains(fi.suffix().toLower()); }
