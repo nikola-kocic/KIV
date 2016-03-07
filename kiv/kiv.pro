@@ -80,13 +80,13 @@ win32{
 QT += opengl
 
 #DEFINES += KIV_USE_QT4
-!defined(KIV_USE_QT4): QT += widgets concurrent
+!contains(DEFINES, KIV_USE_QT4): QT += widgets concurrent
 
-defined(KIV_USE_QT4): LIBS += -lquazip
-!defined(KIV_USE_QT4): LIBS += -lquazip5
+contains(DEFINES, KIV_USE_QT4): LIBS += -lquazip
+!contains(DEFINES, KIV_USE_QT4): LIBS += -lquazip5
 
 #DEFINES += KIV_USE_DBUS
-defined(KIV_USE_DBUS): QT += -dbus
+contains(DEFINES, KIV_USE_DBUS): QT += dbus
 
 ANDROID_EXTRA_LIBS = libquazip.so
 
