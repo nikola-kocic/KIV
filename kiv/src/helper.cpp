@@ -16,6 +16,7 @@ void osxFinderOpen(const FileInfo& fi);
 bool xdgOpen(const FileInfo& fi);
 #ifdef KIV_USE_DBUS
     bool dbusOpen(const FileInfo& fi);
+    bool dbusOpenThunar(const FileInfo& fi);
 #endif
 
 
@@ -186,6 +187,24 @@ bool dbusOpen(const FileInfo& fi)
     const bool success = (response.type() != QDBusMessage::MessageType::ErrorMessage);
     return success;
 }
+
+bool dbusOpenThunar(const FileInfo& fi)
+{
+    const QString filepath = fi.isInArchive() ? fi.getContainerPath() : fi.getPath();
+    const QString containerPath = fi.getContainerPath();
+    const QFileInfo containerFileInfo(containerPath);
+    const QString folder = containerFileInfo.isDir() ? containerFileInfo.absoluteFilePath() : containerFileInfo.absolutePath();
+    const QString filename = QFileInfo(filepath).fileName();
+
+    QDBusMessage msg = QDBusMessage::createMethodCall("org.xfce.FileManager",
+                                                      "/org/xfce/FileManager",
+                                                      "org.xfce.FileManager",
+                                                      "DisplayFolderAndSelect");
+    msg << folder << filename << "" << "";
+    const QDBusMessage response = QDBusConnection::sessionBus().call(msg);
+    const bool success = (response.type() != QDBusMessage::MessageType::ErrorMessage);
+    return success;
+}
 #endif
 
 void showInFileBrowser(const FileInfo& fi)
@@ -197,7 +216,8 @@ void showInFileBrowser(const FileInfo& fi)
 #else // Linux
 #ifdef KIV_USE_DBUS
     // Prefer to use D-Bus because that way file selection works
-    if (dbusOpen(fi) == false)
+    // TODO: Settings for order
+    if (dbusOpenThunar(fi) == false && dbusOpen(fi) == false)
 #endif // KIV_USE_DBUS
     {
         xdgOpen(fi);
