@@ -14,11 +14,11 @@ class ArchiveRar
 {
 public:
     static bool loadlib();
-    static int extract(
+    static bool extract(
             const QString &archiveName,
             const QString &fileName,
             const QString &newFileName);
-    static int readFile(
+    static bool readFile(
             const QString &archiveName,
             const QString &fileName,
             QByteArray &buffer);

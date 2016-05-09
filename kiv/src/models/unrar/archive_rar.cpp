@@ -3,6 +3,8 @@
 #include <QBuffer>
 #include <QDir>
 
+#include <limits>
+
 #include "kiv/src/models/unrar/unrar.h"
 
 #define  LHD_LARGE          0x0100
@@ -56,28 +58,33 @@ bool ArchiveRar::loadlib()
     return true;
 }
 
-int ArchiveRar::extract(const QString &archiveName,
+static qint64 getUncompressedSize(const RARHeaderDataEx& HeaderData)
+{
+    const qint64 uncompressedSize = HeaderData.UnpSize +
+            (static_cast<qint64>(HeaderData.UnpSizeHigh) << 32);
+    return uncompressedSize;
+}
+
+bool ArchiveRar::extract(const QString &archiveName,
                                  const QString &fileName,
                                  const QString &newFileName)
 {
     const std::wstring fileNameW =
             QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
-    int returnCode = 1000;
+    bool retval = true;
 
     RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
     OpenArchiveData.ArcNameW = arcNameW.c_str();
-    OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
-    OpenArchiveData.Callback = nullptr;
-    OpenArchiveData.UserData = 0;
 
-    Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
+    const Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
 
     if (OpenArchiveData.OpenResult != 0)
     {
-        return OpenArchiveData.OpenResult;
+        qWarning("RAROpenArchiveEx error: %d", OpenArchiveData.OpenResult);
+        return false;
     }
 
     int RHCode, PFCode;
@@ -88,20 +95,21 @@ int ArchiveRar::extract(const QString &archiveName,
 
     while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
     {
-        if (wcscmp(fileNameW.c_str(),  HeaderData.FileNameW) == 0)
+        if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
-            std::wstring newFileNameW =
-                    QDir::toNativeSeparators(newFileName).toStdWString();
-            PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, nullptr,
-                                     newFileNameW.c_str());
-            returnCode = PFCode;
+            const std::wstring newFileNameW = QDir::toNativeSeparators(newFileName).toStdWString();
+
+            if ((PFCode = RARProcessFileW(hArcData, RAR_EXTRACT, nullptr, newFileNameW.c_str())) != 0)
+            {
+                qWarning("RARProcessFileW RAR_EXTRACT error: %d", PFCode);
+                retval = false;
+            }
             break;
         }
-        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr))
-                 != 0)
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr)) != 0)
         {
-            qWarning("%d", PFCode);
-            returnCode = PFCode;
+            qWarning("RARProcessFileW RAR_SKIP error: %d", PFCode);
+            retval = false;
             break;
         }
     }
@@ -113,7 +121,7 @@ int ArchiveRar::extract(const QString &archiveName,
 
     RARCloseArchive(hArcData);
 
-    return returnCode;
+    return retval;
 }
 
 static int CALLBACK CallbackProc(unsigned int msg,
@@ -141,26 +149,27 @@ static int CALLBACK CallbackProc(unsigned int msg,
     }
 }
 
-int ArchiveRar::readFile(const QString &archiveName,
-                                  const QString &fileName,
-                                  QByteArray &buffer)
+bool ArchiveRar::readFile(
+        const QString &archiveName,
+        const QString &fileName,
+        QByteArray &buffer)
 {
     const std::wstring fileNameW =
             QDir::toNativeSeparators(fileName).toStdWString();
     const std::wstring arcNameW = archiveName.toStdWString();
-    int returnCode = 1000;
+    bool retval = true;
 
     RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
     OpenArchiveData.ArcNameW = arcNameW.c_str();
-    OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
 
     Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
 
     if (OpenArchiveData.OpenResult != 0)
     {
-        return OpenArchiveData.OpenResult;
+        qWarning("RAROpenArchiveEx error: %d", OpenArchiveData.OpenResult);
+        return false;
     }
 
     char *callBackBuffer = nullptr;
@@ -175,20 +184,27 @@ int ArchiveRar::readFile(const QString &archiveName,
     {
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
-            qint64 UnpSize = HeaderData.UnpSize
-                    + (static_cast<qint64>(HeaderData.UnpSizeHigh) << 32);
-            buffer.resize(UnpSize);
+            qint64 UnpSize = getUncompressedSize(HeaderData);
+            if (UnpSize > std::numeric_limits<int>::max())
+            {
+                qWarning("File size too large: %lld", UnpSize);
+                retval = false;
+                break;
+            }
+            buffer.resize(static_cast<int>(UnpSize));
             callBackBuffer = buffer.data();
 
-            PFCode = RARProcessFileW(hArcData, RAR_TEST, nullptr, nullptr);
-            returnCode = PFCode;
-            break;
+            if ((PFCode = RARProcessFileW(hArcData, RAR_TEST, nullptr, nullptr) != 0))
+            {
+                qWarning("RARProcessFileW RAR_TEST error: %d", PFCode);
+                retval = false;
+                break;
+            }
         }
-        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr))
-                 != 0)
+        else if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr)) != 0)
         {
-            qWarning("%d", PFCode);
-            returnCode = PFCode;
+            qWarning("RARProcessFileW RAR_SKIP error: %d", PFCode);
+            retval = false;
             break;
         }
     }
@@ -200,7 +216,7 @@ int ArchiveRar::readFile(const QString &archiveName,
 
     RARCloseArchive(hArcData);
 
-    return returnCode;
+    return retval;
 }
 
 QDateTime ArchiveRar::dateFromDos(const uint32_t dosTime)
@@ -214,12 +230,11 @@ QDateTime ArchiveRar::dateFromDos(const uint32_t dosTime)
     return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
 
-
 ArchiveFileInfo ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx HeaderData)
 {
     QString fileName = QString::fromWCharArray(HeaderData.FileNameW);
     fileName = QDir::fromNativeSeparators(fileName);
-    quint32 uncompressedSize = 0;
+    qint64 uncompressedSize = 0;
     if ((HeaderData.Flags & RHDF_DIRECTORY) == RHDF_DIRECTORY)
     {
         fileName.append(QDir::separator());
@@ -227,9 +242,7 @@ ArchiveFileInfo ArchiveRar::createArchiveFileInfo(const RARHeaderDataEx HeaderDa
     }
     else
     {
-        qint64 unpSize = HeaderData.UnpSize
-                + (static_cast<qint64>(HeaderData.UnpSizeHigh) << 32);
-        uncompressedSize = unpSize;
+        uncompressedSize = getUncompressedSize(HeaderData);
     }
     return ArchiveFileInfo(fileName, dateFromDos(HeaderData.FileTime), uncompressedSize);
 }
@@ -243,9 +256,7 @@ unsigned int ArchiveRar::getFileInfoList(
     RAROpenArchiveDataEx OpenArchiveData;
     memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
     OpenArchiveData.ArcNameW = path_wstr.c_str();
-    OpenArchiveData.CmtBufSize = 0;
     OpenArchiveData.OpenMode = RAR_OM_LIST;
-    OpenArchiveData.Callback = nullptr;
 
     Qt::HANDLE hArcData = RAROpenArchiveEx(&OpenArchiveData);
 
@@ -270,7 +281,7 @@ unsigned int ArchiveRar::getFileInfoList(
 
         if ((PFCode = RARProcessFileW(hArcData, RAR_SKIP, nullptr, nullptr)) != 0)
         {
-            qWarning("%d", PFCode);
+            qWarning("RARProcessFileW RAR_SKIP error %d", PFCode);
             break;
         }
     }
