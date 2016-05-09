@@ -2,6 +2,7 @@
 #define FIXTURES_H
 
 #include <memory>
+#include <vector>
 
 #include "../kiv/src/enums.h"
 
