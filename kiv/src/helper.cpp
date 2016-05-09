@@ -37,20 +37,21 @@ QString size(const qint64 bytes)
 {
     // According to the Si standard KB is 1000 bytes, KiB is 1024
     // but on windows sizes are calculated by dividing by 1024 so we do what they do.
-    const qint64 kib = 1024;
-    const qint64 mib = 1024 * kib;
-    const qint64 gib = 1024 * mib;
-    const qint64 tib = 1024 * gib;
-    if (bytes >= tib)
+    constexpr qint64 kib = 1024;
+    constexpr qint64 mib = 1024 * kib;
+    constexpr qint64 gib = 1024 * mib;
+    constexpr qint64 tib = 1024 * gib;
+    if (bytes >= tib) {
         return QFileSystemModel::tr("%1 TiB").arg(QLocale().toString(1.0 * bytes / tib, 'f', 3));
-    else if (bytes >= gib)
+    } else if (bytes >= gib) {
         return QFileSystemModel::tr("%1 GiB").arg(QLocale().toString(1.0 * bytes / gib, 'f', 2));
-    else if (bytes >= mib)
+    } else if (bytes >= mib) {
         return QFileSystemModel::tr("%1 MiB").arg(QLocale().toString(1.0 * bytes / mib, 'f', 1));
-    else if (bytes >= kib)
-        return QFileSystemModel::tr("%1 KiB").arg(QLocale().toString(1.0 * bytes / kib));
-    else if (bytes == 0)
+    } else if (bytes >= kib) {
+        return QFileSystemModel::tr("%1 KiB").arg(QLocale().toString(1.0 * bytes / kib, 'f', 1));
+    } else if (bytes == 0) {
         return "";
+    }
     return QFileSystemModel::tr("%1 bytes").arg(QLocale().toString(bytes));
 }
 
