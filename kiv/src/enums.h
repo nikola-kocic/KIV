@@ -96,7 +96,7 @@ struct ArchiveFileInfo {
 //    /// Compressed file size.
 //    quint32 compressedSize;
     /// Uncompressed file size.
-    const quint32 m_uncompressedSize;
+    const qint64 m_uncompressedSize;
 //    /// Disk number start.
 //    quint16 diskNumberStart;
 //    /// Internal file attributes.
@@ -109,7 +109,7 @@ struct ArchiveFileInfo {
 //    QByteArray extra;
     explicit ArchiveFileInfo(const QString name,
                              const QDateTime dateTime,
-                             const quint32 uncompressedSize)
+                             const qint64 uncompressedSize)
         : m_name(name)
         , m_dateTime(dateTime)
         , m_uncompressedSize(uncompressedSize)
