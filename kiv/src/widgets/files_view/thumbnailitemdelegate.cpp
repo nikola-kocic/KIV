@@ -158,17 +158,13 @@ void ThumbnailItemDelegate::initStyleOption(QStyleOptionViewItem *option,
                 QCryptographicHash::Md4);
     if (m_thumbnails.contains(path_hash))
     {
-        if (QStyleOptionViewItemV4 *v4 =
-            qstyleoption_cast<QStyleOptionViewItemV4 *>(option))
+        const ThumbImageDate *tid = m_thumbnails.value(path_hash);
+        if (tid->getThumb().availableSizes().isEmpty())
         {
-            const ThumbImageDate *tid = m_thumbnails.value(path_hash);
-            if (tid->getThumb().availableSizes().isEmpty())
-            {
-                return;
-            }
-            v4->icon = tid->getThumb();
-            v4->decorationSize = v4->icon.availableSizes().last();
+            return;
         }
+        option->icon = tid->getThumb();
+        option->decorationSize = option->icon.availableSizes().last();
     }
 }
 
