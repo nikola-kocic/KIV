@@ -39,15 +39,13 @@ public:
 
     void setLockMode(const LockMode mode);
 
-    void setHardwareAcceleration(const bool b);
-    bool getHardwareAcceleration() const;
+    void initPictureItem(bool opengl);
 
     void setPixmap(const FileInfo &info);
     bool isPixmapNull() const;
 
 
 private:
-    void initPictureItem();
     void afterPixmapLoad();
     QColor getAverageColor(const QImage &img) const;
 
@@ -63,7 +61,6 @@ private:
     QFutureWatcher< QImage > *const m_loader_image;
     LockMode m_lockMode;
 
-    bool m_opengl;
     bool m_dragging;
 
 #ifdef DEBUG_PICTUREITEM
@@ -92,9 +89,6 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 };
-
-inline bool PictureItem::getHardwareAcceleration() const
-{ return m_opengl; }
 
 inline bool PictureItem::isPixmapNull() const
 { return m_data->isPixmapNull(); }

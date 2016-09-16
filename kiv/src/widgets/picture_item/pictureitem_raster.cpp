@@ -11,11 +11,12 @@
 #include "kiv/src/helper.h"
 #endif
 
-PictureItemRaster::PictureItemRaster(PictureItemData *data, QWidget *parent)
+PictureItemRaster::PictureItemRaster(PictureItemData *data, ZoomFilter zoomFilter, QWidget *parent)
     : QWidget(parent)
     , PictureItemInterface(data)
     , m_pixmap(QPixmap())
     , m_pixmap_edited(m_pixmap)
+    , m_zoomFilter(zoomFilter)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
     m_widget = this;
@@ -79,7 +80,10 @@ void PictureItemRaster::paint(QPainter &p, QPaintEvent const * const event)
 
         /* Draw image */
         p.setClipRect(eventRect);
-        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        if (m_zoomFilter == ZoomFilter::Good)
+        {
+            p.setRenderHint(QPainter::SmoothPixmapTransform);
+        }
         p.drawPixmap(targetRect, m_pixmap_edited, sourceRect);
     }
 }
@@ -105,7 +109,10 @@ void PictureItemRaster::setRotation(const qreal current, const qreal previous)
         m_pixmap_edited.fill(m_data->m_color_clear);
         QPainter p(&m_pixmap_edited);
 
-        p.setRenderHint(QPainter::SmoothPixmapTransform);
+        if (m_zoomFilter == ZoomFilter::Good)
+        {
+            p.setRenderHint(QPainter::SmoothPixmapTransform);
+        }
         p.translate(image_size_transformed.width() / 2,
                     image_size_transformed.height() / 2);
         p.rotate(current);

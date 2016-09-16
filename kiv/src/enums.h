@@ -40,6 +40,12 @@ enum class FileViewMode: int
 };
 
 
+enum class ZoomFilter: int
+{
+    None = 0,
+    Good = 1,
+};
+
 enum class Column
 {
     Name,

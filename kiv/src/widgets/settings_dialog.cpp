@@ -30,6 +30,8 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
     ui->cbRTL->setChecked(m_settings->getRightToLeft());
     ui->cbHardwareAcceleration->setChecked(
                 m_settings->getHardwareAcceleration());
+    ui->cbSmoothZoom->setChecked(
+                m_settings->getZoomFilter() != ZoomFilter::None),
     ui->spinBox_thumbnail_width->setValue(
                 m_settings->getThumbnailSize().width());
     ui->spinBox_thumbnail_height->setValue(
@@ -50,6 +52,10 @@ void Settings_Dialog::on_buttonBox_accepted()
 
     m_settings->setHardwareAcceleration(
                 ui->cbHardwareAcceleration->isChecked());
+    m_settings->setZoomFilter(
+                ui->cbSmoothZoom->isChecked() ?
+                    ZoomFilter::Good :
+                    ZoomFilter::None);
     m_settings->setThumbnailSize(QSize(ui->spinBox_thumbnail_width->value(),
                                        ui->spinBox_thumbnail_height->value()));
     m_settings->setCalculateAverageColor(

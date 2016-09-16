@@ -4,13 +4,14 @@
 
 #include <QWidget>
 #include "kiv/src/widgets/picture_item/pictureitem_interface.h"
+#include "kiv/src/enums.h"
 
 class PictureItemRaster : private QWidget, public PictureItemInterface
 {
     Q_OBJECT
 
 public:
-    explicit PictureItemRaster(PictureItemData *data, QWidget* parent);
+    explicit PictureItemRaster(PictureItemData *data, ZoomFilter zoomFilter, QWidget* parent);
     ~PictureItemRaster() override;
     void setRotation(const qreal current, const qreal previous) override;
     void setZoom(const qreal current, const qreal previous) override;
@@ -22,6 +23,7 @@ public:
 private:
     QPixmap m_pixmap;
     QPixmap m_pixmap_edited;
+    ZoomFilter m_zoomFilter;
 
 protected:
     void paintEvent(QPaintEvent *event) override;

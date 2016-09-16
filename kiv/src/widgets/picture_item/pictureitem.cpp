@@ -16,7 +16,6 @@ PictureItem::PictureItem(const IPictureLoader * const picture_loader,
     , m_loader_image(new QFutureWatcher<QImage>(this))
 
     , m_lockMode(LockMode::None)
-    , m_opengl(settings->getHardwareAcceleration())
     , m_dragging(false)
 {
     this->setCursor(Qt::OpenHandCursor);
@@ -30,7 +29,7 @@ PictureItem::PictureItem(const IPictureLoader * const picture_loader,
     layoutMain->setMargin(0);
     this->setLayout(layoutMain);
 
-    initPictureItem();
+    initPictureItem(m_settings->getHardwareAcceleration());
 }
 
 PictureItem::~PictureItem()
@@ -39,35 +38,25 @@ PictureItem::~PictureItem()
     delete m_imageDisplay;
 }
 
-void PictureItem::initPictureItem()
+void PictureItem::initPictureItem(bool opengl)
 {
-    if (m_opengl)
+    if (m_imageDisplay != nullptr)
     {
-        m_imageDisplay = new PictureItemGL(m_data, this);
-    }
-    else
-    {
-        m_imageDisplay = new PictureItemRaster(m_data, this);
-    }
-    this->layout()->addWidget(m_imageDisplay->getWidget());
-}
-
-void PictureItem::setHardwareAcceleration(const bool b)
-{
-    if (m_opengl != b)
-    {
-#ifdef DEBUG_PICTUREITEM
-        DEBUGOUT << "Deleted m_imageDisplay";
-#endif
         this->layout()->removeWidget(m_imageDisplay->getWidget());
 //        m_imageDisplay->getWidget()->deleteLater();
         delete m_imageDisplay;
-
-        m_opengl = b;
-        initPictureItem();
     }
-}
 
+    if (opengl)
+    {
+        m_imageDisplay = new PictureItemGL(m_data, m_settings->getZoomFilter(), this);
+    }
+    else
+    {
+        m_imageDisplay = new PictureItemRaster(m_data, m_settings->getZoomFilter(), this);
+    }
+    this->layout()->addWidget(m_imageDisplay->getWidget());
+}
 
 
 /* Region Image loading */

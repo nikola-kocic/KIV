@@ -10,7 +10,7 @@
 
 QImage CreatePow2Bitmap(const TexIndex *const index);
 
-PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
+PictureItemGL::PictureItemGL(PictureItemData *data, ZoomFilter zoomFilter, QWidget *parent)
     : QGLWidget(parent)
     , PictureItemInterface(data)
     , m_loader_texture(new QFutureWatcher<QImage>(this))
@@ -19,6 +19,7 @@ PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
     , m_textures(QVector < QVector < QOpenGLTexture* > >(0))
     , m_texImg(new TexImg())
     , m_returnTexCount(0)
+    , m_zoomFilter(zoomFilter)
 {
     m_widget = this;
     QGLContext::setTextureCacheLimit(0);
@@ -132,8 +133,17 @@ void PictureItemGL::setTexture(const QImage &tex, const int num)
     const int hIndex = num / m_texImg->vTile->tileCount;
     const int vIndex = num % m_texImg->vTile->tileCount;
 
-    gltex->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-    gltex->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    switch(m_zoomFilter)
+    {
+    case ZoomFilter::None:
+        gltex->setMinificationFilter(QOpenGLTexture::Nearest);
+        gltex->setMagnificationFilter(QOpenGLTexture::Nearest);
+        break;
+    case ZoomFilter::Good:
+        gltex->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+        gltex->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
+        break;
+    }
     m_textures[hIndex][vIndex] = gltex;
 
 #ifdef DEBUG_PICTUREITEM_GL

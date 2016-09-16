@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>309</width>
-    <height>189</height>
+    <height>203</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -86,6 +86,13 @@
         <widget class="QCheckBox" name="cbHardwareAcceleration">
          <property name="text">
           <string>Enable Hardware Acceleration</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbSmoothZoom">
+         <property name="text">
+          <string>Smooth Zoom</string>
          </property>
         </widget>
        </item>

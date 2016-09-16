@@ -54,6 +54,9 @@ public:
     bool getHardwareAcceleration() const;
     void setHardwareAcceleration(const bool b);
 
+    inline ZoomFilter getZoomFilter() const;
+    void setZoomFilter(const ZoomFilter v);
+
     QSize getThumbnailSize() const;
     void setThumbnailSize(const QSize &size);
 
@@ -81,6 +84,7 @@ private:
     int m_middleClick;
     int m_wheel;
     int m_pageChangeTimeout;
+    ZoomFilter m_zoomFilter;
 
     bool m_scrollPageByWidth;
     bool m_rightToLeft;
@@ -143,6 +147,15 @@ inline void Settings::setHardwareAcceleration(const bool b)
                          m_hardwareAcceleration);
 }
 
+inline ZoomFilter Settings::getZoomFilter() const
+{ return m_zoomFilter; }
+
+inline void Settings::setZoomFilter(const ZoomFilter v)
+{
+    m_zoomFilter = v;
+    m_settings->setValue("Interface/ZoomFilter",
+                         static_cast<int>(m_zoomFilter));
+}
 
 inline QSize Settings::getThumbnailSize() const
 { return m_thumbSize; }

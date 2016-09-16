@@ -10,13 +10,14 @@
 #include <QtConcurrent/QtConcurrentMap>
 
 #include "kiv/src/widgets/picture_item/teximg.h"
+#include "kiv/src/enums.h"
 
 class PictureItemGL : private QGLWidget, public PictureItemInterface, protected QOpenGLFunctions_2_0
 {
     Q_OBJECT
 
 public:
-    explicit PictureItemGL(PictureItemData *data, QWidget *parent);
+    explicit PictureItemGL(PictureItemData *data, ZoomFilter zoomFilter, QWidget *parent);
     ~PictureItemGL() override;
     void setRotation(const qreal current, const qreal previous) override;
     void setBackgroundColor(const QColor &color) override;
@@ -37,6 +38,7 @@ private:
     QVector < QVector <QOpenGLTexture*> > m_textures;
     TexImg *m_texImg;
     int m_returnTexCount;
+    ZoomFilter m_zoomFilter;
 
 protected:
     void initializeGL() override;

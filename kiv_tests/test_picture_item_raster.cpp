@@ -14,7 +14,7 @@ void TestPictureItemRaster::init()
 {
     m_data = PictureItemData();
     m_data.m_color_clear = QColor::fromRgb(192, 192, 192);
-    m_pictureitem = new PictureItemRaster(&m_data, NULL);
+    m_pictureitem = new PictureItemRaster(&m_data, ZoomFilter::Good, NULL);
 }
 
 void TestPictureItemRaster::cleanup()

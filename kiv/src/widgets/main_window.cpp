@@ -891,14 +891,16 @@ void MainWindow::rotateReset()
 
 void MainWindow::settingsDialog()
 {
+    const bool prev_HWA = m_settings->getHardwareAcceleration();
+    const ZoomFilter prev_ZoomFilter = m_settings->getZoomFilter();
     Settings_Dialog sd(m_settings, this);
     if (sd.exec() == QDialog::Accepted)
     {
         /* Update settings */
-        if (m_settings->getHardwareAcceleration()
-            != m_picture_item->getHardwareAcceleration())
+        if (m_settings->getHardwareAcceleration() != prev_HWA ||
+                m_settings->getZoomFilter() != prev_ZoomFilter)
         {
-            m_picture_item->setHardwareAcceleration(
+            m_picture_item->initPictureItem(
                         m_settings->getHardwareAcceleration());
             m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
         }
