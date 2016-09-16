@@ -51,14 +51,19 @@ bool InitTestData::generateFolderContentFile(const QString &path) const
     return success;
 }
 
-void InitTestCommon::executeCommand(const QString &command, const QString &workingDir) const
+bool InitTestCommon::executeCommand(const QString &command, const QString &workingDir) const
 {
 #ifndef WIN32
     QProcess p;
     //qDebug() << command;
     p.setWorkingDirectory(workingDir);
     p.start(command);
-    p.waitForFinished();
+    bool success = p.waitForFinished();
+    if (!success)
+    {
+        QProcess::ProcessError pe = p.error();
+        qDebug() << "Error" << pe << "running \"" << command << "\"";
+    }
     QByteArray stderr = p.readAllStandardError();
     QByteArray stdout = p.readAllStandardOutput();
     if (!stderr.isEmpty() || !stdout.isEmpty())
@@ -67,14 +72,17 @@ void InitTestCommon::executeCommand(const QString &command, const QString &worki
         qDebug() << stderr;
         qDebug() << stdout;
     }
+    return success;
 #endif
 }
-void InitTestCommon::executeCommands(const QStringList &commands, const QString &workingDir) const
+bool InitTestCommon::executeCommands(const QStringList &commands, const QString &workingDir) const
 {
+    bool success = true;
     for (const QString &command : commands)
     {
-        executeCommand(command, workingDir);
+        success = executeCommand(command, workingDir);
     }
+    return success;
 }
 
 void InitTestData::createFiles(

@@ -12,8 +12,8 @@
 class InitTestCommon
 {
 protected:
-    void executeCommands(const QStringList &commands, const QString &workingDir) const;
-    void executeCommand(const QString &command, const QString &workingDir) const;
+    bool executeCommands(const QStringList &commands, const QString &workingDir) const;
+    bool executeCommand(const QString &command, const QString &workingDir) const;
 };
 
 class InitTestArchives : public InitTestCommon
