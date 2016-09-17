@@ -1,12 +1,6 @@
+include(../defaults.pri)
+
 TARGET = kiv
-
-!*msvc* {
-    !win32 {
-        QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
-    }
-}
-
-CONFIG += c++11
 
 SOURCES += \
     fileinfo.cpp \
@@ -90,39 +84,6 @@ contains(DEFINES, KIV_USE_DBUS): QT += dbus
 
 ANDROID_EXTRA_LIBS = libquazip.so
 
-win32 {
-    INCLUDEPATH += D:/Downloads/zlib128
-    *msvc* {
-        CONFIG(debug, debug|release) {
-            LIBS += -LD:/Downloads/zlib128/contrib/vstudio/vc11/x64/ZlibDllDebug
-        } else:CONFIG(release, debug|release) {
-            LIBS += -LD:/Downloads/zlib128/contrib/vstudio/vc11/x64/ZlibDllRelease
-        }
-        LIBS += -lzlibwapi
-        INCLUDEPATH += C:/QuaZip-VS2015-x64/include
-        LIBS += -LC:/QuaZip-VS2015-x64/lib
-    } else {
-        LIBS += -LD:/Downloads/zlib128
-        LIBS += -lz
-        INCLUDEPATH += C:/QuaZip-MinGW/include
-        LIBS += -LC:/QuaZip-MinGW/lib
-    }
-}
-
-win32:*msvc*:CONFIG(debug, debug|release) {
-    LIBS += -lquazip5d
-} else {
-    LIBS += -lquazip5
-}
-
-win32:CONFIG(release, debug|release) {
-    BIN_DIR = $${OUT_PWD}/release
-} else:win32:CONFIG(debug, debug|release) {
-    BIN_DIR = $${OUT_PWD}/debug
-} else {
-    BIN_DIR = $${OUT_PWD}
-}
-
 KIV_ROOT_DIR = $${PWD}/..
 KIV_LIBS_DIR = $${KIV_ROOT_DIR}/libs
 
@@ -145,5 +106,3 @@ isEmpty(ANDROID_TARGET_ARCH) {
     RESOURCES += \
         icons.qrc \
 }
-
-DEPENDPATH *= $${INCLUDEPATH}
