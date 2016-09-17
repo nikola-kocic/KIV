@@ -43,7 +43,11 @@ void PictureItemGL::clearTextures()
     {
         for (int vIndex = 0; vIndex < m_textures.at(hIndex).size(); ++vIndex)
         {
-            m_textures.at(hIndex).at(vIndex)->destroy();
+            QOpenGLTexture* tex = m_textures.at(hIndex).at(vIndex);
+            if (tex != nullptr)
+            {
+                m_textures.at(hIndex).at(vIndex)->destroy();
+            }
 #ifdef DEBUG_PICTUREITEM_GL
             DEBUGOUT << "deleted texture"
                      << this->m_textures.at(hIndex).at(vIndex)
