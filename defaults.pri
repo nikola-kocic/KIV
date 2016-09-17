@@ -4,6 +4,11 @@ CONFIG += c++11
     QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
 }
 
+QT += opengl
+QT += widgets concurrent
+
+#DEFINES += KIV_USE_DBUS
+contains(DEFINES, KIV_USE_DBUS): QT += dbus
 
 win32 {
     INCLUDEPATH += D:/Downloads/zlib128
@@ -36,4 +41,25 @@ win32:CONFIG(release, debug|release) {
     BIN_DIR = $${OUT_PWD}/debug
 } else {
     BIN_DIR = $${OUT_PWD}
+}
+
+ANDROID_EXTRA_LIBS = libquazip.so
+
+KIV_ROOT_DIR = $${PWD}
+KIV_LIBS_DIR = $${KIV_ROOT_DIR}/libs
+
+isEmpty(ANDROID_TARGET_ARCH) {
+    !contains(QMAKE_HOST.arch, x86_64) {
+        win32 {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/windows/x86/unrar.dll)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
+        } else:unix {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/linux/x86/libunrar.so)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
+        }
+    } else {
+        win32 {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/windows/x86_64/unrar.dll)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
+        } else:unix {
+            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/linux/x86_64/libunrar.so)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
+        }
+    }
 }

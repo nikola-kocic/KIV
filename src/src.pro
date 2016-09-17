@@ -70,37 +70,11 @@ HEADERS += \
 FORMS += \
     widgets/settings_dialog.ui
 
-INCLUDEPATH += $$PWD/../
-
-win32{
+win32 {
     RC_FILE = ../res/icons/kiv.rc
 }
 
-QT += opengl
-QT += widgets concurrent
-
-#DEFINES += KIV_USE_DBUS
-contains(DEFINES, KIV_USE_DBUS): QT += dbus
-
-ANDROID_EXTRA_LIBS = libquazip.so
-
-KIV_ROOT_DIR = $${PWD}/..
-KIV_LIBS_DIR = $${KIV_ROOT_DIR}/libs
-
 isEmpty(ANDROID_TARGET_ARCH) {
-    !contains(QMAKE_HOST.arch, x86_64) {
-        win32 {
-            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/windows/x86/unrar.dll)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
-        } else:unix {
-            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/linux/x86/libunrar.so)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
-        }
-    } else {
-        win32 {
-            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/windows/x86_64/unrar.dll)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
-        } else:unix {
-            QMAKE_POST_LINK += $${QMAKE_COPY} \"$$shell_path($${KIV_LIBS_DIR}/linux/x86_64/libunrar.so)\" \"$$shell_path($${BIN_DIR})\" $$escape_expand(\\n\\t)
-        }
-    }
     QMAKE_POST_LINK += $${QMAKE_COPY_DIR} \"$$shell_path($${KIV_ROOT_DIR}/res/icons)\" \"$$shell_path($${BIN_DIR}/icons)\" $$escape_expand(\\n\\t)
 } else {
     RESOURCES += \

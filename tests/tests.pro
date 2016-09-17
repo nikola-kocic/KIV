@@ -2,14 +2,10 @@ include(../defaults.pri)
 
 TARGET = kiv_tests
 
+QT += testlib
 
-QT       += testlib gui widgets
-
-#DEFINES += KIV_USE_DBUS
-contains(DEFINES, KIV_USE_DBUS): QT += dbus
-
-#CONFIG   += console
-CONFIG   -= app_bundle
+#CONFIG += console
+CONFIG -= app_bundle
 
 TEMPLATE = app
 
