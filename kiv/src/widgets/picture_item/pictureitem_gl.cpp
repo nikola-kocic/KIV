@@ -16,7 +16,7 @@ PictureItemGL::PictureItemGL(PictureItemData *data, QWidget *parent)
     , m_loader_texture(new QFutureWatcher<QImage>(this))
     , m_scaleX(0)
     , m_scaleY(0)
-    , m_textures(QVector < QVector < GLuint > >(0))
+    , m_textures(QVector < QVector < QOpenGLTexture* > >(0))
     , m_texImg(new TexImg())
     , m_returnTexCount(0)
 {
@@ -42,7 +42,7 @@ void PictureItemGL::clearTextures()
     {
         for (int vIndex = 0; vIndex < m_textures.at(hIndex).size(); ++vIndex)
         {
-            deleteTexture(m_textures.at(hIndex).at(vIndex));
+            m_textures.at(hIndex).at(vIndex)->destroy();
 #ifdef DEBUG_PICTUREITEM_GL
             DEBUGOUT << "deleted texture"
                      << this->m_textures.at(hIndex).at(vIndex)
@@ -51,7 +51,7 @@ void PictureItemGL::clearTextures()
         }
     }
 
-    m_textures = QVector < QVector < GLuint > >(0);
+    m_textures = QVector < QVector < QOpenGLTexture* > >(0);
 }
 
 void PictureItemGL::setImage(const QImage &img)
@@ -61,7 +61,7 @@ void PictureItemGL::setImage(const QImage &img)
 
     m_texImg->setImage(img);
 
-    m_textures = QVector < QVector < GLuint > >(m_texImg->hTile->tileCount);
+    m_textures = QVector < QVector < QOpenGLTexture* > >(m_texImg->hTile->tileCount);
     QList<TexIndex *> indexes;
     for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
     {
@@ -128,15 +128,13 @@ void PictureItemGL::textureFinished(int num)
 
 void PictureItemGL::setTexture(const QImage &tex, const int num)
 {
+    QOpenGLTexture* gltex = new QOpenGLTexture(tex);
     const int hIndex = num / m_texImg->vTile->tileCount;
     const int vIndex = num % m_texImg->vTile->tileCount;
 
-    m_textures[hIndex][vIndex] = bindTexture(
-                tex,
-                GL_TEXTURE_2D,
-                GL_RGB,
-                QGLContext::LinearFilteringBindOption
-                | QGLContext::MipmapBindOption);
+    gltex->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    gltex->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    m_textures[hIndex][vIndex] = gltex;
 
 #ifdef DEBUG_PICTUREITEM_GL
     DEBUGOUT << "bound texture" << this->m_textures.at(hIndex).at(vIndex)
@@ -154,6 +152,7 @@ void PictureItemGL::setBackgroundColor(const QColor &color)
 
 void PictureItemGL::initializeGL()
 {
+    initializeOpenGLFunctions();
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
 
@@ -263,7 +262,7 @@ void PictureItemGL::paintGL()
                 continue;
             }
 
-            glBindTexture(GL_TEXTURE_2D, m_textures.at(hIndex).at(vIndex));
+            m_textures.at(hIndex).at(vIndex)->bind();
             glBegin(GL_QUADS);
 
             glTexCoord2d(tx, ty);

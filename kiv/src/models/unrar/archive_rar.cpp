@@ -185,7 +185,7 @@ bool ArchiveRar::readFile(
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
             qint64 UnpSize = getUncompressedSize(HeaderData);
-            if (UnpSize > std::numeric_limits<int>::max())
+            if (UnpSize > (std::numeric_limits<int>::max)())
             {
                 qWarning("File size too large: %lld", UnpSize);
                 retval = false;

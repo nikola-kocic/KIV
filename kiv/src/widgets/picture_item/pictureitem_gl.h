@@ -5,11 +5,13 @@
 
 #include <QFutureWatcher>
 #include <QtOpenGL/QGLWidget>
+#include <QOpenGLFunctions_2_0>
+#include <QOpenGLTexture>
 #include <QtConcurrent/QtConcurrentMap>
 
 #include "kiv/src/widgets/picture_item/teximg.h"
 
-class PictureItemGL : private QGLWidget, public PictureItemInterface
+class PictureItemGL : private QGLWidget, public PictureItemInterface, protected QOpenGLFunctions_2_0
 {
     Q_OBJECT
 
@@ -32,7 +34,7 @@ private:
     QFutureWatcher< QImage > *m_loader_texture;
     qreal m_scaleX;
     qreal m_scaleY;
-    QVector < QVector <GLuint> > m_textures;
+    QVector < QVector <QOpenGLTexture*> > m_textures;
     TexImg *m_texImg;
     int m_returnTexCount;
 

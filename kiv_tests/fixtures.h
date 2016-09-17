@@ -1,6 +1,7 @@
 #ifndef FIXTURES_H
 #define FIXTURES_H
 
+#include <functional>
 #include <memory>
 #include <vector>
 

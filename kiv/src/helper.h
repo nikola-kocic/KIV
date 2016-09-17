@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QStringList>
 
+#include <array>
+
 #include "kiv/src/fileinfo.h"
 #include "kiv/src/polyfill.h"
 

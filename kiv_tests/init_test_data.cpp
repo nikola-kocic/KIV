@@ -53,6 +53,7 @@ bool InitTestData::generateFolderContentFile(const QString &path) const
 
 void InitTestCommon::executeCommand(const QString &command, const QString &workingDir) const
 {
+#ifndef WIN32
     QProcess p;
     //qDebug() << command;
     p.setWorkingDirectory(workingDir);
@@ -66,6 +67,7 @@ void InitTestCommon::executeCommand(const QString &command, const QString &worki
         qDebug() << stderr;
         qDebug() << stdout;
     }
+#endif
 }
 void InitTestCommon::executeCommands(const QStringList &commands, const QString &workingDir) const
 {
