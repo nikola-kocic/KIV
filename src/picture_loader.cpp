@@ -16,23 +16,42 @@ PictureLoader::PictureLoader(std::unique_ptr<const IArchiveExtractor> archive_ex
 {
 }
 
-QImage PictureLoader::getImage(const FileInfo &info) const
+QIODevice* PictureLoader::getDevice(const FileInfo &info) const
 {
+    QIODevice* device = nullptr;
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << info.getPath();
 #endif
-    if (!info.fileExists())
+    if (info.fileExists())
+    {
+        if (info.isInArchive())
+        {
+            device = getArchiveFileDevice(info);
+        }
+        else
+        {
+            device = getFileDevice(info);
+        }
+    }
+    return device;
+}
+
+QImage PictureLoader::getImage(const FileInfo &info) const
+{
+    QIODevice* device = getDevice(info);
+#ifdef DEBUG_PICTURE_LOADER
+    DEBUGOUT << info.getPath();
+#endif
+    if (device == nullptr)
     {
         return QImage(0,0, QImage::Format_RGB32);
     }
-    else if (info.isInArchive())
-    {
-        return getImageFromArchive(ThumbnailInfo(info, QSize(0, 0)));
-    }
-    else
-    {
-        return getImageFromFile(ThumbnailInfo(info, QSize(0, 0)));
-    }
+
+    QImageReader image_reader(device);
+    const QImage img = image_reader.read();
+    delete device;
+
+    return img;
 }
 
 QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
@@ -40,21 +59,27 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << thumb_info.getFileInfo().getPath() << thumb_info.getThumbSize();
 #endif
-    if (!thumb_info.getFileInfo().fileExists())
+    QIODevice* data = getDevice(thumb_info.getFileInfo());
+    if (data == nullptr)
     {
         return QImage(0, 0, QImage::Format_RGB32);
     }
-    else if (thumb_info.getFileInfo().isInArchive())
-    {
-        return styleThumbnail(
-                    getImageFromArchive(thumb_info),
-                    thumb_info.getThumbSize());
-    }
     else
     {
-        return styleThumbnail(
-                    getImageFromFile(thumb_info),
-                    thumb_info.getThumbSize());
+        QImageReader image_reader(data);
+        if (!thumb_info.getThumbSize().isEmpty())
+        {
+            if (image_reader.size().height() > thumb_info.getThumbSize().height()
+                || image_reader.size().width() > thumb_info.getThumbSize().width())
+            {
+                image_reader.setScaledSize(
+                            PictureLoader::ThumbnailImageSize(
+                                image_reader.size(), thumb_info.getThumbSize()));
+            }
+        }
+        const QImage img = image_reader.read();
+        delete data;
+        return styleThumbnail(img, thumb_info.getThumbSize());
     }
 }
 
@@ -74,63 +99,38 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
     return thumb;
 }
 
-QImage PictureLoader::getImageFromFile(const ThumbnailInfo &thumb_info) const
+QIODevice* PictureLoader::getFileDevice(const FileInfo &file_info) const
 {
-    QImageReader image_reader(thumb_info.getFileInfo().getPath());
+    QFile* file = new QFile(file_info.getPath());
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << thumb_info.getFileInfo().getPath() << image_reader.format()
              << image_reader.supportedImageFormats();
 #endif
-    if (!thumb_info.getThumbSize().isEmpty())
-    {
-        if (image_reader.size().height() > thumb_info.getThumbSize().height()
-            || image_reader.size().width() > thumb_info.getThumbSize().width())
-        {
-            image_reader.setScaledSize(
-                        PictureLoader::ThumbnailImageSize(
-                            image_reader.size(), thumb_info.getThumbSize()));
-        }
-    }
-    return image_reader.read();
+
+    return file;
 }
 
 
-QImage PictureLoader::getImageFromArchive(const ThumbnailInfo &thumb_info) const
+QIODevice* PictureLoader::getArchiveFileDevice(const FileInfo &file_info) const
 {
     QByteArray buff;
     int success = m_archive_extractor->readFile(
-                thumb_info.getFileInfo().getContainerPath(),
-                thumb_info.getFileInfo().getArchiveImagePath(),
+                file_info.getContainerPath(),
+                file_info.getArchiveImagePath(),
                 buff);
 
     if (success != 0 || buff.isEmpty())
     {
-        return QImage(0, 0, QImage::Format_RGB32);
+        return nullptr;
     }
 
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << "finished reading from archive"
              << thumb_info.getFileInfo().getPath();
 #endif
-    QBuffer out(&buff);
-    QImageReader image_reader(&out);
-
-#ifdef DEBUG_PICTURE_LOADER
-    DEBUGOUT << image_reader.format() << image_reader.supportedImageFormats();
-#endif
-    if (!thumb_info.getThumbSize().isEmpty())
-    {
-        if (image_reader.size().height() > thumb_info.getThumbSize().height()
-            || image_reader.size().width() > thumb_info.getThumbSize().width())
-        {
-            image_reader.setScaledSize(
-                        PictureLoader::ThumbnailImageSize(
-                            image_reader.size(), thumb_info.getThumbSize()));
-        }
-    }
-    const QImage img = image_reader.read();
-
-    return img;
+    QBuffer* out = new QBuffer();
+    out->setData(buff);
+    return out;
 }
 
 QSize PictureLoader::ThumbnailImageSize(const QSize &image_size,

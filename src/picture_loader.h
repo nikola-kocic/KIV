@@ -18,8 +18,9 @@ public:
 private:
     QSize ThumbnailImageSize(const QSize &image_size,
                              const QSize &thumb_size) const;
-    QImage getImageFromArchive(const ThumbnailInfo &thumb_info) const;
-    QImage getImageFromFile(const ThumbnailInfo &thumb_info) const;
+    QIODevice* getDevice(const FileInfo &info) const;
+    QIODevice* getArchiveFileDevice(const FileInfo &file_info) const;
+    QIODevice* getFileDevice(const FileInfo &file_info) const;
 
     std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
 };
