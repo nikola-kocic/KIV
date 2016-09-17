@@ -13,34 +13,23 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-option(KIV_USE_QT4 "Use Qt4" OFF)
 option(KIV_USE_DBUS "Use D-Bus" OFF)
 
 if(KIV_USE_DBUS)
     add_definitions(-DKIV_USE_DBUS)
 endif()
 
-if(KIV_USE_QT4)
-    find_package(Qt4 REQUIRED)
-    add_definitions(-DKIV_USE_QT4)
-else()
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5Gui REQUIRED)
-    find_package(Qt5Widgets REQUIRED)
-    find_package(Qt5Concurrent REQUIRED)
-    find_package(Qt5OpenGL REQUIRED)
-    if(KIV_USE_DBUS)
-        find_package(Qt5DBus REQUIRED)
-    endif()
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+if(KIV_USE_DBUS)
+    find_package(Qt5DBus REQUIRED)
 endif()
 
 find_package ( OpenGL REQUIRED )
-if(KIV_USE_QT4)
-    include ( ${QT_USE_FILE} )
-    find_package ( QuaZip REQUIRED )
-else()
-    find_package ( QuaZip5 REQUIRED )
-endif()
+find_package ( QuaZip5 REQUIRED )
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTOPENGL_INCLUDE_DIR}
@@ -103,20 +92,12 @@ set ( kiv_SRCS
 set ( kiv_UIS
     src/widgets/settings_dialog.ui
     )
-if(KIV_USE_QT4)
-    QT4_WRAP_UI(UIS ${kiv_UIS})
-else()
-    qt5_wrap_ui(UIS ${kiv_UIS})
-endif()
+qt5_wrap_ui(UIS ${kiv_UIS})
 
 set ( kiv_RSCS
     icons.qrc
     )
-if(KIV_USE_QT4)
-    QT4_ADD_RESOURCES(RSCS ${kiv_RSCS})
-else()
-    qt5_add_resources(RSCS ${kiv_RSCS})
-endif()
+qt5_add_resources(RSCS ${kiv_RSCS})
 
 set ( kiv_MOCS
     src/models/archive_model.h
@@ -138,23 +119,12 @@ set ( kiv_MOCS
     src/widgets/urlnavigator.h
     src/archiveextractor.h
     )
-if(KIV_USE_QT4)
-    QT4_WRAP_CPP(MOCS ${kiv_MOCS})
-else()
-    qt5_wrap_cpp(MOCS ${kiv_MOCS})
-endif()
+qt5_wrap_cpp(MOCS ${kiv_MOCS})
 
 add_executable ( kiv ${kiv_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-if (KIV_USE_QT4)
-    target_link_libraries ( kiv ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})
-    if (KIV_USE_DBUS)
-        target_link_libraries ( kiv ${QT_QTDBUS_LIBRARY} )
-    endif()
-else()
-    target_link_libraries ( kiv Qt5::Widgets Qt5::Concurrent Qt5::OpenGL ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})
-    if (KIV_USE_DBUS)
-        target_link_libraries ( kiv Qt5::DBus )
-    endif()
+target_link_libraries ( kiv Qt5::Widgets Qt5::Concurrent Qt5::OpenGL ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY})
+if (KIV_USE_DBUS)
+    target_link_libraries ( kiv Qt5::DBus )
 endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/icons/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/icons/)

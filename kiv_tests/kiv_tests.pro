@@ -3,10 +3,7 @@
 }
 QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
 
-#DEFINES += KIV_USE_QT4
-
-QT       += testlib gui
-!contains(DEFINES, KIV_USE_QT4): QT += widgets
+QT       += testlib gui widgets
 
 #DEFINES += KIV_USE_DBUS
 contains(DEFINES, KIV_USE_DBUS): QT += dbus
@@ -68,8 +65,7 @@ RESOURCES += \
 
 DEPENDPATH *= $${INCLUDEPATH}
 
-contains(DEFINES, KIV_USE_QT4): LIBS += -lquazip
-!contains(DEFINES, KIV_USE_QT4): LIBS += -lquazip5
+LIBS += -lquazip5
 
 win32:CONFIG(release, debug|release) {
     BIN_DIR = $${OUT_PWD}$${QMAKE_DIR_SEP}release

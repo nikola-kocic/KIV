@@ -5,13 +5,8 @@
 #include <QFutureWatcher>
 #include <QKeyEvent>
 #include <QMouseEvent>
-#ifdef KIV_USE_QT4
-    #include <QtConcurrentMap>
-    #include <QtConcurrentRun>
-#else
-    #include <QtConcurrent/QtConcurrentMap>
-    #include <QtConcurrent/QtConcurrentRun>
-#endif
+#include <QtConcurrent/QtConcurrentMap>
+#include <QtConcurrent/QtConcurrentRun>
 #include <QTimer>
 #include <QWheelEvent>
 

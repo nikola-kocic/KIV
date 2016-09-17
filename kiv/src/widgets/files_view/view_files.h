@@ -9,11 +9,7 @@
 #include <QPointer>
 #include <QSortFilterProxyModel>
 #include <QSplitter>
-#ifdef KIV_USE_QT4
-    #include <QtConcurrentMap>
-#else
-    #include <QtConcurrent/QtConcurrentMap>
-#endif
+#include <QtConcurrent/QtConcurrentMap>
 #include <QTreeView>
 #include <QUrl>
 

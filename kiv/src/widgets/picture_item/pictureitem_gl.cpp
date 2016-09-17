@@ -159,10 +159,6 @@ void PictureItemGL::initializeGL()
 
     qglClearColor(m_data->m_color_clear);
 
-#ifdef KIV_USE_QT4
-    QGL::setPreferredPaintEngine(QPaintEngine::OpenGL2);
-#endif
-
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
 

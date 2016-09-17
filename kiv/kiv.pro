@@ -78,12 +78,8 @@ win32{
 }
 
 QT += opengl
-
-#DEFINES += KIV_USE_QT4
-!contains(DEFINES, KIV_USE_QT4): QT += widgets concurrent
-
-contains(DEFINES, KIV_USE_QT4): LIBS += -lquazip
-!contains(DEFINES, KIV_USE_QT4): LIBS += -lquazip5
+QT += widgets concurrent
+LIBS += -lquazip5
 
 #DEFINES += KIV_USE_DBUS
 contains(DEFINES, KIV_USE_DBUS): QT += dbus

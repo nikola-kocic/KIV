@@ -14,34 +14,22 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-option(KIV_USE_QT4 "Use Qt4" OFF)
 option(KIV_USE_DBUS "Use D-Bus" OFF)
 
 if(KIV_USE_DBUS)
     add_definitions(-DKIV_USE_DBUS)
 endif()
 
-if(KIV_USE_QT4)
-    find_package(Qt4 REQUIRED)
-    add_definitions(-DKIV_USE_QT4)
-else()
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5Gui REQUIRED)
-    find_package(Qt5Widgets REQUIRED)
-    find_package(Qt5Concurrent REQUIRED)
-    find_package(Qt5Test REQUIRED)
-    if(KIV_USE_DBUS)
-        find_package(Qt5DBus REQUIRED)
-    endif()
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Test REQUIRED)
+if(KIV_USE_DBUS)
+    find_package(Qt5DBus REQUIRED)
 endif()
 
-
-if(KIV_USE_QT4)
-    include ( ${QT_USE_FILE} )
-    find_package ( QuaZip REQUIRED )
-else()
-    find_package ( QuaZip5 REQUIRED )
-endif()
+find_package ( QuaZip5 REQUIRED )
 include_directories (
     ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
     ${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR} ${QT_QTTEST_INCLUDE_DIR}
@@ -75,11 +63,7 @@ set ( tst_kiv_teststest_SRCS
 set ( tst_kiv_teststest_RSCS
     test_assets.qrc
     )
-if(KIV_USE_QT4)
-    QT4_ADD_RESOURCES(RSCS ${tst_kiv_teststest_RSCS})
-else()
-    qt5_add_resources(RSCS ${tst_kiv_teststest_RSCS})
-endif()
+qt5_add_resources(RSCS ${tst_kiv_teststest_RSCS})
 
 set ( tst_kiv_teststest_MOCS
     test_settings_bookmarks.h
@@ -95,24 +79,13 @@ set ( tst_kiv_teststest_MOCS
     ../kiv/src/archiveextractor.h
     ../kiv/src/models/unrar/archive_rar.h
     )
-if(KIV_USE_QT4)
-    QT4_WRAP_CPP(MOCS ${tst_kiv_teststest_MOCS})
-else()
-    qt5_wrap_cpp(MOCS ${tst_kiv_teststest_MOCS})
-endif()
+qt5_wrap_cpp(MOCS ${tst_kiv_teststest_MOCS})
 
 
 add_executable ( tst_kiv_teststest ${tst_kiv_teststest_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-if (KIV_USE_QT4)
-    target_link_libraries ( tst_kiv_teststest  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTTEST_LIBRARY} ${QUAZIP_LIBRARIES} )
-    if (KIV_USE_DBUS)
-        target_link_libraries ( tst_kiv_teststest ${QT_QTDBUS_LIBRARY} )
-    endif()
-else()
-    target_link_libraries ( tst_kiv_teststest  Qt5::Widgets Qt5::Gui Qt5::Test ${QUAZIP_LIBRARIES} )
-    if (KIV_USE_DBUS)
-        target_link_libraries ( tst_kiv_teststest Qt5::DBus )
-    endif()
+target_link_libraries ( tst_kiv_teststest  Qt5::Widgets Qt5::Gui Qt5::Test ${QUAZIP_LIBRARIES} )
+if (KIV_USE_DBUS)
+    target_link_libraries ( tst_kiv_teststest Qt5::DBus )
 endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)
