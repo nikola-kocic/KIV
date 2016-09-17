@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-SUBDIRS += kiv_tests \
-    kiv
+SUBDIRS += tests \
+    src

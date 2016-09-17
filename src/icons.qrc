@@ -1,0 +1,34 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../res/icons/default/16x16/configure.png</file>
+        <file>../res/icons/default/16x16/document-open.png</file>
+        <file>../res/icons/default/16x16/go-next.png</file>
+        <file>../res/icons/default/16x16/go-previous.png</file>
+        <file>../res/icons/default/16x16/go-up.png</file>
+        <file>../res/icons/default/16x16/image-x-generic.png</file>
+        <file>../res/icons/default/16x16/media-skip-backward.png</file>
+        <file>../res/icons/default/16x16/media-skip-forward.png</file>
+        <file>../res/icons/default/16x16/object-rotate-left.png</file>
+        <file>../res/icons/default/16x16/object-rotate-right.png</file>
+        <file>../res/icons/default/16x16/thumbnail.png</file>
+        <file>../res/icons/default/16x16/view-fullscreen.png</file>
+        <file>../res/icons/default/16x16/view-left-right.png</file>
+        <file>../res/icons/default/16x16/view-refresh.png</file>
+        <file>../res/icons/default/16x16/zoom-fit-best.png</file>
+        <file>../res/icons/default/16x16/zoom-in.png</file>
+        <file>../res/icons/default/16x16/zoom-out.png</file>
+        <file>../res/icons/default/22x22/document-open.png</file>
+        <file>../res/icons/default/22x22/go-next.png</file>
+        <file>../res/icons/default/22x22/go-previous.png</file>
+        <file>../res/icons/default/22x22/go-up.png</file>
+        <file>../res/icons/default/22x22/media-skip-backward.png</file>
+        <file>../res/icons/default/22x22/media-skip-forward.png</file>
+        <file>../res/icons/default/22x22/object-rotate-left.png</file>
+        <file>../res/icons/default/22x22/object-rotate-right.png</file>
+        <file>../res/icons/default/22x22/view-fullscreen.png</file>
+        <file>../res/icons/default/22x22/view-left-right.png</file>
+        <file>../res/icons/default/22x22/view-refresh.png</file>
+        <file>../res/icons/default/22x22/zoom-in.png</file>
+        <file>../res/icons/default/22x22/zoom-out.png</file>
+    </qresource>
+</RCC>
