@@ -5,6 +5,7 @@
 #include <QFutureWatcher>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QMovie>
 #include <QtConcurrent/QtConcurrentMap>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QTimer>
@@ -49,7 +50,7 @@ public:
 
 
 private:
-    void afterPixmapLoad();
+    void afterImageLoad(const QImage &img);
     QColor getAverageColor(const QImage &img) const;
 
     void drag(const QPoint &pt);
@@ -59,6 +60,8 @@ private:
 
     const DataLoader * const m_data_loader;
     const IPictureLoader *const m_picture_loader;
+    std::unique_ptr<QBuffer> m_animation_buffer;
+    std::unique_ptr<QMovie> m_movie;
     PictureItemData *const m_data;
     const Settings *const m_settings;
     PictureItemInterface *m_imageDisplay;
@@ -67,6 +70,7 @@ private:
     LockMode m_lockMode;
 
     bool m_dragging;
+    bool m_is_animation_first_frame;
 
 #ifdef DEBUG_PICTUREITEM
     QTime t;

@@ -1,6 +1,7 @@
 #include "widgets/picture_item/pictureitem.h"
 
 #include <QMouseEvent>
+#include <QImageReader>
 
 PictureItem::PictureItem(
         const DataLoader * const data_loader,
@@ -12,6 +13,7 @@ PictureItem::PictureItem(
 
     , m_data_loader(data_loader)
     , m_picture_loader(picture_loader)
+    , m_movie(std::unique_ptr<QMovie>(new QMovie()))
     , m_data(new PictureItemData())
 
     , m_settings(settings)
@@ -21,6 +23,7 @@ PictureItem::PictureItem(
 
     , m_lockMode(LockMode::None)
     , m_dragging(false)
+    , m_is_animation_first_frame(true)
 {
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -72,6 +75,8 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
     DEBUGOUT << info.getPath();
 #endif
+    m_movie->stop();
+    m_movie->setDevice(nullptr);
     m_watcher_data->cancel();
     m_watcher_image->cancel();
     m_imageDisplay->getWidget()->setUpdatesEnabled(false);
@@ -107,7 +112,17 @@ void PictureItem::dataLoaded(int num)
     auto f = [this, data]() {
         std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
         buffer->setData(data);
-        return m_picture_loader->getImage(std::move(buffer));
+        QImageReader ir(buffer.get());
+        if (ir.supportsAnimation())
+        {
+            m_animation_buffer = std::move(buffer);
+            return QImage(ir.size(), ir.imageFormat());
+        }
+        else
+        {
+            m_animation_buffer = nullptr;
+            return m_picture_loader->getImage(std::move(buffer));
+        }
     };
     m_watcher_image->setFuture(QtConcurrent::run(f));
     /* Free result memory */
@@ -120,26 +135,36 @@ void PictureItem::imageFinished(int num)
 #ifdef DEBUG_PICTUREITEM
     DEBUGOUT << t.restart() << newImage.size();
 #endif
-    m_data->setPixmapNull(newImage.isNull());
     m_imageDisplay->setBackgroundColor(getAverageColor(newImage));
-
     m_imageDisplay->setImage(newImage);
-    m_data->setWidgetSize(m_imageDisplay->getWidget()->size());
-    m_data->setImageSize(newImage.size());
 
-    this->afterPixmapLoad();
-
-    m_data->updateOffsets();
-
+    this->afterImageLoad(newImage);
 //    m_imageDisplay->getWidget()->setUpdatesEnabled(true);
-    emit imageChanged();
 
     /* Free result memory */
     m_watcher_image->setFuture(QFuture<QImage>());
+    if (m_animation_buffer != nullptr)
+    {
+        m_movie->setDevice(m_animation_buffer.get());
+        QObject::connect(m_movie.get(), &QMovie::updated, [&](const QRect &/*rect*/) {
+            const QImage img = m_movie->currentImage();
+            m_imageDisplay->setImage(img);
+            if (m_is_animation_first_frame)
+            {
+                m_is_animation_first_frame = false;
+                this->afterImageLoad(img);
+            }
+        });
+        m_is_animation_first_frame = true;
+        m_movie->start();
+    }
 }
 
-void PictureItem::afterPixmapLoad()
+void PictureItem::afterImageLoad(const QImage& img)
 {
+    m_data->setPixmapNull(img.isNull());
+    m_data->setWidgetSize(m_imageDisplay->getWidget()->size());
+    m_data->setImageSize(img.size());
     if (m_lockMode == LockMode::None)
     {
         this->setZoom(1);
@@ -148,6 +173,8 @@ void PictureItem::afterPixmapLoad()
 
     this->updateLockMode();
     m_data->resetImagePosition(m_settings->getRightToLeft());
+    m_data->updateOffsets();
+    emit imageChanged();
 }
 
 QColor PictureItem::getAverageColor(const QImage &img) const
