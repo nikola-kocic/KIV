@@ -15,8 +15,8 @@ public:
     QByteArray getData(const FileInfo &file_info, int maxSize) const;
 
 protected:
-    QByteArray getArchiveFileData(const FileInfo &file_info, int maxSize) const;
-    QByteArray getFileData(const FileInfo &file_info, int maxSize) const;
+    QByteArray getArchiveFileData(const QString &archive_path, const QString &archive_image_path, int maxSize) const;
+    QByteArray getFileData(const QString &file_path, int maxSize) const;
 
 protected:
     const IArchiveExtractor* const m_archive_extractor;

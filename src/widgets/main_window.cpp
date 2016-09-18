@@ -28,6 +28,7 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
                        QWidget *parent,
                        Qt::WindowFlags f)
     : QMainWindow(parent, f)
+    , m_data_loader(data_loader)
     , m_model_filesystem(new FileSystemModel(this))
 
     , m_settings(new Settings())
@@ -691,8 +692,9 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasUrls())
     {
-        if (Helper::checkFileExtension(
-                QFileInfo(event->mimeData()->urls().first().toLocalFile())))
+        const QString filePath = event->mimeData()->urls().first().toLocalFile();
+        const bool supported = Helper::isSupportedFileType(filePath, m_data_loader);
+        if (supported)
         {
             event->acceptProposedAction();
         }

@@ -42,6 +42,7 @@ private:
                     m_picture_item->mapFromGlobal(pos));
     }
 
+    const DataLoader *const m_data_loader;
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

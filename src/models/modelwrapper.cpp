@@ -44,7 +44,7 @@ FileSystemModelWrapper::FileSystemModelWrapper(FileSystemModel *model)
 NodeType FileSystemModelWrapper::getNodeType(const QModelIndex &index) const
 {
     const QFileInfo indexFileInfo = m_model->fileInfo(index);
-    if (Helper::isImageFile(indexFileInfo))
+    if (Helper::isImageFileExtension(indexFileInfo))
     {
         return NodeType::Image;
     }

@@ -61,7 +61,8 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 
     if (fi.exists())
     {
-        if (!Helper::isImageFile(fi))
+        const QString mime = Helper::getMimeTypeForFile(path);
+        if (!Helper::isImageMime(mime))
             return;
 
         // If path is image

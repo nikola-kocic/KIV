@@ -4,6 +4,7 @@
 #include <QImageReader>
 #include <QLocale>
 #include <QProcess>
+#include <QMimeDatabase>
 
 #ifdef KIV_USE_DBUS
     #include <QtDBus/QtDBus>
@@ -31,6 +32,67 @@ const QStringList& getFiltersImage()
         }
     }
     return filters_image;
+}
+
+QString getMimeTypeForFile(const QString& file_path)
+{
+    const QString mime = QMimeDatabase().mimeTypeForFile(file_path).name();
+    return mime;
+}
+
+QString getMimeType(const FileInfo& file_info, const DataLoader *const data_loader)
+{
+    const QByteArray buf = data_loader->getData(file_info, 16384);
+    const QString mime = QMimeDatabase().mimeTypeForData(buf).name();
+    return mime;
+}
+
+bool isImageMime(const QString& mime)
+{
+    const QList<QByteArray> supportedMimes = QImageReader::supportedMimeTypes();
+    const bool val = supportedMimes.contains(mime.toUtf8());
+    return val;
+}
+
+bool isImageFile(const FileInfo& file_info, const DataLoader *const data_loader)
+{
+    const QString mime = getMimeType(file_info, data_loader);
+    const bool val = isImageMime(mime);
+    return val;
+}
+
+bool isImageFileExtension(const QFileInfo &fi)
+{ return getFiltersImage().contains(fi.suffix().toLower()); }
+
+bool isArchiveFile(const QFileInfo &fi)
+{
+    if (!fi.exists())
+    {
+        return false;
+    }
+    for (auto &ext : Helper::filtersArchive)
+    {
+        // TODO: Use MIME
+        if (fi.suffix().toLower().endsWith(ext))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isSupportedFileType(const QString &file_path, const DataLoader *const data_loader)
+{
+    const QFileInfo fi(file_path);
+    if (fi.exists())
+    {
+        if (fi.isDir() || isArchiveFile(fi))
+        {
+            return true;
+        }
+    }
+    const FileInfo file_info(file_path);
+    return isImageFile(file_info, data_loader);
 }
 
 QString size(const qint64 bytes)

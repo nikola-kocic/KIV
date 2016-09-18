@@ -75,7 +75,7 @@ void ArchiveModel::populate(
                 else
                 {
                     const QFileInfo fi(currentArchiveFile.m_name);
-                    if (Helper::isImageFile(fi))
+                    if (Helper::isImageFileExtension(fi))
                     {
                         const QString nodeFilePath = path + "/"
                                 + currentArchiveFile.m_name;

@@ -8,6 +8,7 @@
 
 #include <array>
 
+#include "dataloader.h"
 #include "fileinfo.h"
 #include "polyfill.h"
 
@@ -41,9 +42,12 @@ namespace Helper
     const QStringList& getFiltersImage();
     QString size(const qint64 bytes);
 
+    QString getMimeTypeForFile(const QString& file_path);
     bool isArchiveFile(const QFileInfo &fi);
-    bool isImageFile(const QFileInfo &fi);
-    bool checkFileExtension(const QFileInfo &info);
+    bool isImageMime(const QString& mime);
+    bool isImageFile(const FileInfo &file_info, const DataLoader *const data_loader);
+    bool isImageFileExtension(const QFileInfo &fi);
+    bool isSupportedFileType(const QString &file_path, const DataLoader *const data_loader);
 
     bool FuzzyCompare(const double p1, const double p2);
     bool FuzzyCompare(const float p1, const float p2);
@@ -56,25 +60,6 @@ namespace Helper
     // Doesn't work reliably for files inside of archives.
     void showInFileBrowser(const FileInfo &fi);
 }
-
-inline bool Helper::isArchiveFile(const QFileInfo &fi)
-{
-    for (auto &ext : Helper::filtersArchive)
-    {
-        // TODO: Use MIME
-        if (fi.suffix().toLower().endsWith(ext))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-inline bool Helper::isImageFile(const QFileInfo &fi)
-{ return getFiltersImage().contains(fi.suffix().toLower()); }
-
-inline bool Helper::checkFileExtension(const QFileInfo &info)
-{ return (isArchiveFile(info) || info.isDir() || isImageFile(info)); }
 
 
 inline bool Helper::FuzzyCompare(const double p1, const double p2)
