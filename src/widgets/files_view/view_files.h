@@ -32,7 +32,7 @@ class ViewFiles : public QWidget
 
 public:
     explicit ViewFiles(ThumbnailItemDelegate * const thumbnail_item_delegate,
-                       std::unique_ptr<const IArchiveExtractor> archive_extractor,
+                       const IArchiveExtractor* const archive_extractor,
                        IModelWrapper *model_filesystem,
                        QWidget *parent = nullptr);
     ~ViewFiles() override;
@@ -53,7 +53,7 @@ private:
     void showThumbnails();
     IModelWrapper *createArchiveModel(const FileInfo &info);
 
-    const std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
+    const IArchiveExtractor* const m_archive_extractor;
 
     IFileView *m_view_archiveDirs;
     QTreeView *m_view_filesystem;

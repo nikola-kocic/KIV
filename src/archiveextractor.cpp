@@ -8,8 +8,7 @@
 #include "models/unrar/archive_rar.h"
 
 
-ArchiveExtractor::ArchiveExtractor(QObject *parent) :
-    QObject(parent)
+ArchiveExtractor::ArchiveExtractor()
 {
 }
 

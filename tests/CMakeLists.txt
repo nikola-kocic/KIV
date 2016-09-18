@@ -73,11 +73,8 @@ set ( kiv_tests_MOCS
     test_zoom_widget_no_defaults.h
     test_archive_files.h
     test_archive_file_list.h
-    init_test_data.h
     ../src/widgets/picture_item/pictureitem_raster.h
     ../src/widgets/zoom_widget.h
-    ../src/archiveextractor.h
-    ../src/models/unrar/archive_rar.h
     )
 qt5_wrap_cpp(MOCS ${kiv_tests_MOCS})
 

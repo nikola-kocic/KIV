@@ -24,7 +24,7 @@
 
 MainWindow::MainWindow(const DataLoader * const data_loader,
                        const IPictureLoader *const picture_loader,
-                       std::unique_ptr<const IArchiveExtractor> archive_extractor,
+                       const IArchiveExtractor* const archive_extractor,
                        QWidget *parent,
                        Qt::WindowFlags f)
     : QMainWindow(parent, f)
@@ -35,7 +35,7 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
     , m_view_files(
           new ViewFiles(
               new ThumbnailItemDelegate(data_loader, picture_loader,QSize(100, 100), this),
-              std::move(archive_extractor),
+              archive_extractor,
               new FileSystemModelWrapper(m_model_filesystem),
               this))
 

@@ -3,13 +3,10 @@
 
 #include "include/IArchiveExtractor.h"
 
-#include <QObject>
-
-class ArchiveExtractor : public QObject, public IArchiveExtractor
+class ArchiveExtractor: public IArchiveExtractor
 {
-    Q_OBJECT
 public:
-    explicit ArchiveExtractor(QObject *parent = nullptr);
+    explicit ArchiveExtractor();
 
     virtual int getFileInfoList(const QString &path,
                                 std::vector<ArchiveFileInfo> &list) const override;
@@ -19,10 +16,6 @@ public:
     virtual int readFile(const QString &archiveName,
                          const QString &fileName,
                          QByteArray &buffer) const override;
-signals:
-
-public slots:
-
 };
 
 #endif // ARCHIVEEXTRACTOR_H

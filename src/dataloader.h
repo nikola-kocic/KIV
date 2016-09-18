@@ -11,7 +11,7 @@
 class DataLoader
 {
 public:
-    DataLoader(std::unique_ptr<const IArchiveExtractor> archive_extractor);
+    DataLoader(const IArchiveExtractor* const archive_extractor);
     QByteArray getData(const FileInfo &file_info) const;
 
 protected:
@@ -19,7 +19,7 @@ protected:
     QByteArray getFileData(const FileInfo &file_info) const;
 
 protected:
-    std::unique_ptr<const IArchiveExtractor> m_archive_extractor;
+    const IArchiveExtractor* const m_archive_extractor;
 };
 
 #endif // DATALOADER_H

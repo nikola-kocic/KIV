@@ -24,7 +24,7 @@ public:
     explicit MainWindow(
             const DataLoader *const data_loader,
             const IPictureLoader *const picture_loader,
-            std::unique_ptr<const IArchiveExtractor> archive_extractor,
+            const IArchiveExtractor* const archive_extractor,
             QWidget *parent = nullptr,
             Qt::WindowFlags f = nullptr);
     ~MainWindow() override;

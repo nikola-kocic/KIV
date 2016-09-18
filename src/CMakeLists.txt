@@ -119,7 +119,6 @@ set ( kiv_MOCS
     widgets/settings_dialog.h
     widgets/zoom_widget.h
     widgets/urlnavigator.h
-    archiveextractor.h
     )
 qt5_wrap_cpp(MOCS ${kiv_MOCS})
 

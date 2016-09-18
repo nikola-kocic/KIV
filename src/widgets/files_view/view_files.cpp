@@ -12,12 +12,12 @@
 #endif
 
 ViewFiles::ViewFiles(ThumbnailItemDelegate *const thumbnail_item_delegate,
-                     std::unique_ptr<const IArchiveExtractor> archive_extractor,
+                     const IArchiveExtractor * const archive_extractor,
                      IModelWrapper *model_filesystem,
                      QWidget *parent)
     : QWidget(parent)
 
-    , m_archive_extractor(std::move(archive_extractor))
+    , m_archive_extractor(archive_extractor)
 
     , m_view_archiveDirs(new ViewArchiveDirs(
                              std::unique_ptr<QTreeView>(new QTreeView())

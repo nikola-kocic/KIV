@@ -5,8 +5,8 @@
 #include "helper.h"
 #endif
 
-DataLoader::DataLoader(std::unique_ptr<const IArchiveExtractor> archive_extractor)
-    : m_archive_extractor(std::move(archive_extractor))
+DataLoader::DataLoader(const IArchiveExtractor* const archive_extractor)
+    : m_archive_extractor(archive_extractor)
 {
 }
 

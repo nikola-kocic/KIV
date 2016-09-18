@@ -25,15 +25,10 @@ int main(int argc, char *argv[])
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
+    const ArchiveExtractor archive_extractor;
     const PictureLoader picture_loader;
-    const DataLoader data_loader(
-                std::unique_ptr<const IArchiveExtractor>(new ArchiveExtractor())
-                );
-    MainWindow w(
-                &data_loader,
-                &picture_loader,
-                std::unique_ptr<const IArchiveExtractor>(new ArchiveExtractor())
-                );
+    const DataLoader data_loader(&archive_extractor);
+    MainWindow w(&data_loader, &picture_loader, &archive_extractor);
     w.showMaximized();
     return app.exec();
 }
