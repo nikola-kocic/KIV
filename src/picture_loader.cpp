@@ -10,15 +10,16 @@
 #include "helper.h"
 #endif
 
+IPictureLoader::~IPictureLoader() {}
 
 PictureLoader::PictureLoader(std::unique_ptr<const IArchiveExtractor> archive_extractor)
     : m_archive_extractor(std::move(archive_extractor))
 {
 }
 
-QIODevice* PictureLoader::getDevice(const FileInfo &info) const
+std::unique_ptr<QBuffer> PictureLoader::getReadDevice(const FileInfo &info) const
 {
-    QIODevice* device = nullptr;
+    QByteArray data;
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << info.getPath();
 #endif
@@ -26,19 +27,25 @@ QIODevice* PictureLoader::getDevice(const FileInfo &info) const
     {
         if (info.isInArchive())
         {
-            device = getArchiveFileDevice(info);
+            data = getArchiveFileData(info);
         }
         else
         {
-            device = getFileDevice(info);
+            data = getFileData(info);
         }
     }
-    return device;
+    if (data.isEmpty())
+    {
+        return nullptr;
+    }
+    std::unique_ptr<QBuffer> out = std::unique_ptr<QBuffer>(new QBuffer());
+    out->setData(data);
+    return out;
 }
 
 QImage PictureLoader::getImage(const FileInfo &info) const
 {
-    QIODevice* device = getDevice(info);
+    std::unique_ptr<QBuffer> device = getReadDevice(info);
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << info.getPath();
 #endif
@@ -47,9 +54,8 @@ QImage PictureLoader::getImage(const FileInfo &info) const
         return QImage(0,0, QImage::Format_RGB32);
     }
 
-    QImageReader image_reader(device);
+    QImageReader image_reader(device.get());
     const QImage img = image_reader.read();
-    delete device;
 
     return img;
 }
@@ -59,26 +65,25 @@ QImage PictureLoader::getThumbnail(const ThumbnailInfo &thumb_info) const
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << thumb_info.getFileInfo().getPath() << thumb_info.getThumbSize();
 #endif
-    QIODevice* data = getDevice(thumb_info.getFileInfo());
+    std::unique_ptr<QBuffer> data = getReadDevice(thumb_info.getFileInfo());
     if (data == nullptr)
     {
         return QImage(0, 0, QImage::Format_RGB32);
     }
     else
     {
-        QImageReader image_reader(data);
+        QImageReader image_reader(data.get());
         if (!thumb_info.getThumbSize().isEmpty())
         {
             if (image_reader.size().height() > thumb_info.getThumbSize().height()
                 || image_reader.size().width() > thumb_info.getThumbSize().width())
             {
                 image_reader.setScaledSize(
-                            PictureLoader::ThumbnailImageSize(
+                            ThumbnailImageSize(
                                 image_reader.size(), thumb_info.getThumbSize()));
             }
         }
         const QImage img = image_reader.read();
-        delete data;
         return styleThumbnail(img, thumb_info.getThumbSize());
     }
 }
@@ -99,19 +104,21 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
     return thumb;
 }
 
-QIODevice* PictureLoader::getFileDevice(const FileInfo &file_info) const
+QByteArray PictureLoader::getFileData(const FileInfo &file_info) const
 {
-    QFile* file = new QFile(file_info.getPath());
+    QFile file(file_info.getPath());
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << thumb_info.getFileInfo().getPath() << image_reader.format()
              << image_reader.supportedImageFormats();
 #endif
-
-    return file;
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+    file.close();
+    return data;
 }
 
 
-QIODevice* PictureLoader::getArchiveFileDevice(const FileInfo &file_info) const
+QByteArray PictureLoader::getArchiveFileData(const FileInfo &file_info) const
 {
     QByteArray buff;
     int success = m_archive_extractor->readFile(
@@ -121,16 +128,14 @@ QIODevice* PictureLoader::getArchiveFileDevice(const FileInfo &file_info) const
 
     if (success != 0 || buff.isEmpty())
     {
-        return nullptr;
+        return QByteArray();
     }
 
 #ifdef DEBUG_PICTURE_LOADER
     DEBUGOUT << "finished reading from archive"
              << thumb_info.getFileInfo().getPath();
 #endif
-    QBuffer* out = new QBuffer();
-    out->setData(buff);
-    return out;
+    return buff;
 }
 
 QSize PictureLoader::ThumbnailImageSize(const QSize &image_size,
