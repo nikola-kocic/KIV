@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QStyledItemDelegate>
 
+#include "dataloader.h"
 #include "include/IPictureLoader.h"
 #include "helper.h"
 
@@ -16,6 +17,7 @@ class ThumbnailItemDelegate : public QStyledItemDelegate
 
 public:
     explicit ThumbnailItemDelegate(
+            const DataLoader *const data_loader,
             const IPictureLoader *const picture_loader,
             const QSize &thumbSize,
             QObject *parent = nullptr);
@@ -80,13 +82,14 @@ private:
     QHash<QByteArray, ThumbImageDate *> m_thumbnails;
 
     QList<ProcessInfo *> m_files_to_process;
+    const DataLoader *const m_data_loader;
     const IPictureLoader *const m_picture_loader;
 
 signals:
     void thumbnailFinished(QModelIndex);
 
 private slots:
-    void showThumbnail(int num);
+    void imageLoaded(int num);
 };
 
 #endif  // THUMBNAILITEMDELEGATE_H

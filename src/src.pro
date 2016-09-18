@@ -29,7 +29,8 @@ SOURCES += \
     widgets/files_view/sortcombobox.cpp \
     models/modelwrapper.cpp \
     widgets/files_view/view_archive_dirs.cpp \
-    widgets/files_view/fileviewwithproxy.cpp
+    widgets/files_view/fileviewwithproxy.cpp \
+    dataloader.cpp
 
 
 HEADERS += \
@@ -64,7 +65,8 @@ HEADERS += \
     widgets/files_view/ifileview.h \
     widgets/files_view/fileviewwithproxy.h \
     widgets/files_view/view_files_list.h \
-    widgets/files_view/view_files_tree.h
+    widgets/files_view/view_files_tree.h \
+    dataloader.h
 
 
 FORMS += \

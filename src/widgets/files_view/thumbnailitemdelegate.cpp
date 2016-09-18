@@ -16,16 +16,18 @@
 
 
 ThumbnailItemDelegate::ThumbnailItemDelegate(
+        const DataLoader *const data_loader,
         const IPictureLoader *const picture_loader,
         const QSize &thumbSize,
         QObject *parent)
     : QStyledItemDelegate(parent)
     , m_thumb_size(thumbSize)
     , m_watcherThumbnail(new QFutureWatcher<QImage>(this))
+    , m_data_loader(data_loader)
     , m_picture_loader(picture_loader)
 {
-    connect(m_watcherThumbnail, SIGNAL(resultReadyAt(int)),
-            this, SLOT(showThumbnail(int)));
+    connect(m_watcherThumbnail, &QFutureWatcher<QImage>::resultReadyAt,
+            this, &ThumbnailItemDelegate::imageLoaded);
 }
 
 ThumbnailItemDelegate::~ThumbnailItemDelegate()
@@ -127,10 +129,13 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info,
                                                   currentDateTime));
         if (m_files_to_process.size() == 1)
         {
-            m_watcherThumbnail->setFuture(
-                        QtConcurrent::run(m_picture_loader,
-                                          &IPictureLoader::getThumbnail,
-                                          ThumbnailInfo(info, m_thumb_size)));
+            auto f = [this](FileInfo info) {
+                QByteArray data = m_data_loader->getData(info);
+                std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
+                buffer->setData(data);
+                return m_picture_loader->getThumbnail(std::move(buffer), m_thumb_size);
+            };
+            m_watcherThumbnail->setFuture(QtConcurrent::run(f, info));
         }
     }
     else
@@ -176,7 +181,7 @@ void ThumbnailItemDelegate::clearThumbnailsCache()
     m_thumbnails.clear();
 }
 
-void ThumbnailItemDelegate::showThumbnail(int num)
+void ThumbnailItemDelegate::imageLoaded(int num)
 {
     if (m_files_to_process.isEmpty())
     {
@@ -200,12 +205,13 @@ void ThumbnailItemDelegate::showThumbnail(int num)
 
     if (!m_files_to_process.isEmpty())
     {
-        m_watcherThumbnail->setFuture(
-                    QtConcurrent::run(
-                        m_picture_loader,
-                        &IPictureLoader::getThumbnail,
-                        ThumbnailInfo(m_files_to_process.first()->getFileInfo(),
-                                      m_thumb_size)));
+        auto f = [this](FileInfo info) {
+            QByteArray data = m_data_loader->getData(info);
+            std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
+            buffer->setData(data);
+            return m_picture_loader->getThumbnail(std::move(buffer), m_thumb_size);
+        };
+        m_watcherThumbnail->setFuture(QtConcurrent::run(f, m_files_to_process.first()->getFileInfo()));
     }
     else
     {

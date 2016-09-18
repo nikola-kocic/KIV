@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QWheelEvent>
 
+#include "dataloader.h"
 #include "include/IPictureLoader.h"
 #include "settings.h"
 #include "widgets/picture_item/pictureitem_data.h"
@@ -26,10 +27,12 @@ class PictureItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit PictureItem(const IPictureLoader *const picture_loader,
-                         Settings const * const settings,
-                         QWidget *parent = nullptr,
-                         Qt::WindowFlags f = nullptr);
+    explicit PictureItem(
+            const DataLoader *const data_loader,
+            const IPictureLoader *const picture_loader,
+            Settings const * const settings,
+            QWidget *parent = nullptr,
+            Qt::WindowFlags f = nullptr);
     ~PictureItem() override;
 
     qreal getZoom() const;
@@ -54,11 +57,13 @@ private:
     void endDrag();
     void updateLockMode();
 
+    const DataLoader * const m_data_loader;
     const IPictureLoader *const m_picture_loader;
     PictureItemData *const m_data;
     const Settings *const m_settings;
     PictureItemInterface *m_imageDisplay;
-    QFutureWatcher< QImage > *const m_loader_image;
+    QFutureWatcher< QByteArray > *const m_watcher_data;
+    QFutureWatcher< QImage > *const m_watcher_image;
     LockMode m_lockMode;
 
     bool m_dragging;
@@ -80,6 +85,7 @@ public slots:
     void scrollPageVertical(const int value);
 
 private slots:
+    void dataLoaded(int num);
     void imageFinished(int num);
 
 protected:

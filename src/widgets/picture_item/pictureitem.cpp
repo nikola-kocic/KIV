@@ -2,18 +2,22 @@
 
 #include <QMouseEvent>
 
-PictureItem::PictureItem(const IPictureLoader * const picture_loader,
-                         const Settings * const settings,
-                         QWidget *parent,
-                         Qt::WindowFlags f)
+PictureItem::PictureItem(
+        const DataLoader * const data_loader,
+        const IPictureLoader * const picture_loader,
+        const Settings * const settings,
+        QWidget *parent,
+        Qt::WindowFlags f)
     : QWidget(parent, f)
 
+    , m_data_loader(data_loader)
     , m_picture_loader(picture_loader)
     , m_data(new PictureItemData())
 
     , m_settings(settings)
     , m_imageDisplay(nullptr)
-    , m_loader_image(new QFutureWatcher<QImage>(this))
+    , m_watcher_data(new QFutureWatcher<QByteArray>(this))
+    , m_watcher_image(new QFutureWatcher<QImage>(this))
 
     , m_lockMode(LockMode::None)
     , m_dragging(false)
@@ -21,8 +25,10 @@ PictureItem::PictureItem(const IPictureLoader * const picture_loader,
     this->setCursor(Qt::OpenHandCursor);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(m_loader_image, SIGNAL(resultReadyAt(int)),
-            this, SLOT(imageFinished(int)));
+    connect(m_watcher_data, &QFutureWatcher<QByteArray>::resultReadyAt,
+            this, &PictureItem::dataLoaded);
+    connect(m_watcher_image, &QFutureWatcher<QImage>::resultReadyAt,
+            this, &PictureItem::imageFinished);
 
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
     layoutMain->setSpacing(0);
@@ -66,7 +72,8 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
     DEBUGOUT << info.getPath();
 #endif
-    m_loader_image->cancel();
+    m_watcher_data->cancel();
+    m_watcher_image->cancel();
     m_imageDisplay->getWidget()->setUpdatesEnabled(false);
     m_imageDisplay->setNullImage();
     if (!info.fileExists())
@@ -84,15 +91,32 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
         t.start();
 #endif
-        m_loader_image->setFuture(
+        m_watcher_data->setFuture(
                     QtConcurrent::run(
-                        m_picture_loader, &IPictureLoader::getImage, info));
+                        m_data_loader, &DataLoader::getData, info));
     }
+}
+
+void PictureItem::dataLoaded(int num)
+{
+    const QByteArray data = m_watcher_data->resultAt(num);
+    if (data.isEmpty())
+    {
+        return;
+    }
+    auto f = [this, data]() {
+        std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
+        buffer->setData(data);
+        return m_picture_loader->getImage(std::move(buffer));
+    };
+    m_watcher_image->setFuture(QtConcurrent::run(f));
+    /* Free result memory */
+    m_watcher_data->setFuture(QFuture<QByteArray>());
 }
 
 void PictureItem::imageFinished(int num)
 {
-    const QImage newImage = m_loader_image->resultAt(num);
+    const QImage newImage = m_watcher_image->resultAt(num);
 #ifdef DEBUG_PICTUREITEM
     DEBUGOUT << t.restart() << newImage.size();
 #endif
@@ -111,7 +135,7 @@ void PictureItem::imageFinished(int num)
     emit imageChanged();
 
     /* Free result memory */
-    m_loader_image->setFuture(QFuture<QImage>());
+    m_watcher_image->setFuture(QFuture<QImage>());
 }
 
 void PictureItem::afterPixmapLoad()

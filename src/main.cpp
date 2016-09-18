@@ -2,6 +2,7 @@
 
 #include "archiveextractor.h"
 #include "picture_loader.h"
+#include "dataloader.h"
 
 #include "widgets/main_window.h"
 
@@ -24,11 +25,13 @@ int main(int argc, char *argv[])
         QIcon::setThemeName(FALLBACK_ICON_THEME);
     }
 
-    const PictureLoader pl(
+    const PictureLoader picture_loader;
+    const DataLoader data_loader(
                 std::unique_ptr<const IArchiveExtractor>(new ArchiveExtractor())
                 );
     MainWindow w(
-                &pl,
+                &data_loader,
+                &picture_loader,
                 std::unique_ptr<const IArchiveExtractor>(new ArchiveExtractor())
                 );
     w.showMaximized();

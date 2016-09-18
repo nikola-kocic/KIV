@@ -37,6 +37,7 @@ include_directories (
     ${CMAKE_CURRENT_SOURCE_DIR}/../
     ${QUAZIP_INCLUDE_DIR})
 set ( kiv_HDRS
+    dataloader.h
     enums.h
     fileinfo.h
     helper.h
@@ -60,6 +61,7 @@ set ( kiv_HDRS
     )
 
 set ( kiv_SRCS
+    dataloader.cpp
     fileinfo.cpp
     helper.cpp
     main.cpp

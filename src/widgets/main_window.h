@@ -9,6 +9,7 @@
 #include <QToolBar>
 
 #include "models/filesystem_model.h"
+#include "dataloader.h"
 #include "picture_loader.h"
 #include "widgets/files_view/view_files.h"
 #include "widgets/urlnavigator.h"
@@ -20,10 +21,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(const IPictureLoader *const picture_loader,
-                        std::unique_ptr<const IArchiveExtractor> archive_extractor,
-                        QWidget *parent = nullptr,
-                        Qt::WindowFlags f = nullptr);
+    explicit MainWindow(
+            const DataLoader *const data_loader,
+            const IPictureLoader *const picture_loader,
+            std::unique_ptr<const IArchiveExtractor> archive_extractor,
+            QWidget *parent = nullptr,
+            Qt::WindowFlags f = nullptr);
     ~MainWindow() override;
 
 private:
@@ -39,7 +42,6 @@ private:
                     m_picture_item->mapFromGlobal(pos));
     }
 
-    const IPictureLoader *const m_picture_loader;
     FileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

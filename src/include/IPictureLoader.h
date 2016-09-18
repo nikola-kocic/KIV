@@ -1,10 +1,12 @@
 #ifndef IPICTURELOADER_H
 #define IPICTURELOADER_H
 
-#include "include/IArchiveExtractor.h"
 #include "fileinfo.h"
 
 #include <QImage>
+#include <QBuffer>
+
+#include <memory>
 
 class ThumbnailInfo
 {
@@ -27,8 +29,8 @@ class IPictureLoader
 public:
     // Empty virtual destructor for proper cleanup
     virtual ~IPictureLoader();
-    virtual QImage getImage(const FileInfo &info) const = 0;
-    virtual QImage getThumbnail(const ThumbnailInfo &thumb_info) const = 0;
+    virtual QImage getImage(std::unique_ptr<QBuffer> device) const = 0;
+    virtual QImage getThumbnail(std::unique_ptr<QBuffer> device, const QSize &thumbSize) const = 0;
     virtual QImage styleThumbnail(const QImage &img, const QSize &thumb_size) const = 0;
 };
 
