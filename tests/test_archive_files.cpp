@@ -33,7 +33,7 @@ void TestArchiveFiles::commonCheck(const QString &archiveName, const DirStructur
     for(ArchiveFileInfo &afi : tds.getFiles())
     {
         QByteArray buffer;
-        m_archive_extractor->readFile(archivePath, afi.m_name, buffer);
+        m_archive_extractor->readFile(archivePath, afi.m_name, buffer, -1);
         QString fileContentKey = afi.m_name;
         QVERIFY2(buffer.size() > 0, QString(archivePath + "\n\n" + afi.m_name).toUtf8());
         QVERIFY2(m_file_content[fileContentKey].size() > 0, QString(archivePath + "\n\n" + afi.m_name).toUtf8());

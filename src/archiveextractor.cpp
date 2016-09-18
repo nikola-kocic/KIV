@@ -8,6 +8,8 @@
 #include "models/unrar/archive_rar.h"
 
 
+IArchiveExtractor::~IArchiveExtractor() {}
+
 ArchiveExtractor::ArchiveExtractor()
 {
 }
@@ -66,7 +68,8 @@ int ArchiveExtractor::extract(const QString &archiveName,
 
 int ArchiveExtractor::readFile(const QString &archiveName,
                                const QString &fileName,
-                               QByteArray &buffer) const
+                               QByteArray &buffer,
+                               int maxSize) const
 {
     QFile zipFile(archiveName);
     QuaZip zip(&zipFile);
@@ -79,7 +82,14 @@ int ArchiveExtractor::readFile(const QString &archiveName,
             QuaZipFile file(&zip);
             if (file.open(QIODevice::ReadOnly))
             {
-                buffer = file.readAll();
+                if (maxSize == -1)
+                {
+                    buffer = file.readAll();
+                }
+                else
+                {
+                    buffer = file.read(maxSize);
+                }
             }
             else
             {
@@ -97,7 +107,7 @@ int ArchiveExtractor::readFile(const QString &archiveName,
         if (ArchiveRar::loadlib())
         {
             // TODO: Check return value
-            ArchiveRar::readFile(archiveName, fileName, buffer);
+            ArchiveRar::readFile(archiveName, fileName, buffer, maxSize);
         }
     }
 

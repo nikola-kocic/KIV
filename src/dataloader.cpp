@@ -10,7 +10,7 @@ DataLoader::DataLoader(const IArchiveExtractor* const archive_extractor)
 {
 }
 
-QByteArray DataLoader::getData(const FileInfo &file_info) const
+QByteArray DataLoader::getData(const FileInfo &file_info, int maxSize) const
 {
     QByteArray data;
 #ifdef DEBUG_DATA_LOADER
@@ -20,36 +20,45 @@ QByteArray DataLoader::getData(const FileInfo &file_info) const
     {
         if (file_info.isInArchive())
         {
-            data = getArchiveFileData(file_info);
+            data = getArchiveFileData(file_info, maxSize);
         }
         else
         {
-            data = getFileData(file_info);
+            data = getFileData(file_info, maxSize);
         }
     }
     return data;
 }
 
-QByteArray DataLoader::getFileData(const FileInfo &file_info) const
+QByteArray DataLoader::getFileData(const FileInfo &file_info, int maxSize) const
 {
     QFile file(file_info.getPath());
 #ifdef DEBUG_DATA_LOADER
     DEBUGOUT << file_info.getPath();
 #endif
     file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
+    QByteArray data;
+    if (maxSize == -1)
+    {
+        data = file.readAll();
+    }
+    else
+    {
+        data = file.read(maxSize);
+    }
     file.close();
     return data;
 }
 
 
-QByteArray DataLoader::getArchiveFileData(const FileInfo &file_info) const
+QByteArray DataLoader::getArchiveFileData(const FileInfo &file_info, int maxSize) const
 {
     QByteArray buff;
     int success = m_archive_extractor->readFile(
                 file_info.getContainerPath(),
                 file_info.getArchiveImagePath(),
-                buff);
+                buff,
+                maxSize);
 
     if (success != 0 || buff.isEmpty())
     {

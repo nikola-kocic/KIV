@@ -15,7 +15,8 @@ public:
                         const QString &newFileName) const override;
     virtual int readFile(const QString &archiveName,
                          const QString &fileName,
-                         QByteArray &buffer) const override;
+                         QByteArray &buffer,
+                         int maxSize) const override;
 };
 
 #endif // ARCHIVEEXTRACTOR_H

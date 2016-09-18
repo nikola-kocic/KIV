@@ -21,7 +21,8 @@ public:
     static bool readFile(
             const QString &archiveName,
             const QString &fileName,
-            QByteArray &buffer);
+            QByteArray &buffer,
+            int maxSize);
     static unsigned int getFileInfoList(const QString &path,
                                         std::vector<ArchiveFileInfo> &list);
     static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);

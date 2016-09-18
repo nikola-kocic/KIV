@@ -98,7 +98,7 @@ void PictureItem::setPixmap(const FileInfo &info)
 #endif
         m_watcher_data->setFuture(
                     QtConcurrent::run(
-                        m_data_loader, &DataLoader::getData, info));
+                        m_data_loader, &DataLoader::getData, info, -1));
     }
 }
 

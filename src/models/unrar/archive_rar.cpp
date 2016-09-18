@@ -124,10 +124,16 @@ bool ArchiveRar::extract(const QString &archiveName,
     return retval;
 }
 
+struct CallbackData {
+    CallbackData(QByteArray *_buf, int _maxSize) : buf(_buf), maxSize(_maxSize) {}
+    QByteArray *buf;
+    int maxSize;
+};
+
 static int CALLBACK CallbackProc(unsigned int msg,
-                                 LPARAM myBufferPtr,
-                                 LPARAM rarBuffer,
-                                 LPARAM bytesProcessed)
+                                 LPARAM UserData,
+                                 LPARAM unpackedDataParam,
+                                 LPARAM unpackedDataSize)
 {
     switch(msg)
     {
@@ -136,9 +142,13 @@ static int CALLBACK CallbackProc(unsigned int msg,
 
     case UCM_PROCESSDATA:
     {
-        char** buf = reinterpret_cast<char**>(myBufferPtr);
-        memcpy(*buf, reinterpret_cast<char*>(rarBuffer), static_cast<size_t>(bytesProcessed));
-        *buf += bytesProcessed;
+        CallbackData* data = reinterpret_cast<CallbackData*>(UserData);
+        char* unpackedData = reinterpret_cast<char*>(unpackedDataParam);
+        data->buf->append(unpackedData, static_cast<int>(unpackedDataSize));
+        if (data->maxSize != -1 && data->buf->size() >= data->maxSize)
+        {
+            return -1;
+        }
         return 1;
     }
 
@@ -149,10 +159,10 @@ static int CALLBACK CallbackProc(unsigned int msg,
     }
 }
 
-bool ArchiveRar::readFile(
-        const QString &archiveName,
+bool ArchiveRar::readFile(const QString &archiveName,
         const QString &fileName,
-        QByteArray &buffer)
+        QByteArray &buffer,
+        int maxSize)
 {
     const std::wstring fileNameW =
             QDir::toNativeSeparators(fileName).toStdWString();
@@ -172,8 +182,8 @@ bool ArchiveRar::readFile(
         return false;
     }
 
-    char *callBackBuffer = nullptr;
-    RARSetCallback(hArcData, CallbackProc, reinterpret_cast<LPARAM>(&callBackBuffer));
+    CallbackData callBackUserData = CallbackData(&buffer, maxSize);
+    RARSetCallback(hArcData, CallbackProc, reinterpret_cast<LPARAM>(&callBackUserData));
 
     RARHeaderDataEx HeaderData;
     HeaderData.CmtBuf = nullptr;
@@ -184,6 +194,8 @@ bool ArchiveRar::readFile(
     {
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
+            if (maxSize == -1)
+            {
             qint64 UnpSize = getUncompressedSize(HeaderData);
             if (UnpSize > (std::numeric_limits<int>::max)())
             {
@@ -191,8 +203,8 @@ bool ArchiveRar::readFile(
                 retval = false;
                 break;
             }
-            buffer.resize(static_cast<int>(UnpSize));
-            callBackBuffer = buffer.data();
+                buffer.reserve(static_cast<int>(UnpSize));
+            }
 
             if ((PFCode = RARProcessFileW(hArcData, RAR_TEST, nullptr, nullptr) != 0))
             {
