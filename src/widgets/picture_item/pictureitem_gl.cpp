@@ -23,8 +23,8 @@ PictureItemGL::PictureItemGL(PictureItemData *data, ZoomFilter zoomFilter, QWidg
 {
     m_widget = this;
     QGLContext::setTextureCacheLimit(0);
-    connect(m_loader_texture, SIGNAL(resultReadyAt(int)),
-            this, SLOT(textureFinished(int)));
+    connect(m_loader_texture, &QFutureWatcher<QImage>::resultReadyAt,
+            this, &PictureItemGL::textureFinished);
 }
 
 PictureItemGL::~PictureItemGL()

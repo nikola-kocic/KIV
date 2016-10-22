@@ -12,7 +12,7 @@
 #include "widgets/picture_item/teximg.h"
 #include "enums.h"
 
-class PictureItemGL : private QGLWidget, public PictureItemInterface, protected QOpenGLFunctions_2_0
+class PictureItemGL : public QGLWidget, public PictureItemInterface, protected QOpenGLFunctions_2_0
 {
     Q_OBJECT
 

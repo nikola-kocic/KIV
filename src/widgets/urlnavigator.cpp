@@ -20,7 +20,7 @@ UrlNavigator::UrlNavigator(QAbstractItemModel *model, const QUrl &url,
 {
     setLocationUrl(url);
     setCompleter(m_completer);
-    connect(this, SIGNAL(returnPressed()), this, SLOT(on_returnPressed()));
+    connect(this, &QLineEdit::returnPressed, this, &UrlNavigator::on_returnPressed);
 }
 
 void UrlNavigator::setLocationUrl(const QUrl &url)

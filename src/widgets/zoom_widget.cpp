@@ -34,8 +34,11 @@ ZoomWidget::ZoomWidget(const QVector<qreal> defaultZoomSizes,
         }
     }
 
-    connect(lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_textChanged()));
-    connect(this, SIGNAL(activated(int)), this, SLOT(on_activated(int)));
+    connect(lineEdit(), &QLineEdit::returnPressed,
+            this, &ZoomWidget::on_textChanged);
+    connect(this, static_cast<void (QComboBox::*)(int)>(
+                &QComboBox::activated),
+            this, &ZoomWidget::on_activated);
 }
 
 void ZoomWidget::on_zoomChanged(qreal current, qreal previous)

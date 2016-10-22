@@ -10,11 +10,8 @@ FileViewWithProxy::FileViewWithProxy(
     , m_proxy(std::move(proxy))
 {
     m_view->setModel(m_proxy.get());
-    connect(m_view->selectionModel(),
-            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            this,
-            SLOT(currentChanged(QModelIndex, QModelIndex))
-            );
+    connect(m_view->selectionModel(), &QItemSelectionModel::currentChanged,
+            this, &FileViewWithProxy::currentChanged);
 }
 
 QWidget *FileViewWithProxy::getWidget()

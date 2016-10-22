@@ -54,8 +54,8 @@ ViewFiles::ViewFiles(ThumbnailItemDelegate *const thumbnail_item_delegate,
 {
     m_proxy_containers->setSourceModel(m_model_filesystem->getModel());
 
-    connect(m_thumbnail_delegate, SIGNAL(thumbnailFinished(QModelIndex)),
-            this, SLOT(on_thumbnail_finished(QModelIndex)));
+    connect(m_thumbnail_delegate, &ThumbnailItemDelegate::thumbnailFinished,
+            this, &ViewFiles::on_thumbnail_finished);
 
     /* Start archiveDirsView */
     m_view_archiveDirs->getWidget()->hide();
@@ -113,16 +113,13 @@ ViewFiles::ViewFiles(ThumbnailItemDelegate *const thumbnail_item_delegate,
 
     /* End Layout */
 
-    connect(m_view_archiveDirs,
-            SIGNAL(currentRowChanged(QModelIndex)),
-            this,
-            SLOT(on_archiveDirsView_currentRowChanged(QModelIndex)));
+    connect(m_view_archiveDirs, &IFileView::currentRowChanged,
+            this, &ViewFiles::on_archiveDirsView_currentRowChanged);
     connect(m_view_filesystem->selectionModel(),
-            SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
-            this,
-            SLOT(on_filesystemView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_combobox_sort, SIGNAL(currentSortChanged(ColumnSort)),
-            this, SLOT(on_combobox_sort_currentSortChanged(ColumnSort)));
+            &QItemSelectionModel::currentRowChanged,
+            this, &ViewFiles::on_filesystemView_currentRowChanged);
+    connect(m_combobox_sort, &SortComboBox::currentSortChanged,
+            this, &ViewFiles::on_combobox_sort_currentSortChanged);
 
     initViewItem();
 }
@@ -147,8 +144,8 @@ void ViewFiles::initViewItem()
         m_treeView_files = new TreeViewFiles(this);
         m_listView_files = nullptr;
         m_view_current = qobject_cast<QAbstractItemView *>(m_treeView_files);
-        connect(m_treeView_files, SIGNAL(rowsInserted(QModelIndexList)),
-                this, SLOT(on_rows_inserted(QModelIndexList)));
+        connect(m_treeView_files, &TreeViewFiles::rowsInsertedSignal,
+                this, &ViewFiles::on_rows_inserted);
     }
     else
     {
@@ -156,18 +153,18 @@ void ViewFiles::initViewItem()
         m_listView_files->setViewMode(m_view_mode);
         m_treeView_files = nullptr;
         m_view_current = qobject_cast<QAbstractItemView *>(m_listView_files);
-        connect(m_listView_files, SIGNAL(rowsInserted(QModelIndexList)),
-                this, SLOT(on_rows_inserted(QModelIndexList)));
+        connect(m_listView_files, &ListViewFiles::rowsInsertedSignal,
+                this, &ViewFiles::on_rows_inserted);
     }
 
     m_view_current->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_view_current->setModel(m_proxy_file_list);
     connect(m_view_current->selectionModel(),
-            SIGNAL(currentRowChanged(QModelIndex,QModelIndex)),
+            &QItemSelectionModel::currentRowChanged,
             this,
-            SLOT(on_FilesView_currentRowChanged(QModelIndex,QModelIndex)));
-    connect(m_view_current, SIGNAL(activated(QModelIndex)),
-            this, SLOT(on_item_activated(QModelIndex)));
+            &ViewFiles::on_FilesView_currentRowChanged);
+    connect(m_view_current, &QAbstractItemView::activated,
+            this, &ViewFiles::on_item_activated);
 
     if (m_fileinfo_current.isValid())
     {

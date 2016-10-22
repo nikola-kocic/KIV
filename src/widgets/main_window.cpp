@@ -447,114 +447,114 @@ void MainWindow::createMenus()
 
 void MainWindow::connectActions()
 {
-    connect(m_act_open, SIGNAL(triggered()), this, SLOT(openFileDialog()));
-    connect(m_act_save, SIGNAL(triggered()), this, SLOT(saveAs()));
-    connect(m_act_exit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(m_act_back, SIGNAL(triggered()), m_urlNavigator, SLOT(goBack()));
-    connect(m_act_forward, SIGNAL(triggered()), m_urlNavigator, SLOT(goForward()));
+    connect(m_act_open, &QAction::triggered, this, &MainWindow::openFileDialog);
+    connect(m_act_save, &QAction::triggered, this, &MainWindow::saveAs);
+    connect(m_act_exit, &QAction::triggered, this, &MainWindow::close);
+    connect(m_act_back, &QAction::triggered, m_urlNavigator, &UrlNavigator::goBack);
+    connect(m_act_forward, &QAction::triggered, m_urlNavigator, &UrlNavigator::goForward);
 
-    connect(m_act_bookmark_add, SIGNAL(triggered()), this, SLOT(addBookmark()));
+    connect(m_act_bookmark_add, &QAction::triggered, this, &MainWindow::addBookmark);
 
-    connect(m_act_settings, SIGNAL(triggered()), this, SLOT(settingsDialog()));
-    connect(m_act_pagePrevious, SIGNAL(triggered()),
-            m_view_files, SLOT(pagePrevious()));
-    connect(m_act_pageNext, SIGNAL(triggered()),
-            m_view_files, SLOT(pageNext()));
+    connect(m_act_settings, &QAction::triggered, this, &MainWindow::settingsDialog);
+    connect(m_act_pagePrevious, &QAction::triggered,
+            m_view_files, &ViewFiles::pagePrevious);
+    connect(m_act_pageNext, &QAction::triggered,
+            m_view_files, &ViewFiles::pageNext);
 
 
-    connect(m_act_thumbnails, SIGNAL(toggled(bool)),
-            this, SLOT(toggleShowThumbnails(bool)));
-    connect(m_act_fullscreen, SIGNAL(toggled(bool)),
-            this, SLOT(toggleFullscreen(bool)));
-    connect(m_act_largeIcons, SIGNAL(toggled(bool)),
-            this, SLOT(toggleLargeIcons(bool)));
-    connect(m_act_sidebar, SIGNAL(toggled(bool)),
-            this, SLOT(toggleSidebar(bool)));
-    connect(m_act_mode_list, SIGNAL(triggered()),
-            this, SLOT(on_view_mode_list_triggered()));
-    connect(m_act_mode_details, SIGNAL(triggered()),
-            this, SLOT(on_view_mode_details_triggered()));
-    connect(m_act_mode_icons, SIGNAL(triggered()),
-            this, SLOT(on_view_mode_icons_triggered()));
+    connect(m_act_thumbnails, &QAction::toggled,
+            this, &MainWindow::toggleShowThumbnails);
+    connect(m_act_fullscreen, &QAction::toggled,
+            this, &MainWindow::toggleFullscreen);
+    connect(m_act_largeIcons, &QAction::toggled,
+            this, &MainWindow::toggleLargeIcons);
+    connect(m_act_sidebar, &QAction::toggled,
+            this, &MainWindow::toggleSidebar);
+    connect(m_act_mode_list, &QAction::triggered,
+            this, &MainWindow::on_view_mode_list_triggered);
+    connect(m_act_mode_details, &QAction::triggered,
+            this, &MainWindow::on_view_mode_details_triggered);
+    connect(m_act_mode_icons, &QAction::triggered,
+            this, &MainWindow::on_view_mode_icons_triggered);
 
-    connect(m_act_rotateLeft, SIGNAL(triggered()), this, SLOT(rotateLeft()));
-    connect(m_act_rotateRight, SIGNAL(triggered()), this, SLOT(rotateRight()));
-    connect(m_act_rotateReset, SIGNAL(triggered()), this, SLOT(rotateReset()));
-    connect(m_act_zoomIn, SIGNAL(triggered()), m_comboBox_zoom, SLOT(zoomIn()));
-    connect(m_act_zoomOut, SIGNAL(triggered()),
-            m_comboBox_zoom, SLOT(zoomOut()));
-    connect(m_act_zoomReset, SIGNAL(triggered()), this, SLOT(zoomReset()));
-    connect(m_act_fitToWindow, SIGNAL(triggered()),
-            m_picture_item, SLOT(fitToScreen()));
-    connect(m_act_fitToWidth, SIGNAL(triggered()),
-            m_picture_item, SLOT(fitWidth()));
-    connect(m_act_fitToHeight, SIGNAL(triggered()),
-            m_picture_item, SLOT(fitHeight()));
+    connect(m_act_rotateLeft, &QAction::triggered, this, &MainWindow::rotateLeft);
+    connect(m_act_rotateRight, &QAction::triggered, this, &MainWindow::rotateRight);
+    connect(m_act_rotateReset, &QAction::triggered, this, &MainWindow::rotateReset);
+    connect(m_act_zoomIn, &QAction::triggered, m_comboBox_zoom, &ZoomWidget::zoomIn);
+    connect(m_act_zoomOut, &QAction::triggered,
+            m_comboBox_zoom, &ZoomWidget::zoomOut);
+    connect(m_act_zoomReset, &QAction::triggered, this, &MainWindow::zoomReset);
+    connect(m_act_fitToWindow, &QAction::triggered,
+            m_picture_item, &PictureItem::fitToScreen);
+    connect(m_act_fitToWidth, &QAction::triggered,
+            m_picture_item, &PictureItem::fitWidth);
+    connect(m_act_fitToHeight, &QAction::triggered,
+            m_picture_item, &PictureItem::fitHeight);
 
-    connect(m_act_lockNone, SIGNAL(triggered()), this, SLOT(lockNone()));
-    connect(m_act_lockZoom, SIGNAL(triggered()), this, SLOT(lockZoom()));
-    connect(m_act_lockAutofit, SIGNAL(triggered()), this, SLOT(lockAutofit()));
-    connect(m_act_lockFitHeight, SIGNAL(triggered()),
-            this, SLOT(lockFitHeight()));
-    connect(m_act_lockFitWidth, SIGNAL(triggered()),
-            this, SLOT(lockFitWidth()));
+    connect(m_act_lockNone, &QAction::triggered, this, &MainWindow::lockNone);
+    connect(m_act_lockZoom, &QAction::triggered, this, &MainWindow::lockZoom);
+    connect(m_act_lockAutofit, &QAction::triggered, this, &MainWindow::lockAutofit);
+    connect(m_act_lockFitHeight, &QAction::triggered,
+            this, &MainWindow::lockFitHeight);
+    connect(m_act_lockFitWidth, &QAction::triggered,
+            this, &MainWindow::lockFitWidth);
 
-    connect(m_act_about, SIGNAL(triggered()), this, SLOT(about()));
-    connect(m_act_webSite, SIGNAL(triggered()), this, SLOT(website()));
+    connect(m_act_about, &QAction::triggered, this, &MainWindow::about);
+    connect(m_act_webSite, &QAction::triggered, this, &MainWindow::website);
 
-    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)),
-            m_view_files, SLOT(setLocationUrl(QUrl)));
-    connect(m_urlNavigator, SIGNAL(urlChanged(QUrl)),
-            this, SLOT(setLocationUrl(QUrl)));
-    connect(m_view_files, SIGNAL(urlChanged(QUrl)),
-            m_urlNavigator, SLOT(setLocationUrl(QUrl)));
-    connect(m_view_files, SIGNAL(urlChanged(QUrl)),
-            this, SLOT(setLocationUrl(QUrl)));
+    connect(m_urlNavigator, &UrlNavigator::urlChanged,
+            m_view_files, &ViewFiles::setLocationUrl);
+    connect(m_urlNavigator, &UrlNavigator::urlChanged,
+            this, &MainWindow::setLocationUrl);
+    connect(m_view_files, &ViewFiles::urlChanged,
+            m_urlNavigator, &UrlNavigator::setLocationUrl);
+    connect(m_view_files, &ViewFiles::urlChanged,
+            this, &MainWindow::setLocationUrl);
 
-    connect(m_picture_item, SIGNAL(imageChanged()),
-            this, SLOT(updateActions()));
-    connect(m_picture_item, SIGNAL(zoomChanged(qreal,qreal)),
-            m_comboBox_zoom, SLOT(on_zoomChanged(qreal,qreal)));
-    connect(m_picture_item, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(on_customContextMenuRequested(QPoint)));
+    connect(m_picture_item, &PictureItem::imageChanged,
+            this, &MainWindow::updateActions);
+    connect(m_picture_item, &PictureItem::zoomChanged,
+            m_comboBox_zoom, &ZoomWidget::on_zoomChanged);
+    connect(m_picture_item, &PictureItem::customContextMenuRequested,
+            this, &MainWindow::on_customContextMenuRequested);
 
-    connect(m_comboBox_zoom, SIGNAL(zoomChanged(qreal)),
-            m_picture_item, SLOT(setZoom(qreal)));
+    connect(m_comboBox_zoom, &ZoomWidget::zoomChanged,
+            m_picture_item, &PictureItem::setZoom);
 
-    connect(m_act_refreshPath, SIGNAL(triggered()), this, SLOT(refreshPath()));
-    connect(m_act_showInFileBrowser, SIGNAL(triggered()),
-            this, SLOT(showInFileBrowser()));
-    connect(m_act_dirUp, SIGNAL(triggered()), m_view_files, SLOT(dirUp()));
+    connect(m_act_refreshPath, &QAction::triggered, this, &MainWindow::refreshPath);
+    connect(m_act_showInFileBrowser, &QAction::triggered,
+            this, &MainWindow::showInFileBrowser);
+    connect(m_act_dirUp, &QAction::triggered, m_view_files, &ViewFiles::dirUp);
 
-    connect(m_act_bookmark_delete, SIGNAL(triggered()),
-            this, SLOT(deleteBookmark()));
-    connect(m_act_focus_location, SIGNAL(triggered()),
-            m_urlNavigator, SLOT(focus()));
+    connect(m_act_bookmark_delete, &QAction::triggered,
+            this, &MainWindow::deleteBookmark);
+    connect(m_act_focus_location, &QAction::triggered,
+            m_urlNavigator, &UrlNavigator::focus);
 
-    connect(m_menu_history, SIGNAL(aboutToShow()),
-            this, SLOT(populateHistoryMenu()));
-    connect(m_menu_history, SIGNAL(triggered(QAction*)),
-            this, SLOT(on_historyMenuTriggered(QAction*)));
+    connect(m_menu_history, &QMenu::aboutToShow,
+            this, &MainWindow::populateHistoryMenu);
+    connect(m_menu_history, &QMenu::triggered,
+            this, &MainWindow::on_historyMenuTriggered);
 
-    connect(m_menu_bookmarks, SIGNAL(aboutToShow()),
-            this, SLOT(populateBookmarks()));
-    connect(m_menu_bookmarks, SIGNAL(aboutToHide()),
-            this, SLOT(on_bookmark_menu_aboutToHide()));
-    connect(m_menu_bookmarks, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(on_bookmark_customContextMenuRequested(QPoint)));
-    connect(m_menu_bookmarks, SIGNAL(triggered(QAction*)),
-            this, SLOT(on_bookmark_triggered(QAction*)));
+    connect(m_menu_bookmarks, &QMenu::aboutToShow,
+            this, &MainWindow::populateBookmarks);
+    connect(m_menu_bookmarks, &QMenu::aboutToHide,
+            this, &MainWindow::on_bookmark_menu_aboutToHide);
+    connect(m_menu_bookmarks, &QMenu::customContextMenuRequested,
+            this, &MainWindow::on_bookmark_customContextMenuRequested);
+    connect(m_menu_bookmarks, &QMenu::triggered,
+            this, &MainWindow::on_bookmark_triggered);
 
-    connect(m_urlNavigator, SIGNAL(historyChanged()),
-            this, SLOT(on_urlHistoryChanged()));
+    connect(m_urlNavigator, &UrlNavigator::historyChanged,
+            this, &MainWindow::on_urlHistoryChanged);
 
 
     foreach (QAction *action, QList<QAction*>() << m_act_back << m_act_forward)
     {
         QWidget *action_widget = m_toolbar->widgetForAction(action);
         action_widget->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(action_widget, SIGNAL(customContextMenuRequested(QPoint)),
-                this, SLOT(on_historyMenuRequested(QPoint)));
+        connect(action_widget, &QWidget::customContextMenuRequested,
+                this, &MainWindow::on_historyMenuRequested);
     }
 }
 

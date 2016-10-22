@@ -16,7 +16,7 @@ protected slots:
     void rowsInserted(const QModelIndex &parent, int start, int end) override;
 
 signals:
-    void rowsInserted(const QModelIndexList &indexes);
+    void rowsInsertedSignal(const QModelIndexList &indexes);
 };
 
 #endif // VIEW_FILES_TREE_H

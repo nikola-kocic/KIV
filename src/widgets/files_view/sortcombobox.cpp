@@ -9,8 +9,9 @@ SortComboBox::SortComboBox(const QList<ColumnSort> &items,
     {
         this->addItem(this->getSortText(sort));
     }
-    connect(this, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(on_currentIndexChanged(int)));
+    connect(this, static_cast<void (QComboBox::*)(int)>(
+                &QComboBox::currentIndexChanged),
+            this, &SortComboBox::on_currentIndexChanged);
 }
 
 void SortComboBox::on_currentIndexChanged(int index)

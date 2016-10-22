@@ -25,5 +25,5 @@ void TreeViewFiles::rowsInserted(const QModelIndex &parent, int start, int end)
 //        DEBUGOUT << parent << i << parent.child(i, 0)
 //                 << parent.child(i, 0).data().toString();
     }
-    emit rowsInserted(indexes);
+    emit rowsInsertedSignal(indexes);
 }
