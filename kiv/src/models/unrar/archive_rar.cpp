@@ -136,9 +136,9 @@ static int CALLBACK CallbackProc(unsigned int msg,
 
     case UCM_PROCESSDATA:
     {
-        char* buf = *reinterpret_cast<char**>(myBufferPtr);
-        memcpy(buf, reinterpret_cast<char*>(rarBuffer), static_cast<size_t>(bytesProcessed));
-        buf += bytesProcessed;
+        char** buf = reinterpret_cast<char**>(myBufferPtr);
+        memcpy(*buf, reinterpret_cast<char*>(rarBuffer), static_cast<size_t>(bytesProcessed));
+        *buf += bytesProcessed;
         return 1;
     }
 
