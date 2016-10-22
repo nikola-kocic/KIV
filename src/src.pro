@@ -1,11 +1,14 @@
 include(../defaults.pri)
 
-TARGET = kiv
+CONFIG += staticlib
+CONFIG -= app_bundle
+
+TEMPLATE = lib
+TARGET = src
 
 SOURCES += \
     fileinfo.cpp \
     helper.cpp \
-    main.cpp \
     picture_loader.cpp \
     settings.cpp \
     models/archive_item.cpp \
@@ -72,13 +75,6 @@ HEADERS += \
 FORMS += \
     widgets/settings_dialog.ui
 
-win32 {
-    RC_FILE = ../res/icons/kiv.rc
-}
 
-isEmpty(ANDROID_TARGET_ARCH) {
-    QMAKE_POST_LINK += $${QMAKE_COPY_DIR} \"$$shell_path($${KIV_ROOT_DIR}/res/icons)\" \"$$shell_path($${BIN_DIR}/icons)\" $$escape_expand(\\n\\t)
-} else {
-    RESOURCES += \
-        icons.qrc \
-}
+OTHER_FILES += \
+    CMakeLists.txt \

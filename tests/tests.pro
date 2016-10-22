@@ -1,14 +1,25 @@
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../src/release/ -lsrc
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../src/debug/ -lsrc
+else:unix: LIBS += -L$$OUT_PWD/../src/ -lsrc
+
+INCLUDEPATH += $$PWD/../src
+DEPENDPATH += $$PWD/../src
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../src/release/libsrc.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../src/debug/libsrc.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../src/release/src.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../src/debug/src.lib
+else:unix: PRE_TARGETDEPS += $$OUT_PWD/../src/libsrc.a
+
 include(../defaults.pri)
-
-TARGET = kiv_tests
-
-QT += testlib
 
 #CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
+TARGET = kiv_tests
 
+QT += testlib
 
 HEADERS += \
     test_settings_bookmarks.h \
@@ -33,28 +44,11 @@ SOURCES += \
     init_test_data.cpp \
     fixtures.cpp
 
-
-INCLUDEPATH += $${PWD}/../src/
-
-HEADERS += \
-    ../src/enums.h \
-    ../src/settings.h \
-    ../src/widgets/picture_item/pictureitem_data.h \
-    ../src/widgets/picture_item/pictureitem_raster.h \
-    ../src/widgets/zoom_widget.h \
-    ../src/archiveextractor.h \
-    ../src/models/unrar/archive_rar.h \
-
-SOURCES += \
-    ../src/settings.cpp \
-    ../src/widgets/picture_item/pictureitem_data.cpp \
-    ../src/widgets/picture_item/pictureitem_raster.cpp \
-    ../src/widgets/zoom_widget.cpp \
-    ../src/archiveextractor.cpp \
-    ../src/models/unrar/archive_rar.cpp \
-
 RESOURCES += \
     test_assets.qrc
+
+OTHER_FILES += \
+    CMakeLists.txt \
 
 KIV_TESTS_ROOT_DIR = $${PWD}
 QMAKE_POST_LINK += $${QMAKE_COPY_DIR} \"$$shell_path($${KIV_TESTS_ROOT_DIR}/assets)\" \"$$shell_path($${BIN_DIR}/assets)\" $$escape_expand(\\n\\t)
