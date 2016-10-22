@@ -88,7 +88,7 @@ private:
 signals:
     void thumbnailFinished(QModelIndex);
 
-private slots:
+private:
     void imageLoaded(int num);
 };
 

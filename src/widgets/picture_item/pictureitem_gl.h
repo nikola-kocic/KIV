@@ -31,6 +31,7 @@ private:
     void loadTextures(QList<TexIndex *> indexes);
     void updateSize();
     void clearTextures();
+    void textureFinished(int num);
 
     QFutureWatcher< QImage > *m_loader_texture;
     qreal m_scaleX;
@@ -44,9 +45,6 @@ protected:
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int width, int height) override;
-
-private slots:
-    void textureFinished(int num);
 };
 
 #endif  // PICTUREITEM_GL_H

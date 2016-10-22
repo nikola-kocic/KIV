@@ -48,10 +48,18 @@ public:
     void setPixmap(const FileInfo &info);
     bool isPixmapNull() const;
 
+    void setZoom(const qreal value);
+    void fitToScreen();
+    void fitWidth();
+    void fitHeight();
+    void scrollPageHorizontal(const int value);
+    void scrollPageVertical(const int value);
 
 private:
     void afterImageLoad(const QImage &img);
     QColor getAverageColor(const QImage &img) const;
+    void dataLoaded(int num);
+    void imageFinished(int num);
 
     void drag(const QPoint &pt);
     void beginDrag(const QPoint &pt);
@@ -79,18 +87,6 @@ private:
 signals:
     void zoomChanged(qreal current, qreal previous);
     void imageChanged();
-
-public slots:
-    void setZoom(const qreal value);
-    void fitToScreen();
-    void fitWidth();
-    void fitHeight();
-    void scrollPageHorizontal(const int value);
-    void scrollPageVertical(const int value);
-
-private slots:
-    void dataLoaded(int num);
-    void imageFinished(int num);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

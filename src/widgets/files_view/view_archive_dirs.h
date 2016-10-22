@@ -18,8 +18,6 @@ public:
             std::unique_ptr<QAbstractProxyModel> proxy,
             QWidget *parent = nullptr);
     void setModel(QAbstractItemModel *model) override;
-
-public slots:
     void setCurrentIndex(const QModelIndex &index) override;
 };
 

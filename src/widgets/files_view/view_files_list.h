@@ -14,7 +14,7 @@ public:
 
     void setViewMode(const FileViewMode mode);
 
-protected slots:
+protected:
     void rowsInserted(const QModelIndex &parent, int start, int end) override;
 
 signals:

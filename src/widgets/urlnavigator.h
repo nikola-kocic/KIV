@@ -19,7 +19,6 @@ public:
     int historySize() const;
     QList<QUrl> getHistory() const;
 
-public slots:
     void setLocationUrl(const QUrl &url);
     void focus();
     bool goBack();
@@ -36,15 +35,13 @@ protected:
 private:
     void setLocationUrlInternal(const QUrl &url);
     void updateContent();
+    void on_returnPressed();
     QAbstractItemModel *m_model;
     QCompleter *m_completer;
     QUrl m_currentUrl;
     QList<QUrl> m_history;
     int m_historyIndex;
     const int m_historyMax;
-
-private slots:
-    void on_returnPressed();
 };
 
 #endif  // LOCATION_WIDGET_H

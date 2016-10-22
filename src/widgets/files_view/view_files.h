@@ -42,11 +42,10 @@ public:
     FileInfo getCurrentFileInfo() const;
     void setShowThumbnails(const bool b);
     void saveCurrentFile(const QString &fileName) const;
-
-public slots:
     void pageNext();
     void pagePrevious();
     void setLocationUrl(const QUrl &url);
+    void dirUp();
 
 private:
     void initViewItem();
@@ -82,10 +81,6 @@ private:
     bool m_show_thumbnails;
     bool m_flag_opening;
 
-public slots:
-    void dirUp();
-
-private slots:
     void on_item_activated(const QModelIndex &index);
     void on_FilesView_currentRowChanged(const QModelIndex &current,
                                         const QModelIndex &previous);

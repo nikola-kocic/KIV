@@ -20,8 +20,6 @@ public:
     virtual QWidget *getWidget() override;
     void setModel(QAbstractItemModel *model) override;
     QModelIndex currentIndex() const override;
-
-public slots:
     void setCurrentIndex(const QModelIndex &index) override;
 
 private:
@@ -29,8 +27,6 @@ private:
 protected:
     std::unique_ptr<QAbstractItemView> m_view;
     std::unique_ptr<QAbstractProxyModel> m_proxy;
-
-protected slots:
     void currentChanged(
             const QModelIndex &current,
             const QModelIndex &previous

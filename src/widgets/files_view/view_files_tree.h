@@ -12,7 +12,7 @@ class TreeViewFiles : public QTreeView
 public:
     explicit TreeViewFiles(QWidget *parent = nullptr);
 
-protected slots:
+protected:
     void rowsInserted(const QModelIndex &parent, int start, int end) override;
 
 signals:

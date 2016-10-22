@@ -118,8 +118,6 @@ private:
 
     QHash<QAction*, QStringList> m_actions_icons;
 
-private slots:
-
     void updateActions();
 
     /* File Menu Actions Slots */

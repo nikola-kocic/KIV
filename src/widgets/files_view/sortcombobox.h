@@ -20,8 +20,6 @@ signals:
 protected:
     QList<ColumnSort> m_items;
     QString getSortText(ColumnSort sort) const;
-
-protected slots:
     void on_currentIndexChanged(int index);
 };
 
