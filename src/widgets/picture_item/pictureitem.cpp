@@ -107,6 +107,8 @@ void PictureItem::dataLoaded(int num)
     const QByteArray data = m_watcher_data->resultAt(num);
     if (data.isEmpty())
     {
+        m_imageDisplay->getWidget()->setUpdatesEnabled(true);
+        m_data->setPixmapNull(true);
         return;
     }
     auto f = [this, data]() {
