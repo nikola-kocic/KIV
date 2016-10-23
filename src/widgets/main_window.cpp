@@ -669,7 +669,6 @@ bool MainWindow::setLocationUrl(const QUrl &url)
     this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName()
                          + " - " + QApplication::applicationName() + " "
                          + QApplication::applicationVersion());
-    this->setCursor(Qt::BusyCursor);
 
     m_picture_item->setPixmap(fileinfo);
 
