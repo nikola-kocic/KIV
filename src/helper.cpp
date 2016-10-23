@@ -104,13 +104,13 @@ QString size(const qint64 bytes)
     constexpr qint64 gib = 1024 * mib;
     constexpr qint64 tib = 1024 * gib;
     if (bytes >= tib) {
-        return QFileSystemModel::tr("%1 TiB").arg(QLocale().toString(1.0 * bytes / tib, 'f', 3));
+        return QFileSystemModel::tr("%1 TiB").arg(QLocale().toString(static_cast<double>(bytes) / tib, 'f', 3));
     } else if (bytes >= gib) {
-        return QFileSystemModel::tr("%1 GiB").arg(QLocale().toString(1.0 * bytes / gib, 'f', 2));
+        return QFileSystemModel::tr("%1 GiB").arg(QLocale().toString(static_cast<double>(bytes) / gib, 'f', 2));
     } else if (bytes >= mib) {
-        return QFileSystemModel::tr("%1 MiB").arg(QLocale().toString(1.0 * bytes / mib, 'f', 1));
+        return QFileSystemModel::tr("%1 MiB").arg(QLocale().toString(static_cast<double>(bytes) / mib, 'f', 1));
     } else if (bytes >= kib) {
-        return QFileSystemModel::tr("%1 KiB").arg(QLocale().toString(1.0 * bytes / kib, 'f', 1));
+        return QFileSystemModel::tr("%1 KiB").arg(QLocale().toString(static_cast<double>(bytes) / kib, 'f', 1));
     } else if (bytes == 0) {
         return "";
     }
