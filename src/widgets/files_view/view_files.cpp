@@ -419,17 +419,14 @@ void ViewFiles::on_FilesView_currentRowChanged(const QModelIndex &current,
     emit urlChanged(QUrl::fromLocalFile(filePath));
 }
 
-void ViewFiles::pageNext()
+bool ViewFiles::changeImage(std::function<int()> generator)
 {
-    if (!m_view_current->currentIndex().isValid())
-    {
-        return;
-    }
-
-    IModelWrapper *m = (m_fileinfo_current.isInArchive() ? m_model_archive_files.get() : m_model_filesystem);
-    for (int i = m_view_current->currentIndex().row() + 1;
-         i < m_view_current->model()->rowCount(m_view_current->rootIndex());
-         ++i)
+    const IModelWrapper *const m = m_fileinfo_current.isInArchive()
+            ? m_model_archive_files.get()
+            : m_model_filesystem;
+    bool imageChanged = false;
+    int i = 0;
+    while ((i = generator()) != -1)
     {
         const QModelIndex index = m_view_current->model()->index(
                     i, 0, m_view_current->rootIndex());
@@ -437,30 +434,35 @@ void ViewFiles::pageNext()
         if (m->getNodeType(source_index) == NodeType::Image)
         {
             m_view_current->setCurrentIndex(index);
+            imageChanged = true;
             break;
         }
     }
+    return imageChanged;
+}
+
+void ViewFiles::pageNext()
+{
+    const QModelIndex currentIndex = m_view_current->currentIndex();
+    const int startRow = currentIndex.isValid() ? (currentIndex.row() + 1) : 0;
+    const int totalRows = m_view_current->model()->rowCount(m_view_current->rootIndex());
+    const std::function<int()> generator = [startRow, totalRows] {
+        int i = startRow;
+        return [=]() mutable { return i < totalRows ? i++ : -1; };
+    }();
+    const bool hasNext = changeImage(generator);
 }
 
 void ViewFiles::pagePrevious()
 {
-    if (!m_view_current->currentIndex().isValid())
-    {
-        return;
-    }
-
-    IModelWrapper *m = (m_fileinfo_current.isInArchive() ? m_model_archive_files.get() : m_model_filesystem);
-    for (int i = m_view_current->currentIndex().row() - 1; i >= 0; --i)
-    {
-        const QModelIndex index = m_view_current->model()->index(
-                    i, 0, m_view_current->rootIndex());
-        const QModelIndex source_index = m_proxy_file_list->mapToSource(index);
-        if (m->getNodeType(source_index) == NodeType::Image)
-        {
-            m_view_current->setCurrentIndex(index);
-            break;
-        }
-    }
+    const QModelIndex currentIndex = m_view_current->currentIndex();
+    const int totalRows = m_view_current->model()->rowCount(m_view_current->rootIndex());
+    const int startRow = currentIndex.isValid() ? (currentIndex.row() - 1) : (totalRows - 1);
+    const std::function<int()> generator = [startRow] {
+        int i = startRow;
+        return [=]() mutable { return i >= 0 ? i-- : -1; };
+    }();
+    const bool hasPrevious = changeImage(generator);
 }
 
 

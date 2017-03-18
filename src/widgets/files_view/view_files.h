@@ -13,6 +13,8 @@
 #include <QTreeView>
 #include <QUrl>
 
+#include <functional>
+
 #include "include/IArchiveExtractor.h"
 #include "helper.h"
 #include "models/archive_model.h"
@@ -42,6 +44,7 @@ public:
     FileInfo getCurrentFileInfo() const;
     void setShowThumbnails(const bool b);
     void saveCurrentFile(const QString &fileName) const;
+    bool changeImage(std::function<int()> generator);
     void pageNext();
     void pagePrevious();
     void setLocationUrl(const QUrl &url);
