@@ -269,49 +269,26 @@ public:
     }
 
 protected:
-    void _q_sourceRowsAboutToBeInserted(const QModelIndex &parent, int start, int end) {
-        beginInsertRows(mapFromSource(parent), start, end);
-    }
+    QList<QPersistentModelIndex> layoutChangePersistentIndexes;
+    QModelIndexList proxyIndexes;
 
-    void _q_sourceRowsInserted(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
-        endInsertRows();
-    }
-
-    void _q_sourceRowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) {
-        beginRemoveRows(mapFromSource(parent), start, end);
-    }
-    void _q_sourceRowsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
-        endRemoveRows();
-    }
-    void _q_sourceRowsAboutToBeMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destParent, int dest) {
-        beginMoveRows(mapFromSource(sourceParent), sourceStart, sourceEnd, mapFromSource(destParent), dest);
-    }
-    void _q_sourceRowsMoved(const QModelIndex &/*sourceParent*/, int /*sourceStart*/, int /*sourceEnd*/, const QModelIndex &/*destParent*/, int /*dest*/) {
-        endMoveRows();
-    }
     void _q_sourceColumnsAboutToBeInserted(const QModelIndex &parent, int start, int end) {
         beginInsertColumns(mapFromSource(parent), start, end);
-    }
-    void _q_sourceColumnsInserted(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
-        endInsertColumns();
-    }
-    void _q_sourceColumnsAboutToBeRemoved(const QModelIndex &parent, int start, int end) {
-        beginRemoveColumns(mapFromSource(parent), start, end);
-    }
-    void _q_sourceColumnsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
-        endRemoveColumns();
     }
     void _q_sourceColumnsAboutToBeMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destParent, int dest) {
         beginMoveColumns(mapFromSource(sourceParent), sourceStart, sourceEnd, mapFromSource(destParent), dest);
     }
+    void _q_sourceColumnsAboutToBeRemoved(const QModelIndex &parent, int start, int end) {
+        beginRemoveColumns(mapFromSource(parent), start, end);
+    }
+    void _q_sourceColumnsInserted(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
+        endInsertColumns();
+    }
     void _q_sourceColumnsMoved(const QModelIndex &/*sourceParent*/, int /*sourceStart*/, int /*sourceEnd*/, const QModelIndex &/*destParent*/, int /*dest*/) {
         endMoveColumns();
     }
-    void _q_sourceModelAboutToBeReset() {
-        beginResetModel();
-    }
-    void _q_sourceModelReset() {
-        endResetModel();
+    void _q_sourceColumnsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
+        endRemoveColumns();
     }
     void _q_sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) {
         dataChanged(mapFromSource(topLeft), mapFromSource(bottomRight), roles);
@@ -319,13 +296,76 @@ protected:
     void _q_sourceHeaderDataChanged(Qt::Orientation orientation, int first, int last) {
         headerDataChanged(orientation, first, last);
     }
+
     void _q_sourceLayoutAboutToBeChanged(const QList<QPersistentModelIndex> &sourceParents, QAbstractItemModel::LayoutChangeHint hint) {
-        // TODO
+        const auto proxyPersistentIndexes = persistentIndexList();
+        for (const QPersistentModelIndex &proxyPersistentIndex : proxyPersistentIndexes) {
+            proxyIndexes << proxyPersistentIndex;
+            Q_ASSERT(proxyPersistentIndex.isValid());
+            const QPersistentModelIndex srcPersistentIndex = mapToSource(proxyPersistentIndex);
+            Q_ASSERT(srcPersistentIndex.isValid());
+            layoutChangePersistentIndexes << srcPersistentIndex;
+        }
+
+        QList<QPersistentModelIndex> parents;
+        parents.reserve(sourceParents.size());
+        for (const QPersistentModelIndex &parent : sourceParents) {
+            if (!parent.isValid()) {
+                parents << QPersistentModelIndex();
+                continue;
+            }
+            const QModelIndex mappedParent = mapFromSource(parent);
+            Q_ASSERT(mappedParent.isValid());
+            parents << mappedParent;
+        }
         layoutAboutToBeChanged(sourceParents, hint);
     }
+
     void _q_sourceLayoutChanged(const QList<QPersistentModelIndex> &sourceParents, QAbstractItemModel::LayoutChangeHint hint) {
-        // TODO
+        for (int i = 0; i < proxyIndexes.size(); ++i) {
+            changePersistentIndex(proxyIndexes.at(i), mapFromSource(layoutChangePersistentIndexes.at(i)));
+        }
+
+        layoutChangePersistentIndexes.clear();
+        proxyIndexes.clear();
+
+        QList<QPersistentModelIndex> parents;
+        parents.reserve(sourceParents.size());
+        for (const QPersistentModelIndex &parent : sourceParents) {
+            if (!parent.isValid()) {
+                parents << QPersistentModelIndex();
+                continue;
+            }
+            const QModelIndex mappedParent = mapFromSource(parent);
+            Q_ASSERT(mappedParent.isValid());
+            parents << mappedParent;
+        }
         layoutChanged(sourceParents, hint);
+    }
+
+    void _q_sourceModelAboutToBeReset() {
+        beginResetModel();
+    }
+    void _q_sourceModelReset() {
+        endResetModel();
+    }
+    void _q_sourceRowsAboutToBeInserted(const QModelIndex &parent, int start, int end) {
+        beginInsertRows(mapFromSource(parent), start, end);
+    }
+    void _q_sourceRowsAboutToBeMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destParent, int dest) {
+        beginMoveRows(mapFromSource(sourceParent), sourceStart, sourceEnd, mapFromSource(destParent), dest);
+    }
+    void _q_sourceRowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) {
+        beginRemoveRows(mapFromSource(parent), start, end);
+    }
+    void _q_sourceRowsInserted(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
+        endInsertRows();
+    }
+    void _q_sourceRowsMoved(const QModelIndex &/*sourceParent*/, int /*sourceStart*/, int /*sourceEnd*/, const QModelIndex &/*destParent*/, int /*dest*/) {
+        endMoveRows();
+    }
+    void _q_sourceRowsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/) {
+        endRemoveRows();
     }
 };
 
