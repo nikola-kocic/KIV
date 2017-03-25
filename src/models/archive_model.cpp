@@ -36,18 +36,9 @@ void ArchiveModel::populate(
         const std::vector<ArchiveFileInfo> &archive_files)
 {
     /* Populate model */
-    const QFileIconProvider fip;
     const QFileInfo archive_info(archive_path);
     const QString path = archive_info.absoluteFilePath();
-    ArchiveItem *rootArchiveItem = new ArchiveItem(
-                archive_info.fileName(),
-                archive_info.lastModified(),
-                archive_info.size(),
-                archive_info.absoluteFilePath(),
-                NodeType::Archive,
-                fip.icon(archive_info),
-                rootItem);
-    rootItem->appendChild(rootArchiveItem);
+    ArchiveItem *rootArchiveItem = rootItem;
 
     for (const ArchiveFileInfo &currentArchiveFile : archive_files)
     {

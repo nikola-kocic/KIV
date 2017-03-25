@@ -29,15 +29,14 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
                        Qt::WindowFlags f)
     : QMainWindow(parent, f)
     , m_data_loader(data_loader)
-    , m_model_filesystem(new FileSystemModel(this))
+    , m_model_filesystem(new CustomFileSystemModel(this))
 
     , m_settings(new Settings())
 
     , m_view_files(
-          new ViewFiles(
-              new ThumbnailItemDelegate(data_loader, picture_loader,QSize(100, 100), this),
+          new ViewFilesUnified(
               archive_extractor,
-              new FileSystemModelWrapper(m_model_filesystem),
+              m_model_filesystem,
               this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))
@@ -457,9 +456,9 @@ void MainWindow::connectActions()
 
     connect(m_act_settings, &QAction::triggered, this, &MainWindow::settingsDialog);
     connect(m_act_pagePrevious, &QAction::triggered,
-            m_view_files, &ViewFiles::pagePrevious);
+            m_view_files, &ViewFilesUnified::pagePrevious);
     connect(m_act_pageNext, &QAction::triggered,
-            m_view_files, &ViewFiles::pageNext);
+            m_view_files, &ViewFilesUnified::pageNext);
 
 
     connect(m_act_thumbnails, &QAction::toggled,
@@ -503,12 +502,12 @@ void MainWindow::connectActions()
     connect(m_act_webSite, &QAction::triggered, this, &MainWindow::website);
 
     connect(m_urlNavigator, &UrlNavigator::urlChanged,
-            m_view_files, &ViewFiles::setLocationUrl);
+            m_view_files, &ViewFilesUnified::setLocationUrl);
     connect(m_urlNavigator, &UrlNavigator::urlChanged,
             this, &MainWindow::setLocationUrl);
-    connect(m_view_files, &ViewFiles::urlChanged,
+    connect(m_view_files, &ViewFilesUnified::urlChanged,
             m_urlNavigator, &UrlNavigator::setLocationUrl);
-    connect(m_view_files, &ViewFiles::urlChanged,
+    connect(m_view_files, &ViewFilesUnified::urlChanged,
             this, &MainWindow::setLocationUrl);
 
     connect(m_picture_item, &PictureItem::imageChanged,
@@ -524,7 +523,7 @@ void MainWindow::connectActions()
     connect(m_act_refreshPath, &QAction::triggered, this, &MainWindow::refreshPath);
     connect(m_act_showInFileBrowser, &QAction::triggered,
             this, &MainWindow::showInFileBrowser);
-    connect(m_act_dirUp, &QAction::triggered, m_view_files, &ViewFiles::dirUp);
+    connect(m_act_dirUp, &QAction::triggered, m_view_files, &ViewFilesUnified::dirUp);
 
     connect(m_act_bookmark_delete, &QAction::triggered,
             this, &MainWindow::deleteBookmark);

@@ -11,10 +11,11 @@
 #include "models/filesystem_model.h"
 #include "dataloader.h"
 #include "picture_loader.h"
-#include "widgets/files_view/view_files.h"
+#include "widgets/files_view/viewfilesunified.h"
 #include "widgets/urlnavigator.h"
 #include "widgets/picture_item/pictureitem.h"
 #include "widgets/zoom_widget.h"
+#include "models/archivemodelhandler.h"
 
 class MainWindow : public QMainWindow
 {
@@ -43,10 +44,10 @@ private:
     }
 
     const DataLoader *const m_data_loader;
-    FileSystemModel *m_model_filesystem;
+    CustomFileSystemModel *m_model_filesystem;
     Settings *m_settings;
 
-    ViewFiles *m_view_files;
+    ViewFilesUnified *m_view_files;
 
     QSplitter *m_splitter_main;
     PictureItem *m_picture_item;
