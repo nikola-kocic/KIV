@@ -4,6 +4,8 @@
 #include "archive_model.h"
 #include "nestedmodel.h"
 #include "archiveextractor.h"
+#include "helper.h"
+#include "enums.h"
 
 #include <QFileInfo>
 #include <QModelIndex>
@@ -15,6 +17,25 @@ public:
     CustomFileSystemModel(QObject *parent = nullptr): QFileSystemModel (parent) { }
     QModelIndex createIndexMine(int arow, int acolumn, quintptr i) const {
         return createIndex(arow, acolumn, i);
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
+        if (role == Helper::ROLE_NODE_TYPE) {
+            const QFileInfo indexFileInfo = fileInfo(index);
+            if (Helper::isImageFileExtension(indexFileInfo))
+            {
+                return NodeType::Image;
+            }
+            else if (Helper::isArchiveFile(indexFileInfo))
+            {
+                return NodeType::Archive;
+            }
+            else
+            {
+                return NodeType::Directory;
+            }
+        }
+        return QFileSystemModel::data(index, role);
     }
 };
 

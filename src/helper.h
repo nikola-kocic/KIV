@@ -37,6 +37,7 @@ namespace Helper
     }
 
     constexpr int ROLE_FILE_DATE = Qt::UserRole + 1001;
+    constexpr int ROLE_NODE_TYPE = Qt::UserRole + 1002;
     constexpr auto filtersArchive = make_array("zip", "cbz", "rar", "cbr");
 
     const QStringList& getFiltersImage();

@@ -166,6 +166,9 @@ QVariant ArchiveItem::data(const int role, const int column) const
     case Helper::ROLE_FILE_DATE:
         return m_date;
 
+    case Helper::ROLE_NODE_TYPE:
+        return m_type;
+
     default:
         return QVariant();
     }

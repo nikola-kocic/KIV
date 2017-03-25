@@ -36,27 +36,17 @@ ViewFilesUnified::ViewFilesUnified(
             this, &ViewFilesUnified::on_filesystemView_currentRowChanged);
 }
 
-void ViewFilesUnified::pageNext()
-{
-
-}
-
-void ViewFilesUnified::pagePrevious()
-{
-
-}
-
 void ViewFilesUnified::setLocationUrl(const QUrl &url)
 {
     const QString path = url.toLocalFile();
-    const QModelIndex sourceIndex2 = mModelFilesystem->index(path);
-    const QModelIndex current = mNestedModel->mapFromSource(sourceIndex2);
+    const QModelIndex sourceIndex = mModelFilesystem->index(path);
+    const QModelIndex current = mNestedModel->mapFromSource(sourceIndex);
     setCurrentIndex(current);
 }
 
 void ViewFilesUnified::dirUp()
 {
-
+    setCurrentIndex(currentIndex().parent());
 }
 
 void ViewFilesUnified::setViewMode(const FileViewMode mode)
@@ -91,4 +81,64 @@ void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex &cu
     // Pass 'false' for 'IsContainer' because item is only selected
     m_fileinfo_current = FileInfo(filePath, false);
     emit urlChanged(QUrl::fromLocalFile(filePath));
+}
+
+bool ViewFilesUnified::changeImage(std::function<int()> generator, const QModelIndex& parent)
+{
+    bool imageChanged = false;
+    int i = 0;
+    while ((i = generator()) != -1)
+    {
+        const QModelIndex index = model()->index(i, 0, parent);
+        const QModelIndex source_index = mNestedModel->mapToSource(index);
+        if (getNodeType(source_index) == NodeType::Image)
+        {
+            setCurrentIndex(index);
+            imageChanged = true;
+            break;
+        }
+    }
+    return imageChanged;
+}
+
+NodeType ViewFilesUnified::getNodeType(const QModelIndex &index)
+{
+    bool ok = false;
+    const int nodeTypeInt = index.data(Helper::ROLE_NODE_TYPE).toInt(&ok);
+    Q_ASSERT(ok);
+    return NodeType(nodeTypeInt);
+}
+
+void ViewFilesUnified::pageNext()
+{
+    const QModelIndex currentProxyIndex = currentIndex();
+    const QModelIndex parentProxyIndex = currentProxyIndex.parent();
+    if (!parentProxyIndex.isValid()) {
+        Q_ASSERT(false);
+        return;
+    }
+    const int startRow = currentProxyIndex.isValid() ? (currentProxyIndex.row() + 1) : 0;
+    const int totalRows = model()->rowCount(currentProxyIndex.parent());
+    const std::function<int()> generator = [startRow, totalRows] {
+        int i = startRow;
+        return [=]() mutable { return i < totalRows ? i++ : -1; };
+    }();
+    const bool hasNext = changeImage(generator, parentProxyIndex);
+}
+
+void ViewFilesUnified::pagePrevious()
+{
+    const QModelIndex currentProxyIndex = currentIndex();
+    const QModelIndex parentProxyIndex = currentProxyIndex.parent();
+    if (!parentProxyIndex.isValid()) {
+        Q_ASSERT(false);
+        return;
+    }
+    const int totalRows = model()->rowCount(parentProxyIndex);
+    const int startRow = currentProxyIndex.isValid() ? (currentProxyIndex.row() - 1) : (totalRows - 1);
+    const std::function<int()> generator = [startRow] {
+        int i = startRow;
+        return [=]() mutable { return i >= 0 ? i-- : -1; };
+    }();
+    const bool hasPrevious = changeImage(generator, parentProxyIndex);
 }

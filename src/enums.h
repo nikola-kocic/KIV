@@ -59,7 +59,7 @@ enum class SortOrder
     Desc,
 };
 
-enum class NodeType
+enum NodeType
 {
     Directory,
     Image,
