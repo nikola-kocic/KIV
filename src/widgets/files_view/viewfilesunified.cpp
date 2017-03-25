@@ -39,9 +39,17 @@ ViewFilesUnified::ViewFilesUnified(
 void ViewFilesUnified::setLocationUrl(const QUrl &url)
 {
     const QString path = url.toLocalFile();
-    const QModelIndex sourceIndex = mModelFilesystem->index(path);
-    const QModelIndex current = mNestedModel->mapFromSource(sourceIndex);
-    setCurrentIndex(current);
+    const FileInfo fileinfo(path);
+    // TODO: Move this logic, for example "NestedModel::identifiersFromIndex" and "FileInfo::getIdentifiers"
+    if (fileinfo.isInArchive()) {
+        const QString containerPath = fileinfo.getContainerPath();
+        const QString pathInArchive = fileinfo.getArchiveImagePath();
+        const QModelIndex index = mNestedModel->indexFromIdentifiers(containerPath, pathInArchive);
+        setCurrentIndex(index);
+    } else {
+        const QModelIndex current = mNestedModel->indexFromIdentifiers(path, "");
+        setCurrentIndex(current);
+    }
 }
 
 void ViewFilesUnified::dirUp()

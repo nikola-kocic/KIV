@@ -92,6 +92,10 @@ public:
     int getColumnCount() override {
         return 3;  // TODO: Don't hardcode
     }
+
+    virtual QModelIndex getChildIndexFromIdentifier(const QAbstractItemModel* childModel, const QString& identifier) const override {
+        return dynamic_cast<const ArchiveModel*>(childModel)->getIndexFromPath(identifier);
+    }
 };
 
 #endif // ARCHIVEMODELHANDLER_H

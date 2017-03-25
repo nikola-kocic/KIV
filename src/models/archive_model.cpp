@@ -242,9 +242,9 @@ ArchiveItem *ArchiveModel::AddNode(
     return ntvi;
 }
 
-QModelIndex ArchiveModel::getDirectory(const QString &path)
+QModelIndex ArchiveModel::getIndexFromPath(const QString &path) const
 {
-    QModelIndex cri = this->index(0, 0);
+    QModelIndex cri = createIndex(0, 0, rootItem);
 
     const QStringList file_path_parts = path.split('/',
                                                    QString::SkipEmptyParts);
@@ -261,12 +261,13 @@ QModelIndex ArchiveModel::getDirectory(const QString &path)
 }
 
 QModelIndex ArchiveModel::findIndexChild(const QString &text,
-                                         const QModelIndex &root)
+                                         const QModelIndex &root) const
 {
     if (!root.isValid()) return QModelIndex();
     for (int i = 0; root.child(i, 0).isValid(); ++i)
     {
-        if (root.child(i, 0).data(Qt::EditRole) == text)
+        const QString childText = root.child(i, 0).data(Qt::DisplayRole).toString();
+        if (childText == text)
         {
             return root.child(i, 0);
         }

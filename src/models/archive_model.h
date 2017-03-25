@@ -35,9 +35,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    QModelIndex getDirectory(const QString &path);  // Use with info.getZipPath()
+    QModelIndex getIndexFromPath(const QString &path) const;  // Use with info.getZipPath()
     QModelIndex findIndexChild(const QString &text,
-                               const QModelIndex &root = QModelIndex());
+                               const QModelIndex &root = QModelIndex()) const;
     ArchiveItem *getItem(const QModelIndex &index) const;
     QModelIndex createIndexMine(int arow, int acolumn, quintptr i) const;
 

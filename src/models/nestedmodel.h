@@ -15,6 +15,7 @@ public:
     virtual QAbstractItemModel* getParentModel() const = 0;
     virtual TIdentifier getParentIndexIdentifier(const QModelIndex &proxyIndex) const = 0;
     virtual QModelIndex getParentIndexFromIdentifier(const TIdentifier& identifier) const = 0;
+    virtual QModelIndex getChildIndexFromIdentifier(const QAbstractItemModel* childModel, const TIdentifier& identifier) const = 0;
     virtual bool shouldHaveChilModel(const QModelIndex& parentIndex) const = 0;
     virtual QModelIndex createChildIndex(const QAbstractItemModel* childModel, int arow, int acolumn, quintptr i) const = 0;
     virtual QModelIndex createParentIndex(const QAbstractItemModel* parentModel, int arow, int acolumn, quintptr i) const = 0;
@@ -53,6 +54,23 @@ public:
             delete childModel;
         }
         mChildModels.clear();
+    }
+
+    QModelIndex indexFromIdentifiers(const TIdentifier& parentId, const TIdentifier& childId) {
+        const QModelIndex parentIndex = mModelHandler->getParentIndexFromIdentifier(parentId);
+        const QModelIndex proxyIndex = mapFromSource(parentIndex);
+        if (canFetchMore(proxyIndex)) {
+            fetchMore(proxyIndex);
+        }
+        // Child model was created in fetchMore if needed
+        const QAbstractItemModel* childModel = mChildModels.value(proxyIndex.internalId(), nullptr);
+        if (childModel != nullptr) {
+            QModelIndex childIndex = mModelHandler->getChildIndexFromIdentifier(childModel, childId);
+            if (childIndex.isValid()) {
+                return mapFromSource(childIndex);
+            }
+        }
+        return proxyIndex;
     }
 
 protected:

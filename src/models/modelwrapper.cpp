@@ -20,7 +20,7 @@ QAbstractItemModel *ArchiveModelWrapper::getModel()
 { return m_model; }
 
 QModelIndex ArchiveModelWrapper::getContainer(const FileInfo &info) const
-{ return m_model->getDirectory(info.getArchiveContainerPath()); }
+{ return m_model->getIndexFromPath(info.getArchiveContainerPath()); }
 
 QModelIndex ArchiveModelWrapper::getFile(const FileInfo &info, const QModelIndex& container) const
 { return m_model->findIndexChild(info.getImageFileName(), container); }
