@@ -1,7 +1,8 @@
-CONFIG += c++11
+CONFIG += c++17
 
 !*msvc*:!win32 {
-    QMAKE_CXXFLAGS_WARN_ON += -Wextra -Wconversion -Wsign-conversion
+    QMAKE_CXXFLAGS_WARN_ON += -Wextra # -Wconversion -Wsign-conversion
+    QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 }
 
 QT += opengl

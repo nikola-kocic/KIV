@@ -33,7 +33,10 @@ SOURCES += \
     models/modelwrapper.cpp \
     widgets/files_view/view_archive_dirs.cpp \
     widgets/files_view/fileviewwithproxy.cpp \
-    dataloader.cpp
+    dataloader.cpp \
+    widgets/files_view/viewfilesunified.cpp \
+    models/nestedmodel.cpp \
+    models/archivemodelhandler.cpp
 
 
 HEADERS += \
@@ -69,7 +72,10 @@ HEADERS += \
     widgets/files_view/fileviewwithproxy.h \
     widgets/files_view/view_files_list.h \
     widgets/files_view/view_files_tree.h \
-    dataloader.h
+    dataloader.h \
+    widgets/files_view/viewfilesunified.h \
+    models/nestedmodel.h \
+    models/archivemodelhandler.h
 
 
 FORMS += \

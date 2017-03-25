@@ -138,6 +138,11 @@ ArchiveItem *ArchiveModel::getItem(const QModelIndex &index) const
     return rootItem;
 }
 
+QModelIndex ArchiveModel::createIndexMine(int arow, int acolumn, quintptr i) const
+{
+    return createIndex(arow, acolumn, i);
+}
+
 QVariant ArchiveModel::headerData(const int section,
                                   const Qt::Orientation orientation,
                                   const int role) const

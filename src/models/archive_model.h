@@ -39,6 +39,7 @@ public:
     QModelIndex findIndexChild(const QString &text,
                                const QModelIndex &root = QModelIndex());
     ArchiveItem *getItem(const QModelIndex &index) const;
+    QModelIndex createIndexMine(int arow, int acolumn, quintptr i) const;
 
 
 private:

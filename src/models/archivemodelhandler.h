@@ -1,0 +1,76 @@
+#ifndef ARCHIVEMODELHANDLER_H
+#define ARCHIVEMODELHANDLER_H
+
+#include "archive_model.h"
+#include "nestedmodel.h"
+#include "archiveextractor.h"
+
+#include <QFileInfo>
+#include <QModelIndex>
+#include <QFileSystemModel>
+
+class CustomFileSystemModel : public QFileSystemModel {
+    Q_OBJECT
+public:
+    CustomFileSystemModel(QObject *parent = nullptr): QFileSystemModel (parent) { }
+    QModelIndex createIndexMine(int arow, int acolumn, quintptr i) const {
+        return createIndex(arow, acolumn, i);
+    }
+};
+
+
+class ArchiveModelHandler : public NestedModelHandler<QString> {
+protected:
+    CustomFileSystemModel* mFileSystemModel;
+    const IArchiveExtractor* mArchiveReader;
+
+public:
+    ArchiveModelHandler(CustomFileSystemModel* fileSystemModel, const IArchiveExtractor* archiveReader)
+        : mFileSystemModel(fileSystemModel)
+        , mArchiveReader(archiveReader) {
+    }
+
+    QAbstractItemModel* getParentModel() const override {
+        return mFileSystemModel;
+    }
+
+    QString getParentIndexIdentifier(const QModelIndex &index) const override {
+        return mFileSystemModel->filePath(index);
+    }
+
+
+    QModelIndex getParentIndexFromIdentifier(const QString& identifier) const override {
+        return mFileSystemModel->index(identifier);
+    }
+
+    QAbstractItemModel* createChildModel(const QModelIndex& parentIndex) override {
+        const QString path = mFileSystemModel->filePath(parentIndex);
+        std::vector<ArchiveFileInfo> list;
+        mArchiveReader->getFileInfoList(path, list);
+
+        QAbstractItemModel* arm = new ArchiveModel(list, path);
+        return arm;
+    }
+
+    bool shouldHaveChilModel(const QModelIndex& parentIndex) const override {
+        bool shouldHaveChilModel = false;
+        const QFileInfo fi = mFileSystemModel->fileInfo(parentIndex);
+        QStringList archiveExtensions = QStringList() << "zip" << "rar" << "7z";
+        shouldHaveChilModel = archiveExtensions.contains(fi.suffix().toLower());
+        return shouldHaveChilModel;
+    }
+
+    QModelIndex createChildIndex(const QAbstractItemModel* model, int arow, int acolumn, quintptr i) const override {
+        return dynamic_cast<const ArchiveModel*>(model)->createIndexMine(arow, acolumn, i);
+    }
+
+    QModelIndex createParentIndex(const QAbstractItemModel* model, int arow, int acolumn, quintptr i) const override {
+        return dynamic_cast<const CustomFileSystemModel*>(model)->createIndexMine(arow, acolumn, i);
+    }
+
+    int getColumnCount() override {
+        return 3;  // TODO: Don't hardcode
+    }
+};
+
+#endif // ARCHIVEMODELHANDLER_H
