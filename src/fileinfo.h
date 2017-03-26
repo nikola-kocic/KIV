@@ -5,6 +5,18 @@
 #include <QString>
 #include <QStringList>
 
+template <class TIdentifier>
+struct Identifiers {
+    Identifiers(const TIdentifier& parentIdentifier, const TIdentifier& childIdentifier)
+        : parentIdentifier(parentIdentifier)
+        , childIdentifier(childIdentifier)
+    {
+    }
+    TIdentifier parentIdentifier;
+    TIdentifier childIdentifier;
+};
+
+
 class FileInfo
 {
 public:
@@ -15,6 +27,8 @@ public:
     bool fileExists() const;
     bool isContainerValid() const;
     bool isContainerRoot() const;
+
+    Identifiers<QString> getIdentifiers() const;
 
      /* C:/Folder1/Folder2/image.png"
       * or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */

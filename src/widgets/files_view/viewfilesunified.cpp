@@ -20,11 +20,7 @@ ViewFilesUnified::ViewFilesUnified(
             std::make_unique<ArchiveModelHandler>(mModelFilesystem, archive_extractor);
     mNestedModel = new NestedModel<QString>(std::move(archiveModelHandler));
     setModel(mNestedModel);
-    setRootIndex(
-                mNestedModel->mapFromSource(
-                    mModelFilesystem->index("/")
-                    )
-                );
+    setRootIndex(mNestedModel->mapFromSource(mModelFilesystem->index("/")));
 
     // Only show first column
     for (int i = 1; i < mNestedModel->columnCount(); ++i) {
@@ -40,16 +36,8 @@ void ViewFilesUnified::setLocationUrl(const QUrl &url)
 {
     const QString path = url.toLocalFile();
     const FileInfo fileinfo(path);
-    // TODO: Move this logic, for example "NestedModel::identifiersFromIndex" and "FileInfo::getIdentifiers"
-    if (fileinfo.isInArchive()) {
-        const QString containerPath = fileinfo.getContainerPath();
-        const QString pathInArchive = fileinfo.getArchiveImagePath();
-        const QModelIndex index = mNestedModel->indexFromIdentifiers(Identifiers<QString>(containerPath, pathInArchive));
-        setCurrentIndex(index);
-    } else {
-        const QModelIndex current = mNestedModel->indexFromIdentifiers(Identifiers<QString>(path, ""));
-        setCurrentIndex(current);
-    }
+    const QModelIndex index = mNestedModel->indexFromIdentifiers(fileinfo.getIdentifiers());
+    setCurrentIndex(index);
 }
 
 void ViewFilesUnified::dirUp()

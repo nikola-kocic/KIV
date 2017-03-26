@@ -1,6 +1,8 @@
 #ifndef NESTEDMODEL_H
 #define NESTEDMODEL_H
 
+#include "fileinfo.h"
+
 #include <QAbstractItemModel>
 #include <QHash>
 
@@ -24,17 +26,6 @@ public:
     virtual int getColumnCount() const = 0;
 };
 
-
-template <class TIdentifier>
-struct Identifiers {
-    Identifiers(const TIdentifier& parentIdentifier, const TIdentifier& childIdentifier)
-        : parentIdentifier(parentIdentifier)
-        , childIdentifier(childIdentifier)
-    {
-    }
-    TIdentifier parentIdentifier;
-    TIdentifier childIdentifier;
-};
 
 template <class TIdentifier>
 class NestedModel : public QAbstractItemModel {

@@ -206,6 +206,21 @@ bool FileInfo::isContainerRoot() const
     return m_container.isRoot();
 }
 
+Identifiers<QString> FileInfo::getIdentifiers() const
+{
+    if (isInArchive())
+    {
+        const QString parentPath = getContainerPath();
+        const QString childPath = getArchiveImagePath();
+        return Identifiers<QString>(parentPath, childPath);
+    }
+    else
+    {
+        const QString parentPath = getPath();
+        return Identifiers<QString>(parentPath, QString());
+    }
+}
+
 QString FileInfo::getDebugInfo() const
 {
     const QString str = "\n\tContainer: " + getContainerPath()
