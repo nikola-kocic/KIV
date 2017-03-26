@@ -28,6 +28,7 @@ public:
     int row() const;
     ArchiveItem *parent() const;
     NodeType getType() const { return m_type; }
+    QString getPath() const { return m_path; }
 
     static const int col_name = 0;
     static const int col_size = 1;

@@ -44,10 +44,10 @@ void ViewFilesUnified::setLocationUrl(const QUrl &url)
     if (fileinfo.isInArchive()) {
         const QString containerPath = fileinfo.getContainerPath();
         const QString pathInArchive = fileinfo.getArchiveImagePath();
-        const QModelIndex index = mNestedModel->indexFromIdentifiers(containerPath, pathInArchive);
+        const QModelIndex index = mNestedModel->indexFromIdentifiers(Identifiers<QString>(containerPath, pathInArchive));
         setCurrentIndex(index);
     } else {
-        const QModelIndex current = mNestedModel->indexFromIdentifiers(path, "");
+        const QModelIndex current = mNestedModel->indexFromIdentifiers(Identifiers<QString>(path, ""));
         setCurrentIndex(current);
     }
 }
@@ -57,7 +57,7 @@ void ViewFilesUnified::dirUp()
     setCurrentIndex(currentIndex().parent());
 }
 
-void ViewFilesUnified::setViewMode(const FileViewMode mode)
+void ViewFilesUnified::setViewMode(const FileViewMode /*mode*/)
 {
 
 }
@@ -67,25 +67,25 @@ FileInfo ViewFilesUnified::getCurrentFileInfo() const
     return m_fileinfo_current;
 }
 
-void ViewFilesUnified::saveCurrentFile(const QString &fileName) const
+void ViewFilesUnified::saveCurrentFile(const QString& /*fileName*/) const
 {
 
 }
 
-void ViewFilesUnified::setThumbnailsSize(const QSize &size)
+void ViewFilesUnified::setThumbnailsSize(const QSize& /*size*/)
 {
 
 }
 
-void ViewFilesUnified::setShowThumbnails(const bool b)
+void ViewFilesUnified::setShowThumbnails(const bool /*b*/)
 {
 
 }
 
-void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous)
+void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
-    const QString filePath =
-            current.data(QFileSystemModel::FilePathRole).toString();
+    const Identifiers<QString> identifiers = mNestedModel->identifiersFromIndex(current);
+    const QString filePath = QDir::cleanPath(identifiers.parentIdentifier + '/' + identifiers.childIdentifier);
     // Pass 'false' for 'IsContainer' because item is only selected
     m_fileinfo_current = FileInfo(filePath, false);
     emit urlChanged(QUrl::fromLocalFile(filePath));
@@ -131,7 +131,7 @@ void ViewFilesUnified::pageNext()
         int i = startRow;
         return [=]() mutable { return i < totalRows ? i++ : -1; };
     }();
-    const bool hasNext = changeImage(generator, parentProxyIndex);
+    /*const bool hasNext = */changeImage(generator, parentProxyIndex);
 }
 
 void ViewFilesUnified::pagePrevious()
@@ -148,5 +148,5 @@ void ViewFilesUnified::pagePrevious()
         int i = startRow;
         return [=]() mutable { return i >= 0 ? i-- : -1; };
     }();
-    const bool hasPrevious = changeImage(generator, parentProxyIndex);
+    /*const bool hasPrevious = */changeImage(generator, parentProxyIndex);
 }

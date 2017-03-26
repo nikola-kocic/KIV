@@ -19,7 +19,6 @@ class ArchiveModel : public QAbstractItemModel
 
 public:
     explicit ArchiveModel(const std::vector<ArchiveFileInfo> &archive_files,
-                          const QString &path,
                           QObject *const parent = nullptr);
     ~ArchiveModel() override;
 
@@ -38,8 +37,8 @@ public:
     QModelIndex getIndexFromPath(const QString &path) const;  // Use with info.getZipPath()
     QModelIndex findIndexChild(const QString &text,
                                const QModelIndex &root = QModelIndex()) const;
-    ArchiveItem *getItem(const QModelIndex &index) const;
     QModelIndex createIndexMine(int arow, int acolumn, quintptr i) const;
+    QString getIndexIdentifier(const QModelIndex& index) const;
 
 
 private:
@@ -49,10 +48,9 @@ private:
                          const QString &path,
                          const NodeType type,
                          ArchiveItem *const parent = nullptr);
+    ArchiveItem *getItem(const QModelIndex &index) const;
 
-    void populate(
-            const QString &archive_path,
-            const std::vector<ArchiveFileInfo> &archive_files);
+    void populate(const std::vector<ArchiveFileInfo> &archive_files);
 
     ArchiveItem *rootItem;
 

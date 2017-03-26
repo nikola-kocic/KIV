@@ -161,6 +161,7 @@ QVariant ArchiveItem::data(const int role, const int column) const
         return m_tooltip;
 
     case QFileSystemModel::FilePathRole:
+        // TODO: Deprecate
         return m_path;
 
     case Helper::ROLE_FILE_DATE:

@@ -11,22 +11,35 @@ template <class TIdentifier>
 class NestedModelHandler {
 public:
     virtual ~NestedModelHandler() {}
-    virtual QAbstractItemModel* createChildModel(const QModelIndex& fsIndex) = 0;
+    virtual QAbstractItemModel* createChildModel(const QModelIndex& fsIndex) const = 0;
     virtual QAbstractItemModel* getParentModel() const = 0;
-    virtual TIdentifier getParentIndexIdentifier(const QModelIndex &proxyIndex) const = 0;
+    virtual TIdentifier getParentIdentifierFromIndex(const QModelIndex &parentIndex) const = 0;
+    virtual TIdentifier getNullIdentifier() const = 0;
     virtual QModelIndex getParentIndexFromIdentifier(const TIdentifier& identifier) const = 0;
     virtual QModelIndex getChildIndexFromIdentifier(const QAbstractItemModel* childModel, const TIdentifier& identifier) const = 0;
+    virtual TIdentifier getChildIdentifierFromIndex(const QModelIndex& childIndex) const = 0;
     virtual bool shouldHaveChilModel(const QModelIndex& parentIndex) const = 0;
     virtual QModelIndex createChildIndex(const QAbstractItemModel* childModel, int arow, int acolumn, quintptr i) const = 0;
     virtual QModelIndex createParentIndex(const QAbstractItemModel* parentModel, int arow, int acolumn, quintptr i) const = 0;
-    virtual int getColumnCount() = 0;
+    virtual int getColumnCount() const = 0;
 };
 
 
 template <class TIdentifier>
+struct Identifiers {
+    Identifiers(const TIdentifier& parentIdentifier, const TIdentifier& childIdentifier)
+        : parentIdentifier(parentIdentifier)
+        , childIdentifier(childIdentifier)
+    {
+    }
+    TIdentifier parentIdentifier;
+    TIdentifier childIdentifier;
+};
+
+template <class TIdentifier>
 class NestedModel : public QAbstractItemModel {
 protected:
-    std::unique_ptr<NestedModelHandler<TIdentifier>> mModelHandler;
+    std::unique_ptr<const NestedModelHandler<TIdentifier>> mModelHandler;
     QAbstractItemModel* mParentModel;
 
     // Remember source model from index internalId. Pointers are borrowed.
@@ -39,7 +52,7 @@ protected:
     QHash<quintptr, TIdentifier> mParentIdentifiers;
 
 public:
-    NestedModel(std::unique_ptr<NestedModelHandler<TIdentifier>> modelHandler)
+    NestedModel(std::unique_ptr<const NestedModelHandler<TIdentifier>> modelHandler)
         : mModelHandler(std::move(modelHandler))
         , mParentModel(mModelHandler->getParentModel())
         , mSourceModels(QHash<quintptr, const QAbstractItemModel*>())
@@ -56,8 +69,8 @@ public:
         mChildModels.clear();
     }
 
-    QModelIndex indexFromIdentifiers(const TIdentifier& parentId, const TIdentifier& childId) {
-        const QModelIndex parentIndex = mModelHandler->getParentIndexFromIdentifier(parentId);
+    QModelIndex indexFromIdentifiers(const Identifiers<TIdentifier>& identifiers) {
+        const QModelIndex parentIndex = mModelHandler->getParentIndexFromIdentifier(identifiers.parentIdentifier);
         const QModelIndex proxyIndex = mapFromSource(parentIndex);
         if (canFetchMore(proxyIndex)) {
             fetchMore(proxyIndex);
@@ -65,12 +78,24 @@ public:
         // Child model was created in fetchMore if needed
         const QAbstractItemModel* childModel = mChildModels.value(proxyIndex.internalId(), nullptr);
         if (childModel != nullptr) {
-            QModelIndex childIndex = mModelHandler->getChildIndexFromIdentifier(childModel, childId);
+            QModelIndex childIndex = mModelHandler->getChildIndexFromIdentifier(childModel, identifiers.childIdentifier);
             if (childIndex.isValid()) {
                 return mapFromSource(childIndex);
             }
         }
         return proxyIndex;
+    }
+
+    Identifiers<TIdentifier> identifiersFromIndex(const QModelIndex& proxyIndex) {
+        const QModelIndex sourceIndex = mapToSource(proxyIndex);
+        if (sourceIndex.model() == mParentModel) {
+            const TIdentifier parentIdentifier = mModelHandler->getParentIdentifierFromIndex(sourceIndex);
+            return Identifiers<TIdentifier>(parentIdentifier, mModelHandler->getNullIdentifier());
+        } else {
+            const TIdentifier childIdentifier = mModelHandler->getChildIdentifierFromIndex(sourceIndex);
+            const TIdentifier parentIdentifier = getParentIdentifier(sourceIndex.model());
+            return Identifiers<TIdentifier>(parentIdentifier, childIdentifier);
+        }
     }
 
 protected:
@@ -158,6 +183,13 @@ public:
         return mChildModels.value(parentInternalId, nullptr);
     }
 
+    const TIdentifier getParentIdentifier(const QAbstractItemModel* childModel) const {
+        const quintptr parentInternalId = mChildModels.key(childModel, 0);
+        Q_ASSERT(parentInternalId != 0);
+        const TIdentifier identifier = mParentIdentifiers.value(parentInternalId);
+        return identifier;
+    }
+
     QModelIndex index(int row, int column,
                               const QModelIndex &parent = QModelIndex()) const override {
         if (!parent.isValid()) {
@@ -173,17 +205,18 @@ public:
     }
 
     QModelIndex parent(const QModelIndex &proxyChild) const override {
+        Q_ASSERT(this == proxyChild.model());
         const QModelIndex sourceChild = mapToSource(proxyChild);
         QModelIndex sourceParent = sourceChild.parent();
         if (!sourceParent.isValid() && !isParentModelIndex(proxyChild)) {
-            const quintptr parentInternalId = mChildModels.key(sourceChild.model());
-            const TIdentifier identifier = mParentIdentifiers.value(parentInternalId);
+            const TIdentifier identifier = getParentIdentifier(sourceChild.model());
             sourceParent = mModelHandler->getParentIndexFromIdentifier(identifier);
         }
         return mapFromSource(sourceParent);
     }
 
     bool isParentModelIndex(const QModelIndex &proxyChild) const {
+        Q_ASSERT(this == proxyChild.model());
         const QAbstractItemModel* sourceModel = getSourceModel(proxyChild.internalId());
         return sourceModel == mParentModel;
     }
@@ -192,7 +225,7 @@ public:
         Q_ASSERT(isParentModelIndex(proxyIndex));
         const QModelIndex sourceIndex = mapToSource(proxyIndex);
         Q_ASSERT(sourceIndex.model() == mParentModel);
-        return mModelHandler->getParentIndexIdentifier(sourceIndex);
+        return mModelHandler->getParentIdentifierFromIndex(sourceIndex);
     }
 
     bool hasChildModel(const QModelIndex &proxyIndex) const {

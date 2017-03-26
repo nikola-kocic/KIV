@@ -13,7 +13,6 @@
 #endif
 
 ArchiveModel::ArchiveModel(const std::vector<ArchiveFileInfo> &archive_files,
-                           const QString &path,
                            QObject *const parent)
     : QAbstractItemModel(parent)
     , rootItem(new ArchiveItem("", QDateTime(), 0, "",
@@ -28,16 +27,12 @@ ArchiveModel::ArchiveModel(const std::vector<ArchiveFileInfo> &archive_files,
     {
         m_icon_file = QApplication::style()->standardIcon(QStyle::SP_FileIcon);
     }
-    populate(path, archive_files);
+    populate(archive_files);
 }
 
-void ArchiveModel::populate(
-        const QString &archive_path,
-        const std::vector<ArchiveFileInfo> &archive_files)
+void ArchiveModel::populate(const std::vector<ArchiveFileInfo> &archive_files)
 {
     /* Populate model */
-    const QFileInfo archive_info(archive_path);
-    const QString path = archive_info.absoluteFilePath();
     ArchiveItem *rootArchiveItem = rootItem;
 
     for (const ArchiveFileInfo &currentArchiveFile : archive_files)
@@ -47,7 +42,7 @@ void ArchiveModel::populate(
 #endif
         ArchiveItem *node = rootArchiveItem;
         const QStringList file_path_parts = currentArchiveFile.m_name.split('/');
-        QString folderPath = path + "/";
+        QString folderPath = "/";
         for (int j = 0; j < file_path_parts.size(); ++j)
         {
             const QString currentFilePathPart = file_path_parts.at(j);
@@ -68,8 +63,7 @@ void ArchiveModel::populate(
                     const QFileInfo fi(currentArchiveFile.m_name);
                     if (Helper::isImageFileExtension(fi))
                     {
-                        const QString nodeFilePath = path + "/"
-                                + currentArchiveFile.m_name;
+                        const QString nodeFilePath = currentArchiveFile.m_name;
                         node = AddNode(currentFilePathPart,
                                        currentArchiveFile.m_dateTime,
                                        currentArchiveFile.m_uncompressedSize,
@@ -132,6 +126,13 @@ ArchiveItem *ArchiveModel::getItem(const QModelIndex &index) const
 QModelIndex ArchiveModel::createIndexMine(int arow, int acolumn, quintptr i) const
 {
     return createIndex(arow, acolumn, i);
+}
+
+QString ArchiveModel::getIndexIdentifier(const QModelIndex &index) const
+{
+    Q_ASSERT(this == index.model());
+    const ArchiveItem* item = static_cast<ArchiveItem*>(index.internalPointer());
+    return item->getPath();
 }
 
 QVariant ArchiveModel::headerData(const int section,

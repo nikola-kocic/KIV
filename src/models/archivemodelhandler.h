@@ -55,7 +55,7 @@ public:
         return mFileSystemModel;
     }
 
-    QString getParentIndexIdentifier(const QModelIndex &index) const override {
+    QString getParentIdentifierFromIndex(const QModelIndex &index) const override {
         return mFileSystemModel->filePath(index);
     }
 
@@ -64,12 +64,12 @@ public:
         return mFileSystemModel->index(identifier);
     }
 
-    QAbstractItemModel* createChildModel(const QModelIndex& parentIndex) override {
+    QAbstractItemModel* createChildModel(const QModelIndex& parentIndex) const override {
         const QString path = mFileSystemModel->filePath(parentIndex);
         std::vector<ArchiveFileInfo> list;
         mArchiveReader->getFileInfoList(path, list);
 
-        QAbstractItemModel* arm = new ArchiveModel(list, path);
+        QAbstractItemModel* arm = new ArchiveModel(list);
         return arm;
     }
 
@@ -89,12 +89,22 @@ public:
         return dynamic_cast<const CustomFileSystemModel*>(model)->createIndexMine(arow, acolumn, i);
     }
 
-    int getColumnCount() override {
+    int getColumnCount() const override {
         return 3;  // TODO: Don't hardcode
     }
 
-    virtual QModelIndex getChildIndexFromIdentifier(const QAbstractItemModel* childModel, const QString& identifier) const override {
+    QModelIndex getChildIndexFromIdentifier(const QAbstractItemModel* childModel, const QString& identifier) const override {
         return dynamic_cast<const ArchiveModel*>(childModel)->getIndexFromPath(identifier);
+    }
+
+    QString getNullIdentifier() const override {
+        return QString();
+    }
+
+    QString getChildIdentifierFromIndex(const QModelIndex &childIndex) const override {
+        const ArchiveModel* archiveModel = dynamic_cast<const ArchiveModel*>(childIndex.model());
+        Q_ASSERT(archiveModel != nullptr);
+        return archiveModel->getIndexIdentifier(childIndex);
     }
 };
 
