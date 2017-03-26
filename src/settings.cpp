@@ -22,16 +22,9 @@ Settings::Settings(QSettings *settings)
           m_settings->value("Mouse/MiddleClick",
                             MiddleClickAction::Fullscreen).toInt())
     , m_wheel(m_settings->value("Mouse/Wheel", WheelAction::ChangeImage).toInt())
-    , m_pageChangeTimeout(
-          m_settings->value("Behavior/PageChangeTimeout", 300).toInt())
     , m_zoomFilter(
           static_cast<ZoomFilter>(m_settings->value("Interface/ZoomFilter", false).toInt()))
-    , m_scrollImageByWidth(
-          m_settings->value("Behavior/ScrollPageByWidth", false).toBool())
     , m_rightToLeft(m_settings->value("Behavior/RightToLeft", false).toBool())
-    , m_scrollChangesImage(
-          m_settings->value("Behavior/ScrollChangesPage", true).toBool())
-    , m_jumpToEnd(m_settings->value("Behavior/JumpToBottom", false).toBool())
 
     , m_calculateAverageColor(
           m_settings->value("Interface/CalculateAverageColor", false).toBool())
