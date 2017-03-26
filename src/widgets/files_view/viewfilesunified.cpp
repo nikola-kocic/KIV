@@ -117,7 +117,7 @@ NodeType ViewFilesUnified::getNodeType(const QModelIndex &index)
     return NodeType(nodeTypeInt);
 }
 
-void ViewFilesUnified::pageNext()
+void ViewFilesUnified::imageNext()
 {
     const QModelIndex currentProxyIndex = currentIndex();
     const QModelIndex parentProxyIndex = currentProxyIndex.parent();
@@ -134,7 +134,7 @@ void ViewFilesUnified::pageNext()
     /*const bool hasNext = */changeImage(generator, parentProxyIndex);
 }
 
-void ViewFilesUnified::pagePrevious()
+void ViewFilesUnified::imagePrevious()
 {
     const QModelIndex currentProxyIndex = currentIndex();
     const QModelIndex parentProxyIndex = currentProxyIndex.parent();

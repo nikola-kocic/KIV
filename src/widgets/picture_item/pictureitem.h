@@ -52,8 +52,8 @@ public:
     void fitToScreen();
     void fitWidth();
     void fitHeight();
-    void scrollPageHorizontal(const int value);
-    void scrollPageVertical(const int value);
+    void scrollImageHorizontal(const int value);
+    void scrollImageVertical(const int value);
 
 private:
     void afterImageLoad(const QImage &img);

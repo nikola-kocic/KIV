@@ -19,7 +19,7 @@ struct MiddleClickAction
     static const int Fullscreen = 1;
     static const int AutoFit = 2;
     static const int ZoomReset = 3;
-    static const int NextPage = 4;
+    static const int NextImage = 4;
     static const int Quit = 5;
     static const int Boss = 6;
 };
@@ -28,7 +28,7 @@ struct WheelAction
 {
     static const int None = 0;
     static const int Scroll = 1;
-    static const int ChangePage = 2;
+    static const int ChangeImage = 2;
     static const int Zoom = 3;
 };
 

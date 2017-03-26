@@ -15,8 +15,8 @@ public:
     ViewFilesUnified(const IArchiveExtractor * const archive_extractor,
                      CustomFileSystemModel *modelFilesystem,
                      QWidget *parent = nullptr);
-    void pageNext();
-    void pagePrevious();
+    void imageNext();
+    void imagePrevious();
     void setLocationUrl(const QUrl &url);
     void dirUp();
     void setViewMode(const FileViewMode mode);

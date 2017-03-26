@@ -13,7 +13,7 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
                                MiddleClickAction::Fullscreen);
     ui->ddMiddleClick->addItem(tr("Autofit"),     MiddleClickAction::AutoFit);
     ui->ddMiddleClick->addItem(tr("Actual Size"), MiddleClickAction::ZoomReset);
-    ui->ddMiddleClick->addItem(tr("Next Page"),   MiddleClickAction::NextPage);
+    ui->ddMiddleClick->addItem(tr("Next Image"),  MiddleClickAction::NextImage);
     ui->ddMiddleClick->addItem(tr("Boss Key"),    MiddleClickAction::Boss);
     ui->ddMiddleClick->addItem(tr("Quit"),        MiddleClickAction::Quit);
 
@@ -21,10 +21,10 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
                 ui->ddMiddleClick->findData(m_settings->getMiddleClick()));
 
 
-    ui->ddWheel->addItem(tr("<None>"),               WheelAction::None);
-    ui->ddWheel->addItem(tr("Scroll Page"),          WheelAction::Scroll);
-    ui->ddWheel->addItem(tr("Next / Previous Page"), WheelAction::ChangePage);
-    ui->ddWheel->addItem(tr("Zoom In / Out"),        WheelAction::Zoom);
+    ui->ddWheel->addItem(tr("<None>"),                WheelAction::None);
+    ui->ddWheel->addItem(tr("Scroll Image"),          WheelAction::Scroll);
+    ui->ddWheel->addItem(tr("Next / Previous Image"), WheelAction::ChangeImage);
+    ui->ddWheel->addItem(tr("Zoom In / Out"),         WheelAction::Zoom);
 
     ui->ddWheel->setCurrentIndex(ui->ddWheel->findData(m_settings->getWheel()));
     ui->cbRTL->setChecked(m_settings->getRightToLeft());

@@ -59,16 +59,16 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
     , m_act_focus_location(new QAction(tr("Fo&cus location bar"), this))
 
     , m_act_open(new QAction(tr("&Open..."), this))
-    , m_act_save(new QAction(tr("&Save Page As..."), this))
-    , m_act_pageNext(new QAction(tr("&Next"), this))
-    , m_act_pagePrevious(new QAction(tr("&Previous"), this))
+    , m_act_save(new QAction(tr("&Save Image As..."), this))
+    , m_act_imageNext(new QAction(tr("&Next"), this))
+    , m_act_imagePrevious(new QAction(tr("&Previous"), this))
     , m_act_dirUp(new QAction(tr("Go &Up"), this))
     , m_act_back(new QAction(tr("&Back"), this))
     , m_act_forward(new QAction(tr("&Forward"), this))
     , m_act_refreshPath(new QAction(tr("&Refresh"), this))
     , m_act_showInFileBrowser(new QAction(tr("Show in File Browser"), this))
     , m_act_exit(new QAction(tr("E&xit"), this))
-    , m_act_bookmark_add(new QAction(tr("Bookmark &This Page"), this))
+    , m_act_bookmark_add(new QAction(tr("Bookmark &This Image"), this))
     , m_act_bookmark_active_item(nullptr)
 
     , m_act_zoomIn(new QAction(tr("Zoom &In"), this))
@@ -193,8 +193,8 @@ void MainWindow::createActions()
 {
     m_actions_icons[m_act_open] = QStringList() << "document-open";
     m_actions_icons[m_act_save] = QStringList() << "document-save-as";
-    m_actions_icons[m_act_pageNext] = QStringList() << "media-skip-forward";
-    m_actions_icons[m_act_pagePrevious] = QStringList() << "media-skip-backward";
+    m_actions_icons[m_act_imageNext] = QStringList() << "media-skip-forward";
+    m_actions_icons[m_act_imagePrevious] = QStringList() << "media-skip-backward";
     m_actions_icons[m_act_dirUp] = QStringList() << "go-up";
     m_actions_icons[m_act_back] = QStringList() << "go-previous";
     m_actions_icons[m_act_forward] = QStringList() << "go-next";
@@ -231,8 +231,8 @@ void MainWindow::createActions()
 
     m_act_open->setShortcut(QKeySequence::Open);
     m_act_save->setShortcut(QKeySequence::SaveAs);
-    m_act_pageNext->setShortcut(QKeySequence::MoveToNextPage);
-    m_act_pagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
+    m_act_imageNext->setShortcut(QKeySequence::MoveToNextPage);
+    m_act_imagePrevious->setShortcut(QKeySequence::MoveToPreviousPage);
     m_act_back->setShortcut(QKeySequence::Back);
     m_act_forward->setShortcut(QKeySequence::Forward);
     m_act_refreshPath->setShortcut(QKeySequence::Refresh);
@@ -298,10 +298,10 @@ void MainWindow::createMenus()
     fileMenu->addMenu(m_menu_bookmarks);
 
     fileMenu->addSeparator();
-    fileMenu->addAction(m_act_pageNext);
-    this->addAction(m_act_pageNext);
-    fileMenu->addAction(m_act_pagePrevious);
-    this->addAction(m_act_pagePrevious);
+    fileMenu->addAction(m_act_imageNext);
+    this->addAction(m_act_imageNext);
+    fileMenu->addAction(m_act_imagePrevious);
+    this->addAction(m_act_imagePrevious);
     fileMenu->addMenu(m_menu_history);
 
     fileMenu->addSeparator();
@@ -390,8 +390,8 @@ void MainWindow::createMenus()
     m_toolbar->addAction(m_act_refreshPath);
     m_toolbar->addWidget(m_urlNavigator);
     m_toolbar->addSeparator();
-    m_toolbar->addAction(m_act_pagePrevious);
-    m_toolbar->addAction(m_act_pageNext);
+    m_toolbar->addAction(m_act_imagePrevious);
+    m_toolbar->addAction(m_act_imageNext);
     m_toolbar->addSeparator();
     m_toolbar->addAction(m_act_zoomIn);
     m_toolbar->addAction(m_act_zoomOut);
@@ -405,8 +405,8 @@ void MainWindow::createMenus()
 
 
     /* Start contextMenu */
-    m_menu_context_picture->addAction(m_act_pageNext);
-    m_menu_context_picture->addAction(m_act_pagePrevious);
+    m_menu_context_picture->addAction(m_act_imageNext);
+    m_menu_context_picture->addAction(m_act_imagePrevious);
     m_menu_context_picture->addSeparator();
     m_menu_context_picture->addAction(m_act_fullscreen);
     m_menu_context_picture->addAction(m_act_sidebar);
@@ -455,10 +455,10 @@ void MainWindow::connectActions()
     connect(m_act_bookmark_add, &QAction::triggered, this, &MainWindow::addBookmark);
 
     connect(m_act_settings, &QAction::triggered, this, &MainWindow::settingsDialog);
-    connect(m_act_pagePrevious, &QAction::triggered,
-            m_view_files, &ViewFilesUnified::pagePrevious);
-    connect(m_act_pageNext, &QAction::triggered,
-            m_view_files, &ViewFilesUnified::pageNext);
+    connect(m_act_imagePrevious, &QAction::triggered,
+            m_view_files, &ViewFilesUnified::imagePrevious);
+    connect(m_act_imageNext, &QAction::triggered,
+            m_view_files, &ViewFilesUnified::imageNext);
 
 
     connect(m_act_thumbnails, &QAction::toggled,
@@ -818,7 +818,7 @@ void MainWindow::showInFileBrowser()
 void MainWindow::addBookmark()
 {
     QInputDialog dialog(this);
-    dialog.setWindowTitle(tr("Bookmark Page"));
+    dialog.setWindowTitle(tr("Bookmark Image"));
     dialog.setLabelText(tr("Bookmark Name:"));
     dialog.setTextValue(
                 m_view_files->getCurrentFileInfo().getContainerName() + " /"
@@ -1030,8 +1030,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         m_comboBox_zoom->setZoom(1);
         break;
 
-    case MiddleClickAction::NextPage:
-        m_view_files->pageNext();
+    case MiddleClickAction::NextImage:
+        m_view_files->imageNext();
         break;
 
     case MiddleClickAction::Quit:
@@ -1079,22 +1079,22 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     }
     else if (Qt::NoModifier == event->modifiers())
     {
-        /* If page can't be scrolled, change page if necessary */
-        if (WheelAction::ChangePage == m_settings->getWheel())
+        /* If image can't be scrolled, change image if necessary */
+        if (WheelAction::ChangeImage == m_settings->getWheel())
         {
             if (event->delta() < 0)
             {
-                m_view_files->pageNext();
+                m_view_files->imageNext();
             }
             else
             {
-                m_view_files->pagePrevious();
+                m_view_files->imagePrevious();
             }
         }
-        /* Scroll page */
+        /* Scroll image */
         else if (WheelAction::Scroll == m_settings->getWheel())
         {
-            m_picture_item->scrollPageVertical(event->delta());
+            m_picture_item->scrollImageVertical(event->delta());
         }
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
@@ -1105,11 +1105,11 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     }
     else if (Qt::ShiftModifier == event->modifiers())
     {
-        m_picture_item->scrollPageVertical(event->delta());
+        m_picture_item->scrollImageVertical(event->delta());
     }
     else if (Qt::AltModifier == event->modifiers())
     {
-        m_picture_item->scrollPageHorizontal(event->delta());
+        m_picture_item->scrollImageHorizontal(event->delta());
     }
 }
 

@@ -70,8 +70,8 @@ private:
     /* File Menu Actions */
     QAction *m_act_open;
     QAction *m_act_save;
-    QAction *m_act_pageNext;
-    QAction *m_act_pagePrevious;
+    QAction *m_act_imageNext;
+    QAction *m_act_imagePrevious;
     QAction *m_act_dirUp;
     QAction *m_act_back;
     QAction *m_act_forward;

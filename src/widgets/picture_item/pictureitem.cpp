@@ -233,22 +233,22 @@ void PictureItem::keyPressEvent(QKeyEvent *event)
     switch (event->key())
     {
     case Qt::Key_Up:
-        this->scrollPageVertical(120);
+        this->scrollImageVertical(120);
         event->accept();
         break;
 
     case Qt::Key_Down:
-        this->scrollPageVertical(-120);
+        this->scrollImageVertical(-120);
         event->accept();
         break;
 
     case Qt::Key_Left:
-        this->scrollPageHorizontal(120);
+        this->scrollImageHorizontal(120);
         event->accept();
         break;
 
     case Qt::Key_Right:
-        this->scrollPageHorizontal(-120);
+        this->scrollImageHorizontal(-120);
         event->accept();
         break;
     default:
@@ -413,14 +413,14 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
-void PictureItem::scrollPageVertical(const int value)
+void PictureItem::scrollImageVertical(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(0,value));
     this->endDrag();
 }
 
-void PictureItem::scrollPageHorizontal(const int value)
+void PictureItem::scrollImageHorizontal(const int value)
 {
     this->beginDrag(QPoint(0,0));
     this->drag(QPoint(value,0));

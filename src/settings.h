@@ -86,9 +86,9 @@ private:
     int m_pageChangeTimeout;
     ZoomFilter m_zoomFilter;
 
-    bool m_scrollPageByWidth;
+    bool m_scrollImageByWidth;
     bool m_rightToLeft;
-    bool m_scrollChangesPage;
+    bool m_scrollChangesImage;
     bool m_jumpToEnd;
     bool m_calculateAverageColor;
     bool m_hardwareAcceleration;
