@@ -16,7 +16,6 @@ SOURCES += \
     models/filesystem_model.cpp \
     models/unrar/archive_rar.cpp \
     widgets/files_view/thumbnailitemdelegate.cpp \
-    widgets/files_view/view_files.cpp \
     widgets/files_view/view_files_list.cpp \
     widgets/files_view/view_files_tree.cpp \
     widgets/main_window.cpp \
@@ -30,8 +29,6 @@ SOURCES += \
     archiveextractor.cpp \
     widgets/picture_item/pictureitem_gl.cpp \
     widgets/files_view/sortcombobox.cpp \
-    models/modelwrapper.cpp \
-    widgets/files_view/view_archive_dirs.cpp \
     widgets/files_view/fileviewwithproxy.cpp \
     dataloader.cpp \
     widgets/files_view/viewfilesunified.cpp \
@@ -51,7 +48,6 @@ HEADERS += \
     models/unrar/archive_rar.h \
     models/unrar/unrar.h \
     widgets/files_view/thumbnailitemdelegate.h \
-    widgets/files_view/view_files.h \
     widgets/main_window.h \
     widgets/picture_item/pictureitem.h \
     widgets/picture_item/pictureitem_data.h \
@@ -66,8 +62,6 @@ HEADERS += \
     include/IPictureLoader.h \
     widgets/picture_item/pictureitem_gl.h \
     widgets/files_view/sortcombobox.h \
-    models/modelwrapper.h \
-    widgets/files_view/view_archive_dirs.h \
     widgets/files_view/ifileview.h \
     widgets/files_view/fileviewwithproxy.h \
     widgets/files_view/view_files_list.h \
