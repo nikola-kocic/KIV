@@ -34,7 +34,7 @@ protected:
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);
 
-    bool changeImage(std::function<int ()> generator, const QModelIndex& parent);
+    bool changeImage(std::function<int (int, int)> generator);
     NodeType getNodeType(const QModelIndex& index);
 signals:
     void urlChanged(const QUrl &url);

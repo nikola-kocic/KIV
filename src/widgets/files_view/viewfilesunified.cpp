@@ -79,13 +79,22 @@ void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex& cu
     emit urlChanged(QUrl::fromLocalFile(filePath));
 }
 
-bool ViewFilesUnified::changeImage(std::function<int()> generator, const QModelIndex& parent)
+bool ViewFilesUnified::changeImage(std::function<int(int, int)> fNextIndex)
 {
+    const QModelIndex currentProxyIndex = currentIndex();
+    const QModelIndex parentProxyIndex = currentProxyIndex.parent();
+    if (!parentProxyIndex.isValid()) {
+        Q_ASSERT(false);
+        return false;
+    }
+    const int totalRows = model()->rowCount(parentProxyIndex) - 1;
+    const int startRow = currentProxyIndex.isValid() ? currentProxyIndex.row() : 0;
+
     bool imageChanged = false;
-    int i = 0;
-    while ((i = generator()) != -1)
+    int i = startRow;
+    while ((i = fNextIndex(i, totalRows)) != -1)
     {
-        const QModelIndex index = model()->index(i, 0, parent);
+        const QModelIndex index = model()->index(i, 0, parentProxyIndex);
         const QModelIndex source_index = mNestedModel->mapToSource(index);
         if (getNodeType(source_index) == NodeType::Image)
         {
@@ -107,34 +116,16 @@ NodeType ViewFilesUnified::getNodeType(const QModelIndex &index)
 
 void ViewFilesUnified::imageNext()
 {
-    const QModelIndex currentProxyIndex = currentIndex();
-    const QModelIndex parentProxyIndex = currentProxyIndex.parent();
-    if (!parentProxyIndex.isValid()) {
-        Q_ASSERT(false);
-        return;
-    }
-    const int startRow = currentProxyIndex.isValid() ? (currentProxyIndex.row() + 1) : 0;
-    const int totalRows = model()->rowCount(currentProxyIndex.parent());
-    const std::function<int()> generator = [startRow, totalRows] {
-        int i = startRow;
-        return [=]() mutable { return i < totalRows ? i++ : -1; };
-    }();
-    /*const bool hasNext = */changeImage(generator, parentProxyIndex);
+    const std::function<int(int, int)> fNextIndex = [](int i, int totalRows) {
+        return i < totalRows ? i +1  : -1;
+    };
+    /*const bool hasNext = */changeImage(fNextIndex);
 }
 
 void ViewFilesUnified::imagePrevious()
 {
-    const QModelIndex currentProxyIndex = currentIndex();
-    const QModelIndex parentProxyIndex = currentProxyIndex.parent();
-    if (!parentProxyIndex.isValid()) {
-        Q_ASSERT(false);
-        return;
-    }
-    const int totalRows = model()->rowCount(parentProxyIndex);
-    const int startRow = currentProxyIndex.isValid() ? (currentProxyIndex.row() - 1) : (totalRows - 1);
-    const std::function<int()> generator = [startRow] {
-        int i = startRow;
-        return [=]() mutable { return i >= 0 ? i-- : -1; };
-    }();
-    /*const bool hasPrevious = */changeImage(generator, parentProxyIndex);
+    const std::function<int(int, int)> fNextIndex = [](int i, int /*totalRows*/) {
+        return i >= 0 ? i - 1 : -1;
+    };
+    /*const bool hasPrevious = */changeImage(fNextIndex);
 }
