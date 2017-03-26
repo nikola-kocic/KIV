@@ -18,13 +18,14 @@ QByteArray DataLoader::getData(const FileInfo &file_info, int maxSize) const
 #endif
     if (file_info.fileExists())
     {
-        if (file_info.isInArchive())
+        Identifiers<QString> identifiers = file_info.getIdentifiers();
+        if (identifiers.childIdentifier.isEmpty())
         {
-            data = getArchiveFileData(file_info.getContainerPath(), file_info.getArchiveImagePath(), maxSize);
+            data = getFileData(identifiers.parentIdentifier, maxSize);
         }
         else
         {
-            data = getFileData(file_info.getPath(), maxSize);
+            data = getArchiveFileData(identifiers.parentIdentifier, identifiers.childIdentifier, maxSize);
         }
     }
     return data;

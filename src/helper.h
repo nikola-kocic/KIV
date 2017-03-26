@@ -59,7 +59,7 @@ namespace Helper
     // Opens file browser (e.g. explorer) in file directory
     // and if possible, selects file.
     // Doesn't work reliably for files inside of archives.
-    void showInFileBrowser(const FileInfo &fi);
+    void showInFileBrowser(const QFileInfo& fi);
 }
 
 

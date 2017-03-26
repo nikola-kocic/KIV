@@ -173,37 +173,9 @@ QString FileInfo::getArchiveImagePath() const
     return m_zipPath + m_zipImageFileName;
 }
 
-QString FileInfo::getImageFileName() const
-{
-    if (isInArchive())
-    {
-        return m_zipImageFileName;
-    }
-    else
-    {
-        return m_image.fileName();
-    }
-}
-
 QString FileInfo::getContainerPath() const
 {
     return m_container.canonicalFilePath();
-}
-
-QString FileInfo::getArchiveContainerPath() const
-{
-    return m_zipPath;
-}
-
-QString FileInfo::getContainerName() const
-{
-    const QString containerName = m_container.fileName();
-    return containerName;
-}
-
-bool FileInfo::isContainerRoot() const
-{
-    return m_container.isRoot();
 }
 
 Identifiers<QString> FileInfo::getIdentifiers() const
@@ -225,9 +197,6 @@ QString FileInfo::getDebugInfo() const
 {
     const QString str = "\n\tContainer: " + getContainerPath()
             + "\n\tPath: " + getPath()
-            + "\n\tImageFileName: " + getImageFileName()
-            + "\n\tZipPath: " + getArchiveContainerPath()
-            + "\n\tIsInArchive: " + (isInArchive() ? "true" : "false")
-            + "\n\tContainer Name: " + getContainerName();
+            + "\n\tIsInArchive: " + (isInArchive() ? "true" : "false");
     return str;
 }

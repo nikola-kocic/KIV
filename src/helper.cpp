@@ -196,9 +196,9 @@ int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs
     return QString::compare(s1, s2, cs);
 }
 
-void windowsExplorerOpen(const FileInfo& fi)
+void windowsExplorerOpen(const QFileInfo& fi)
 {
-    const QString containerPath = fi.getContainerPath();
+    const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     const QString explorer = "explorer";
     QStringList param;
     if (!QFileInfo(containerPath).isDir())
@@ -209,9 +209,9 @@ void windowsExplorerOpen(const FileInfo& fi)
     QProcess::startDetached(explorer, param);
 }
 
-void osxFinderOpen(const FileInfo& fi)
+void osxFinderOpen(const QFileInfo& fi)
 {
-    const QString containerPath = fi.getContainerPath();
+    const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     QStringList scriptArgs;
     scriptArgs << QLatin1String("-e")
                << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
@@ -223,9 +223,9 @@ void osxFinderOpen(const FileInfo& fi)
     QProcess::execute("/usr/bin/osascript", scriptArgs);
 }
 
-bool xdgOpen(const FileInfo& fi)
+bool xdgOpen(const QFileInfo& fi)
 {
-    const QString containerPath = fi.getContainerPath();
+    const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     // we cannot select a file here, because no file browser really supports it...
     const QFileInfo fileInfo(containerPath);
     const QString folder = fileInfo.isDir() ? fileInfo.absoluteFilePath() : fileInfo.absolutePath();
@@ -236,9 +236,9 @@ bool xdgOpen(const FileInfo& fi)
 }
 
 #ifdef KIV_USE_DBUS
-bool dbusOpen(const FileInfo& fi)
+bool dbusOpen(const QFileInfo& fi)
 {
-    const QString filepath = fi.isInArchive() ? fi.getContainerPath() : fi.getPath();
+    const QString filepath = fi.canonicalFilePath();
     const QUrl fileurl = QUrl::fromLocalFile(filepath);
     const QStringList args(fileurl.toString());
     QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.FileManager1",
@@ -251,13 +251,12 @@ bool dbusOpen(const FileInfo& fi)
     return success;
 }
 
-bool dbusOpenThunar(const FileInfo& fi)
+bool dbusOpenThunar(const QFileInfo& fi)
 {
-    const QString filepath = fi.isInArchive() ? fi.getContainerPath() : fi.getPath();
-    const QString containerPath = fi.getContainerPath();
+    const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     const QFileInfo containerFileInfo(containerPath);
     const QString folder = containerFileInfo.isDir() ? containerFileInfo.absoluteFilePath() : containerFileInfo.absolutePath();
-    const QString filename = QFileInfo(filepath).fileName();
+    const QString filename = fi.isFile() ? fi.fileName() : QString();
 
     QDBusMessage msg = QDBusMessage::createMethodCall("org.xfce.FileManager",
                                                       "/org/xfce/FileManager",
@@ -270,7 +269,7 @@ bool dbusOpenThunar(const FileInfo& fi)
 }
 #endif
 
-void showInFileBrowser(const FileInfo& fi)
+void showInFileBrowser(const QFileInfo& fi)
 {
 #if defined(Q_OS_WIN)
     windowsExplorerOpen(fi);

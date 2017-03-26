@@ -23,27 +23,13 @@ public:
     explicit FileInfo(const QString &path, const bool isContainer = true);
 
     bool isValid() const;
-    bool isInArchive() const;
     bool fileExists() const;
-    bool isContainerValid() const;
-    bool isContainerRoot() const;
 
     Identifiers<QString> getIdentifiers() const;
 
      /* C:/Folder1/Folder2/image.png"
       * or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */
     QString getPath() const;
-
-    QString getImageFileName() const; /* image.png */
-    QString getContainerPath() const; /* C:/Folder1/Folder2" */
-
-    /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
-    QString getArchiveImagePath() const;
-
-    /* "ZipFolder1/ZipFolder2/" (ends with '/') */
-    QString getArchiveContainerPath() const;
-
-    QString getContainerName() const;
 
     QString getDebugInfo() const;
 
@@ -57,6 +43,15 @@ private:
     bool m_hasValidContainer;
     bool m_fileExists;
     bool m_isInArchive;
+
+private:
+    bool isInArchive() const;
+    bool isContainerValid() const;
+    /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
+    QString getArchiveImagePath() const;
+    QString getContainerPath() const; /* C:/Folder1/Folder2" */
+
+
 };
 
 #endif  // FILEINFO_H

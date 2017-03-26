@@ -216,7 +216,7 @@ void MainWindow::createActions()
     updateIcons();
 
     m_act_save->setEnabled(false);
-    m_act_dirUp->setEnabled(false);
+    m_act_dirUp->setEnabled(true);
     m_act_back->setEnabled(false);
     m_act_forward->setEnabled(false);
     m_act_zoomIn->setEnabled(false);
@@ -660,14 +660,19 @@ void MainWindow::spreadUrl(const QUrl &url)
 
 bool MainWindow::setLocationUrl(const QUrl &url)
 {
-    const FileInfo fileinfo(url.toLocalFile());
+    const QString filePath = url.toLocalFile();
+    const FileInfo fileinfo(filePath);
 
     m_picture_item->setFocus();
 
-    m_act_dirUp->setEnabled(!fileinfo.isContainerRoot());
-    this->setWindowTitle(m_view_files->getCurrentFileInfo().getContainerName()
-                         + " - " + QApplication::applicationName() + " "
-                         + QApplication::applicationVersion());
+    const QFileInfo fi(filePath);
+
+    // TODO
+    //m_act_dirUp->setEnabled(!fileinfo.isContainerRoot());
+    this->setWindowTitle(
+                fi.fileName() + " - " +
+                QApplication::applicationName() + " " +
+                QApplication::applicationVersion());
 
     m_picture_item->setPixmap(fileinfo);
 
@@ -774,10 +779,14 @@ void MainWindow::openFileDialog()
 {
     const QString imageExtensions =
             "*." + Helper::getFiltersImage().join(" *.");
+    const QString fileSystemPath = m_view_files->getCurrentFileInfo().getIdentifiers().parentIdentifier;
+    const QFileInfo fi(fileSystemPath);
+    const QString folderPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
+
     const QString fileName = QFileDialog::getOpenFileName(
                 this,
                 tr("Open File"),
-                m_view_files->getCurrentFileInfo().getContainerPath(),
+                folderPath,
                 tr("Zip files") + "(*.zip *.cbz);;" + tr("Images")
                 + " (" + imageExtensions + ")");
     if (!fileName.isEmpty())
@@ -788,9 +797,10 @@ void MainWindow::openFileDialog()
 
 void MainWindow::saveAs()
 {
-    const FileInfo info = m_view_files->getCurrentFileInfo();
+    const QString filePath = m_view_files->getCurrentFileInfo().getPath();
+    const QFileInfo fi(filePath);
     const QString fileName = QFileDialog::getSaveFileName(
-                this, tr("Save File"), info.getImageFileName());
+                this, tr("Save File") , fi.fileName());
     if (fileName.isEmpty())
     {
         return;
@@ -811,8 +821,9 @@ void MainWindow::saveAs()
 
 void MainWindow::showInFileBrowser()
 {
-    const FileInfo cfi = m_view_files->getCurrentFileInfo();
-    Helper::showInFileBrowser(cfi);
+    const QString fileSystemPath = m_view_files->getCurrentFileInfo().getIdentifiers().parentIdentifier;
+    const QFileInfo fi(fileSystemPath);
+    Helper::showInFileBrowser(fi);
 }
 
 void MainWindow::addBookmark()
@@ -820,9 +831,8 @@ void MainWindow::addBookmark()
     QInputDialog dialog(this);
     dialog.setWindowTitle(tr("Bookmark Image"));
     dialog.setLabelText(tr("Bookmark Name:"));
-    dialog.setTextValue(
-                m_view_files->getCurrentFileInfo().getContainerName() + " /"
-                + m_view_files->getCurrentFileInfo().getImageFileName());
+    const QString path = m_view_files->getCurrentFileInfo().getPath();
+    dialog.setTextValue(path);
 
     if (dialog.exec() != QDialog::Accepted)
     {

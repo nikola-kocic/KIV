@@ -42,7 +42,10 @@ void ViewFilesUnified::setLocationUrl(const QUrl &url)
 
 void ViewFilesUnified::dirUp()
 {
-    setCurrentIndex(currentIndex().parent());
+    const QModelIndex parent = currentIndex().parent();
+    if (parent.isValid()) {
+        setCurrentIndex(currentIndex().parent());
+    }
 }
 
 void ViewFilesUnified::setViewMode(const FileViewMode /*mode*/)
