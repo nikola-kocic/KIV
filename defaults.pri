@@ -8,7 +8,9 @@ CONFIG += c++17
 QT += opengl
 QT += widgets concurrent
 
-#DEFINES += KIV_USE_DBUS
+linux {
+    DEFINES += KIV_USE_DBUS
+}
 contains(DEFINES, KIV_USE_DBUS): QT += dbus
 
 win32 {
