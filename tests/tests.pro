@@ -30,7 +30,8 @@ HEADERS += \
     test_archive_file_list.h \
     test_archive_files.h \
     init_test_data.h \
-    fixtures.h
+    fixtures.h \
+    test_nodenavigator.h
 
 SOURCES += \
     test_settings_bookmarks.cpp \
@@ -42,7 +43,8 @@ SOURCES += \
     test_archive_file_list.cpp \
     test_archive_files.cpp \
     init_test_data.cpp \
-    fixtures.cpp
+    fixtures.cpp \
+    test_nodenavigator.cpp
 
 RESOURCES += \
     test_assets.qrc

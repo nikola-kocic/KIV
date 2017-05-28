@@ -7,6 +7,7 @@
 #include "test_zoom_widget_no_defaults.h"
 #include "test_archive_file_list.h"
 #include "test_archive_files.h"
+#include "test_nodenavigator.h"
 
 #include "fixtures.h"
 #include "archiveextractor.h"
@@ -39,6 +40,10 @@ int main(int argc, char **argv)
     {
         TestZoomWidgetNoDefaults testZoomWidget;
         err = qMax(err, QTest::qExec(&testZoomWidget, app.arguments()));
+    }
+    {
+        TestNodeNavigator testNodeNavigator;
+        err = qMax(err, QTest::qExec(&testNodeNavigator, app.arguments()));
     }
 
     const QString base_dir(

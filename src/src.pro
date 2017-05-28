@@ -33,7 +33,9 @@ SOURCES += \
     dataloader.cpp \
     widgets/files_view/viewfilesunified.cpp \
     models/nestedmodel.cpp \
-    models/archivemodelhandler.cpp
+    models/archivemodelhandler.cpp \
+    widgets/files_view/nodenavigator.cpp \
+    widgets/files_view/nodeidentifier.cpp
 
 
 HEADERS += \
@@ -69,7 +71,9 @@ HEADERS += \
     dataloader.h \
     widgets/files_view/viewfilesunified.h \
     models/nestedmodel.h \
-    models/archivemodelhandler.h
+    models/archivemodelhandler.h \
+    widgets/files_view/nodenavigator.h \
+    widgets/files_view/nodeidentifier.h
 
 
 FORMS += \

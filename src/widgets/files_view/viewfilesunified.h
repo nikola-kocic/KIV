@@ -3,6 +3,7 @@
 
 #include "archiveextractor.h"
 #include "models/archivemodelhandler.h"
+#include "nodenavigator.h"
 
 #include <QTreeView>
 #include <QFileSystemModel>
@@ -30,12 +31,11 @@ protected:
     const IArchiveExtractor * const mArchiveExtractor;
     NestedModel<QString> *mNestedModel;
     FileInfo m_fileinfo_current;
+    const NodeNavigator* mNodeNavigator;
 
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);
 
-    bool changeImage(std::function<int (int, int)> generator);
-    NodeType getNodeType(const QModelIndex& index);
 signals:
     void urlChanged(const QUrl &url);
 };

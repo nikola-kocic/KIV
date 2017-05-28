@@ -1,7 +1,10 @@
+#include "include/optional.hpp"
 #include "viewfilesunified.h"
 #include "models/nestedmodel.h"
 #include "models/archivemodelhandler.h"
 #include <memory>
+
+using std::experimental::optional;
 
 ViewFilesUnified::ViewFilesUnified(
         const IArchiveExtractor * const archive_extractor, CustomFileSystemModel *model_filesystem, QWidget *parent)
@@ -19,6 +22,7 @@ ViewFilesUnified::ViewFilesUnified(
     std::unique_ptr<ArchiveModelHandler> archiveModelHandler =
             std::make_unique<ArchiveModelHandler>(mModelFilesystem, archive_extractor);
     mNestedModel = new NestedModel<QString>(std::move(archiveModelHandler));
+    mNodeNavigator = new NodeNavigator(mNestedModel, new NodeIdentifier());
     setModel(mNestedModel);
     setRootIndex(mNestedModel->mapFromSource(mModelFilesystem->index("/")));
 
@@ -44,7 +48,7 @@ void ViewFilesUnified::dirUp()
 {
     const QModelIndex parent = currentIndex().parent();
     if (parent.isValid()) {
-        setCurrentIndex(currentIndex().parent());
+        setCurrentIndex(parent);
     }
 }
 
@@ -82,53 +86,20 @@ void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex& cu
     emit urlChanged(QUrl::fromLocalFile(filePath));
 }
 
-bool ViewFilesUnified::changeImage(std::function<int(int, int)> fNextIndex)
+void ViewFilesUnified::imagePrevious()
 {
-    const QModelIndex currentProxyIndex = currentIndex();
-    const QModelIndex parentProxyIndex = currentProxyIndex.parent();
-    if (!parentProxyIndex.isValid()) {
-        Q_ASSERT(false);
-        return false;
+    const optional<QModelIndex> index = mNodeNavigator->getPreviousImage(currentIndex());
+    if (index) {
+        Q_ASSERT(index.value().isValid());
+        setCurrentIndex(index.value());
     }
-    const int totalRows = model()->rowCount(parentProxyIndex) - 1;
-    const int startRow = currentProxyIndex.isValid() ? currentProxyIndex.row() : 0;
-
-    bool imageChanged = false;
-    int i = startRow;
-    while ((i = fNextIndex(i, totalRows)) != -1)
-    {
-        const QModelIndex index = model()->index(i, 0, parentProxyIndex);
-        const QModelIndex source_index = mNestedModel->mapToSource(index);
-        if (getNodeType(source_index) == NodeType::Image)
-        {
-            setCurrentIndex(index);
-            imageChanged = true;
-            break;
-        }
-    }
-    return imageChanged;
-}
-
-NodeType ViewFilesUnified::getNodeType(const QModelIndex &index)
-{
-    bool ok = false;
-    const int nodeTypeInt = index.data(Helper::ROLE_NODE_TYPE).toInt(&ok);
-    Q_ASSERT(ok);
-    return NodeType(nodeTypeInt);
 }
 
 void ViewFilesUnified::imageNext()
 {
-    const std::function<int(int, int)> fNextIndex = [](int i, int totalRows) {
-        return i < totalRows ? i +1  : -1;
-    };
-    /*const bool hasNext = */changeImage(fNextIndex);
-}
-
-void ViewFilesUnified::imagePrevious()
-{
-    const std::function<int(int, int)> fNextIndex = [](int i, int /*totalRows*/) {
-        return i >= 0 ? i - 1 : -1;
-    };
-    /*const bool hasPrevious = */changeImage(fNextIndex);
+    const optional<QModelIndex> index = mNodeNavigator->getNextImage(currentIndex());
+    if (index) {
+        Q_ASSERT(index.value().isValid());
+        setCurrentIndex(index.value());
+    }
 }
