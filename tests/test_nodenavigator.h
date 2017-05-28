@@ -14,6 +14,7 @@ private:
     QAbstractItemModel* mModel;
     const INodeIdentifier* mNodeIdentifier;
     QHash<QString, QModelIndex> mNodes;
+    NodeNavigator* mNodeNavigator;
 
     QStandardItem *insertNode(QStandardItem *parent, QStandardItem *item);
     QModelIndex getNode(const QString& key) const;

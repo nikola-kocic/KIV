@@ -9,6 +9,12 @@
 
 using std::experimental::optional;
 
+NodeNavigator::NodeNavigator(QAbstractItemModel *model, const INodeIdentifier *nodeIdentifier)
+    : mModel(model)
+    , mNodeIdentifier(nodeIdentifier)
+    , mCache(optional<Cache>())
+{}
+
 bool NodeNavigator::isImageNode(const QModelIndex &index) const
 {
     Q_ASSERT(index.isValid());
@@ -23,20 +29,38 @@ QString nodeText(const optional<QModelIndex>& index) {
     }
 }
 
-optional<QModelIndex> NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, bool initial) const
+void NodeNavigator::nodeLoaded(const QModelIndex &index) {
+    if (mCache) {
+        const Cache cache = mCache.value();
+        if (cache.waitingFor == index) {
+            getImageRec(cache.index, cache.direction, cache.initial); // or false?
+        }
+    }
+}
+
+void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, bool initial)
 {
     Q_ASSERT(index.isValid());
 #ifdef DEBUG_NAVIGATION
-    DEBUGOUT << "startIndex " << nodeText(index);
+    DEBUGOUT << "startIndex " << nodeText(index) << "; direction " << int(direction) << "; initial " << initial;
 #endif
     if (isImageNode(index) && !initial) {
-        return index;
+#ifdef DEBUG_NAVIGATION
+    DEBUGOUT << "ret " << nodeText(index);
+#endif
+        mCache = optional<Cache>();
+        emit navigated(index);
+        return;
     }
 
     QModelIndex nextIndex = QModelIndex();
     if (mModel->rowCount(index) == 0) {
         if (mModel->canFetchMore(index)) {
+            DEBUGOUT << "fetchMore" << nodeText(index) << "; index " << index;
             mModel->fetchMore(index);
+            if (mModel->rowCount(index) == 0) {
+                return;
+            }
         }
     }
     if (mModel->rowCount(index) == 0) {
@@ -65,7 +89,9 @@ optional<QModelIndex> NodeNavigator::getImageRec(const QModelIndex &index, Direc
             if (parent.isValid()) {
                 nextIndex = parentSibling;
             } else {
-                return optional<QModelIndex>();
+                mCache = optional<Cache>();
+                emit navigated(QModelIndex());
+                return;
             }
         }
     } else {
@@ -79,33 +105,24 @@ optional<QModelIndex> NodeNavigator::getImageRec(const QModelIndex &index, Direc
         }
     }
     Q_ASSERT(nextIndex.isValid());
+    mCache = Cache(index, nextIndex, direction, initial);
     return getImageRec(nextIndex, direction, false);  // recursive
 }
 
-optional<QModelIndex> NodeNavigator::getPreviousImage(const QModelIndex &startIndex) const
+void NodeNavigator::getPreviousImage(const QModelIndex &startIndex)
 {
     Q_ASSERT(startIndex.isValid());
 #ifdef DEBUG_NAVIGATION
     DEBUGOUT << "startIndex " << nodeText(startIndex);
 #endif
-    const optional<QModelIndex> ret = getImageRec(startIndex, Direction::PREVIOUS, true);
-#ifdef DEBUG_NAVIGATION
-    DEBUGOUT << "ret = " << nodeText(ret);
-#endif
-    Q_ASSERT(!ret || isImageNode(ret.value()));
-    return ret;
+    getImageRec(startIndex, Direction::PREVIOUS, true);
 }
 
-optional<QModelIndex> NodeNavigator::getNextImage(const QModelIndex &startIndex) const
+void NodeNavigator::getNextImage(const QModelIndex &startIndex)
 {
     Q_ASSERT(startIndex.isValid());
 #ifdef DEBUG_NAVIGATION
     DEBUGOUT << "startIndex " << nodeText(startIndex);
 #endif
-    const optional<QModelIndex> ret = getImageRec(startIndex, Direction::NEXT, true);
-#ifdef DEBUG_NAVIGATION
-    DEBUGOUT << "ret = " << nodeText(ret);
-#endif
-    Q_ASSERT(!ret || isImageNode(ret.value()));
-    return ret;
+    getImageRec(startIndex, Direction::NEXT, true);
 }

@@ -9,19 +9,21 @@
 
 #include <functional>
 
-class NodeNavigator
-{
+class NodeNavigator : public QObject {
+    Q_OBJECT
+
     template<typename T>
     using optional = std::experimental::optional<T>;
 
 public:
-    NodeNavigator(QAbstractItemModel* model, const INodeIdentifier* nodeIdentifier)
-        : mModel(model)
-        , mNodeIdentifier(nodeIdentifier)
-    {}
+    NodeNavigator(QAbstractItemModel* model, const INodeIdentifier* nodeIdentifier);
 
-    optional<QModelIndex> getNextImage(const QModelIndex &startIndex) const;
-    optional<QModelIndex> getPreviousImage(const QModelIndex &startIndex) const;
+    void getNextImage(const QModelIndex &startIndex);
+    void getPreviousImage(const QModelIndex &startIndex);
+    void nodeLoaded(const QModelIndex &index);
+
+signals:
+    void navigated(QModelIndex index);
 
 private:
     enum class Direction {
@@ -29,11 +31,23 @@ private:
         PREVIOUS
     };
 
+    struct Cache {
+        Cache(const QModelIndex& index, const QModelIndex& waitingFor, Direction direction, bool initial)
+            : index(index), waitingFor(waitingFor), direction(direction), initial(initial)
+        {}
+
+        QModelIndex index;
+        QModelIndex waitingFor;
+        Direction direction;
+        bool initial;
+    };
+
     QAbstractItemModel* mModel;
     const INodeIdentifier* mNodeIdentifier;
+    optional<Cache> mCache;
 
     bool isImageNode(const QModelIndex& index) const;
-    optional<QModelIndex> getImageRec(const QModelIndex &startIndex, Direction direction, bool initial) const;
+    void getImageRec(const QModelIndex &startIndex, Direction direction, bool initial);
 };
 
 #endif // NODENAVIGATOR_H

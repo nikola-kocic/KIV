@@ -31,7 +31,7 @@ protected:
     const IArchiveExtractor * const mArchiveExtractor;
     NestedModel<QString> *mNestedModel;
     FileInfo m_fileinfo_current;
-    const NodeNavigator* mNodeNavigator;
+    NodeNavigator* mNodeNavigator;
 
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);

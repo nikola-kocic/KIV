@@ -3,6 +3,7 @@
 #include "models/nestedmodel.h"
 #include "models/archivemodelhandler.h"
 #include <memory>
+#include <QFileSystemModel>
 
 using std::experimental::optional;
 
@@ -34,6 +35,17 @@ ViewFilesUnified::ViewFilesUnified(
     connect(selectionModel(),
             &QItemSelectionModel::currentRowChanged,
             this, &ViewFilesUnified::on_filesystemView_currentRowChanged);
+    connect(model_filesystem, &QFileSystemModel::directoryLoaded, [this](const QString &path) {
+        const QModelIndex directoryLoadedIndex = mModelFilesystem->index(path);
+        const QModelIndex proxyIndex = mNestedModel->mapFromSource(directoryLoadedIndex);
+        qDebug() << "directoryLoaded" << path << "; index" << proxyIndex;
+        mNodeNavigator->nodeLoaded(proxyIndex);
+    });
+    connect(mNodeNavigator, &NodeNavigator::navigated, [this](QModelIndex index){
+        if (index.isValid()) {
+            setCurrentIndex(index);
+        }
+    });
 }
 
 void ViewFilesUnified::setLocationUrl(const QUrl &url)
@@ -88,18 +100,10 @@ void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex& cu
 
 void ViewFilesUnified::imagePrevious()
 {
-    const optional<QModelIndex> index = mNodeNavigator->getPreviousImage(currentIndex());
-    if (index) {
-        Q_ASSERT(index.value().isValid());
-        setCurrentIndex(index.value());
-    }
+    mNodeNavigator->getPreviousImage(currentIndex());
 }
 
 void ViewFilesUnified::imageNext()
 {
-    const optional<QModelIndex> index = mNodeNavigator->getNextImage(currentIndex());
-    if (index) {
-        Q_ASSERT(index.value().isValid());
-        setCurrentIndex(index.value());
-    }
+    mNodeNavigator->getNextImage(currentIndex());
 }

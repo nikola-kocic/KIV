@@ -2,6 +2,9 @@
 
 #include <QtTest>
 #include <QStandardItemModel>
+#include <QSignalSpy>
+
+using std::experimental::optional;
 
 namespace QTest {
     template<>
@@ -113,13 +116,15 @@ void TestNodeNavigator::init()
 
     mModel = model;
     mNodeIdentifier = new MockNodeIdentifier();
+    mNodeNavigator = new NodeNavigator(mModel, mNodeIdentifier);
 }
 
 void TestNodeNavigator::cleanup()
 {
-    mNodes.clear();
+    delete mNodeNavigator;
     delete mNodeIdentifier;
     delete mModel;
+    mNodes.clear();
 }
 
 QModelIndex TestNodeNavigator::getNode(const QString& key) const {
@@ -128,69 +133,81 @@ QModelIndex TestNodeNavigator::getNode(const QString& key) const {
     return index;
 }
 
+QModelIndex getNextIndex(NodeNavigator* navigator, void (NodeNavigator::*function)(const QModelIndex&), const QModelIndex& index) {
+    QSignalSpy spy(navigator, &NodeNavigator::navigated);
+    (navigator->*function)(index);
+
+    Q_ASSERT(spy.count() == 1); // make sure the signal was emitted exactly one time
+    QList<QVariant> arguments = spy.takeFirst(); // take the first signal
+    const QModelIndex nextImage = arguments.at(0).toModelIndex();
+    return nextImage;
+}
+
+QModelIndex getNext(NodeNavigator* navigator, const QModelIndex& index) {
+    return getNextIndex(navigator, &NodeNavigator::getNextImage, index);
+}
+
+
+QModelIndex getPrevious(NodeNavigator* navigator, const QModelIndex& index) {
+    return getNextIndex(navigator, &NodeNavigator::getPreviousImage, index);
+}
+
 void TestNodeNavigator::testNavigateNextImage()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
-    const QModelIndex nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d2_d1_i1.png")).value();
+    const QModelIndex nextImage = getNext(mNodeNavigator, getNode("d1_a1_d2_d1_i1.png"));
     const QModelIndex expectedNextImage = getNode("d1_a1_d2_d1_i2.png");
     QCOMPARE(nextImage, expectedNextImage);
 }
 
 void TestNodeNavigator::testNavigatePreviousImage()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
-    const QModelIndex nextImage = nodeNavigator.getPreviousImage(getNode("d1_a1_d2_d1_i2.png")).value();
+    const QModelIndex nextImage = getPrevious(mNodeNavigator, getNode("d1_a1_d2_d1_i2.png"));
     const QModelIndex expectedImage = getNode("d1_a1_d2_d1_i1.png");
     QCOMPARE(nextImage, expectedImage);
 }
 
 void TestNodeNavigator::testNavigateNextImageFromContainer()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
     const QModelIndex expectedNextImage = getNode("d1_a1_d2_d1_i1.png");
 
-    QModelIndex nextImage = nodeNavigator.getNextImage(getNode("/")).value();
+    QModelIndex nextImage = getNext(mNodeNavigator, getNode("/"));
     QCOMPARE(nextImage, expectedNextImage);
-    nextImage = nodeNavigator.getNextImage(getNode("dir1")).value();
+    nextImage = getNext(mNodeNavigator, getNode("dir1"));
     QCOMPARE(nextImage, expectedNextImage);
-    nextImage = nodeNavigator.getNextImage(getNode("d1_a1.zip")).value();
+    nextImage = getNext(mNodeNavigator, getNode("d1_a1.zip"));
     QCOMPARE(nextImage, expectedNextImage);
-    nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d1")).value();
+    nextImage = getNext(mNodeNavigator, getNode("d1_a1_d1"));
     QCOMPARE(nextImage, expectedNextImage);
-    nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d2")).value();
+    nextImage = getNext(mNodeNavigator, getNode("d1_a1_d2"));
     QCOMPARE(nextImage, expectedNextImage);
-    nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d1_d1")).value();
+    nextImage = getNext(mNodeNavigator, getNode("d1_a1_d1_d1"));
     QCOMPARE(nextImage, expectedNextImage);
 }
 
 void TestNodeNavigator::testNavigateNextImageToParentContainer()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
-    const QModelIndex nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d2_d1_i3.png")).value();
+    const QModelIndex nextImage = getNext(mNodeNavigator, getNode("d1_a1_d2_d1_i3.png"));
     const QModelIndex expectedNextImage = getNode("d1_a1_d2_i1.png");
     QCOMPARE(nextImage, expectedNextImage);
 }
 
 void TestNodeNavigator::testNavigateNextImageToSiblingContainer()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
-    const QModelIndex nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d3_d1_i3.png")).value();
+    const QModelIndex nextImage = getNext(mNodeNavigator, getNode("d1_a1_d3_d1_i3.png"));
     const QModelIndex expectedNextImage = getNode("d1_a1_d3_d2_i1.png");
     QCOMPARE(nextImage, expectedNextImage);
 }
 
 void TestNodeNavigator::testNavigateNextImageToSiblingContainerSubfolder()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
-    const QModelIndex nextImage = nodeNavigator.getNextImage(getNode("d1_a1_d2_i3.png")).value();
+    const QModelIndex nextImage = getNext(mNodeNavigator, getNode("d1_a1_d2_i3.png"));
     const QModelIndex expectedNextImage = getNode("d1_a1_d3_d1_i1.png");
     QCOMPARE(nextImage, expectedNextImage);
 }
 
 void TestNodeNavigator::testNavigateNextImageInNextArchive()
 {
-    const NodeNavigator nodeNavigator = NodeNavigator(mModel, mNodeIdentifier);
-    const QModelIndex nextImage = nodeNavigator.getNextImage(getNode("d1_a1_i3.png")).value();
+    const QModelIndex nextImage = getNext(mNodeNavigator, getNode("d1_a1_i3.png"));
     const QModelIndex expectedNextImage = getNode("d1_a2_d1_i1.png");
     QCOMPARE(nextImage, expectedNextImage);
 }
