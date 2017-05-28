@@ -192,6 +192,10 @@ QModelIndex ArchiveModel::parent(const QModelIndex &index) const
     }
 
     const ArchiveItem *const childItem = getItem(index);
+    if (childItem == rootItem)
+    {
+        return QModelIndex();
+    }
     ArchiveItem *const parentItem = childItem->parent();
 
     if (parentItem == rootItem)

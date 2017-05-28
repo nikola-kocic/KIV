@@ -74,10 +74,9 @@ public:
     }
 
     bool shouldHaveChilModel(const QModelIndex& parentIndex) const override {
-        bool shouldHaveChilModel = false;
         const QFileInfo fi = mFileSystemModel->fileInfo(parentIndex);
-        QStringList archiveExtensions = QStringList() << "zip" << "rar" << "7z";
-        shouldHaveChilModel = archiveExtensions.contains(fi.suffix().toLower());
+        const QStringList archiveExtensions = QStringList() << "zip" << "rar" << "7z";
+        bool shouldHaveChilModel = archiveExtensions.contains(fi.suffix().toLower());
         return shouldHaveChilModel;
     }
 

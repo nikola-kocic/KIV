@@ -8,6 +8,10 @@
 
 #include <memory>
 
+//#define DEBUG_NESTED_MODEL
+#ifdef DEBUG_NESTED_MODEL
+#include "helper.h"
+#endif
 
 template <class TIdentifier>
 class NestedModelHandler {
@@ -61,6 +65,10 @@ public:
     }
 
     QModelIndex indexFromIdentifiers(const Identifiers<TIdentifier>& identifiers) {
+#ifdef DEBUG_NESTED_MODEL
+        DEBUGOUT << "identifiers.parentIdentifier = " << identifiers.parentIdentifier
+                 << "identifiers.childIdentifier = " << identifiers.childIdentifier;
+#endif
         const QModelIndex parentIndex = mModelHandler->getParentIndexFromIdentifier(identifiers.parentIdentifier);
         const QModelIndex proxyIndex = mapFromSource(parentIndex);
         if (canFetchMore(proxyIndex)) {
@@ -68,13 +76,17 @@ public:
         }
         // Child model was created in fetchMore if needed
         const QAbstractItemModel* childModel = mChildModels.value(proxyIndex.internalId(), nullptr);
+        QModelIndex ret = proxyIndex;
         if (childModel != nullptr) {
-            QModelIndex childIndex = mModelHandler->getChildIndexFromIdentifier(childModel, identifiers.childIdentifier);
+            const QModelIndex childIndex = mModelHandler->getChildIndexFromIdentifier(childModel, identifiers.childIdentifier);
             if (childIndex.isValid()) {
-                return mapFromSource(childIndex);
+                ret = mapFromSource(childIndex);
             }
         }
-        return proxyIndex;
+#ifdef DEBUG_NESTED_MODEL
+        DEBUGOUT << "return = " << ret.data(Qt::DisplayRole).toString();
+#endif
+        return ret;
     }
 
     Identifiers<TIdentifier> identifiersFromIndex(const QModelIndex& proxyIndex) {
@@ -157,6 +169,7 @@ public:
 
         const quintptr internalId = proxyIndex.internalId();
         const QAbstractItemModel* sourceModel = getSourceModel(internalId);
+        Q_ASSERT(sourceModel != nullptr);
         if (isParentModelIndex(proxyIndex)) {
             const QModelIndex sourceIndex = mModelHandler->createParentIndex(
                         sourceModel, proxyIndex.row(), proxyIndex.column(), internalId);
