@@ -22,17 +22,14 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
         if (role == Helper::ROLE_NODE_TYPE) {
             const QFileInfo indexFileInfo = fileInfo(index);
-            if (Helper::isImageFileExtension(indexFileInfo))
-            {
-                return NodeType::Image;
-            }
-            else if (Helper::isArchiveFile(indexFileInfo))
-            {
-                return NodeType::Archive;
-            }
-            else
-            {
+            if (indexFileInfo.isDir()) {
                 return NodeType::Directory;
+            } else if (Helper::isImageFileExtension(indexFileInfo)) {
+                return NodeType::Image;
+            } else if (Helper::isArchiveFile(indexFileInfo)) {
+                return NodeType::Archive;
+            } else {
+                return NodeType::Unknown;
             }
         }
         return QFileSystemModel::data(index, role);

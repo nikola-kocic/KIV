@@ -685,8 +685,9 @@ bool MainWindow::openUrl(const QUrl &url)
     return setLocationUrl(url);
 }
 
-bool MainWindow::openFilePath(const QString &path)
-{ return openUrl(QUrl::fromLocalFile(path)); }
+bool MainWindow::openFilePath(const QString &path) {
+    return openUrl(QUrl::fromLocalFile(path));
+}
 
 bool MainWindow::openFile(const FileInfo &info)
 { return openFilePath(info.getPath()); }

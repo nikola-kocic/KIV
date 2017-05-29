@@ -64,6 +64,7 @@ enum NodeType
     Directory,
     Image,
     Archive,
+    Unknown,
 };
 
 class ColumnSort {

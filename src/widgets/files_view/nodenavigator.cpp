@@ -13,7 +13,10 @@ NodeNavigator::NodeNavigator(QAbstractItemModel *model, const INodeIdentifier *n
     : mModel(model)
     , mNodeIdentifier(nodeIdentifier)
     , mCache(optional<Cache>())
-{}
+{
+    Q_ASSERT(mModel != nullptr);
+    Q_ASSERT(mNodeIdentifier != nullptr);
+}
 
 bool NodeNavigator::isImageNode(const QModelIndex &index) const
 {
@@ -54,11 +57,12 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
     }
 
     QModelIndex nextIndex = QModelIndex();
-    if (mModel->rowCount(index) == 0) {
+    const NodeType nodeType = mNodeIdentifier->identify(index);
+    if ((nodeType == Directory || nodeType == Archive) && mModel->rowCount(index) == 0) {
         if (mModel->canFetchMore(index)) {
             DEBUGOUT << "fetchMore" << nodeText(index) << "; index " << index;
             mModel->fetchMore(index);
-            if (mModel->rowCount(index) == 0) {
+            if (mModel->rowCount(index) == 0 && nodeType == Directory) {
                 return;
             }
         }
