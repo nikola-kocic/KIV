@@ -197,7 +197,7 @@ public:
     QModelIndex index(int row, int column,
                               const QModelIndex &parent = QModelIndex()) const override {
         if (!parent.isValid()) {
-            return mParentModel->index(row, column);
+            return mapFromSource(mParentModel->index(row, column));
         }
         if (hasChildModel(parent)) {
             const QAbstractItemModel* childModel = getChildModel(parent.internalId());
@@ -285,6 +285,9 @@ public:
     }
 
     bool canFetchMore(const QModelIndex &parent) const override {
+        if (!parent.isValid()) {
+            return false;
+        }
         bool canFetchMore = false;
         if (shouldHaveChildModel(parent)) {
             const QAbstractItemModel* childModel = getChildModel(parent.internalId());
