@@ -35,16 +35,32 @@ ViewFilesUnified::ViewFilesUnified(
     connect(selectionModel(),
             &QItemSelectionModel::currentRowChanged,
             this, &ViewFilesUnified::on_filesystemView_currentRowChanged);
-    connect(model_filesystem, &QFileSystemModel::directoryLoaded, [this](const QString &path) {
-        const QModelIndex directoryLoadedIndex = mModelFilesystem->index(path);
-        const QModelIndex proxyIndex = mNestedModel->mapFromSource(directoryLoadedIndex);
-        qDebug() << "directoryLoaded" << path << "; index" << proxyIndex;
-        mNodeNavigator->nodeLoaded(proxyIndex);
-    });
     connect(mNodeNavigator, &NodeNavigator::navigated, [this](QModelIndex index){
         if (index.isValid()) {
             setCurrentIndex(index);
         }
+    });
+    connect(mNestedModel, &QAbstractItemModel::rowsInserted, [this](
+            const QModelIndex &parent, int /*first*/, int /*last*/) {
+        /*
+         * In both this and QFileSystemModel::directoryLoaded slot,
+         * child nodes are not yet sorted.
+         * They will be sorted in QAbstractItemModel::layoutChanged.
+         * Wait with navigation until then.
+        */
+        mLastDirLoaded = parent;
+        // But if there are no child nodes, continue navigation
+        if (mNestedModel->rowCount(parent) == 0) {
+            mNodeNavigator->nodeLoaded(parent);
+            mLastDirLoaded = QPersistentModelIndex();
+        }
+    });
+    connect(mNestedModel, &QAbstractItemModel::layoutChanged, [this](
+            const QList<QPersistentModelIndex> &/*parents*/,
+            QAbstractItemModel::LayoutChangeHint /*hint*/) {
+        // Child nodes should be sorted here, so continue navigation
+        mNodeNavigator->nodeLoaded(mLastDirLoaded);
+        mLastDirLoaded = QPersistentModelIndex();
     });
 }
 

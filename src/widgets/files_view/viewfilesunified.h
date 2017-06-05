@@ -32,6 +32,7 @@ protected:
     NestedModel<QString> *mNestedModel;
     FileInfo m_fileinfo_current;
     NodeNavigator* mNodeNavigator;
+    QPersistentModelIndex mLastDirLoaded;
 
     void on_filesystemView_currentRowChanged(const QModelIndex &current,
                                              const QModelIndex &previous);

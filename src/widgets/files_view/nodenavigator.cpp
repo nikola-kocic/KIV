@@ -32,7 +32,7 @@ QString nodeText(const optional<QModelIndex>& index) {
     }
 }
 
-void NodeNavigator::nodeLoaded(const QModelIndex &index) {
+void NodeNavigator::nodeLoaded(const QPersistentModelIndex &index) {
     if (mCache) {
         const Cache cache = mCache.value();
         if (cache.waitingFor == index) {
@@ -109,7 +109,7 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
         }
     }
     Q_ASSERT(nextIndex.isValid());
-    mCache = Cache(index, nextIndex, direction, initial);
+    mCache = Cache(QPersistentModelIndex(index), QPersistentModelIndex(nextIndex), direction, initial);
     return getImageRec(nextIndex, direction, false);  // recursive
 }
 

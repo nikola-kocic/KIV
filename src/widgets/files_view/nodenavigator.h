@@ -20,7 +20,7 @@ public:
 
     void getNextImage(const QModelIndex &startIndex);
     void getPreviousImage(const QModelIndex &startIndex);
-    void nodeLoaded(const QModelIndex &index);
+    void nodeLoaded(const QPersistentModelIndex &index);
 
 signals:
     void navigated(QModelIndex index);
@@ -36,8 +36,8 @@ private:
             : index(index), waitingFor(waitingFor), direction(direction), initial(initial)
         {}
 
-        QModelIndex index;
-        QModelIndex waitingFor;
+        QPersistentModelIndex index;
+        QPersistentModelIndex waitingFor;
         Direction direction;
         bool initial;
     };
