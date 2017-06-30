@@ -99,6 +99,8 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
     , m_act_webSite(new QAction(tr("&Web Site"), this))
     , m_act_about(new QAction(tr("&About"), this))
 
+    , m_ignoreMouseButtonEvent(false)
+
 {
     this->setAcceptDrops(true);
     QString startFilePath;
@@ -1013,6 +1015,10 @@ void MainWindow::on_view_mode_icons_triggered()
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
+    if (m_ignoreMouseButtonEvent) {
+        m_ignoreMouseButtonEvent = false;
+        return;
+    }
 
     if (!isPosInPictureItem(event->globalPos()))
     {
@@ -1149,6 +1155,19 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     }
 }
 
+void MainWindow::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::ActivationChange)
+    {
+        if (this->isActiveWindow())
+        {
+            if (QApplication::mouseButtons() & Qt::LeftButton) {
+                m_ignoreMouseButtonEvent = true;
+            }
+        }
+    }
+}
 
 /* History start */
 

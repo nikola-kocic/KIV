@@ -120,6 +120,8 @@ private:
 
     QHash<QAction*, QStringList> m_actions_icons;
 
+    bool m_ignoreMouseButtonEvent;
+
     void updateActions();
 
     /* File Menu Actions Slots */
@@ -185,6 +187,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void changeEvent(QEvent *event) override;
 };
 
 #endif  // MAINWINDOW_H
