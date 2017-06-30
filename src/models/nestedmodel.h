@@ -307,7 +307,7 @@ public:
             Q_ASSERT(mChildModels.value(parentInternalId, nullptr) == nullptr);
 
             const TIdentifier parentIdentifier = getParentIndexIdentifier(parent);
-            const QAbstractItemModel* childModel = mModelHandler->createChildModel(parent);
+            const QAbstractItemModel* childModel = mModelHandler->createChildModel(mapToSource(parent));
 
             beginInsertRows(parent, 0, childModel->rowCount());
             mChildModels.insert(parentInternalId, childModel);
