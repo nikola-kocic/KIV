@@ -413,18 +413,20 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
+void PictureItem::scrollBy(const int x, const int y) {
+    m_data->beginDrag(QPoint(0, 0));
+    m_data->drag(QPoint(x, y));
+    m_imageDisplay->getWidget()->update();
+}
+
 void PictureItem::scrollImageVertical(const int value)
 {
-    this->beginDrag(QPoint(0,0));
-    this->drag(QPoint(0,value));
-    this->endDrag();
+    scrollBy(0, value);
 }
 
 void PictureItem::scrollImageHorizontal(const int value)
 {
-    this->beginDrag(QPoint(0,0));
-    this->drag(QPoint(value,0));
-    this->endDrag();
+    scrollBy(value, 0);
 }
 
 /* End Region Drag */

@@ -1021,41 +1021,54 @@ void MainWindow::on_view_mode_icons_triggered()
     m_view_files->setViewMode(FileViewMode::Icons);
 }
 
-void MainWindow::mousePressEvent(QMouseEvent *event)
-{
-    if (event->buttons() != Qt::MiddleButton
-        || !isPosInPictureItem(event->globalPos()))
+void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
+
+    if (!isPosInPictureItem(event->globalPos()))
     {
         return;
     }
 
-    switch (m_settings->getMiddleClick())
-    {
-    case MiddleClickAction::Fullscreen :
-        m_act_fullscreen->toggle();
-        break;
+    const Qt::MouseButtons buttons = event->buttons();
+    if (buttons != Qt::NoButton) {
+        return;
+    }
 
-    case MiddleClickAction::AutoFit:
-        m_picture_item->fitToScreen();
-        break;
+    const Qt::MouseButton button = event->button();
 
-    case MiddleClickAction::ZoomReset:
-        m_comboBox_zoom->setZoom(1);
-        break;
+    switch (button) {
+    case Qt::MiddleButton: {
+        switch (m_settings->getMiddleClick())
+        {
+        case MiddleClickAction::Fullscreen :
+            m_act_fullscreen->toggle();
+            break;
 
-    case MiddleClickAction::NextImage:
-        m_view_files->imageNext();
-        break;
+        case MiddleClickAction::AutoFit:
+            m_picture_item->fitToScreen();
+            break;
 
-    case MiddleClickAction::Quit:
-        close();
-        break;
+        case MiddleClickAction::ZoomReset:
+            m_comboBox_zoom->setZoom(1);
+            break;
 
-    case MiddleClickAction::Boss:
-        showMinimized();
-        break;
+        case MiddleClickAction::NextImage:
+            m_view_files->imageNext();
+            break;
 
-    default: break;
+        case MiddleClickAction::Quit:
+            close();
+            break;
+
+        case MiddleClickAction::Boss:
+            showMinimized();
+            break;
+
+        default: break;
+        }
+        break;
+    }
+    default:
+        break;
     }
 }
 

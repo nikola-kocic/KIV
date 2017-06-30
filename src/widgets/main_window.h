@@ -182,7 +182,7 @@ protected:
     void dropEvent(QDropEvent *event) override;
     void showEvent(QShowEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 };
 

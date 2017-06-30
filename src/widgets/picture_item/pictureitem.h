@@ -65,6 +65,7 @@ private:
     void beginDrag(const QPoint &pt);
     void endDrag();
     void updateLockMode();
+    void scrollBy(const int x, const int y);
 
     const DataLoader * const m_data_loader;
     const IPictureLoader *const m_picture_loader;
