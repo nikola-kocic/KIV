@@ -753,6 +753,7 @@ void MainWindow::toggleSidebar(bool value)
     if (m_act_fullscreen->isChecked())
     {
         m_menu_main->setVisible(value);
+        m_toolbar->setVisible(value);
     }
 }
 
@@ -760,6 +761,7 @@ void MainWindow::toggleFullscreen(bool value)
 {
     m_act_sidebar->setChecked(!value);
     this->menuBar()->setVisible(!value);
+    m_toolbar->setVisible(!value);
     if (value)
     {
 
