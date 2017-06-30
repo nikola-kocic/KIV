@@ -1081,6 +1081,15 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         default:
             break;
         }
+        break;
+    }
+    case Qt::BackButton: {
+        m_view_files->imageNext();
+        break;
+    }
+    case Qt::ForwardButton: {
+        m_view_files->imagePrevious();
+        break;
     }
     default:
         break;
