@@ -13,6 +13,12 @@ enum class LockMode: int
     Zoom = 4,
 };
 
+struct LeftClickAction
+{
+    static const int BeginDrag = 0;
+    static const int ChangeImage = 1;
+};
+
 struct MiddleClickAction
 {
     static const int None = 0;

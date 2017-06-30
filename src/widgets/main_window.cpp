@@ -40,7 +40,7 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
               this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))
-    , m_picture_item(new PictureItem(data_loader, picture_loader, m_settings, this))
+    , m_picture_item(new PictureItem(data_loader, picture_loader, m_settings->getData(), this))
 
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
@@ -904,20 +904,11 @@ void MainWindow::rotateReset()
 
 void MainWindow::settingsDialog()
 {
-    const bool prev_HWA = m_settings->getHardwareAcceleration();
-    const ZoomFilter prev_ZoomFilter = m_settings->getZoomFilter();
     Settings_Dialog sd(m_settings, this);
     if (sd.exec() == QDialog::Accepted)
     {
         /* Update settings */
-        if (m_settings->getHardwareAcceleration() != prev_HWA ||
-                m_settings->getZoomFilter() != prev_ZoomFilter)
-        {
-            m_picture_item->initPictureItem(
-                        m_settings->getHardwareAcceleration());
-            m_picture_item->setPixmap(m_view_files->getCurrentFileInfo());
-        }
-
+        m_picture_item->settingsUpdated(m_settings->getData(), m_view_files->getCurrentFileInfo());
         updateSettings();
     }
 }
@@ -1063,9 +1054,27 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
             showMinimized();
             break;
 
-        default: break;
+        default:
+            break;
         }
         break;
+    }
+    case Qt::LeftButton: {
+        switch (m_settings->getLeftClick())
+        {
+        case LeftClickAction::ChangeImage: {
+            const int widgetWidth = m_picture_item->width();
+            const QPointF localPos = m_picture_item->mapFromGlobal(event->globalPos());
+            if (localPos.x() < widgetWidth / 2.0) {
+                m_view_files->imagePrevious();
+            } else {
+                m_view_files->imageNext();
+            }
+            break;
+        }
+        default:
+            break;
+        }
     }
     default:
         break;
@@ -1075,7 +1084,8 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->buttons() == Qt::LeftButton
-        && isPosInPictureItem(event->globalPos()))
+            && isPosInPictureItem(event->globalPos())
+            && m_settings->getLeftClick() == LeftClickAction::BeginDrag)
     {
         m_act_fullscreen->toggle();
     }

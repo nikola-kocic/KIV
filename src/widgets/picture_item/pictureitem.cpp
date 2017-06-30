@@ -6,7 +6,7 @@
 PictureItem::PictureItem(
         const DataLoader * const data_loader,
         const IPictureLoader * const picture_loader,
-        const Settings * const settings,
+        const SettingsData settings,
         QWidget *parent,
         Qt::WindowFlags f)
     : QWidget(parent, f)
@@ -25,7 +25,7 @@ PictureItem::PictureItem(
     , m_dragging(false)
     , m_is_animation_first_frame(true)
 {
-    this->setCursor(Qt::OpenHandCursor);
+    updateCursor(m_settings);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(m_watcher_data, &QFutureWatcher<QByteArray>::resultReadyAt,
@@ -38,13 +38,41 @@ PictureItem::PictureItem(
     layoutMain->setMargin(0);
     this->setLayout(layoutMain);
 
-    initPictureItem(m_settings->getHardwareAcceleration());
+    initPictureItem(m_settings.getHardwareAcceleration());
 }
 
 PictureItem::~PictureItem()
 {
     delete m_data;
     delete m_imageDisplay;
+}
+
+void PictureItem::updateCursor(const SettingsData& settings) {
+    switch (settings.getLeftClick()) {
+    case LeftClickAction::BeginDrag: {
+        this->setCursor(Qt::OpenHandCursor);
+        break;
+    }
+    case LeftClickAction::ChangeImage: {
+        this->setCursor(Qt::PointingHandCursor);
+        break;
+    }
+    default:
+        this->setCursor(Qt::ArrowCursor);
+        break;
+    }
+}
+
+void PictureItem::settingsUpdated(const SettingsData& newSettings, const FileInfo& currentFileInfo) {
+    if (m_settings.getHardwareAcceleration() != newSettings.getHardwareAcceleration() ||
+            m_settings.getZoomFilter() != newSettings.getZoomFilter())
+    {
+        initPictureItem(newSettings.getHardwareAcceleration());
+        setPixmap(currentFileInfo);
+    }
+    updateCursor(newSettings);
+
+    m_settings = newSettings;
 }
 
 void PictureItem::initPictureItem(bool opengl)
@@ -58,11 +86,11 @@ void PictureItem::initPictureItem(bool opengl)
 
     if (opengl)
     {
-        m_imageDisplay = new PictureItemGL(m_data, m_settings->getZoomFilter(), this);
+        m_imageDisplay = new PictureItemGL(m_data, m_settings.getZoomFilter(), this);
     }
     else
     {
-        m_imageDisplay = new PictureItemRaster(m_data, m_settings->getZoomFilter(), this);
+        m_imageDisplay = new PictureItemRaster(m_data, m_settings.getZoomFilter(), this);
     }
     this->layout()->addWidget(m_imageDisplay->getWidget());
 }
@@ -174,7 +202,7 @@ void PictureItem::afterImageLoad(const QImage& img)
     this->setRotation(0);
 
     this->updateLockMode();
-    m_data->resetImagePosition(m_settings->getRightToLeft());
+    m_data->resetImagePosition(m_settings.getRightToLeft());
     m_data->updateOffsets();
     emit imageChanged();
 }
@@ -182,7 +210,7 @@ void PictureItem::afterImageLoad(const QImage& img)
 QColor PictureItem::getAverageColor(const QImage &img) const
 {
     QColor retColor = Qt::lightGray;
-    if (m_settings->getCalculateAverageColor() && !img.isNull())
+    if (m_settings.getCalculateAverageColor() && !img.isNull())
     {
         const QImage averageColorImage = img.scaled(1, 1, Qt::IgnoreAspectRatio,
                                                     Qt::SmoothTransformation);
@@ -201,8 +229,10 @@ void PictureItem::mousePressEvent(QMouseEvent *event)
 
     if (event->button() == Qt::LeftButton)
     {
-        /* Start dragging */
-        this->beginDrag(event->pos());
+        if (m_settings.getLeftClick() == LeftClickAction::BeginDrag) {
+            /* Start dragging */
+            this->beginDrag(event->pos());
+        }
     }
 
     return QWidget::mousePressEvent(event);
@@ -363,16 +393,21 @@ void PictureItem::updateLockMode()
 
 void PictureItem::mouseMoveEvent(QMouseEvent *event)
 {
-    this->drag(event->pos());
+    if (m_settings.getLeftClick() == LeftClickAction::BeginDrag) {
+        this->drag(event->pos());
+    }
 
     return QWidget::mouseMoveEvent(event);
 }
 
 void PictureItem::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (m_dragging && (event->button() == Qt::LeftButton))
-    {
-        this->endDrag();
+    if (event->button() == Qt::LeftButton) {
+        if (m_settings.getLeftClick() == LeftClickAction::BeginDrag) {
+            if (m_dragging) {
+                this->endDrag();
+            }
+        }
     }
 
     return QWidget::mouseReleaseEvent(event);

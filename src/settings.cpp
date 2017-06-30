@@ -18,6 +18,9 @@ Settings::Settings(QSettings *settings)
           m_settings->value("Interface/ThumbnailSize", QSize(100, 100)).toSize()
           )
     , m_lastPath(m_settings->value("Interface/LastPath", "").toString())
+    , m_leftClick(
+          m_settings->value("Mouse/LeftClick",
+                            LeftClickAction::BeginDrag).toInt())
     , m_middleClick(
           m_settings->value("Mouse/MiddleClick",
                             MiddleClickAction::Fullscreen).toInt())
@@ -63,6 +66,20 @@ Settings::~Settings()
     qDeleteAll(m_bookmarks);
     m_bookmarks.clear();
     delete m_settings;
+}
+
+SettingsData Settings::getData() const
+{
+    return SettingsData(
+                getLeftClick(),
+                getMiddleClick(),
+                getWheel(),
+                getThumbnailSize(),
+                getZoomFilter(),
+                getRightToLeft(),
+                getCalculateAverageColor(),
+                getHardwareAcceleration(),
+                getLargeIcons());
 }
 
 

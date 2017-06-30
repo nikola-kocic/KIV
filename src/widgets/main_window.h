@@ -11,6 +11,7 @@
 #include "models/filesystem_model.h"
 #include "dataloader.h"
 #include "picture_loader.h"
+#include "settings.h"
 #include "widgets/files_view/viewfilesunified.h"
 #include "widgets/urlnavigator.h"
 #include "widgets/picture_item/pictureitem.h"

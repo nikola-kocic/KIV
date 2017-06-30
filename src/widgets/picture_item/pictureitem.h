@@ -13,7 +13,7 @@
 
 #include "dataloader.h"
 #include "include/IPictureLoader.h"
-#include "settings.h"
+#include "settingsdata.h"
 #include "widgets/picture_item/pictureitem_data.h"
 #include "widgets/picture_item/pictureitem_gl.h"
 #include "widgets/picture_item/pictureitem_raster.h"
@@ -31,7 +31,7 @@ public:
     explicit PictureItem(
             const DataLoader *const data_loader,
             const IPictureLoader *const picture_loader,
-            Settings const * const settings,
+            const SettingsData settings,
             QWidget *parent = nullptr,
             Qt::WindowFlags f = nullptr);
     ~PictureItem() override;
@@ -44,6 +44,7 @@ public:
     void setLockMode(const LockMode mode);
 
     void initPictureItem(bool opengl);
+    void settingsUpdated(const SettingsData &newSettings, const FileInfo &currentFileInfo);
 
     void setPixmap(const FileInfo &info);
     bool isPixmapNull() const;
@@ -56,6 +57,7 @@ public:
     void scrollImageVertical(const int value);
 
 private:
+    void updateCursor(const SettingsData &settings);
     void afterImageLoad(const QImage &img);
     QColor getAverageColor(const QImage &img) const;
     void dataLoaded(int num);
@@ -72,7 +74,7 @@ private:
     std::unique_ptr<QBuffer> m_animation_buffer;
     std::unique_ptr<QMovie> m_movie;
     PictureItemData *const m_data;
-    const Settings *const m_settings;
+    SettingsData m_settings;
     PictureItemInterface *m_imageDisplay;
     QFutureWatcher< QByteArray > *const m_watcher_data;
     QFutureWatcher< QImage > *const m_watcher_image;

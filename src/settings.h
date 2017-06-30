@@ -6,6 +6,7 @@
 
 #include "fileinfo.h"
 #include "enums.h"
+#include "settingsdata.h"
 
 class Bookmark
 {
@@ -35,7 +36,12 @@ public:
     explicit Settings(QSettings *settings = nullptr);
     ~Settings();
 
+    SettingsData getData() const;
+
     /* Behaviour */
+
+    int getLeftClick() const;
+    void setLeftClick(const int v);
 
     int getMiddleClick() const;
     void setMiddleClick(const int v);
@@ -81,6 +87,7 @@ private:
     QString m_lastPath;
     QList<Bookmark *> m_bookmarks;
 
+    int m_leftClick;
     int m_middleClick;
     int m_wheel;
     ZoomFilter m_zoomFilter;
@@ -91,6 +98,15 @@ private:
     bool m_largeIcons;
 };
 
+
+inline int Settings::getLeftClick() const
+{ return m_leftClick; }
+
+inline void Settings::setLeftClick(const int v)
+{
+    m_leftClick = v;
+    m_settings->setValue("Mouse/LeftClick", v);
+}
 
 inline int Settings::getMiddleClick() const
 { return m_middleClick; }

@@ -73,7 +73,8 @@ HEADERS += \
     models/nestedmodel.h \
     models/archivemodelhandler.h \
     widgets/files_view/nodenavigator.h \
-    widgets/files_view/nodeidentifier.h
+    widgets/files_view/nodeidentifier.h \
+    settingsdata.h
 
 
 FORMS += \

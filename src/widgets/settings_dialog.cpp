@@ -7,6 +7,8 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
     , m_settings(settings)
 {
     ui->setupUi(this);
+    ui->ddLeftClick->addItem(tr("Begin drag"), LeftClickAction::BeginDrag);
+    ui->ddLeftClick->addItem(tr("Next / Previous Image"), LeftClickAction::ChangeImage);
 
     ui->ddMiddleClick->addItem(tr("<None>"),      MiddleClickAction::None);
     ui->ddMiddleClick->addItem(tr("Full Screen"),
@@ -43,6 +45,9 @@ Settings_Dialog::Settings_Dialog(Settings *settings, QWidget *parent)
 
 void Settings_Dialog::on_buttonBox_accepted()
 {
+    m_settings->setLeftClick(
+                ui->ddLeftClick->itemData(ui->ddLeftClick->currentIndex()).
+                toInt());
     m_settings->setMiddleClick(
                 ui->ddMiddleClick->itemData(ui->ddMiddleClick->currentIndex()).
                 toInt());
