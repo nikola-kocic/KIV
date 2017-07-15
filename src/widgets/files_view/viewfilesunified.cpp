@@ -64,12 +64,16 @@ ViewFilesUnified::ViewFilesUnified(
     });
 }
 
-void ViewFilesUnified::setLocationUrl(const QUrl &url)
+bool ViewFilesUnified::setLocationUrl(const QUrl &url)
 {
     const QString path = url.toLocalFile();
     const FileInfo fileinfo(path);
     const QModelIndex index = mNestedModel->indexFromIdentifiers(fileinfo.getIdentifiers());
-    setCurrentIndex(index);
+    if (index.isValid()) {
+        setCurrentIndex(index);
+        return true;
+    }
+    return false;
 }
 
 void ViewFilesUnified::dirUp()

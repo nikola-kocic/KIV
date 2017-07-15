@@ -37,7 +37,7 @@ private:
     void connectActions();
     void updateIcons();
     void updateSettings();
-    void spreadUrl(const QUrl &url);
+    bool spreadUrl(const QUrl &url);
     inline bool isPosInPictureItem(const QPoint &pos) const
     {
         return m_picture_item->rect().contains(

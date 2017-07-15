@@ -654,10 +654,18 @@ void MainWindow::deleteBookmark()
     m_act_bookmark_active_item = nullptr;
 }
 
-void MainWindow::spreadUrl(const QUrl &url)
+bool MainWindow::spreadUrl(const QUrl &url)
 {
-    m_view_files->setLocationUrl(url);
-    m_urlNavigator->setLocationUrl(url);
+    if (m_view_files->setLocationUrl(url)) {
+        m_urlNavigator->setLocationUrl(url);
+        return true;
+    } else {
+        QMessageBox::critical(
+                    this, QApplication::applicationName(),
+                    tr("File not found: ").append(url.toLocalFile()),
+                    QMessageBox::Close);
+        return false;
+    }
 }
 
 bool MainWindow::setLocationUrl(const QUrl &url)
@@ -683,8 +691,10 @@ bool MainWindow::setLocationUrl(const QUrl &url)
 
 bool MainWindow::openUrl(const QUrl &url)
 {
-    spreadUrl(url);
-    return setLocationUrl(url);
+    if (spreadUrl(url)) {
+        return setLocationUrl(url);
+    }
+    return false;
 }
 
 bool MainWindow::openFilePath(const QString &path) {

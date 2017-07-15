@@ -18,7 +18,7 @@ public:
                      QWidget *parent = nullptr);
     void imageNext();
     void imagePrevious();
-    void setLocationUrl(const QUrl &url);
+    bool setLocationUrl(const QUrl &url);
     void dirUp();
     void setViewMode(const FileViewMode mode);
     FileInfo getCurrentFileInfo() const;
