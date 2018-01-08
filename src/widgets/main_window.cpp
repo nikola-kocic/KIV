@@ -112,6 +112,9 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
     {
         startFilePath = m_settings->getLastPath();
     }
+    if (startFilePath.length() == 0) {
+        startFilePath = QDir::currentPath();
+    }
     m_urlNavigator = new UrlNavigator(m_model_filesystem,
                                       QUrl::fromLocalFile(startFilePath),
                                       this);
