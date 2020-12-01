@@ -14,7 +14,7 @@ Cross-platform image viewer with support for images in archives
 ```
 mkdir build
 cd build
-qmake QUAZIP_LIB=-lquazip1-qt5 QUAZIP_INCLUDE="/usr/include/QuaZip-Qt5-1.1" ../project/kiv.pro
+qmake QUAZIP_LIB=-lquazip1-qt5 QUAZIP_INCLUDE="/usr/include/QuaZip-Qt5-1.1" ../kiv.pro
 make
 ```
 
@@ -24,7 +24,7 @@ make
 ```
 mkdir build
 cd build
-cmake ../project/
+cmake ..
 make
 ```
 
