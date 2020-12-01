@@ -1,4 +1,7 @@
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 3.11 )
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_EXTENSIONS OFF)
+
 include(../cmake-defaults.txt)
 
 find_package(Qt5Test REQUIRED)
@@ -22,6 +25,7 @@ set ( tests_SRCS
     test_zoom_widget_no_defaults.cpp
     test_archive_files.cpp
     test_archive_file_list.cpp
+    test_nodenavigator.cpp
     init_test_data.cpp
     )
 
@@ -38,11 +42,12 @@ set ( tests_MOCS
     test_zoom_widget_no_defaults.h
     test_archive_files.h
     test_archive_file_list.h
+    test_nodenavigator.h
     )
 qt5_wrap_cpp(MOCS ${tests_MOCS})
 
 
 add_executable ( tests ${tests_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-target_link_libraries ( tests src Qt5::Widgets Qt5::Gui Qt5::Test ${QUAZIP_LIBRARIES} )
+target_link_libraries ( tests kivimpl Qt5::Test )
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)

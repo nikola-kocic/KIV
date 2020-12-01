@@ -6,17 +6,6 @@
 
 using std::experimental::optional;
 
-namespace QTest {
-    template<>
-    char *toString(const QModelIndex &index)
-    {
-        QByteArray ba = "QAbstractItemModel(";
-        ba += index.data(Qt::DisplayRole).toString().toUtf8();
-        ba += ")";
-        return qstrdup(ba.data());
-    }
-}
-
 class MockNodeIdentifier : public INodeIdentifier {
 public:
     NodeType identify(const QModelIndex& index) const override {

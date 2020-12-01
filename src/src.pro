@@ -4,7 +4,7 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 
 TEMPLATE = lib
-TARGET = src
+TARGET = kivimpl
 
 SOURCES += \
     fileinfo.cpp \
@@ -83,3 +83,6 @@ FORMS += \
 
 OTHER_FILES += \
     CMakeLists.txt \
+
+isEmpty(QUAZIP_INCLUDE): QUAZIP_INCLUDE = $${PREFIX}/include/quazip5
+INCLUDEPATH += $${QUAZIP_INCLUDE}

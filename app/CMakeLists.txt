@@ -1,5 +1,8 @@
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 3.11 )
 project( kiv )
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_EXTENSIONS OFF)
+
 include(../cmake-defaults.txt)
 
 include_directories (
@@ -18,6 +21,6 @@ qt5_add_resources(RSCS ${app_RSCS})
 
 
 add_executable ( kiv ${app_SRCS} ${RSCS} ${TRS}  )
-target_link_libraries ( kiv src Qt5::Widgets Qt5::Concurrent Qt5::OpenGL ${QUAZIP_LIBRARIES} ${OPENGL_gl_LIBRARY} )
+target_link_libraries ( kiv kivimpl )
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../res/icons/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/icons/)

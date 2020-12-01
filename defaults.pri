@@ -33,9 +33,11 @@ win32 {
 }
 
 win32:*msvc*:CONFIG(debug, debug|release) {
-    LIBS += -lquazip5d
+    isEmpty(QUAZIP_LIB): QUAZIP_LIB = -lquazip5d
+    LIBS += $${QUAZIP_LIB}
 } else {
-    LIBS += -lquazip5
+    isEmpty(QUAZIP_LIB): QUAZIP_LIB = -lquazip5
+    LIBS += $${QUAZIP_LIB}
 }
 
 win32:CONFIG(release, debug|release) {

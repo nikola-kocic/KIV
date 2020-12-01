@@ -6,8 +6,8 @@ SUBDIRS += \
     app \
     tests
 
-app.depends = src
-tests.depends = src
+app.depends = kivimpl
+tests.depends = kivimpl
 
 OTHER_FILES += \
     defaults.pri \

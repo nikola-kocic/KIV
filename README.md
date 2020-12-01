@@ -8,6 +8,26 @@ Cross-platform image viewer with support for images in archives
 
 ## Dependencies
 
+### Build on Linux (qmake)
+
+* Install quazip then build KIV by specifying quazip lib name and include path as in example:
+```
+mkdir build
+cd build
+qmake QUAZIP_LIB=-lquazip1-qt5 QUAZIP_INCLUDE="/usr/include/QuaZip-Qt5-1.1" ../project/kiv.pro
+make
+```
+
+### Build on Linux (CMake)
+
+* Install quazip, then build KIV with
+```
+mkdir build
+cd build
+cmake ../project/
+make
+```
+
 ### Build on Windows (MinGW)
 
 * Install CMake (add to path)
