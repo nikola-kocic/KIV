@@ -43,8 +43,7 @@ QVariant FileSystemModel::data(const QModelIndex &index, int role) const
         const QFileInfo fi = this->fileInfo(index);
         QString tooltip = (QFileSystemModel::tr("Name") + ": " + fi.fileName()
                            + "\n" + QFileSystemModel::tr("Date Modified") + ": "
-                           + fi.lastModified().toString(
-                               Qt::SystemLocaleShortDate));
+                           + QLocale::system().toString(fi.lastModified(), QLocale::ShortFormat));
         if (!this->isDir(index))
         {
             tooltip.append("\n" + QFileSystemModel::tr("Size") + ": "

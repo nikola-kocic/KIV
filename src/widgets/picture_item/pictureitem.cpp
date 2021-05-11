@@ -4,7 +4,7 @@
 #include <QImageReader>
 
 PictureItem::PictureItem(
-        const DataLoader * const data_loader,
+        const DataLoader& data_loader,
         const IPictureLoader * const picture_loader,
         const SettingsData settings,
         QWidget *parent,
@@ -35,7 +35,7 @@ PictureItem::PictureItem(
 
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
     layoutMain->setSpacing(0);
-    layoutMain->setMargin(0);
+    layoutMain->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layoutMain);
 
     initPictureItem(m_settings.getHardwareAcceleration());
@@ -124,9 +124,9 @@ void PictureItem::setPixmap(const FileInfo &info)
 #ifdef DEBUG_PICTUREITEM
         t.start();
 #endif
-        m_watcher_data->setFuture(
-                    QtConcurrent::run(
-                        m_data_loader, &DataLoader::getData, info, -1));
+        m_watcher_data->setFuture(QtConcurrent::run([=] {
+            return m_data_loader.getData(info, -1);
+        }));
     }
 }
 

@@ -29,11 +29,11 @@ class PictureItem : public QWidget
 
 public:
     explicit PictureItem(
-            const DataLoader *const data_loader,
+            const DataLoader& data_loader,
             const IPictureLoader *const picture_loader,
             const SettingsData settings,
             QWidget *parent = nullptr,
-            Qt::WindowFlags f = nullptr);
+            Qt::WindowFlags f = Qt::WindowFlags());
     ~PictureItem() override;
 
     qreal getZoom() const;
@@ -69,7 +69,7 @@ private:
     void updateLockMode();
     void scrollBy(const int x, const int y);
 
-    const DataLoader * const m_data_loader;
+    const DataLoader& m_data_loader;
     const IPictureLoader *const m_picture_loader;
     std::unique_ptr<QBuffer> m_animation_buffer;
     std::unique_ptr<QMovie> m_movie;

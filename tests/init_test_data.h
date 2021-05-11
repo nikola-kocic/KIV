@@ -9,14 +9,7 @@
 #include "fixtures.h"
 
 
-class InitTestCommon
-{
-protected:
-    bool executeCommands(const QStringList &commands, const QString &workingDir) const;
-    bool executeCommand(const QString &command, const QString &workingDir) const;
-};
-
-class InitTestArchives : public InitTestCommon
+class InitTestArchives
 {
     friend class InitTestData;
 protected:
@@ -25,29 +18,16 @@ protected:
     {}
 
     QString m_src_dir;
-    const QStringList getArchiveCommandsZip() const;
-    const QStringList getArchiveCommandsRar4() const;
 public:
 
     void createZip() const;
     void createRar4() const;
 };
 
-class InitTestData : InitTestCommon
+class InitTestData
 {
 public:
     InitTestArchives makeTestData(const DirStructureFixture &dsf) const;
-
-protected:
-    const QStringList getDateSetCommands(const ArchiveFileInfo& afi, const QString &base_path) const;
-    const QString getImageCreateCommand(const QString &path) const;
-    bool generateFolderContentFile(const QString &path) const;
-    const QString getImageCompressCommand(const QString &path) const;
-    const QString getDateSetCommand(const QString &path, const QDateTime &dt) const;
-    void createFiles(const std::vector<ArchiveFileInfo> &folders
-            , const std::vector<ArchiveFileInfo> &files
-            , std::function<QString(ArchiveFileInfo)> f
-            , std::function<QString()> fWorkingDir) const;
 };
 
 

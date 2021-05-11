@@ -4,43 +4,52 @@
 #include <QProcess>
 #include <QDebug>
 
-
-const QString InitTestData::getDateSetCommand(const QString &path, const QDateTime &dt) const
+namespace
 {
-    const QString date_set_command = QString("touch -d %1 \"%2\"")
-            .arg(dt.toLocalTime().toString("yyyy-MM-ddThh:mm:ss"), path);
-    return date_set_command;
+class CommandData {
+public:
+    CommandData(QString program, QStringList arguments)
+        : program(std::move(program)), arguments(std::move(arguments))
+    {
+    }
+
+    QString program;
+    QStringList arguments;
+};
+
+const CommandData getDateSetCommand(const QString &path, const QDateTime &dt)
+{
+    return CommandData("touch", {"-d", dt.toLocalTime().toString("yyyy-MM-ddThh:mm:ss"), path});
 }
 
 
-const QString InitTestData::getImageCreateCommand(const QString &path) const
+
+const CommandData getImageCreateCommand(const QString &path)
 {
     const QString text = QFileInfo(path).fileName().split(' ')[0];
-    const QString image_create_command = QString(
-                "convert -gravity south \
-                -font -schumacher-clean-bold-r-normal--0-0-75-75-c-0-iso646.1991-irv \
-                label:\"%1\" \"%2\"")
-            .arg(text, path);
-    return image_create_command;
+    return CommandData(
+                "convert", {
+                    "-gravity", "south",
+                    "-font", "-schumacher-clean-bold-r-normal--0-0-75-75-c-0-iso646.1991-irv",
+                    QString("label:\"%1\"").arg(text), path});
 }
 
-const QString InitTestData::getImageCompressCommand(const QString &path) const
+const CommandData getImageCompressCommand(const QString &path)
 {
-    const QString image_compress_command = QString("optipng -quiet -strip all \"%1\"")
-            .arg(path);
-    return image_compress_command;
+    return CommandData("optipng", {"-quiet", "-strip", "all", path});
 }
 
 
-bool InitTestData::generateFolderContentFile(const QString &path) const
+bool generateFolderContentFile(const QString &path)
 {
     const QString out_path = QDir::cleanPath(
                 path + QDir::separator() + "content.txt");
-    const QString folder_content_command = QString(
-                "tree -N -D --timefmt=%FT%T%z .");
+    const QString folder_content_command = QString("tree");
+    const QStringList folder_content_command_args = {
+                "-N", "-D", "--timefmt=%FT%T%z", "."};
     QProcess p;
     p.setWorkingDirectory(path);
-    p.start(folder_content_command);
+    p.start(folder_content_command, folder_content_command_args);
     p.waitForFinished();
     QFile f(out_path);
     bool success = f.open(QIODevice::WriteOnly);
@@ -51,50 +60,51 @@ bool InitTestData::generateFolderContentFile(const QString &path) const
     return success;
 }
 
-bool InitTestCommon::executeCommand(const QString &command, const QString &workingDir) const
+bool executeCommand(const CommandData &command, const QString &workingDir)
 {
     bool success = false;
 #ifndef WIN32
     QProcess p;
     //qDebug() << command;
     p.setWorkingDirectory(workingDir);
-    p.start(command);
+    p.start(command.program, command.arguments);
     success = p.waitForFinished();
     if (!success)
     {
         QProcess::ProcessError pe = p.error();
-        qDebug() << "Error" << pe << "running \"" << command << "\"";
+        qDebug() << "Error" << pe << "running \"" << command.program << " " << command.arguments << "\"";
     }
     QByteArray stderr = p.readAllStandardError();
     QByteArray stdout = p.readAllStandardOutput();
     if (!stderr.isEmpty() || !stdout.isEmpty())
     {
-        qDebug() << command;
+        qDebug() << command.program << " " << command.arguments;
         qDebug() << stderr;
         qDebug() << stdout;
     }
 #endif
     return success;
 }
-bool InitTestCommon::executeCommands(const QStringList &commands, const QString &workingDir) const
+
+bool executeCommands(const QList<CommandData> &commands, const QString &workingDir)
 {
     bool success = true;
-    for (const QString &command : commands)
+    for (const CommandData &command : commands)
     {
         success = executeCommand(command, workingDir);
     }
     return success;
 }
 
-void InitTestData::createFiles(
+void createFiles(
         const std::vector<ArchiveFileInfo> &folders
         , const std::vector<ArchiveFileInfo> &files
         , std::function<QString(ArchiveFileInfo)> fFilePath
         , std::function<QString()> fWorkingDir
-        ) const
+        )
 {
-    QStringList image_create_commands;
-    QStringList date_set_commands;
+    QList<CommandData> image_create_commands;
+    QList<CommandData> date_set_commands;
     for (const ArchiveFileInfo &afi : folders)
     {
         const QString path = fFilePath(afi);
@@ -121,6 +131,26 @@ void InitTestData::createFiles(
     executeCommands(date_set_commands, extracted_dir);
 }
 
+const QList<CommandData> getArchiveCommandsZip()
+{
+    return QList<CommandData>()
+            << CommandData("zip", {"--quiet", "-9", "-r", "-Z", "store", "../ZIP zip store 😼.zip", "."})
+            << CommandData("zip", {"--quiet", "-9", "-r", "-Z", "bzip2", "../ZIP zip bzip2 😺.zip", "."})
+            << CommandData("zip", {"--quiet", "-9", "-r", "-Z", "deflate", "../ZIP zip deflate 😻.zip", "."})
+            << CommandData("7za", {"a", "-mx=9", "-r", "-tzip", "../ZIP 7za deflate 😹.zip", "."})
+            << CommandData("rar", {"a", "-r", "-m5", "-ma5", "../RAR rar5 😸.rar", "."})
+               ;
+}
+
+const QList<CommandData> getArchiveCommandsRar4()
+{
+    return QList<CommandData>()
+            << CommandData("rar", {"a", "-r", "-m5", "-ma4", "../RAR rar4 😷.rar", "."})
+               ;
+}
+
+}
+
 InitTestArchives InitTestData::makeTestData(const DirStructureFixture &dsf) const
 {
     const std::vector<ArchiveFileInfo> folders = dsf.getDirs();
@@ -135,24 +165,6 @@ InitTestArchives InitTestData::makeTestData(const DirStructureFixture &dsf) cons
 }
 
 
-
-const QStringList InitTestArchives::getArchiveCommandsZip() const
-{
-    return QStringList()
-            << "zip --quiet -9 -r -Z store \"../ZIP zip store 😼.zip\" ."
-            << "zip --quiet -9 -r -Z bzip2 \"../ZIP zip bzip2 😺.zip\" ."
-            << "zip --quiet -9 -r -Z deflate \"../ZIP zip deflate 😻.zip\" ."
-            << "7za a -mx=9 -r -tzip \"../ZIP 7za deflate 😹.zip\" ."
-            << "rar a -r -m5 -ma5 \"../RAR rar5 😸.rar\" ."
-               ;
-}
-
-const QStringList InitTestArchives::getArchiveCommandsRar4() const
-{
-    return QStringList()
-            << "rar a -r -m5 -ma4 \"../RAR rar4 😷.rar\" ."
-               ;
-}
 
 void InitTestArchives::createZip() const
 {

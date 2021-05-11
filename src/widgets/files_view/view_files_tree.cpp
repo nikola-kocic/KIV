@@ -17,9 +17,10 @@ void TreeViewFiles::rowsInserted(const QModelIndex &parent, int start, int end)
     QModelIndexList indexes;
     for (int i = start; i <= end; ++i)
     {
-        if (parent.child(i, 0).isValid())
+        QModelIndex currentIndex = model()->index(i, 0, parent);
+        if (currentIndex.isValid())
         {
-            indexes.append(parent.child(i, 0));
+            indexes.append(currentIndex);
         }
 
 //        DEBUGOUT << parent << i << parent.child(i, 0)

@@ -103,9 +103,9 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
         DEBUGOUT << "getting child";
 #endif
         if (direction == Direction::NEXT) {
-            nextIndex = index.child(0, 0);
+            nextIndex = mModel->index(0, 0, index);
         } else {
-            nextIndex = index.child(mModel->rowCount(index) - 1, 0);
+            nextIndex = mModel->index(mModel->rowCount(index) - 1, 0, index);
         }
     }
     Q_ASSERT(nextIndex.isValid());

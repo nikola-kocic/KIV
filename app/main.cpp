@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     const ArchiveExtractor archive_extractor;
     const PictureLoader picture_loader;
     const DataLoader data_loader(&archive_extractor);
-    MainWindow w(&data_loader, &picture_loader, &archive_extractor);
+    MainWindow w(data_loader, &picture_loader, &archive_extractor);
     w.showMaximized();
     return app.exec();
 }

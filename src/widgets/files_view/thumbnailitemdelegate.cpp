@@ -16,7 +16,7 @@
 
 
 ThumbnailItemDelegate::ThumbnailItemDelegate(
-        const DataLoader *const data_loader,
+        const DataLoader& data_loader,
         const IPictureLoader *const picture_loader,
         const QSize &thumbSize,
         QObject *parent)
@@ -130,7 +130,7 @@ void ThumbnailItemDelegate::updateThumbnail(const FileInfo &info,
         if (m_files_to_process.size() == 1)
         {
             auto f = [this](FileInfo info) {
-                QByteArray data = m_data_loader->getData(info, -1);
+                QByteArray data = m_data_loader.getData(info, -1);
                 std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
                 buffer->setData(data);
                 return m_picture_loader->getThumbnail(std::move(buffer), m_thumb_size);
@@ -206,7 +206,7 @@ void ThumbnailItemDelegate::imageLoaded(int num)
     if (!m_files_to_process.isEmpty())
     {
         auto f = [this](FileInfo info) {
-            QByteArray data = m_data_loader->getData(info, -1);
+            QByteArray data = m_data_loader.getData(info, -1);
             std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
             buffer->setData(data);
             return m_picture_loader->getThumbnail(std::move(buffer), m_thumb_size);

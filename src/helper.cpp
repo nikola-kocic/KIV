@@ -40,9 +40,9 @@ QString getMimeTypeForFile(const QString& file_path)
     return mime;
 }
 
-QString getMimeType(const FileInfo& file_info, const DataLoader *const data_loader)
+QString getMimeType(const FileInfo& file_info, const DataLoader& data_loader)
 {
-    const QByteArray buf = data_loader->getData(file_info, 16384);
+    const QByteArray buf = data_loader.getData(file_info, 16384);
     const QString mime = QMimeDatabase().mimeTypeForData(buf).name();
     return mime;
 }
@@ -54,7 +54,7 @@ bool isImageMime(const QString& mime)
     return val;
 }
 
-bool isImageFile(const FileInfo& file_info, const DataLoader *const data_loader)
+bool isImageFile(const FileInfo& file_info, const DataLoader& data_loader)
 {
     const QString mime = getMimeType(file_info, data_loader);
     const bool val = isImageMime(mime);
@@ -81,7 +81,7 @@ bool isArchiveFile(const QFileInfo &fi)
     return false;
 }
 
-bool isSupportedFileType(const QString &file_path, const DataLoader *const data_loader)
+bool isSupportedFileType(const QString &file_path, const DataLoader& data_loader)
 {
     const QFileInfo fi(file_path);
     if (fi.exists())

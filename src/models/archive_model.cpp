@@ -104,7 +104,7 @@ Qt::ItemFlags ArchiveModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
     {
-        return nullptr;
+        return Qt::NoItemFlags;
     }
 
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -252,7 +252,7 @@ QModelIndex ArchiveModel::getIndexFromPath(const QString &path) const
     QModelIndex cri = createIndex(0, 0, rootItem);
 
     const QStringList file_path_parts = path.split('/',
-                                                   QString::SkipEmptyParts);
+                                                   Qt::SkipEmptyParts);
     for (const QString &file_path_part : file_path_parts)
     {
         cri = findIndexChild(file_path_part, cri);
@@ -268,13 +268,19 @@ QModelIndex ArchiveModel::getIndexFromPath(const QString &path) const
 QModelIndex ArchiveModel::findIndexChild(const QString &text,
                                          const QModelIndex &root) const
 {
-    if (!root.isValid()) return QModelIndex();
-    for (int i = 0; root.child(i, 0).isValid(); ++i)
+    if (!root.isValid()) { return QModelIndex(); }
+    int i = 0;
+    while (true)
     {
-        const QString childText = root.child(i, 0).data(Qt::DisplayRole).toString();
+        const QModelIndex currentIndex = index(i, 0, root);
+        if (!currentIndex.isValid())
+        {
+            break;
+        }
+        const QString childText = currentIndex.data(Qt::DisplayRole).toString();
         if (childText == text)
         {
-            return root.child(i, 0);
+            return currentIndex;
         }
     }
     return QModelIndex();

@@ -24,11 +24,11 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(
-            const DataLoader *const data_loader,
+            const DataLoader& data_loader,
             const IPictureLoader *const picture_loader,
             const IArchiveExtractor* const archive_extractor,
             QWidget *parent = nullptr,
-            Qt::WindowFlags f = nullptr);
+            Qt::WindowFlags f = Qt::WindowFlags());
     ~MainWindow() override;
 
 private:
@@ -44,7 +44,7 @@ private:
                     m_picture_item->mapFromGlobal(pos));
     }
 
-    const DataLoader *const m_data_loader;
+    const DataLoader& m_data_loader;
     CustomFileSystemModel *m_model_filesystem;
     Settings *m_settings;
 

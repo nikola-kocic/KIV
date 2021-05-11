@@ -25,7 +25,7 @@ ArchiveItem::ArchiveItem(const QString &name,
     , m_icon(icon)
     , m_tooltip(QFileSystemModel::tr("Name") + ": " + m_name + "\n"
                 + QFileSystemModel::tr("Date Modified") + ": "
-                + m_date.toString(Qt::SystemLocaleShortDate))
+                + QLocale::system().toString(m_date, QLocale::ShortFormat))
     , m_type(type)
 {
     if (m_type == NodeType::Image)
@@ -139,7 +139,7 @@ QVariant ArchiveItem::data(const int role, const int column) const
             return Helper::size(m_bytes);
 
         case col_date:
-            return m_date.toString(Qt::SystemLocaleShortDate);
+            return QLocale::system().toString(m_date, QLocale::ShortFormat);
 
         default:
             Q_ASSERT(false);

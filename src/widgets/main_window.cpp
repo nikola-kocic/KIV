@@ -2,10 +2,10 @@
 
 #include <qglobal.h>
 #include <QAction>
+#include <QActionGroup>
 #include <QApplication>
 #include <QBoxLayout>
 #include <QDesktopServices>
-#include <QDesktopWidget>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QKeyEvent>
@@ -22,7 +22,7 @@
 #include "widgets/settings_dialog.h"
 #include "settings.h"
 
-MainWindow::MainWindow(const DataLoader * const data_loader,
+MainWindow::MainWindow(const DataLoader& data_loader,
                        const IPictureLoader *const picture_loader,
                        const IArchiveExtractor* const archive_extractor,
                        QWidget *parent,
@@ -135,7 +135,7 @@ MainWindow::MainWindow(const DataLoader * const data_loader,
     QWidget *content = new QWidget(this);
     QVBoxLayout *vboxMain = new QVBoxLayout(content);
     vboxMain->setSpacing(0);
-    vboxMain->setMargin(0);
+    vboxMain->setContentsMargins(0, 0, 0, 0);
 
     m_splitter_main->addWidget(m_view_files);
     m_splitter_main->setSizes(QList<int>() << 300);
@@ -382,7 +382,7 @@ void MainWindow::createMenus()
     /* Start toolbar */
     m_toolbar->setMovable(false);
     m_toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
-    m_toolbar->layout()->setMargin(0);
+    m_toolbar->layout()->setContentsMargins(0, 0, 0, 0);
 
     m_toolbar->addAction(m_act_sidebar);
     m_toolbar->addSeparator();
@@ -1118,7 +1118,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 
 void MainWindow::wheelEvent(QWheelEvent *event)
 {
-    if (!isPosInPictureItem(event->globalPos()))
+    if (!isPosInPictureItem(event->globalPosition().toPoint()))
     {
         return;
     }
@@ -1129,7 +1129,7 @@ void MainWindow::wheelEvent(QWheelEvent *event)
         ||((Qt::NoModifier == event->modifiers())
            && (WheelAction::Zoom == m_settings->getWheel())))
     {
-        if (event->delta() < 0)
+        if (event->angleDelta().y() < 0)
         {
             m_comboBox_zoom->zoomOut();
         }
@@ -1143,7 +1143,7 @@ void MainWindow::wheelEvent(QWheelEvent *event)
         /* If image can't be scrolled, change image if necessary */
         if (WheelAction::ChangeImage == m_settings->getWheel())
         {
-            if (event->delta() < 0)
+            if (event->angleDelta().y() < 0)
             {
                 m_view_files->imageNext();
             }
@@ -1155,22 +1155,22 @@ void MainWindow::wheelEvent(QWheelEvent *event)
         /* Scroll image */
         else if (WheelAction::Scroll == m_settings->getWheel())
         {
-            m_picture_item->scrollImageVertical(event->delta());
+            m_picture_item->scrollImageVertical(event->angleDelta().y());
         }
     }
     else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
     {
         /* For standard scroll (+-120), zoom +-25% */
         m_comboBox_zoom->setZoom(m_comboBox_zoom->getZoom()
-                                 * (1 + ((event->delta() / 4.8) / 100)));
+                                 * (1 + ((event->angleDelta().y() / 4.8) / 100)));
     }
     else if (Qt::ShiftModifier == event->modifiers())
     {
-        m_picture_item->scrollImageVertical(event->delta());
+        m_picture_item->scrollImageVertical(event->angleDelta().y());
     }
     else if (Qt::AltModifier == event->modifiers())
     {
-        m_picture_item->scrollImageHorizontal(event->delta());
+        m_picture_item->scrollImageHorizontal(event->angleDelta().y());
     }
 }
 
