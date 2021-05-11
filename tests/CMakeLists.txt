@@ -4,7 +4,7 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 
 include(../cmake-defaults.txt)
 
-find_package(Qt5Test REQUIRED)
+find_package(Qt6Test REQUIRED)
 
 include_directories (
     ${QT_QTTEST_INCLUDE_DIR}
@@ -32,7 +32,7 @@ set ( tests_SRCS
 set ( tests_RSCS
     test_assets.qrc
     )
-qt5_add_resources(RSCS ${tests_RSCS})
+qt6_add_resources(RSCS ${tests_RSCS})
 
 set ( tests_MOCS
     test_settings_bookmarks.h
@@ -44,10 +44,10 @@ set ( tests_MOCS
     test_archive_file_list.h
     test_nodenavigator.h
     )
-qt5_wrap_cpp(MOCS ${tests_MOCS})
+qt6_wrap_cpp(MOCS ${tests_MOCS})
 
 
 add_executable ( tests ${tests_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
-target_link_libraries ( tests kivimpl Qt5::Test )
+target_link_libraries ( tests kivimpl Qt6::Test )
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)

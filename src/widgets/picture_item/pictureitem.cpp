@@ -86,7 +86,7 @@ void PictureItem::initPictureItem(bool opengl)
 
     if (opengl)
     {
-        m_imageDisplay = new PictureItemGL(m_data, m_settings.getZoomFilter(), this);
+//        m_imageDisplay = new PictureItemGL(m_data, m_settings.getZoomFilter(), this);
     }
     else
     {

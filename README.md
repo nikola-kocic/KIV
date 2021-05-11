@@ -14,17 +14,25 @@ Cross-platform image viewer with support for images in archives
 ```
 mkdir build
 cd build
-qmake QUAZIP_LIB=-lquazip1-qt5 QUAZIP_INCLUDE="/usr/include/QuaZip-Qt5-1.1" ../kiv.pro
+qmake QUAZIP_LIB=-lquazip1-qt6 QUAZIP_INCLUDE="/usr/include/QuaZip-Qt6-1.1" ../kiv.pro
 make
 ```
 
 ### Build on Linux (CMake)
 
-* Install quazip, then build KIV with
+* Install quazip with
+```
+cd /path/to/quazip-src
+cmake -S . -B ../quazip-build/ -D QUAZIP_QT_MAJOR_VERSION=6
+cmake --build ../quazip-build/
+DESTDIR=../quazip-pkg cmake --install ../quazip-build/
+```
+
+* Build KIV with
 ```
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_PREFIX_PATH=/path/to/quazip-pkg/usr/local/lib/cmake ..
 make
 ```
 

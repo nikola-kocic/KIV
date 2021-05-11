@@ -1030,7 +1030,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         return;
     }
 
-    if (!isPosInPictureItem(event->globalPos()))
+    if (!isPosInPictureItem(event->globalPosition()))
     {
         return;
     }
@@ -1080,7 +1080,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         {
         case LeftClickAction::ChangeImage: {
             const int widgetWidth = m_picture_item->width();
-            const QPointF localPos = m_picture_item->mapFromGlobal(event->globalPos());
+            const QPointF localPos = m_picture_item->mapFromGlobal(event->globalPosition());
             if (localPos.x() < widgetWidth / 2.0) {
                 m_view_files->imagePrevious();
             } else {
@@ -1109,7 +1109,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->buttons() == Qt::LeftButton
-            && isPosInPictureItem(event->globalPos())
+            && isPosInPictureItem(event->globalPosition())
             && m_settings->getLeftClick() == LeftClickAction::BeginDrag)
     {
         m_act_fullscreen->toggle();

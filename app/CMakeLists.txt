@@ -17,7 +17,7 @@ set ( app_RSCS
     icons.qrc
     )
 
-qt5_add_resources(RSCS ${app_RSCS})
+qt6_add_resources(RSCS ${app_RSCS})
 
 
 add_executable ( kiv ${app_SRCS} ${RSCS} ${TRS}  )

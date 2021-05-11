@@ -38,9 +38,9 @@ private:
     void updateIcons();
     void updateSettings();
     bool spreadUrl(const QUrl &url);
-    inline bool isPosInPictureItem(const QPoint &pos) const
+    inline bool isPosInPictureItem(const QPointF &pos) const
     {
-        return m_picture_item->rect().contains(
+        return QRectF(m_picture_item->rect()).contains(
                     m_picture_item->mapFromGlobal(pos));
     }
 

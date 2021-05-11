@@ -15,7 +15,7 @@
 #include "include/IPictureLoader.h"
 #include "settingsdata.h"
 #include "widgets/picture_item/pictureitem_data.h"
-#include "widgets/picture_item/pictureitem_gl.h"
+//#include "widgets/picture_item/pictureitem_gl.h"
 #include "widgets/picture_item/pictureitem_raster.h"
 
 //#define DEBUG_PICTUREITEM

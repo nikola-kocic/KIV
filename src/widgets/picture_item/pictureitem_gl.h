@@ -4,7 +4,7 @@
 #include "widgets/picture_item/pictureitem_interface.h"
 
 #include <QFutureWatcher>
-#include <QtOpenGL/QGLWidget>
+#include <QOpenGLWidget>
 #include <QOpenGLFunctions_2_0>
 #include <QOpenGLTexture>
 #include <QtConcurrent/QtConcurrentMap>
