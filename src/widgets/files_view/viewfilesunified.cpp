@@ -3,7 +3,6 @@
 #include "models/nestedmodel.h"
 #include "models/archivemodelhandler.h"
 #include <memory>
-#include <QFileSystemModel>
 
 using std::experimental::optional;
 

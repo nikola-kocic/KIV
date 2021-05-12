@@ -8,7 +8,6 @@
 #include <QSplitter>
 #include <QToolBar>
 
-#include "models/filesystem_model.h"
 #include "dataloader.h"
 #include "picture_loader.h"
 #include "settings.h"

@@ -23,8 +23,7 @@ set ( kiv_HDRS
     widgets/files_view/view_archive_dirs.h
     widgets/files_view/ifileview.h
     widgets/files_view/fileviewwithproxy.h
-    widgets/files_view/view_files_list.h
-    widgets/files_view/view_files_tree.h
+    widgets/files_view/viewfilesunified.h
     widgets/files_view/sortcombobox.h
     widgets/picture_item/pictureitem_data.h
     widgets/picture_item/pictureitem_interface.h
@@ -43,16 +42,12 @@ set ( kiv_SRCS
     models/archive_item.cpp
     models/archive_model.cpp
     models/archivemodelhandler.cpp
-    models/filesystem_model.cpp
     models/nestedmodel.cpp
     models/unrar/archive_rar.cpp
     widgets/files_view/fileviewwithproxy.cpp
     widgets/files_view/nodeidentifier.cpp
     widgets/files_view/nodenavigator.cpp
     widgets/files_view/sortcombobox.cpp
-    widgets/files_view/thumbnailitemdelegate.cpp
-    widgets/files_view/view_files_list.cpp
-    widgets/files_view/view_files_tree.cpp
     widgets/files_view/viewfilesunified.cpp
     widgets/main_window.cpp
     widgets/picture_item/pictureitem.cpp
@@ -75,15 +70,11 @@ set ( kiv_MOCS
     models/archive_item.h
     models/archive_model.h
     models/archivemodelhandler.h
-    models/filesystem_model.h
     models/nestedmodel.h
     widgets/files_view/fileviewwithproxy.h
     widgets/files_view/nodeidentifier.h
     widgets/files_view/nodenavigator.h
     widgets/files_view/sortcombobox.h
-    widgets/files_view/thumbnailitemdelegate.h
-    widgets/files_view/view_files_list.h
-    widgets/files_view/view_files_tree.h
     widgets/files_view/viewfilesunified.h
     widgets/main_window.h
     widgets/picture_item/pictureitem.h

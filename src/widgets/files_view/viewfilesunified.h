@@ -6,7 +6,6 @@
 #include "nodenavigator.h"
 
 #include <QTreeView>
-#include <QFileSystemModel>
 #include <QUrl>
 
 class ViewFilesUnified : public QTreeView
