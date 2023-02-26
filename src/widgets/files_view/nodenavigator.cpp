@@ -60,7 +60,9 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
     const NodeType nodeType = mNodeIdentifier->identify(index);
     if ((nodeType == Directory || nodeType == Archive) && mModel->rowCount(index) == 0) {
         if (mModel->canFetchMore(index)) {
+#ifdef DEBUG_NAVIGATION
             DEBUGOUT << "fetchMore" << nodeText(index) << "; index " << index;
+#endif
             mModel->fetchMore(index);
             if (mModel->rowCount(index) == 0 && nodeType == Directory) {
                 return;

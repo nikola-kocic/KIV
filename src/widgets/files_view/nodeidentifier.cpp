@@ -1,4 +1,5 @@
 #include "nodeidentifier.h"
+#include "helper.h"
 
 NodeType NodeIdentifier::identify(const QModelIndex& index) const {
     bool ok = false;

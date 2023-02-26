@@ -4,7 +4,6 @@
 #include <QModelIndex>
 
 #include "enums.h"
-#include "helper.h"
 
 class INodeIdentifier
 {

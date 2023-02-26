@@ -357,7 +357,7 @@ protected:
 
     void _q_sourceLayoutAboutToBeChanged(const QList<QPersistentModelIndex> &sourceParents, QAbstractItemModel::LayoutChangeHint hint) {
         const auto proxyPersistentIndexes = persistentIndexList();
-        for (const QPersistentModelIndex &proxyPersistentIndex : proxyPersistentIndexes) {
+        for (const QPersistentModelIndex proxyPersistentIndex : proxyPersistentIndexes) {
             proxyIndexes << proxyPersistentIndex;
             Q_ASSERT(proxyPersistentIndex.isValid());
             const QPersistentModelIndex srcPersistentIndex = mapToSource(proxyPersistentIndex);
