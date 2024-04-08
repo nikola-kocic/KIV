@@ -4,8 +4,6 @@
 #include <QStandardItemModel>
 #include <QSignalSpy>
 
-using std::experimental::optional;
-
 class MockNodeIdentifier : public INodeIdentifier {
 public:
     NodeType identify(const QModelIndex& index) const override {

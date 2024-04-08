@@ -1,19 +1,16 @@
 #ifndef NODENAVIGATOR_H
 #define NODENAVIGATOR_H
 
-#include "include/optional.hpp"
 #include "enums.h"
 #include "nodeidentifier.h"
 
 #include <QAbstractItemModel>
 
 #include <functional>
+#include <optional>
 
 class NodeNavigator : public QObject {
     Q_OBJECT
-
-    template<typename T>
-    using optional = std::experimental::optional<T>;
 
 public:
     NodeNavigator(QAbstractItemModel* model, const INodeIdentifier* nodeIdentifier);
@@ -44,7 +41,7 @@ private:
 
     QAbstractItemModel* mModel;
     const INodeIdentifier* mNodeIdentifier;
-    optional<Cache> mCache;
+    std::optional<Cache> mCache{};
 
     bool isImageNode(const QModelIndex& index) const;
     void getImageRec(const QModelIndex &startIndex, Direction direction, bool initial);

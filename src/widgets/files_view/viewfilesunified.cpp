@@ -1,10 +1,8 @@
-#include "include/optional.hpp"
 #include "viewfilesunified.h"
 #include "models/nestedmodel.h"
 #include "models/archivemodelhandler.h"
-#include <memory>
 
-using std::experimental::optional;
+#include <memory>
 
 ViewFilesUnified::ViewFilesUnified(
         const IArchiveExtractor * const archive_extractor, CustomFileSystemModel *model_filesystem, QWidget *parent)

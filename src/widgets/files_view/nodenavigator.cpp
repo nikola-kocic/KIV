@@ -7,12 +7,9 @@
 #include "helper.h"
 #endif
 
-using std::experimental::optional;
-
 NodeNavigator::NodeNavigator(QAbstractItemModel *model, const INodeIdentifier *nodeIdentifier)
     : mModel(model)
     , mNodeIdentifier(nodeIdentifier)
-    , mCache(optional<Cache>())
 {
     Q_ASSERT(mModel != nullptr);
     Q_ASSERT(mNodeIdentifier != nullptr);
@@ -24,11 +21,11 @@ bool NodeNavigator::isImageNode(const QModelIndex &index) const
     return mNodeIdentifier->identify(index) == Image;
 }
 
-QString nodeText(const optional<QModelIndex>& index) {
-    if (!index) {
+QString nodeText(const QModelIndex& index) {
+    if (!index.isValid()) {
         return "Index not valid";
     } else {
-        return index.value().data(Qt::DisplayRole).toString();
+        return index.data(Qt::DisplayRole).toString();
     }
 }
 
@@ -51,7 +48,7 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
 #ifdef DEBUG_NAVIGATION
     DEBUGOUT << "ret " << nodeText(index);
 #endif
-        mCache = optional<Cache>();
+        mCache.reset();
         emit navigated(index);
         return;
     }
@@ -95,7 +92,7 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
             if (parent.isValid()) {
                 nextIndex = parentSibling;
             } else {
-                mCache = optional<Cache>();
+                mCache.reset();
                 emit navigated(QModelIndex());
                 return;
             }
