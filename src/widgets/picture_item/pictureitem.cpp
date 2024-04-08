@@ -176,7 +176,7 @@ void PictureItem::imageFinished(int num)
     if (m_animation_buffer != nullptr)
     {
         m_movie->setDevice(m_animation_buffer.get());
-        QObject::connect(m_movie.get(), &QMovie::updated, [&](const QRect &/*rect*/) {
+        QObject::connect(m_movie.get(), &QMovie::updated, this, [&](const QRect &/*rect*/) {
             const QImage img = m_movie->currentImage();
             m_imageDisplay->setImage(img);
             if (m_is_animation_first_frame)

@@ -34,12 +34,12 @@ ViewFilesUnified::ViewFilesUnified(
     connect(selectionModel(),
             &QItemSelectionModel::currentRowChanged,
             this, &ViewFilesUnified::on_filesystemView_currentRowChanged);
-    connect(mNodeNavigator, &NodeNavigator::navigated, [this](QModelIndex index){
+    connect(mNodeNavigator, &NodeNavigator::navigated, this, [this](QModelIndex index){
         if (index.isValid()) {
             setCurrentIndex(index);
         }
     });
-    connect(mNestedModel, &QAbstractItemModel::rowsInserted, [this](
+    connect(mNestedModel, &QAbstractItemModel::rowsInserted, this, [this](
             const QModelIndex &parent, int /*first*/, int /*last*/) {
         /*
          * In both this and QFileSystemModel::directoryLoaded slot,
@@ -54,7 +54,7 @@ ViewFilesUnified::ViewFilesUnified(
             mLastDirLoaded = QPersistentModelIndex();
         }
     });
-    connect(mNestedModel, &QAbstractItemModel::layoutChanged, [this](
+    connect(mNestedModel, &QAbstractItemModel::layoutChanged, this, [this](
             const QList<QPersistentModelIndex> &/*parents*/,
             QAbstractItemModel::LayoutChangeHint /*hint*/) {
         // Child nodes should be sorted here, so continue navigation

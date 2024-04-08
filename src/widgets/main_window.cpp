@@ -584,8 +584,7 @@ void MainWindow::updateIcons()
         {
 #ifndef ANDROID
             const QString icon_path_template = QString("%1/icons/default/%3/%2.png")
-                    .arg(QCoreApplication::applicationDirPath())
-                    .arg(icons[0]);
+                    .arg(QCoreApplication::applicationDirPath(), icons[0]);
 #else
             const QString icon_path_template = QString(":/res/icons/default/%2/%1.png")
                     .arg(icons[0]);
@@ -610,7 +609,8 @@ void MainWindow::populateBookmarks()
 {
     /* Cache: If bookmarks menu is not empty that means
      * history did not change. */
-    if (!m_menu_bookmarks->actions().last()->data().isNull())
+    const auto actions = m_menu_bookmarks->actions();
+    if (!actions.last()->data().isNull())
     {
         return;
     }

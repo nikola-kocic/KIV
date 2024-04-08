@@ -38,21 +38,18 @@ protected:
     QAbstractItemModel* mParentModel;
 
     // Remember source model from index internalId. Pointers are borrowed.
-    mutable QHash<quintptr, const QAbstractItemModel*> mSourceModels;
+    mutable QHash<quintptr, const QAbstractItemModel*> mSourceModels{};
 
     // quintptr is internalId of parent. Pointers are owned.
-    QHash<quintptr, const QAbstractItemModel*> mChildModels;
+    QHash<quintptr, const QAbstractItemModel*> mChildModels{};
 
     // Maps parent index internalId to parent model identifier
-    QHash<quintptr, TIdentifier> mParentIdentifiers;
+    QHash<quintptr, TIdentifier> mParentIdentifiers{};
 
 public:
     NestedModel(std::unique_ptr<const NestedModelHandler<TIdentifier>> modelHandler)
         : mModelHandler(std::move(modelHandler))
         , mParentModel(mModelHandler->getParentModel())
-        , mSourceModels(QHash<quintptr, const QAbstractItemModel*>())
-        , mChildModels(QHash<quintptr, const QAbstractItemModel*>())
-        , mParentIdentifiers(QHash<quintptr, TIdentifier>())
     {
         doConnect(mParentModel);
     }

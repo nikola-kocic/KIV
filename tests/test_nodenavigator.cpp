@@ -98,9 +98,9 @@ void TestNodeNavigator::init()
             }
         }
 
-        QStandardItem* d2 = insertNode(root, new QStandardItem("dir2"));
+        insertNode(root, new QStandardItem("dir2"));
 
-        QStandardItem* d2_a1 = insertNode(root, new QStandardItem("dir2archive1.zip"));
+        insertNode(root, new QStandardItem("dir2archive1.zip"));
     }
 
     mModel = model;

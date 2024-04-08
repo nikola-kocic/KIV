@@ -31,8 +31,8 @@ void UrlNavigator::setLocationUrl(const QUrl &url)
 #endif
     if (m_historyIndex + 1 < m_history.size())
     {
-        QList<QUrl>::iterator begin = m_history.begin() + m_historyIndex + 1;
-        QList<QUrl>::iterator end = m_history.end();
+        const auto begin = m_history.cbegin() + m_historyIndex + 1;
+        const auto end = m_history.cend();
         m_history.erase(begin, end);
     }
     if (m_history.isEmpty()
