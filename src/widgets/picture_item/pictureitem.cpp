@@ -1,14 +1,14 @@
 #include "widgets/picture_item/pictureitem.h"
 
-#include <QMouseEvent>
 #include <QImageReader>
+#include <QMouseEvent>
 
 PictureItem::PictureItem(
-        const DataLoader& data_loader,
-        const IPictureLoader * const picture_loader,
-        const SettingsData settings,
-        QWidget *parent,
-        Qt::WindowFlags f)
+    const DataLoader &data_loader,
+    const IPictureLoader *const picture_loader,
+    const SettingsData settings,
+    QWidget *parent,
+    Qt::WindowFlags f)
     : QWidget(parent, f)
 
     , m_data_loader(data_loader)
@@ -28,10 +28,10 @@ PictureItem::PictureItem(
     updateCursor(m_settings);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(m_watcher_data, &QFutureWatcher<QByteArray>::resultReadyAt,
-            this, &PictureItem::dataLoaded);
-    connect(m_watcher_image, &QFutureWatcher<QImage>::resultReadyAt,
-            this, &PictureItem::imageFinished);
+    connect(
+        m_watcher_data, &QFutureWatcher<QByteArray>::resultReadyAt, this, &PictureItem::dataLoaded);
+    connect(
+        m_watcher_image, &QFutureWatcher<QImage>::resultReadyAt, this, &PictureItem::imageFinished);
 
     QVBoxLayout *layoutMain = new QVBoxLayout(this);
     layoutMain->setSpacing(0);
@@ -47,7 +47,8 @@ PictureItem::~PictureItem()
     delete m_imageDisplay;
 }
 
-void PictureItem::updateCursor(const SettingsData& settings) {
+void PictureItem::updateCursor(const SettingsData &settings)
+{
     switch (settings.getLeftClick()) {
     case LeftClickAction::BeginDrag: {
         this->setCursor(Qt::OpenHandCursor);
@@ -63,10 +64,10 @@ void PictureItem::updateCursor(const SettingsData& settings) {
     }
 }
 
-void PictureItem::settingsUpdated(const SettingsData& newSettings, const FileInfo& currentFileInfo) {
-    if (m_settings.getHardwareAcceleration() != newSettings.getHardwareAcceleration() ||
-            m_settings.getZoomFilter() != newSettings.getZoomFilter())
-    {
+void PictureItem::settingsUpdated(const SettingsData &newSettings, const FileInfo &currentFileInfo)
+{
+    if (m_settings.getHardwareAcceleration() != newSettings.getHardwareAcceleration()
+        || m_settings.getZoomFilter() != newSettings.getZoomFilter()) {
         initPictureItem(newSettings.getHardwareAcceleration());
         setPixmap(currentFileInfo);
     }
@@ -77,24 +78,19 @@ void PictureItem::settingsUpdated(const SettingsData& newSettings, const FileInf
 
 void PictureItem::initPictureItem(bool opengl)
 {
-    if (m_imageDisplay != nullptr)
-    {
+    if (m_imageDisplay != nullptr) {
         this->layout()->removeWidget(m_imageDisplay->getWidget());
-//        m_imageDisplay->getWidget()->deleteLater();
+        //        m_imageDisplay->getWidget()->deleteLater();
         delete m_imageDisplay;
     }
 
-    if (opengl)
-    {
-//        m_imageDisplay = new PictureItemGL(m_data, m_settings.getZoomFilter(), this);
-    }
-    else
-    {
+    if (opengl) {
+        //        m_imageDisplay = new PictureItemGL(m_data, m_settings.getZoomFilter(), this);
+    } else {
         m_imageDisplay = new PictureItemRaster(m_data, m_settings.getZoomFilter(), this);
     }
     this->layout()->addWidget(m_imageDisplay->getWidget());
 }
-
 
 /* Region Image loading */
 
@@ -109,32 +105,27 @@ void PictureItem::setPixmap(const FileInfo &info)
     m_watcher_image->cancel();
     m_imageDisplay->getWidget()->setUpdatesEnabled(false);
     m_imageDisplay->setNullImage();
-    if (!info.fileExists())
-    {
-//        calculateAverageColor(QImage());
+    if (!info.fileExists()) {
+        //        calculateAverageColor(QImage());
 
-//        m_imageDisplay->setNullImage();
+        //        m_imageDisplay->setNullImage();
 
         m_imageDisplay->getWidget()->setUpdatesEnabled(true);
         m_data->setPixmapNull(true);
         emit imageChanged();
-    }
-    else
-    {
+    } else {
 #ifdef DEBUG_PICTUREITEM
         t.start();
 #endif
-        m_watcher_data->setFuture(QtConcurrent::run([=] {
-            return m_data_loader.getData(info, -1);
-        }));
+        m_watcher_data->setFuture(
+            QtConcurrent::run([=] { return m_data_loader.getData(info, -1); }));
     }
 }
 
 void PictureItem::dataLoaded(int num)
 {
     const QByteArray data = m_watcher_data->resultAt(num);
-    if (data.isEmpty())
-    {
+    if (data.isEmpty()) {
         m_imageDisplay->getWidget()->setUpdatesEnabled(true);
         m_data->setPixmapNull(true);
         return;
@@ -143,13 +134,10 @@ void PictureItem::dataLoaded(int num)
         std::unique_ptr<QBuffer> buffer = std::unique_ptr<QBuffer>(new QBuffer());
         buffer->setData(data);
         QImageReader ir(buffer.get());
-        if (ir.supportsAnimation())
-        {
+        if (ir.supportsAnimation()) {
             m_animation_buffer = std::move(buffer);
             return QImage(ir.size(), ir.imageFormat());
-        }
-        else
-        {
+        } else {
             m_animation_buffer = nullptr;
             return m_picture_loader->getImage(std::move(buffer));
         }
@@ -169,18 +157,16 @@ void PictureItem::imageFinished(int num)
     m_imageDisplay->setImage(newImage);
 
     this->afterImageLoad(newImage);
-//    m_imageDisplay->getWidget()->setUpdatesEnabled(true);
+    //    m_imageDisplay->getWidget()->setUpdatesEnabled(true);
 
     /* Free result memory */
     m_watcher_image->setFuture(QFuture<QImage>());
-    if (m_animation_buffer != nullptr)
-    {
+    if (m_animation_buffer != nullptr) {
         m_movie->setDevice(m_animation_buffer.get());
-        QObject::connect(m_movie.get(), &QMovie::updated, this, [&](const QRect &/*rect*/) {
+        QObject::connect(m_movie.get(), &QMovie::updated, this, [&](const QRect & /*rect*/) {
             const QImage img = m_movie->currentImage();
             m_imageDisplay->setImage(img);
-            if (m_is_animation_first_frame)
-            {
+            if (m_is_animation_first_frame) {
                 m_is_animation_first_frame = false;
                 this->afterImageLoad(img);
             }
@@ -190,13 +176,12 @@ void PictureItem::imageFinished(int num)
     }
 }
 
-void PictureItem::afterImageLoad(const QImage& img)
+void PictureItem::afterImageLoad(const QImage &img)
 {
     m_data->setPixmapNull(img.isNull());
     m_data->setWidgetSize(m_imageDisplay->getWidget()->size());
     m_data->setImageSize(img.size());
-    if (m_lockMode == LockMode::None)
-    {
+    if (m_lockMode == LockMode::None) {
         this->setZoom(1);
     }
     this->setRotation(0);
@@ -210,25 +195,21 @@ void PictureItem::afterImageLoad(const QImage& img)
 QColor PictureItem::getAverageColor(const QImage &img) const
 {
     QColor retColor = Qt::lightGray;
-    if (m_settings.getCalculateAverageColor() && !img.isNull())
-    {
-        const QImage averageColorImage = img.scaled(1, 1, Qt::IgnoreAspectRatio,
-                                                    Qt::SmoothTransformation);
-        retColor = QColor::fromRgb(averageColorImage.pixel(0,0));
+    if (m_settings.getCalculateAverageColor() && !img.isNull()) {
+        const QImage averageColorImage
+            = img.scaled(1, 1, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        retColor = QColor::fromRgb(averageColorImage.pixel(0, 0));
     }
     return retColor;
 }
 
 /* End Region Image loading */
 
-
-
 void PictureItem::mousePressEvent(QMouseEvent *event)
 {
     this->setFocus();
 
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         if (m_settings.getLeftClick() == LeftClickAction::BeginDrag) {
             /* Start dragging */
             this->beginDrag(event->pos());
@@ -238,14 +219,11 @@ void PictureItem::mousePressEvent(QMouseEvent *event)
     return QWidget::mousePressEvent(event);
 }
 
-
 /* End Region Drag */
-
 
 void PictureItem::resizeEvent(QResizeEvent *event)
 {
-    if (this->isPixmapNull())
-    {
+    if (this->isPixmapNull()) {
         return;
     }
 
@@ -257,11 +235,9 @@ void PictureItem::resizeEvent(QResizeEvent *event)
     return QWidget::resizeEvent(event);
 }
 
-
 void PictureItem::keyPressEvent(QKeyEvent *event)
 {
-    switch (event->key())
-    {
+    switch (event->key()) {
     case Qt::Key_Up:
         this->scrollImageVertical(120);
         event->accept();
@@ -290,8 +266,7 @@ void PictureItem::keyPressEvent(QKeyEvent *event)
 
 void PictureItem::setRotation(const qreal value)
 {
-    if (isPixmapNull())
-    {
+    if (isPixmapNull()) {
         return;
     }
 
@@ -303,20 +278,17 @@ void PictureItem::setRotation(const qreal value)
 
 /* End Region Rotation */
 
-
 /* Region Zoom */
 
 void PictureItem::setZoom(const qreal value)
 {
-    if (m_data->isPixmapNull())
-    {
+    if (m_data->isPixmapNull()) {
         return;
     }
 
     const qreal previous = m_data->getZoom();
     qreal zoomVal;
-    if (m_data->setZoom(value, zoomVal) != 0)
-    {
+    if (m_data->setZoom(value, zoomVal) != 0) {
         return;
     }
     m_imageDisplay->setZoom(zoomVal, previous);
@@ -324,12 +296,10 @@ void PictureItem::setZoom(const qreal value)
     emit zoomChanged(zoomVal, previous);
 }
 
-
 void PictureItem::fitToScreen()
 {
     qreal zoomVal;
-    if (m_data->fitToScreen(zoomVal) != 0)
-    {
+    if (m_data->fitToScreen(zoomVal) != 0) {
         return;
     }
     this->setZoom(zoomVal);
@@ -338,8 +308,7 @@ void PictureItem::fitToScreen()
 void PictureItem::fitWidth()
 {
     qreal zoomVal;
-    if (m_data->fitWidth(zoomVal) != 0)
-    {
+    if (m_data->fitWidth(zoomVal) != 0) {
         return;
     }
     this->setZoom(zoomVal);
@@ -348,8 +317,7 @@ void PictureItem::fitWidth()
 void PictureItem::fitHeight()
 {
     qreal zoomVal;
-    if (m_data->fitHeight(zoomVal) != 0)
-    {
+    if (m_data->fitHeight(zoomVal) != 0) {
         return;
     }
     this->setZoom(zoomVal);
@@ -364,13 +332,11 @@ void PictureItem::setLockMode(const LockMode mode)
 /* Use in setpixmap and resize events */
 void PictureItem::updateLockMode()
 {
-    if (this->isPixmapNull())
-    {
+    if (this->isPixmapNull()) {
         return;
     }
 
-    switch (m_lockMode)
-    {
+    switch (m_lockMode) {
     case LockMode::Autofit:
         this->fitToScreen();
         break;
@@ -386,8 +352,6 @@ void PictureItem::updateLockMode()
 }
 
 /* End Region Zoom */
-
-
 
 /* Region Drag */
 
@@ -415,8 +379,7 @@ void PictureItem::mouseReleaseEvent(QMouseEvent *event)
 
 void PictureItem::drag(const QPoint &pt)
 {
-    if (this->isPixmapNull() || !m_dragging)
-    {
+    if (this->isPixmapNull() || !m_dragging) {
         return;
     }
 
@@ -426,8 +389,7 @@ void PictureItem::drag(const QPoint &pt)
 
 void PictureItem::beginDrag(const QPoint &pt)
 {
-    if (this->isPixmapNull())
-    {
+    if (this->isPixmapNull()) {
         return;
     }
 
@@ -439,8 +401,7 @@ void PictureItem::beginDrag(const QPoint &pt)
 
 void PictureItem::endDrag()
 {
-    if (this->isPixmapNull())
-    {
+    if (this->isPixmapNull()) {
         return;
     }
 
@@ -448,7 +409,8 @@ void PictureItem::endDrag()
     this->setCursor(Qt::OpenHandCursor);
 }
 
-void PictureItem::scrollBy(const int x, const int y) {
+void PictureItem::scrollBy(const int x, const int y)
+{
     m_data->beginDrag(QPoint(0, 0));
     m_data->drag(QPoint(x, y));
     m_imageDisplay->getWidget()->update();

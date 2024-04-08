@@ -1,12 +1,14 @@
 #include "viewfilesunified.h"
-#include "models/nestedmodel.h"
 #include "models/archivemodelhandler.h"
+#include "models/nestedmodel.h"
 
 #include <memory>
 
 ViewFilesUnified::ViewFilesUnified(
-        const IArchiveExtractor * const archive_extractor, CustomFileSystemModel *model_filesystem, QWidget *parent)
-    : QTreeView (parent)
+    const IArchiveExtractor *const archive_extractor,
+    CustomFileSystemModel *model_filesystem,
+    QWidget *parent)
+    : QTreeView(parent)
     , mModelFilesystem(model_filesystem)
     , mArchiveExtractor(archive_extractor)
     , m_fileinfo_current(FileInfo(""))
@@ -17,8 +19,8 @@ ViewFilesUnified::ViewFilesUnified(
 
     mModelFilesystem->setRootPath("");
 
-    std::unique_ptr<ArchiveModelHandler> archiveModelHandler =
-            std::make_unique<ArchiveModelHandler>(mModelFilesystem, archive_extractor);
+    std::unique_ptr<ArchiveModelHandler> archiveModelHandler
+        = std::make_unique<ArchiveModelHandler>(mModelFilesystem, archive_extractor);
     mNestedModel = new NestedModel<QString>(std::move(archiveModelHandler));
     mNodeNavigator = new NodeNavigator(mNestedModel, new NodeIdentifier());
     setModel(mNestedModel);
@@ -29,36 +31,45 @@ ViewFilesUnified::ViewFilesUnified(
         setColumnHidden(i, true);
     }
 
-    connect(selectionModel(),
-            &QItemSelectionModel::currentRowChanged,
-            this, &ViewFilesUnified::on_filesystemView_currentRowChanged);
-    connect(mNodeNavigator, &NodeNavigator::navigated, this, [this](QModelIndex index){
+    connect(
+        selectionModel(),
+        &QItemSelectionModel::currentRowChanged,
+        this,
+        &ViewFilesUnified::on_filesystemView_currentRowChanged);
+    connect(mNodeNavigator, &NodeNavigator::navigated, this, [this](QModelIndex index) {
         if (index.isValid()) {
             setCurrentIndex(index);
         }
     });
-    connect(mNestedModel, &QAbstractItemModel::rowsInserted, this, [this](
-            const QModelIndex &parent, int /*first*/, int /*last*/) {
-        /*
+    connect(
+        mNestedModel,
+        &QAbstractItemModel::rowsInserted,
+        this,
+        [this](const QModelIndex &parent, int /*first*/, int /*last*/) {
+            /*
          * In both this and QFileSystemModel::directoryLoaded slot,
          * child nodes are not yet sorted.
          * They will be sorted in QAbstractItemModel::layoutChanged.
          * Wait with navigation until then.
         */
-        mLastDirLoaded = parent;
-        // But if there are no child nodes, continue navigation
-        if (mNestedModel->rowCount(parent) == 0) {
-            mNodeNavigator->nodeLoaded(parent);
-            mLastDirLoaded = QPersistentModelIndex();
-        }
-    });
-    connect(mNestedModel, &QAbstractItemModel::layoutChanged, this, [this](
-            const QList<QPersistentModelIndex> &/*parents*/,
+            mLastDirLoaded = parent;
+            // But if there are no child nodes, continue navigation
+            if (mNestedModel->rowCount(parent) == 0) {
+                mNodeNavigator->nodeLoaded(parent);
+                mLastDirLoaded = QPersistentModelIndex();
+            }
+        });
+    connect(
+        mNestedModel,
+        &QAbstractItemModel::layoutChanged,
+        this,
+        [this](
+            const QList<QPersistentModelIndex> & /*parents*/,
             QAbstractItemModel::LayoutChangeHint /*hint*/) {
-        // Child nodes should be sorted here, so continue navigation
-        mNodeNavigator->nodeLoaded(mLastDirLoaded);
-        mLastDirLoaded = QPersistentModelIndex();
-    });
+            // Child nodes should be sorted here, so continue navigation
+            mNodeNavigator->nodeLoaded(mLastDirLoaded);
+            mLastDirLoaded = QPersistentModelIndex();
+        });
 }
 
 bool ViewFilesUnified::setLocationUrl(const QUrl &url)
@@ -81,35 +92,25 @@ void ViewFilesUnified::dirUp()
     }
 }
 
-void ViewFilesUnified::setViewMode(const FileViewMode /*mode*/)
-{
-
-}
+void ViewFilesUnified::setViewMode(const FileViewMode /*mode*/) {}
 
 FileInfo ViewFilesUnified::getCurrentFileInfo() const
 {
     return m_fileinfo_current;
 }
 
-void ViewFilesUnified::saveCurrentFile(const QString& /*fileName*/) const
-{
+void ViewFilesUnified::saveCurrentFile(const QString & /*fileName*/) const {}
 
-}
+void ViewFilesUnified::setThumbnailsSize(const QSize & /*size*/) {}
 
-void ViewFilesUnified::setThumbnailsSize(const QSize& /*size*/)
-{
+void ViewFilesUnified::setShowThumbnails(const bool /*b*/) {}
 
-}
-
-void ViewFilesUnified::setShowThumbnails(const bool /*b*/)
-{
-
-}
-
-void ViewFilesUnified::on_filesystemView_currentRowChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
+void ViewFilesUnified::on_filesystemView_currentRowChanged(
+    const QModelIndex &current, const QModelIndex & /*previous*/)
 {
     const Identifiers<QString> identifiers = mNestedModel->identifiersFromIndex(current);
-    const QString filePath = QDir::cleanPath(identifiers.parentIdentifier + '/' + identifiers.childIdentifier);
+    const QString filePath = QDir::cleanPath(
+        identifiers.parentIdentifier + '/' + identifiers.childIdentifier);
     // Pass 'false' for 'IsContainer' because item is only selected
     m_fileinfo_current = FileInfo(filePath, false);
     emit urlChanged(QUrl::fromLocalFile(filePath));

@@ -5,17 +5,16 @@
 #include <QString>
 #include <QStringList>
 
-template <class TIdentifier>
-struct Identifiers {
-    Identifiers(const TIdentifier& parentIdentifier, const TIdentifier& childIdentifier)
+template<class TIdentifier>
+struct Identifiers
+{
+    Identifiers(const TIdentifier &parentIdentifier, const TIdentifier &childIdentifier)
         : parentIdentifier(parentIdentifier)
         , childIdentifier(childIdentifier)
-    {
-    }
+    {}
     TIdentifier parentIdentifier;
     TIdentifier childIdentifier;
 };
-
 
 class FileInfo
 {
@@ -27,8 +26,8 @@ public:
 
     Identifiers<QString> getIdentifiers() const;
 
-     /* C:/Folder1/Folder2/image.png"
-      * or C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png" */
+    /// "C:/Folder1/Folder2/image.png" or
+    /// "C:/Folder1/Folder2/archive.zip/ZipFolder1/ZipFolder2/image.png"
     QString getPath() const;
 
     QString getDebugInfo() const;
@@ -47,11 +46,12 @@ private:
 private:
     bool isInArchive() const;
     bool isContainerValid() const;
-    /* "ZipFolder1/ZipFolder2/image.png" or "image.png" */
+
+    /// "ZipFolder1/ZipFolder2/image.png" or "image.png"
     QString getArchiveImagePath() const;
-    QString getContainerPath() const; /* C:/Folder1/Folder2" */
 
-
+    /// "C:/Folder1/Folder2"
+    QString getContainerPath() const;
 };
 
-#endif  // FILEINFO_H
+#endif // FILEINFO_H

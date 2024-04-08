@@ -3,8 +3,8 @@
 
 #include "enums.h"
 
-#include <QPoint>
 #include <QColor>
+#include <QPoint>
 #include <QRectF>
 
 class PictureItemData
@@ -71,13 +71,19 @@ protected:
 };
 
 inline QRectF PictureItemData::getBoundingRect() const
-{ return m_boundingRect; }
+{
+    return m_boundingRect;
+}
 
 inline bool PictureItemData::isPixmapNull() const
-{ return m_pixmapNull; }
+{
+    return m_pixmapNull;
+}
 
 inline void PictureItemData::setPixmapNull(const bool value)
-{ m_pixmapNull = value; }
+{
+    m_pixmapNull = value;
+}
 
 inline void PictureItemData::setImageSize(const QSize &size)
 {
@@ -87,22 +93,33 @@ inline void PictureItemData::setImageSize(const QSize &size)
 }
 
 inline qreal PictureItemData::getZoom() const
-{ return m_zoom_value; }
+{
+    return m_zoom_value;
+}
 
 inline qreal PictureItemData::getRotation() const
-{ return m_rotation_value; }
+{
+    return m_rotation_value;
+}
 
 inline QPointF PictureItemData::getOffset() const
-{ return m_offset; }
+{
+    return m_offset;
+}
 
 inline void PictureItemData::setWidgetSize(const QSize &size)
-{ m_widget_size = size; }
+{
+    m_widget_size = size;
+}
 
 inline QSizeF PictureItemData::getImageSizeOriginal() const
-{ return m_img_size_original; }
+{
+    return m_img_size_original;
+}
 
 inline QSizeF PictureItemData::getImageSizeTransformed() const
-{ return m_img_size_transformed; }
+{
+    return m_img_size_transformed;
+}
 
-
-#endif  // PICTUREITEMDATA_H
+#endif // PICTUREITEMDATA_H

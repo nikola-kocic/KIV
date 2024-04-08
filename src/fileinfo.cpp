@@ -22,15 +22,13 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 #ifdef DEBUG_FILE_INFO
     DEBUGOUT << "called with path: " << path;
 #endif
-    if (path.isEmpty())
-    {
+    if (path.isEmpty()) {
         return;
     }
 
     const QFileInfo fi(path);
 
-    if (fi.isDir())
-    {
+    if (fi.isDir()) {
         // If path is path to directory
         m_container = fi;
         m_hasValidContainer = true;
@@ -41,15 +39,12 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         return;
     }
 
-
-    if (Helper::isArchiveFile(fi))
-    {
+    if (Helper::isArchiveFile(fi)) {
         // If path is path to zip file
         m_container = fi;
         m_hasValidContainer = true;
 
-        if (isContainer)
-        {
+        if (isContainer) {
             m_isInArchive = true;
         }
 #ifdef DEBUG_FILE_INFO
@@ -58,9 +53,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         return;
     }
 
-
-    if (fi.exists())
-    {
+    if (fi.exists()) {
         const QString mime = Helper::getMimeTypeForFile(path);
         if (!Helper::isImageMime(mime))
             return;
@@ -78,45 +71,37 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
         return;
     }
 
-
     // If path is image in archive
 
     const QString editedPath = QDir::fromNativeSeparators(path);
     QString tempContainerPath = editedPath;
     int indexOfContainerSlash = -1;
-    do
-    {
+    do {
         indexOfContainerSlash = tempContainerPath.lastIndexOf('/');
 
-//#ifdef DEBUG_FILE_INFO
-//        DEBUGOUT << "index of /" << indexOfContainerSlash << "path" << temppath;
-//#endif
+        //#ifdef DEBUG_FILE_INFO
+        //        DEBUGOUT << "index of /" << indexOfContainerSlash << "path" << temppath;
+        //#endif
         tempContainerPath.truncate(indexOfContainerSlash);
         const QFileInfo tempFileInfo = QFileInfo(tempContainerPath);
-        if (tempFileInfo.exists() && !tempFileInfo.isDir())
-        {
+        if (tempFileInfo.exists() && !tempFileInfo.isDir()) {
             m_container = tempFileInfo;
             m_hasValidContainer = true;
             m_isInArchive = true;
 
-            const QString zipAbsoluteFilePath =
-                    editedPath.right(editedPath.size()
-                                     - tempContainerPath.size() - 1);
+            const QString zipAbsoluteFilePath = editedPath.right(
+                editedPath.size() - tempContainerPath.size() - 1);
 
-            if (!zipAbsoluteFilePath.isEmpty())
-            {
+            if (!zipAbsoluteFilePath.isEmpty()) {
                 int indexOfZipSlash = zipAbsoluteFilePath.lastIndexOf('/');
 
-                if (indexOfZipSlash != -1)
-                {
+                if (indexOfZipSlash != -1) {
                     m_zipPath = zipAbsoluteFilePath.left(indexOfZipSlash + 1);
                 }
 
-                if (indexOfZipSlash != zipAbsoluteFilePath.size() - 1)
-                {
+                if (indexOfZipSlash != zipAbsoluteFilePath.size() - 1) {
                     m_zipImageFileName = zipAbsoluteFilePath.right(
-                                zipAbsoluteFilePath.size()
-                                - indexOfZipSlash - 1);
+                        zipAbsoluteFilePath.size() - indexOfZipSlash - 1);
                     m_fileExists = true;
                 }
             }
@@ -126,8 +111,7 @@ FileInfo::FileInfo(const QString &path, const bool isContainer)
 #endif
             return;
         }
-    }
-    while (indexOfContainerSlash != -1);
+    } while (indexOfContainerSlash != -1);
 }
 
 bool FileInfo::isValid() const
@@ -153,16 +137,11 @@ bool FileInfo::isContainerValid() const
 QString FileInfo::getPath() const
 {
     QString path;
-    if (isInArchive())
-    {
+    if (isInArchive()) {
         path = m_container.canonicalFilePath() + "/" + getArchiveImagePath();
-    }
-    else if (fileExists())
-    {
+    } else if (fileExists()) {
         path = m_image.canonicalFilePath();
-    }
-    else
-    {
+    } else {
         path = m_container.canonicalFilePath();
     }
     return path;
@@ -180,14 +159,11 @@ QString FileInfo::getContainerPath() const
 
 Identifiers<QString> FileInfo::getIdentifiers() const
 {
-    if (isInArchive())
-    {
+    if (isInArchive()) {
         const QString parentPath = getContainerPath();
         const QString childPath = getArchiveImagePath();
         return Identifiers<QString>(parentPath, childPath);
-    }
-    else
-    {
+    } else {
         const QString parentPath = getPath();
         return Identifiers<QString>(parentPath, QString());
     }
@@ -195,8 +171,7 @@ Identifiers<QString> FileInfo::getIdentifiers() const
 
 QString FileInfo::getDebugInfo() const
 {
-    const QString str = "\n\tContainer: " + getContainerPath()
-            + "\n\tPath: " + getPath()
-            + "\n\tIsInArchive: " + (isInArchive() ? "true" : "false");
+    const QString str = "\n\tContainer: " + getContainerPath() + "\n\tPath: " + getPath()
+                        + "\n\tIsInArchive: " + (isInArchive() ? "true" : "false");
     return str;
 }

@@ -2,13 +2,13 @@
 #define PICTURELOADER_H
 
 #include <QAbstractItemModel>
-#include <QImage>
 #include <QBuffer>
+#include <QImage>
 
-#include "include/IPictureLoader.h"
 #include "helper.h"
+#include "include/IPictureLoader.h"
 
-class PictureLoader: public IPictureLoader
+class PictureLoader : public IPictureLoader
 {
 public:
     PictureLoader();
@@ -17,8 +17,7 @@ public:
     QImage styleThumbnail(const QImage &img, const QSize &thumb_size) const override;
 
 private:
-    QSize ThumbnailImageSize(const QSize &image_size,
-                             const QSize &thumb_size) const;
+    QSize ThumbnailImageSize(const QSize &image_size, const QSize &thumb_size) const;
 };
 
-#endif  // PICTURELOADER_H
+#endif // PICTURELOADER_H

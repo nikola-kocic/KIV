@@ -3,8 +3,8 @@
 
 #include <memory>
 #include <vector>
-#include <QLibrary>
 #include <QBuffer>
+#include <QLibrary>
 
 #include "enums.h"
 
@@ -15,16 +15,10 @@ class ArchiveRar
 public:
     static bool loadlib();
     static bool extract(
-            const QString &archiveName,
-            const QString &fileName,
-            const QString &newFileName);
+        const QString &archiveName, const QString &fileName, const QString &newFileName);
     static bool readFile(
-            const QString &archiveName,
-            const QString &fileName,
-            QByteArray &buffer,
-            int maxSize);
-    static unsigned int getFileInfoList(const QString &path,
-                                        std::vector<ArchiveFileInfo> &list);
+        const QString &archiveName, const QString &fileName, QByteArray &buffer, int maxSize);
+    static unsigned int getFileInfoList(const QString &path, std::vector<ArchiveFileInfo> &list);
     static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);
 
 private:
@@ -32,5 +26,4 @@ private:
     static QLibrary *Lib;
 };
 
-
-#endif  // ARCHIVE_RAR_H
+#endif // ARCHIVE_RAR_H

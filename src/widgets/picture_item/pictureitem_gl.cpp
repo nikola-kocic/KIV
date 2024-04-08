@@ -1,7 +1,7 @@
 #include "widgets/picture_item/pictureitem_gl.h"
 
-#include "settings.h"
 #include "picture_loader.h"
+#include "settings.h"
 
 //#define DEBUG_PICTUREITEM_GL
 #ifdef DEBUG_PICTUREITEM_GL
@@ -16,15 +16,18 @@ PictureItemGL::PictureItemGL(PictureItemData *data, ZoomFilter zoomFilter, QWidg
     , m_loader_texture(new QFutureWatcher<QImage>(this))
     , m_scaleX(0)
     , m_scaleY(0)
-    , m_textures(QVector < QVector < QOpenGLTexture* > >(0))
+    , m_textures(QVector<QVector<QOpenGLTexture *>>(0))
     , m_texImg(new TexImg())
     , m_returnTexCount(0)
     , m_zoomFilter(zoomFilter)
 {
     m_widget = this;
     QGLContext::setTextureCacheLimit(0);
-    connect(m_loader_texture, &QFutureWatcher<QImage>::resultReadyAt,
-            this, &PictureItemGL::textureFinished);
+    connect(
+        m_loader_texture,
+        &QFutureWatcher<QImage>::resultReadyAt,
+        this,
+        &PictureItemGL::textureFinished);
 }
 
 PictureItemGL::~PictureItemGL()
@@ -39,24 +42,20 @@ PictureItemGL::~PictureItemGL()
 void PictureItemGL::clearTextures()
 {
     /* Delete old textures */
-    for (int hIndex = 0; hIndex < m_textures.size(); ++hIndex)
-    {
-        for (int vIndex = 0; vIndex < m_textures.at(hIndex).size(); ++vIndex)
-        {
-            QOpenGLTexture* tex = m_textures.at(hIndex).at(vIndex);
-            if (tex != nullptr)
-            {
+    for (int hIndex = 0; hIndex < m_textures.size(); ++hIndex) {
+        for (int vIndex = 0; vIndex < m_textures.at(hIndex).size(); ++vIndex) {
+            QOpenGLTexture *tex = m_textures.at(hIndex).at(vIndex);
+            if (tex != nullptr) {
                 m_textures.at(hIndex).at(vIndex)->destroy();
             }
 #ifdef DEBUG_PICTUREITEM_GL
-            DEBUGOUT << "deleted texture"
-                     << this->m_textures.at(hIndex).at(vIndex)
-                     << "@" << hIndex << vIndex;
+            DEBUGOUT << "deleted texture" << this->m_textures.at(hIndex).at(vIndex) << "@" << hIndex
+                     << vIndex;
 #endif
         }
     }
 
-    m_textures = QVector < QVector < QOpenGLTexture* > >(0);
+    m_textures = QVector<QVector<QOpenGLTexture *>>(0);
 }
 
 void PictureItemGL::setImage(const QImage &img)
@@ -66,14 +65,12 @@ void PictureItemGL::setImage(const QImage &img)
 
     m_texImg->setImage(img);
 
-    m_textures = QVector < QVector < QOpenGLTexture* > >(m_texImg->hTile->tileCount);
+    m_textures = QVector<QVector<QOpenGLTexture *>>(m_texImg->hTile->tileCount);
     QList<TexIndex *> indexes;
-    for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
-    {
+    for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex) {
         m_textures[hIndex].resize(m_texImg->vTile->tileCount);
 
-        for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
-        {
+        for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex) {
             TexIndex *tex = new TexIndex();
             tex->bitmapData = img;
             tex->background = m_data->m_color_clear;
@@ -108,15 +105,13 @@ QImage CreatePow2Bitmap(const TexIndex *const index)
 void PictureItemGL::loadTextures(QList<TexIndex *> indexes)
 {
     m_returnTexCount = indexes.size();
-    m_loader_texture->setFuture(QtConcurrent::mapped(indexes,
-                                                     CreatePow2Bitmap));
+    m_loader_texture->setFuture(QtConcurrent::mapped(indexes, CreatePow2Bitmap));
 }
 
 void PictureItemGL::textureFinished(int num)
 {
     this->setTexture(m_loader_texture->resultAt(num), num);
-    if (--m_returnTexCount == 0)
-    {
+    if (--m_returnTexCount == 0) {
         m_data->setPixmapNull(false);
         m_loader_texture->setFuture(QFuture<QImage>());
 
@@ -133,12 +128,11 @@ void PictureItemGL::textureFinished(int num)
 
 void PictureItemGL::setTexture(const QImage &tex, const int num)
 {
-    QOpenGLTexture* gltex = new QOpenGLTexture(tex);
+    QOpenGLTexture *gltex = new QOpenGLTexture(tex);
     const int hIndex = num / m_texImg->vTile->tileCount;
     const int vIndex = num % m_texImg->vTile->tileCount;
 
-    switch(m_zoomFilter)
-    {
+    switch (m_zoomFilter) {
     case ZoomFilter::None:
         gltex->setMinificationFilter(QOpenGLTexture::Nearest);
         gltex->setMagnificationFilter(QOpenGLTexture::Nearest);
@@ -151,17 +145,16 @@ void PictureItemGL::setTexture(const QImage &tex, const int num)
     m_textures[hIndex][vIndex] = gltex;
 
 #ifdef DEBUG_PICTUREITEM_GL
-    DEBUGOUT << "bound texture" << this->m_textures.at(hIndex).at(vIndex)
-             << "@" << hIndex << vIndex <<";" << tex.size();
+    DEBUGOUT << "bound texture" << this->m_textures.at(hIndex).at(vIndex) << "@" << hIndex << vIndex
+             << ";" << tex.size();
 #endif
 }
-
 
 void PictureItemGL::setBackgroundColor(const QColor &color)
 {
     PictureItemInterface::setBackgroundColor(color);
     qglClearColor(color);
-//    this->updateGL();
+    //    this->updateGL();
 }
 
 void PictureItemGL::initializeGL()
@@ -187,8 +180,7 @@ void PictureItemGL::initializeGL()
 
 void PictureItemGL::updateSize()
 {
-    if (m_textures.size() == 0)
-    {
+    if (m_textures.size() == 0) {
         return;
     }
 
@@ -201,8 +193,7 @@ void PictureItemGL::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (m_textures.size() == 0)
-    {
+    if (m_textures.size() == 0) {
         return;
     }
 
@@ -212,22 +203,22 @@ void PictureItemGL::paintGL()
     const QPointF offset = m_data->getOffset();
     const QSizeF img_size_original = m_data->getImageSizeOriginal();
     const QRectF bounding_rect = m_data->getBoundingRect();
-    glTranslated((bounding_rect.x() + offset.x() + bounding_rect.width() / 2),
-                 (bounding_rect.y() + offset.y() + bounding_rect.height() / 2),
-                 0);
+    glTranslated(
+        (bounding_rect.x() + offset.x() + bounding_rect.width() / 2),
+        (bounding_rect.y() + offset.y() + bounding_rect.height() / 2),
+        0);
 
     glRotated(m_data->getRotation(), 0, 0, 1);
-    glTranslated(-(img_size_original.width() * m_data->getZoom()) / 2,
-                 -(img_size_original.height() * m_data->getZoom()) / 2,
-                 0);
+    glTranslated(
+        -(img_size_original.width() * m_data->getZoom()) / 2,
+        -(img_size_original.height() * m_data->getZoom()) / 2,
+        0);
     glScaled(m_scaleX, m_scaleY, 1);
 
-    const QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF (1.0, 1.0));
-    const QRectF vertImage = QRectF(QPointF(0, 0),
-                                    QPointF (this->width(), this->height()));
+    const QRectF texImage = QRectF(QPointF(0.0, 0.0), QPointF(1.0, 1.0));
+    const QRectF vertImage = QRectF(QPointF(0, 0), QPointF(this->width(), this->height()));
 
-    for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex)
-    {
+    for (int hIndex = 0; hIndex < m_texImg->hTile->tileCount; ++hIndex) {
         double texScale = 1.0 * img_size_original.width() / m_texImg->hTile->tileSize.at(hIndex);
         double tx;
         double tx2;
@@ -246,13 +237,11 @@ void PictureItemGL::paintGL()
                 tx,
                 tx2,
                 qx,
-                qx2))
-        {
+                qx2)) {
             continue;
         }
 
-        for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex)
-        {
+        for (int vIndex = 0; vIndex < m_texImg->vTile->tileCount; ++vIndex) {
             texScale = 1.0 * img_size_original.height() / m_texImg->vTile->tileSize.at(vIndex);
             double ty;
             double ty2;
@@ -271,8 +260,7 @@ void PictureItemGL::paintGL()
                     ty,
                     ty2,
                     qy,
-                    qy2))
-            {
+                    qy2)) {
                 continue;
             }
 

@@ -9,9 +9,7 @@ class SortComboBox : public QComboBox
 {
     Q_OBJECT
 public:
-    explicit SortComboBox(
-            const QList<ColumnSort> &items,
-            QWidget *parent = nullptr);
+    explicit SortComboBox(const QList<ColumnSort> &items, QWidget *parent = nullptr);
     bool setSort(ColumnSort sort);
 
 signals:

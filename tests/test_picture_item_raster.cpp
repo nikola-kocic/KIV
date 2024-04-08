@@ -1,14 +1,13 @@
 #include "test_picture_item_raster.h"
-#include <QtTest>
 #include <QPainter>
+#include <QtTest>
 
 TestPictureItemRaster::TestPictureItemRaster(QObject *parent)
     : QObject(parent)
     , m_viewSize(QSize(100, 100))
     , m_viewRect(QRect(QPoint(0, 0), m_viewSize))
     , m_displayedImage(QImage(":/assets/chess-pattern.png"))
-{
-}
+{}
 
 void TestPictureItemRaster::init()
 {
@@ -22,7 +21,8 @@ void TestPictureItemRaster::cleanup()
     delete m_pictureitem;
 }
 
-void TestPictureItemRaster::compareToExpected(const QString& expectedPath) {
+void TestPictureItemRaster::compareToExpected(const QString &expectedPath)
+{
     QPixmap viewPixmap(m_viewSize);
     QPainter p(&viewPixmap);
     QPaintEvent e(m_viewRect);

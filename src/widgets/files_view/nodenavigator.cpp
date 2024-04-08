@@ -21,7 +21,8 @@ bool NodeNavigator::isImageNode(const QModelIndex &index) const
     return mNodeIdentifier->identify(index) == Image;
 }
 
-QString nodeText(const QModelIndex& index) {
+QString nodeText(const QModelIndex &index)
+{
     if (!index.isValid()) {
         return "Index not valid";
     } else {
@@ -29,7 +30,8 @@ QString nodeText(const QModelIndex& index) {
     }
 }
 
-void NodeNavigator::nodeLoaded(const QPersistentModelIndex &index) {
+void NodeNavigator::nodeLoaded(const QPersistentModelIndex &index)
+{
     if (mCache) {
         const Cache cache = mCache.value();
         if (cache.waitingFor == index) {
@@ -42,11 +44,12 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
 {
     Q_ASSERT(index.isValid());
 #ifdef DEBUG_NAVIGATION
-    DEBUGOUT << "startIndex " << nodeText(index) << "; direction " << int(direction) << "; initial " << initial;
+    DEBUGOUT << "startIndex " << nodeText(index) << "; direction " << int(direction) << "; initial "
+             << initial;
 #endif
     if (isImageNode(index) && !initial) {
 #ifdef DEBUG_NAVIGATION
-    DEBUGOUT << "ret " << nodeText(index);
+        DEBUGOUT << "ret " << nodeText(index);
 #endif
         mCache.reset();
         emit navigated(index);
@@ -108,8 +111,9 @@ void NodeNavigator::getImageRec(const QModelIndex &index, Direction direction, b
         }
     }
     Q_ASSERT(nextIndex.isValid());
-    mCache = Cache(QPersistentModelIndex(index), QPersistentModelIndex(nextIndex), direction, initial);
-    return getImageRec(nextIndex, direction, false);  // recursive
+    mCache
+        = Cache(QPersistentModelIndex(index), QPersistentModelIndex(nextIndex), direction, initial);
+    return getImageRec(nextIndex, direction, false); // recursive
 }
 
 void NodeNavigator::getPreviousImage(const QModelIndex &startIndex)

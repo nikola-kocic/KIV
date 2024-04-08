@@ -12,9 +12,7 @@
 
 IPictureLoader::~IPictureLoader() {}
 
-PictureLoader::PictureLoader()
-{
-}
+PictureLoader::PictureLoader() {}
 
 QImage PictureLoader::getImage(std::unique_ptr<QBuffer> device) const
 {
@@ -35,14 +33,10 @@ QImage PictureLoader::getThumbnail(std::unique_ptr<QBuffer> device, const QSize 
     DEBUGOUT << thumbSize;
 #endif
     QImageReader image_reader(device.get());
-    if (!thumbSize.isEmpty())
-    {
+    if (!thumbSize.isEmpty()) {
         if (image_reader.size().height() > thumbSize.height()
-            || image_reader.size().width() > thumbSize.width())
-        {
-            image_reader.setScaledSize(
-                        ThumbnailImageSize(
-                            image_reader.size(), thumbSize));
+            || image_reader.size().width() > thumbSize.width()) {
+            image_reader.setScaledSize(ThumbnailImageSize(image_reader.size(), thumbSize));
         }
     }
     const QImage img = image_reader.read();
@@ -51,13 +45,10 @@ QImage PictureLoader::getThumbnail(std::unique_ptr<QBuffer> device, const QSize 
 
 QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size) const
 {
-    QImage thumb(thumb_size.width() + 2,
-                 thumb_size.height() + 2,
-                 QImage::Format_ARGB32);
+    QImage thumb(thumb_size.width() + 2, thumb_size.height() + 2, QImage::Format_ARGB32);
     thumb.fill(qRgba(255, 255, 255, 0));
     QPainter painter(&thumb);
-    QPoint imgPoint((thumb.width() - img.width()) / 2,
-                    (thumb.height() - img.height()) / 2);
+    QPoint imgPoint((thumb.width() - img.width()) / 2, (thumb.height() - img.height()) / 2);
     painter.setPen(Qt::lightGray);
     painter.drawImage(imgPoint, img);
     painter.drawRect(0, 0, thumb.width() - 1, thumb.height() - 1);
@@ -65,8 +56,7 @@ QImage PictureLoader::styleThumbnail(const QImage &img, const QSize &thumb_size)
     return thumb;
 }
 
-QSize PictureLoader::ThumbnailImageSize(const QSize &image_size,
-                                        const QSize &thumb_size) const
+QSize PictureLoader::ThumbnailImageSize(const QSize &image_size, const QSize &thumb_size) const
 {
     QSize result = image_size;
     result.scale(thumb_size, Qt::KeepAspectRatio);

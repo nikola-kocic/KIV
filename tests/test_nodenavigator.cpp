@@ -1,19 +1,24 @@
 #include "test_nodenavigator.h"
 
-#include <QtTest>
-#include <QStandardItemModel>
 #include <QSignalSpy>
+#include <QStandardItemModel>
+#include <QtTest>
 
-class MockNodeIdentifier : public INodeIdentifier {
+class MockNodeIdentifier : public INodeIdentifier
+{
 public:
-    NodeType identify(const QModelIndex& index) const override {
+    NodeType identify(const QModelIndex &index) const override
+    {
         const QString text = index.data(Qt::DisplayRole).toString();
-        const NodeType ret = text.endsWith(".zip") ? Archive : text.endsWith(".png") ? Image : Directory;
+        const NodeType ret = text.endsWith(".zip")   ? Archive
+                             : text.endsWith(".png") ? Image
+                                                     : Directory;
         return ret;
     }
 };
 
-QStandardItem* TestNodeNavigator::insertNode(QStandardItem* parent, QStandardItem* item) {
+QStandardItem *TestNodeNavigator::insertNode(QStandardItem *parent, QStandardItem *item)
+{
     parent->appendRow(item);
     const QString key = item->data(Qt::DisplayRole).toString();
     const QModelIndex itemIndex = item->index();
@@ -25,20 +30,21 @@ QStandardItem* TestNodeNavigator::insertNode(QStandardItem* parent, QStandardIte
 
 void TestNodeNavigator::init()
 {
-    QStandardItemModel* model = new QStandardItemModel();
-    QStandardItem* parentItem = model->invisibleRootItem();
+    QStandardItemModel *model = new QStandardItemModel();
+    QStandardItem *parentItem = model->invisibleRootItem();
 
-    QStandardItem* root = insertNode(parentItem, new QStandardItem("/"));
+    QStandardItem *root = insertNode(parentItem, new QStandardItem("/"));
     {
-        QStandardItem* d1 = insertNode(root, new QStandardItem("dir1"));
+        QStandardItem *d1 = insertNode(root, new QStandardItem("dir1"));
         {
-            QStandardItem* d1_a1 = insertNode(d1, new QStandardItem("d1_a1.zip"));
+            QStandardItem *d1_a1 = insertNode(d1, new QStandardItem("d1_a1.zip"));
             {
-                insertNode(d1_a1, new QStandardItem("d1_a1_d1"));  // empty dir
+                insertNode(d1_a1, new QStandardItem("d1_a1_d1")); // empty dir
 
-                QStandardItem* d1_a1_d2 = insertNode(d1_a1, new QStandardItem("d1_a1_d2"));
+                QStandardItem *d1_a1_d2 = insertNode(d1_a1, new QStandardItem("d1_a1_d2"));
                 {
-                    QStandardItem* d1_a1_d2_d1 = insertNode(d1_a1_d2, new QStandardItem("d1_a1_d1_d1"));
+                    QStandardItem *d1_a1_d2_d1
+                        = insertNode(d1_a1_d2, new QStandardItem("d1_a1_d1_d1"));
                     {
                         insertNode(d1_a1_d2_d1, new QStandardItem("d1_a1_d2_d1_i1.png"));
                         insertNode(d1_a1_d2_d1, new QStandardItem("d1_a1_d2_d1_i2.png"));
@@ -49,21 +55,24 @@ void TestNodeNavigator::init()
                     insertNode(d1_a1_d2, new QStandardItem("d1_a1_d2_i3.png"));
                 }
 
-                QStandardItem* d1_a1_d3 = insertNode(d1_a1, new QStandardItem("d1_a1_d3"));
+                QStandardItem *d1_a1_d3 = insertNode(d1_a1, new QStandardItem("d1_a1_d3"));
                 {
-                    QStandardItem* d1_a1_d3_d1 = insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_d1"));
+                    QStandardItem *d1_a1_d3_d1
+                        = insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_d1"));
                     {
                         insertNode(d1_a1_d3_d1, new QStandardItem("d1_a1_d3_d1_i1.png"));
                         insertNode(d1_a1_d3_d1, new QStandardItem("d1_a1_d3_d1_i2.png"));
                         insertNode(d1_a1_d3_d1, new QStandardItem("d1_a1_d3_d1_i3.png"));
                     }
-                    QStandardItem* d1_a1_d3_d2 = insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_d2"));
+                    QStandardItem *d1_a1_d3_d2
+                        = insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_d2"));
                     {
                         insertNode(d1_a1_d3_d2, new QStandardItem("d1_a1_d3_d2_i1.png"));
                         insertNode(d1_a1_d3_d2, new QStandardItem("d1_a1_d3_d2_i2.png"));
                         insertNode(d1_a1_d3_d2, new QStandardItem("d1_a1_d3_d2_i3.png"));
                     }
-                    QStandardItem* d1_a1_d3_d3 = insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_d3"));
+                    QStandardItem *d1_a1_d3_d3
+                        = insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_d3"));
                     {
                         insertNode(d1_a1_d3_d3, new QStandardItem("d1_a1_d3_d3_i1.png"));
                         insertNode(d1_a1_d3_d3, new QStandardItem("d1_a1_d3_d3_i2.png"));
@@ -74,7 +83,7 @@ void TestNodeNavigator::init()
                     insertNode(d1_a1_d3, new QStandardItem("d1_a1_d3_i3.png"));
                 }
 
-                QStandardItem* d1_a1_d4 = insertNode(d1_a1, new QStandardItem("d1_a1_d4"));
+                QStandardItem *d1_a1_d4 = insertNode(d1_a1, new QStandardItem("d1_a1_d4"));
                 {
                     insertNode(d1_a1_d4, new QStandardItem("d1_a1_d4_i1.png"));
                     insertNode(d1_a1_d4, new QStandardItem("d1_a1_d4_i2.png"));
@@ -85,9 +94,9 @@ void TestNodeNavigator::init()
                 insertNode(d1_a1, new QStandardItem("d1_a1_i3.png"));
             }
 
-            QStandardItem* d1_a2 = insertNode(d1, new QStandardItem("d1_a2.zip"));
+            QStandardItem *d1_a2 = insertNode(d1, new QStandardItem("d1_a2.zip"));
             {
-                QStandardItem* d1_a2_d1 = insertNode(d1_a2, new QStandardItem("d1_a2_d1"));
+                QStandardItem *d1_a2_d1 = insertNode(d1_a2, new QStandardItem("d1_a2_d1"));
                 {
                     insertNode(d1_a2_d1, new QStandardItem("d1_a2_d1_i1.png"));
                     insertNode(d1_a2_d1, new QStandardItem("d1_a2_d1_i2.png"));
@@ -114,13 +123,18 @@ void TestNodeNavigator::cleanup()
     mNodes.clear();
 }
 
-QModelIndex TestNodeNavigator::getNode(const QString& key) const {
+QModelIndex TestNodeNavigator::getNode(const QString &key) const
+{
     const QModelIndex index = mNodes.value(key);
     Q_ASSERT(index.isValid());
     return index;
 }
 
-QModelIndex getNextIndex(NodeNavigator* navigator, void (NodeNavigator::*function)(const QModelIndex&), const QModelIndex& index) {
+QModelIndex getNextIndex(
+    NodeNavigator *navigator,
+    void (NodeNavigator::*function)(const QModelIndex &),
+    const QModelIndex &index)
+{
     QSignalSpy spy(navigator, &NodeNavigator::navigated);
     (navigator->*function)(index);
 
@@ -130,12 +144,13 @@ QModelIndex getNextIndex(NodeNavigator* navigator, void (NodeNavigator::*functio
     return nextImage;
 }
 
-QModelIndex getNext(NodeNavigator* navigator, const QModelIndex& index) {
+QModelIndex getNext(NodeNavigator *navigator, const QModelIndex &index)
+{
     return getNextIndex(navigator, &NodeNavigator::getNextImage, index);
 }
 
-
-QModelIndex getPrevious(NodeNavigator* navigator, const QModelIndex& index) {
+QModelIndex getPrevious(NodeNavigator *navigator, const QModelIndex &index)
+{
     return getNextIndex(navigator, &NodeNavigator::getPreviousImage, index);
 }
 

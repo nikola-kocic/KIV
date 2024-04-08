@@ -9,13 +9,13 @@
 #include <QToolBar>
 
 #include "dataloader.h"
+#include "models/archivemodelhandler.h"
 #include "picture_loader.h"
 #include "settings.h"
 #include "widgets/files_view/viewfilesunified.h"
-#include "widgets/urlnavigator.h"
 #include "widgets/picture_item/pictureitem.h"
+#include "widgets/urlnavigator.h"
 #include "widgets/zoom_widget.h"
-#include "models/archivemodelhandler.h"
 
 class MainWindow : public QMainWindow
 {
@@ -23,11 +23,11 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(
-            const DataLoader& data_loader,
-            const IPictureLoader *const picture_loader,
-            const IArchiveExtractor* const archive_extractor,
-            QWidget *parent = nullptr,
-            Qt::WindowFlags f = Qt::WindowFlags());
+        const DataLoader &data_loader,
+        const IPictureLoader *const picture_loader,
+        const IArchiveExtractor *const archive_extractor,
+        QWidget *parent = nullptr,
+        Qt::WindowFlags f = Qt::WindowFlags());
     ~MainWindow() override;
 
 private:
@@ -39,11 +39,10 @@ private:
     bool spreadUrl(const QUrl &url);
     inline bool isPosInPictureItem(const QPointF &pos) const
     {
-        return QRectF(m_picture_item->rect()).contains(
-                    m_picture_item->mapFromGlobal(pos));
+        return QRectF(m_picture_item->rect()).contains(m_picture_item->mapFromGlobal(pos));
     }
 
-    const DataLoader& m_data_loader;
+    const DataLoader &m_data_loader;
     CustomFileSystemModel *m_model_filesystem;
     Settings *m_settings;
 
@@ -117,7 +116,7 @@ private:
     QAction *m_act_webSite;
     QAction *m_act_about;
 
-    QHash<QAction*, QStringList> m_actions_icons;
+    QHash<QAction *, QStringList> m_actions_icons;
 
     bool m_ignoreMouseButtonEvent;
 
@@ -189,4 +188,4 @@ protected:
     void changeEvent(QEvent *event) override;
 };
 
-#endif  // MAINWINDOW_H
+#endif // MAINWINDOW_H

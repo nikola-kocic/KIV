@@ -8,8 +8,7 @@ class ZoomWidget : public QComboBox
 {
     Q_OBJECT
 public:
-    explicit ZoomWidget(const QVector<qreal> defaultZoomSizes,
-                        QWidget *parent = nullptr);
+    explicit ZoomWidget(const QVector<qreal> defaultZoomSizes, QWidget *parent = nullptr);
     qreal getZoom();
     void on_zoomChanged(qreal current, qreal previous);
     void zoomIn();
@@ -31,4 +30,4 @@ signals:
     void zoomChanged(qreal value);
 };
 
-#endif  // ZOOMWIDGET_H
+#endif // ZOOMWIDGET_H

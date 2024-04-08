@@ -3,8 +3,8 @@
 
 #include "fileinfo.h"
 
-#include <QImage>
 #include <QBuffer>
+#include <QImage>
 
 #include <memory>
 

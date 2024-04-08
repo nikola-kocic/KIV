@@ -5,7 +5,7 @@
 
 #include "widgets/zoom_widget.h"
 
-class TestZoomWidgetNoDefaults: public QObject
+class TestZoomWidgetNoDefaults : public QObject
 {
     Q_OBJECT
 

@@ -8,7 +8,7 @@ class TestSettingsBookmarks : public QObject
     Q_OBJECT
 
 private:
-    QSettings *m_qsettings ;
+    QSettings *m_qsettings;
     Settings *m_settings;
 
 private Q_SLOTS:

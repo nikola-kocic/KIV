@@ -3,58 +3,55 @@
 #include <QFileSystemModel>
 #include <QImageReader>
 #include <QLocale>
-#include <QProcess>
 #include <QMimeDatabase>
+#include <QProcess>
 
 #ifdef KIV_USE_DBUS
-    #include <QtDBus/QtDBus>
+#include <QtDBus/QtDBus>
 #endif
 
 namespace Helper {
 
-void windowsExplorerOpen(const FileInfo& fi);
-void osxFinderOpen(const FileInfo& fi);
-bool xdgOpen(const FileInfo& fi);
+void windowsExplorerOpen(const FileInfo &fi);
+void osxFinderOpen(const FileInfo &fi);
+bool xdgOpen(const FileInfo &fi);
 #ifdef KIV_USE_DBUS
-    bool dbusOpen(const FileInfo& fi);
-    bool dbusOpenThunar(const FileInfo& fi);
+bool dbusOpen(const FileInfo &fi);
+bool dbusOpenThunar(const FileInfo &fi);
 #endif
 
-
-const QStringList& getFiltersImage()
+const QStringList &getFiltersImage()
 {
     static QStringList filters_image{};
-    if (filters_image.isEmpty())
-    {
-        for (const auto &format : QImageReader::supportedImageFormats())
-        {
+    if (filters_image.isEmpty()) {
+        for (const auto &format : QImageReader::supportedImageFormats()) {
             filters_image.append(QString::fromLatin1(format));
         }
     }
     return filters_image;
 }
 
-QString getMimeTypeForFile(const QString& file_path)
+QString getMimeTypeForFile(const QString &file_path)
 {
     const QString mime = QMimeDatabase().mimeTypeForFile(file_path).name();
     return mime;
 }
 
-QString getMimeType(const FileInfo& file_info, const DataLoader& data_loader)
+QString getMimeType(const FileInfo &file_info, const DataLoader &data_loader)
 {
     const QByteArray buf = data_loader.getData(file_info, 16384);
     const QString mime = QMimeDatabase().mimeTypeForData(buf).name();
     return mime;
 }
 
-bool isImageMime(const QString& mime)
+bool isImageMime(const QString &mime)
 {
     const QList<QByteArray> supportedMimes = QImageReader::supportedMimeTypes();
     const bool val = supportedMimes.contains(mime.toUtf8());
     return val;
 }
 
-bool isImageFile(const FileInfo& file_info, const DataLoader& data_loader)
+bool isImageFile(const FileInfo &file_info, const DataLoader &data_loader)
 {
     const QString mime = getMimeType(file_info, data_loader);
     const bool val = isImageMime(mime);
@@ -62,32 +59,29 @@ bool isImageFile(const FileInfo& file_info, const DataLoader& data_loader)
 }
 
 bool isImageFileExtension(const QFileInfo &fi)
-{ return getFiltersImage().contains(fi.suffix().toLower()); }
+{
+    return getFiltersImage().contains(fi.suffix().toLower());
+}
 
 bool isArchiveFile(const QFileInfo &fi)
 {
-    if (!fi.exists())
-    {
+    if (!fi.exists()) {
         return false;
     }
-    for (auto &ext : Helper::filtersArchive)
-    {
+    for (auto &ext : Helper::filtersArchive) {
         // TODO: Use MIME
-        if (fi.suffix().toLower().endsWith(ext))
-        {
+        if (fi.suffix().toLower().endsWith(ext)) {
             return true;
         }
     }
     return false;
 }
 
-bool isSupportedFileType(const QString &file_path, const DataLoader& data_loader)
+bool isSupportedFileType(const QString &file_path, const DataLoader &data_loader)
 {
     const QFileInfo fi(file_path);
-    if (fi.exists())
-    {
-        if (fi.isDir() || isArchiveFile(fi))
-        {
+    if (fi.exists()) {
+        if (fi.isDir() || isArchiveFile(fi)) {
             return true;
         }
     }
@@ -104,13 +98,17 @@ QString size(const qint64 bytes)
     constexpr qint64 gib = 1024 * mib;
     constexpr qint64 tib = 1024 * gib;
     if (bytes >= tib) {
-        return QFileSystemModel::tr("%1 TiB").arg(QLocale().toString(static_cast<double>(bytes) / tib, 'f', 3));
+        return QFileSystemModel::tr("%1 TiB").arg(
+            QLocale().toString(static_cast<double>(bytes) / tib, 'f', 3));
     } else if (bytes >= gib) {
-        return QFileSystemModel::tr("%1 GiB").arg(QLocale().toString(static_cast<double>(bytes) / gib, 'f', 2));
+        return QFileSystemModel::tr("%1 GiB").arg(
+            QLocale().toString(static_cast<double>(bytes) / gib, 'f', 2));
     } else if (bytes >= mib) {
-        return QFileSystemModel::tr("%1 MiB").arg(QLocale().toString(static_cast<double>(bytes) / mib, 'f', 1));
+        return QFileSystemModel::tr("%1 MiB").arg(
+            QLocale().toString(static_cast<double>(bytes) / mib, 'f', 1));
     } else if (bytes >= kib) {
-        return QFileSystemModel::tr("%1 KiB").arg(QLocale().toString(static_cast<double>(bytes) / kib, 'f', 1));
+        return QFileSystemModel::tr("%1 KiB").arg(
+            QLocale().toString(static_cast<double>(bytes) / kib, 'f', 1));
     } else if (bytes == 0) {
         return "";
     }
@@ -135,7 +133,7 @@ static inline QChar getNextChar(const QString &s, int location)
 
     Slower then QString::compare() (of course)
   */
-int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs)
+int naturalCompare(const QString &s1, const QString &s2, Qt::CaseSensitivity cs)
 {
     for (int l1 = 0, l2 = 0; l1 <= s1.size() && l2 <= s2.size(); ++l1, ++l2) {
         // skip spaces, tabs and 0's
@@ -156,12 +154,10 @@ int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs
             int lookAheadLocation2 = l2;
             int currentReturnValue = 0;
             // find the last digit, setting currentReturnValue as we go if it isn't equal
-            for (
-                QChar lookAhead1 = c1, lookAhead2 = c2;
-                (lookAheadLocation1 <= s1.length() && lookAheadLocation2 <= s2.length());
-                lookAhead1 = getNextChar(s1, ++lookAheadLocation1),
-                lookAhead2 = getNextChar(s2, ++lookAheadLocation2)
-                ) {
+            for (QChar lookAhead1 = c1, lookAhead2 = c2;
+                 (lookAheadLocation1 <= s1.length() && lookAheadLocation2 <= s2.length());
+                 lookAhead1 = getNextChar(s1, ++lookAheadLocation1),
+                       lookAhead2 = getNextChar(s2, ++lookAheadLocation2)) {
                 bool is1ADigit = !lookAhead1.isNull() && lookAhead1.isDigit();
                 bool is2ADigit = !lookAhead2.isNull() && lookAhead2.isDigit();
                 if (!is1ADigit && !is2ADigit)
@@ -183,8 +179,10 @@ int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs
         }
 
         if (cs == Qt::CaseInsensitive) {
-            if (!c1.isLower()) c1 = c1.toLower();
-            if (!c2.isLower()) c2 = c2.toLower();
+            if (!c1.isLower())
+                c1 = c1.toLower();
+            if (!c2.isLower())
+                c2 = c2.toLower();
         }
         int r = QString::localeAwareCompare(c1, c2);
         if (r < 0)
@@ -196,34 +194,32 @@ int naturalCompare(const QString &s1, const QString &s2,  Qt::CaseSensitivity cs
     return QString::compare(s1, s2, cs);
 }
 
-void windowsExplorerOpen(const QFileInfo& fi)
+void windowsExplorerOpen(const QFileInfo &fi)
 {
     const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     const QString explorer = "explorer";
     QStringList param;
-    if (!QFileInfo(containerPath).isDir())
-    {
+    if (!QFileInfo(containerPath).isDir()) {
         param << QLatin1String("/select,");
     }
     param << QDir::toNativeSeparators(containerPath);
     QProcess::startDetached(explorer, param);
 }
 
-void osxFinderOpen(const QFileInfo& fi)
+void osxFinderOpen(const QFileInfo &fi)
 {
     const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     QStringList scriptArgs;
     scriptArgs << QLatin1String("-e")
                << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
-                  .arg(containerPath);
+                      .arg(containerPath);
     QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
     scriptArgs.clear();
-    scriptArgs << QLatin1String("-e")
-               << QLatin1String("tell application \"Finder\" to activate");
+    scriptArgs << QLatin1String("-e") << QLatin1String("tell application \"Finder\" to activate");
     QProcess::execute("/usr/bin/osascript", scriptArgs);
 }
 
-bool xdgOpen(const QFileInfo& fi)
+bool xdgOpen(const QFileInfo &fi)
 {
     const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     // we cannot select a file here, because no file browser really supports it...
@@ -236,40 +232,44 @@ bool xdgOpen(const QFileInfo& fi)
 }
 
 #ifdef KIV_USE_DBUS
-bool dbusOpen(const QFileInfo& fi)
+bool dbusOpen(const QFileInfo &fi)
 {
     const QString filepath = fi.canonicalFilePath();
     const QUrl fileurl = QUrl::fromLocalFile(filepath);
     const QStringList args(fileurl.toString());
-    QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.FileManager1",
-                                                      "/org/freedesktop/FileManager1",
-                                                      "org.freedesktop.FileManager1",
-                                                      "ShowItems");
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        "org.freedesktop.FileManager1",
+        "/org/freedesktop/FileManager1",
+        "org.freedesktop.FileManager1",
+        "ShowItems");
     msg << args << "";
     const QDBusMessage response = QDBusConnection::sessionBus().call(msg);
     const bool success = (response.type() != QDBusMessage::MessageType::ErrorMessage);
     return success;
 }
 
-bool dbusOpenThunar(const QFileInfo& fi)
+bool dbusOpenThunar(const QFileInfo &fi)
 {
     const QString containerPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
     const QFileInfo containerFileInfo(containerPath);
-    const QString folder = containerFileInfo.isDir() ? containerFileInfo.absoluteFilePath() : containerFileInfo.absolutePath();
+    const QString folder = containerFileInfo.isDir() ? containerFileInfo.absoluteFilePath()
+                                                     : containerFileInfo.absolutePath();
     const QString filename = fi.isFile() ? fi.fileName() : QString();
 
-    QDBusMessage msg = QDBusMessage::createMethodCall("org.xfce.FileManager",
-                                                      "/org/xfce/FileManager",
-                                                      "org.xfce.FileManager",
-                                                      "DisplayFolderAndSelect");
-    msg << folder << filename << "" << "";
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        "org.xfce.FileManager",
+        "/org/xfce/FileManager",
+        "org.xfce.FileManager",
+        "DisplayFolderAndSelect");
+    msg << folder << filename << ""
+        << "";
     const QDBusMessage response = QDBusConnection::sessionBus().call(msg);
     const bool success = (response.type() != QDBusMessage::MessageType::ErrorMessage);
     return success;
 }
 #endif
 
-void showInFileBrowser(const QFileInfo& fi)
+void showInFileBrowser(const QFileInfo &fi)
 {
 #if defined(Q_OS_WIN)
     windowsExplorerOpen(fi);
@@ -286,4 +286,4 @@ void showInFileBrowser(const QFileInfo& fi)
     }
 #endif
 }
-}
+} // namespace Helper

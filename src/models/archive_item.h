@@ -7,17 +7,17 @@
 
 #include "enums.h"
 
-
 class ArchiveItem
 {
 public:
-    explicit ArchiveItem(const QString &name,
-                         const QDateTime &date,
-                         const qint64 &bytes,
-                         const QString &path,
-                         const NodeType type,
-                         const QIcon &icon = QIcon(),
-                         ArchiveItem *const parent = nullptr);
+    explicit ArchiveItem(
+        const QString &name,
+        const QDateTime &date,
+        const qint64 &bytes,
+        const QString &path,
+        const NodeType type,
+        const QIcon &icon = QIcon(),
+        ArchiveItem *const parent = nullptr);
     ~ArchiveItem();
     void appendChild(ArchiveItem *const child);
     ArchiveItem *child(const int row) const;
@@ -35,8 +35,8 @@ public:
     static const int col_date = 2;
 
 private:
-    int indexToInsertByName(const ArchiveItem* const item);
-    QList<ArchiveItem*> childItems;
+    int indexToInsertByName(const ArchiveItem *const item);
+    QList<ArchiveItem *> childItems;
     ArchiveItem *const parentItem;
 
     const QString m_name;
@@ -50,4 +50,4 @@ private:
     static const int col_count = 3;
 };
 
-#endif  // ARCHIVE_ITEM_H
+#endif // ARCHIVE_ITEM_H

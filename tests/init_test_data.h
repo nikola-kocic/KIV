@@ -8,18 +8,18 @@
 
 #include "fixtures.h"
 
-
 class InitTestArchives
 {
     friend class InitTestData;
+
 protected:
     InitTestArchives(const QString &src_dir)
-        :m_src_dir(src_dir)
+        : m_src_dir(src_dir)
     {}
 
     QString m_src_dir;
-public:
 
+public:
     void createZip() const;
     void createRar4() const;
 };
@@ -29,7 +29,5 @@ class InitTestData
 public:
     InitTestArchives makeTestData(const DirStructureFixture &dsf) const;
 };
-
-
 
 #endif // INIT_TEST_DATA_H

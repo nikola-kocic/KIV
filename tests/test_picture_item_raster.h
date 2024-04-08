@@ -23,7 +23,7 @@ private:
 private Q_SLOTS:
     void init();
     void cleanup();
-    void compareToExpected(const QString& expectedPath);
+    void compareToExpected(const QString &expectedPath);
     void testRenderNoImage();
     void testRenderNormal();
     void testRenderZoomed();

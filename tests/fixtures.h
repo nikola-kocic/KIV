@@ -7,9 +7,7 @@
 
 #include "enums.h"
 
-
-enum class DirStructureFixtureElement
-{
+enum class DirStructureFixtureElement {
     // rf = root folder
     rf1,
     rf2,
@@ -34,8 +32,6 @@ enum class DirStructureFixtureElement
     fcontent
 };
 
-
-
 class DirStructureFixturePathsUnicodeOutsideBMP
 {
 public:
@@ -43,15 +39,12 @@ public:
     static QString getDirName();
 };
 
-
 class DirStructureFixturePathsUnicodeInsideBMP
 {
 public:
     static QString getPath(DirStructureFixtureElement element);
     static QString getDirName();
 };
-
-
 
 class DirStructureFixtureDateTimes
 {
@@ -65,7 +58,6 @@ public:
     static QDateTime getDateTime(DirStructureFixtureElement element);
 };
 
-
 class DirStructureFixtureSize
 {
 public:
@@ -78,17 +70,15 @@ public:
     static quint32 getSize(DirStructureFixtureElement element);
 };
 
-
 class DirStructureFixture
 {
 public:
     DirStructureFixture(
-            std::function<QString(DirStructureFixtureElement)> pathGiver
-            , std::function<QString()> dirNameGiver
-            , std::function<QDateTime(DirStructureFixtureElement)> dateGiver
-            , std::function<quint32(DirStructureFixtureElement)> sizeGiver
-            , const QString &baseDir
-            );
+        std::function<QString(DirStructureFixtureElement)> pathGiver,
+        std::function<QString()> dirNameGiver,
+        std::function<QDateTime(DirStructureFixtureElement)> dateGiver,
+        std::function<quint32(DirStructureFixtureElement)> sizeGiver,
+        const QString &baseDir);
     std::vector<ArchiveFileInfo> getDirs() const;
     std::vector<ArchiveFileInfo> getFiles() const;
     QString getPath() const;
@@ -102,6 +92,5 @@ protected:
     const QString m_baseDir;
     ArchiveFileInfo get(DirStructureFixtureElement element) const;
 };
-
 
 #endif // FIXTURES_H

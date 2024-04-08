@@ -6,10 +6,10 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QMovie>
-#include <QtConcurrent/QtConcurrentMap>
-#include <QtConcurrent/QtConcurrentRun>
 #include <QTimer>
 #include <QWheelEvent>
+#include <QtConcurrent/QtConcurrentMap>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include "dataloader.h"
 #include "include/IPictureLoader.h"
@@ -20,7 +20,7 @@
 
 //#define DEBUG_PICTUREITEM
 #ifdef DEBUG_PICTUREITEM
-    #include "helper.h"
+#include "helper.h"
 #endif
 
 class PictureItem : public QWidget
@@ -29,11 +29,11 @@ class PictureItem : public QWidget
 
 public:
     explicit PictureItem(
-            const DataLoader& data_loader,
-            const IPictureLoader *const picture_loader,
-            const SettingsData settings,
-            QWidget *parent = nullptr,
-            Qt::WindowFlags f = Qt::WindowFlags());
+        const DataLoader &data_loader,
+        const IPictureLoader *const picture_loader,
+        const SettingsData settings,
+        QWidget *parent = nullptr,
+        Qt::WindowFlags f = Qt::WindowFlags());
     ~PictureItem() override;
 
     qreal getZoom() const;
@@ -69,15 +69,15 @@ private:
     void updateLockMode();
     void scrollBy(const int x, const int y);
 
-    const DataLoader& m_data_loader;
+    const DataLoader &m_data_loader;
     const IPictureLoader *const m_picture_loader;
     std::unique_ptr<QBuffer> m_animation_buffer;
     std::unique_ptr<QMovie> m_movie;
     PictureItemData *const m_data;
     SettingsData m_settings;
     PictureItemInterface *m_imageDisplay;
-    QFutureWatcher< QByteArray > *const m_watcher_data;
-    QFutureWatcher< QImage > *const m_watcher_image;
+    QFutureWatcher<QByteArray> *const m_watcher_data;
+    QFutureWatcher<QImage> *const m_watcher_image;
     LockMode m_lockMode;
 
     bool m_dragging;
@@ -100,13 +100,18 @@ protected:
 };
 
 inline bool PictureItem::isPixmapNull() const
-{ return m_data->isPixmapNull(); }
+{
+    return m_data->isPixmapNull();
+}
 
 inline qreal PictureItem::getRotation() const
-{ return m_data->getRotation(); }
+{
+    return m_data->getRotation();
+}
 
 inline qreal PictureItem::getZoom() const
-{ return m_data->getZoom(); }
+{
+    return m_data->getZoom();
+}
 
-
-#endif  // PICTUREITEM_H
+#endif // PICTUREITEM_H

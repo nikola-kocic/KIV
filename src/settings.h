@@ -4,24 +4,23 @@
 #include <QSettings>
 #include <QSize>
 
-#include "fileinfo.h"
 #include "enums.h"
+#include "fileinfo.h"
 #include "settingsdata.h"
 
 class Bookmark
 {
 public:
-    Bookmark (const QString &name, const QString &path)
+    Bookmark(const QString &name, const QString &path)
         : m_name(name)
         , m_path(path)
     {}
 
     inline QString getName() const { return m_name; }
     inline QString getPath() const { return m_path; }
-    bool operator ==(const Bookmark &other) const
+    bool operator==(const Bookmark &other) const
     {
-        return (m_name == other.m_name &&
-                m_path == other.m_path);
+        return (m_name == other.m_name && m_path == other.m_path);
     }
 
 private:
@@ -31,7 +30,6 @@ private:
 
 class Settings
 {
-
 public:
     explicit Settings(QSettings *settings = nullptr);
     ~Settings();
@@ -98,9 +96,10 @@ private:
     bool m_largeIcons;
 };
 
-
 inline int Settings::getLeftClick() const
-{ return m_leftClick; }
+{
+    return m_leftClick;
+}
 
 inline void Settings::setLeftClick(const int v)
 {
@@ -109,7 +108,9 @@ inline void Settings::setLeftClick(const int v)
 }
 
 inline int Settings::getMiddleClick() const
-{ return m_middleClick; }
+{
+    return m_middleClick;
+}
 
 inline void Settings::setMiddleClick(const int v)
 {
@@ -117,9 +118,10 @@ inline void Settings::setMiddleClick(const int v)
     m_settings->setValue("Mouse/MiddleClick", v);
 }
 
-
 inline int Settings::getWheel() const
-{ return m_wheel; }
+{
+    return m_wheel;
+}
 
 inline void Settings::setWheel(const int v)
 {
@@ -127,9 +129,10 @@ inline void Settings::setWheel(const int v)
     m_settings->setValue("Mouse/Wheel", v);
 }
 
-
 inline bool Settings::getRightToLeft() const
-{ return m_rightToLeft; }
+{
+    return m_rightToLeft;
+}
 
 inline void Settings::setRightToLeft(const bool b)
 {
@@ -137,40 +140,43 @@ inline void Settings::setRightToLeft(const bool b)
     m_settings->setValue("Behavior/RightToLeft", m_rightToLeft);
 }
 
-
 inline bool Settings::getCalculateAverageColor() const
-{ return m_calculateAverageColor; }
+{
+    return m_calculateAverageColor;
+}
 
 inline void Settings::setCalculateAverageColor(const bool b)
 {
     m_calculateAverageColor = b;
-    m_settings->setValue("Interface/CalculateAverageColor",
-                         m_calculateAverageColor);
+    m_settings->setValue("Interface/CalculateAverageColor", m_calculateAverageColor);
 }
 
-
 inline bool Settings::getHardwareAcceleration() const
-{ return m_hardwareAcceleration; }
+{
+    return m_hardwareAcceleration;
+}
 
 inline void Settings::setHardwareAcceleration(const bool b)
 {
     m_hardwareAcceleration = b;
-    m_settings->setValue("Interface/HardwareAcceleration",
-                         m_hardwareAcceleration);
+    m_settings->setValue("Interface/HardwareAcceleration", m_hardwareAcceleration);
 }
 
 inline ZoomFilter Settings::getZoomFilter() const
-{ return m_zoomFilter; }
+{
+    return m_zoomFilter;
+}
 
 inline void Settings::setZoomFilter(const ZoomFilter v)
 {
     m_zoomFilter = v;
-    m_settings->setValue("Interface/ZoomFilter",
-                         static_cast<int>(m_zoomFilter));
+    m_settings->setValue("Interface/ZoomFilter", static_cast<int>(m_zoomFilter));
 }
 
 inline QSize Settings::getThumbnailSize() const
-{ return m_thumbSize; }
+{
+    return m_thumbSize;
+}
 
 inline void Settings::setThumbnailSize(const QSize &size)
 {
@@ -178,9 +184,10 @@ inline void Settings::setThumbnailSize(const QSize &size)
     m_settings->setValue("Interface/ThumbnailSize", m_thumbSize);
 }
 
-
 inline bool Settings::getLargeIcons() const
-{ return m_largeIcons; }
+{
+    return m_largeIcons;
+}
 
 inline void Settings::setLargeIcons(const bool b)
 {
@@ -188,9 +195,10 @@ inline void Settings::setLargeIcons(const bool b)
     m_settings->setValue("Interface/LargeIcons", m_largeIcons);
 }
 
-
 inline QString Settings::getLastPath() const
-{ return m_lastPath; }
+{
+    return m_lastPath;
+}
 
 inline void Settings::setLastPath(const QString &path)
 {
@@ -198,11 +206,14 @@ inline void Settings::setLastPath(const QString &path)
     m_settings->setValue("Interface/LastPath", m_lastPath);
 }
 
-
 inline int Settings::getBookmarkCount() const
-{ return m_bookmarks.size(); }
+{
+    return m_bookmarks.size();
+}
 
 inline QList<Bookmark *> Settings::getBookmarks() const
-{ return m_bookmarks; }
+{
+    return m_bookmarks;
+}
 
-#endif  // SETTINGS_H
+#endif // SETTINGS_H

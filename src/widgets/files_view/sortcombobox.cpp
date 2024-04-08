@@ -1,17 +1,17 @@
 #include "sortcombobox.h"
 
-SortComboBox::SortComboBox(const QList<ColumnSort> &items,
-        QWidget *parent)
+SortComboBox::SortComboBox(const QList<ColumnSort> &items, QWidget *parent)
     : QComboBox(parent)
     , m_items(items)
 {
-    for (const ColumnSort &sort : m_items)
-    {
+    for (const ColumnSort &sort : m_items) {
         this->addItem(this->getSortText(sort));
     }
-    connect(this, static_cast<void (QComboBox::*)(int)>(
-                &QComboBox::currentIndexChanged),
-            this, &SortComboBox::on_currentIndexChanged);
+    connect(
+        this,
+        static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+        this,
+        &SortComboBox::on_currentIndexChanged);
 }
 
 void SortComboBox::on_currentIndexChanged(int index)
@@ -22,17 +22,13 @@ void SortComboBox::on_currentIndexChanged(int index)
 
 QString SortComboBox::getSortText(ColumnSort sort) const
 {
-    switch(sort.getColumn())
-    {
+    switch (sort.getColumn()) {
     case Column::Name:
-        return sort.getOrder() == SortOrder::Asc ? tr("Name Ascending"):
-                                                   tr("Name Descending");
+        return sort.getOrder() == SortOrder::Asc ? tr("Name Ascending") : tr("Name Descending");
     case Column::Date:
-        return sort.getOrder() == SortOrder::Asc ? tr("Date Ascending"):
-                                                   tr("Date Descending");
+        return sort.getOrder() == SortOrder::Asc ? tr("Date Ascending") : tr("Date Descending");
     case Column::Size:
-        return sort.getOrder() == SortOrder::Asc ? tr("Size Ascending"):
-                                                   tr("Size Descending");
+        return sort.getOrder() == SortOrder::Asc ? tr("Size Ascending") : tr("Size Descending");
     }
     return QString();
 }
@@ -40,14 +36,10 @@ QString SortComboBox::getSortText(ColumnSort sort) const
 bool SortComboBox::setSort(ColumnSort sort)
 {
     const auto index = static_cast<int>(std::distance(
-                m_items.constBegin(),
-                std::find(m_items.constBegin(), m_items.constEnd(), sort)));
-    if (index == m_items.size())
-    {
+        m_items.constBegin(), std::find(m_items.constBegin(), m_items.constEnd(), sort)));
+    if (index == m_items.size()) {
         return false;
-    }
-    else
-    {
+    } else {
         this->setCurrentIndex(index);
         return true;
     }

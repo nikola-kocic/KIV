@@ -74,7 +74,7 @@ void TestPictureItemData::testZoomIn_DidntFitBefore_WasMoved()
     p_data.setImageSize(QSize(1500, 1500));
 
     // Center image to viewport
-    p_data.beginDrag(QPoint(0,0));
+    p_data.beginDrag(QPoint(0, 0));
     p_data.drag(QPoint(-250, -250));
     p_data.updateSize();
     QRectF bounding_rect = p_data.getBoundingRect();
@@ -111,11 +111,8 @@ void TestPictureItemData::testRotate()
     QRectF bounding_rect = p_data.getBoundingRect();
     const qreal expectedSize = 800 * qSqrt(2);
     const qreal expectedCoordinates = (1000 - expectedSize) / 2;
-    const QRectF expectedBoundingRect =  QRectF(
-                expectedCoordinates,
-                expectedCoordinates,
-                expectedSize,
-                expectedSize);
+    const QRectF expectedBoundingRect
+        = QRectF(expectedCoordinates, expectedCoordinates, expectedSize, expectedSize);
     QCOMPARE(bounding_rect, expectedBoundingRect);
     p_data.setRotation(0);
     bounding_rect = p_data.getBoundingRect();
@@ -132,11 +129,8 @@ void TestPictureItemData::testZoomOutRotate()
     // Rotated image can fully display in view area
     const qreal expectedCoordinates = 0;
 
-    const QRectF expectedBoundingRect =  QRectF(
-                expectedCoordinates,
-                expectedCoordinates,
-                expectedSize,
-                expectedSize);
+    const QRectF expectedBoundingRect
+        = QRectF(expectedCoordinates, expectedCoordinates, expectedSize, expectedSize);
     QCOMPARE(bounding_rect, expectedBoundingRect);
     p_data.setRotation(0);
     bounding_rect = p_data.getBoundingRect();

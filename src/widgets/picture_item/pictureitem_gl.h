@@ -4,13 +4,13 @@
 #include "widgets/picture_item/pictureitem_interface.h"
 
 #include <QFutureWatcher>
-#include <QOpenGLWidget>
 #include <QOpenGLFunctions_2_0>
 #include <QOpenGLTexture>
+#include <QOpenGLWidget>
 #include <QtConcurrent/QtConcurrentMap>
 
-#include "widgets/picture_item/teximg.h"
 #include "enums.h"
+#include "widgets/picture_item/teximg.h"
 
 class PictureItemGL : public QGLWidget, public PictureItemInterface, protected QOpenGLFunctions_2_0
 {
@@ -33,10 +33,10 @@ private:
     void clearTextures();
     void textureFinished(int num);
 
-    QFutureWatcher< QImage > *m_loader_texture;
+    QFutureWatcher<QImage> *m_loader_texture;
     qreal m_scaleX;
     qreal m_scaleY;
-    QVector < QVector <QOpenGLTexture*> > m_textures;
+    QVector<QVector<QOpenGLTexture *>> m_textures;
     TexImg *m_texImg;
     int m_returnTexCount;
     ZoomFilter m_zoomFilter;
@@ -47,4 +47,4 @@ protected:
     void resizeGL(int width, int height) override;
 };
 
-#endif  // PICTUREITEM_GL_H
+#endif // PICTUREITEM_GL_H

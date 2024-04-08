@@ -1,6 +1,5 @@
 #include "widgets/main_window.h"
 
-#include <qglobal.h>
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
@@ -10,34 +9,32 @@
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMessageBox>
-#include <QMouseEvent>
 #include <QMimeData>
+#include <QMouseEvent>
 #include <QUrl>
+#include <qglobal.h>
 
 //#define DEBUG_MAIN_WINDOW
 #ifdef DEBUG_MAIN_WINDOW
 #include "helper.h"
 #endif
 
-#include "widgets/settings_dialog.h"
 #include "settings.h"
+#include "widgets/settings_dialog.h"
 
-MainWindow::MainWindow(const DataLoader& data_loader,
-                       const IPictureLoader *const picture_loader,
-                       const IArchiveExtractor* const archive_extractor,
-                       QWidget *parent,
-                       Qt::WindowFlags f)
+MainWindow::MainWindow(
+    const DataLoader &data_loader,
+    const IPictureLoader *const picture_loader,
+    const IArchiveExtractor *const archive_extractor,
+    QWidget *parent,
+    Qt::WindowFlags f)
     : QMainWindow(parent, f)
     , m_data_loader(data_loader)
     , m_model_filesystem(new CustomFileSystemModel(this))
 
     , m_settings(new Settings())
 
-    , m_view_files(
-          new ViewFilesUnified(
-              archive_extractor,
-              m_model_filesystem,
-              this))
+    , m_view_files(new ViewFilesUnified(archive_extractor, m_model_filesystem, this))
 
     , m_splitter_main(new QSplitter(Qt::Horizontal, this))
     , m_picture_item(new PictureItem(data_loader, picture_loader, m_settings->getData(), this))
@@ -45,11 +42,9 @@ MainWindow::MainWindow(const DataLoader& data_loader,
     , m_menu_main(new QMenuBar(this))
     , m_toolbar(new QToolBar(this))
     , m_comboBox_zoom(new ZoomWidget(
-                          QVector<qreal>()
-                          << 0.1 << 0.25 << 0.5 << 0.75 << 1.0 << 1.25 << 1.5
-                          << 2.0 << 3.0 << 4.0 << 5.0 << 6.0 << 7.0 << 8.0
-                          << 9.0 << 10.0,
-                          this))
+          QVector<qreal>() << 0.1 << 0.25 << 0.5 << 0.75 << 1.0 << 1.25 << 1.5 << 2.0 << 3.0 << 4.0
+                           << 5.0 << 6.0 << 7.0 << 8.0 << 9.0 << 10.0,
+          this))
 
     , m_menu_bookmarks(new QMenu(tr("&Bookmarks"), this))
     , m_menu_history(new QMenu(tr("&History"), this))
@@ -104,24 +99,18 @@ MainWindow::MainWindow(const DataLoader& data_loader,
 {
     this->setAcceptDrops(true);
     QString startFilePath;
-    if (QApplication::arguments().size() > 1)
-    {
+    if (QApplication::arguments().size() > 1) {
         startFilePath = QApplication::arguments().at(1);
-    }
-    else
-    {
+    } else {
         startFilePath = m_settings->getLastPath();
     }
-    m_urlNavigator = new UrlNavigator(m_model_filesystem,
-                                      QUrl::fromLocalFile(startFilePath),
-                                      this);
+    m_urlNavigator = new UrlNavigator(m_model_filesystem, QUrl::fromLocalFile(startFilePath), this);
 
     updateSettings();
     createActions();
     createMenus();
 
     connectActions();
-
 
     /* Start Layout */
 
@@ -167,25 +156,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 #ifdef DEBUG_MAIN_WINDOW
     DEBUGOUT << event->key();
 #endif
-    if (event->key() == Qt::Key_B)
-    {
+    if (event->key() == Qt::Key_B) {
         showMinimized();
         event->accept();
-    }
-    else if (event->key() == Qt::Key_Escape)
-    {
+    } else if (event->key() == Qt::Key_Escape) {
         m_act_fullscreen->setChecked(false);
-    }
-    else if (event->key() == Qt::Key_Minus)
-    {
+    } else if (event->key() == Qt::Key_Minus) {
         m_act_zoomOut->trigger();
-    }
-    else if (event->key() == Qt::Key_Plus)
-    {
+    } else if (event->key() == Qt::Key_Plus) {
         m_act_zoomIn->trigger();
-    }
-    else if (event->key() == Qt::Key_0)
-    {
+    } else if (event->key() == Qt::Key_0) {
         m_act_zoomReset->trigger();
     }
     return QMainWindow::keyPressEvent(event);
@@ -244,15 +224,14 @@ void MainWindow::createActions()
     m_act_zoomOut->setShortcut(QKeySequence::ZoomOut);
     m_act_zoomReset->setShortcut(Qt::CTRL | Qt::Key_0);
     m_act_fitToWindow->setShortcut(Qt::CTRL | Qt::Key_T);
-    m_act_fullscreen->setShortcuts(QList<QKeySequence>()
-                                   << Qt::Key_F11
-                                   << QKeySequence(Qt::ALT | Qt::Key_Return));
+    m_act_fullscreen->setShortcuts(
+        QList<QKeySequence>() << Qt::Key_F11 << QKeySequence(Qt::ALT | Qt::Key_Return));
     m_act_settings->setShortcut(QKeySequence::Preferences);
     m_act_about->setShortcut(QKeySequence::HelpContents);
 
-    m_act_focus_location->setShortcuts(QList<QKeySequence>()
-                                       << QKeySequence(Qt::ALT | Qt::Key_D)
-                                       << QKeySequence(Qt::CTRL | Qt::Key_L));
+    m_act_focus_location->setShortcuts(
+        QList<QKeySequence>() << QKeySequence(Qt::ALT | Qt::Key_D)
+                              << QKeySequence(Qt::CTRL | Qt::Key_L));
 
     m_act_lockNone->setCheckable(true);
     m_act_lockZoom->setCheckable(true);
@@ -272,12 +251,9 @@ void MainWindow::createActions()
     m_act_lockNone->setChecked(true);
 
     /* Large icons are On by default but I want small icons by default */
-    if (m_settings->getLargeIcons())
-    {
+    if (m_settings->getLargeIcons()) {
         m_act_largeIcons->setChecked(true);
-    }
-    else
-    {
+    } else {
         toggleLargeIcons(false);
     }
 
@@ -316,7 +292,6 @@ void MainWindow::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(m_act_exit);
 
-
     QMenu *imageMenu = m_menu_main->addMenu(tr("&Image"));
     imageMenu->addSeparator();
     imageMenu->addAction(m_act_zoomIn);
@@ -349,7 +324,6 @@ void MainWindow::createMenus()
     imageMenu->addAction(m_act_lockFitWidth);
     imageMenu->addAction(m_act_lockFitHeight);
 
-
     QMenu *viewMenu = m_menu_main->addMenu(tr("&View"));
     viewMenu->addAction(m_act_thumbnails);
 
@@ -368,7 +342,6 @@ void MainWindow::createMenus()
     this->addAction(m_act_fullscreen);
     viewMenu->addAction(m_act_fullscreen);
 
-
     QMenu *optionsMenu = m_menu_main->addMenu(tr("&Options"));
 
     optionsMenu->addAction(m_act_largeIcons);
@@ -377,7 +350,6 @@ void MainWindow::createMenus()
     QMenu *helpMenu = m_menu_main->addMenu(tr("&Help"));
     helpMenu->addAction(m_act_webSite);
     helpMenu->addAction(m_act_about);
-
 
     /* Start toolbar */
     m_toolbar->setMovable(false);
@@ -404,7 +376,6 @@ void MainWindow::createMenus()
     m_toolbar->addAction(m_act_rotateRight);
     m_toolbar->addAction(m_act_fullscreen);
     /* End toolbar */
-
 
     /* Start contextMenu */
     m_menu_context_picture->addAction(m_act_imageNext);
@@ -439,7 +410,6 @@ void MainWindow::createMenus()
     m_menu_context_picture->addSeparator();
     m_menu_context_picture->addAction(m_act_exit);
 
-
     /* End contextMenu */
 
     m_menu_context_bookmark->addAction(m_act_bookmark_delete);
@@ -457,147 +427,119 @@ void MainWindow::connectActions()
     connect(m_act_bookmark_add, &QAction::triggered, this, &MainWindow::addBookmark);
 
     connect(m_act_settings, &QAction::triggered, this, &MainWindow::settingsDialog);
-    connect(m_act_imagePrevious, &QAction::triggered,
-            m_view_files, &ViewFilesUnified::imagePrevious);
-    connect(m_act_imageNext, &QAction::triggered,
-            m_view_files, &ViewFilesUnified::imageNext);
+    connect(m_act_imagePrevious, &QAction::triggered, m_view_files, &ViewFilesUnified::imagePrevious);
+    connect(m_act_imageNext, &QAction::triggered, m_view_files, &ViewFilesUnified::imageNext);
 
-
-    connect(m_act_thumbnails, &QAction::toggled,
-            this, &MainWindow::toggleShowThumbnails);
-    connect(m_act_fullscreen, &QAction::toggled,
-            this, &MainWindow::toggleFullscreen);
-    connect(m_act_largeIcons, &QAction::toggled,
-            this, &MainWindow::toggleLargeIcons);
-    connect(m_act_sidebar, &QAction::toggled,
-            this, &MainWindow::toggleSidebar);
-    connect(m_act_mode_list, &QAction::triggered,
-            this, &MainWindow::on_view_mode_list_triggered);
-    connect(m_act_mode_details, &QAction::triggered,
-            this, &MainWindow::on_view_mode_details_triggered);
-    connect(m_act_mode_icons, &QAction::triggered,
-            this, &MainWindow::on_view_mode_icons_triggered);
+    connect(m_act_thumbnails, &QAction::toggled, this, &MainWindow::toggleShowThumbnails);
+    connect(m_act_fullscreen, &QAction::toggled, this, &MainWindow::toggleFullscreen);
+    connect(m_act_largeIcons, &QAction::toggled, this, &MainWindow::toggleLargeIcons);
+    connect(m_act_sidebar, &QAction::toggled, this, &MainWindow::toggleSidebar);
+    connect(m_act_mode_list, &QAction::triggered, this, &MainWindow::on_view_mode_list_triggered);
+    connect(
+        m_act_mode_details, &QAction::triggered, this, &MainWindow::on_view_mode_details_triggered);
+    connect(m_act_mode_icons, &QAction::triggered, this, &MainWindow::on_view_mode_icons_triggered);
 
     connect(m_act_rotateLeft, &QAction::triggered, this, &MainWindow::rotateLeft);
     connect(m_act_rotateRight, &QAction::triggered, this, &MainWindow::rotateRight);
     connect(m_act_rotateReset, &QAction::triggered, this, &MainWindow::rotateReset);
     connect(m_act_zoomIn, &QAction::triggered, m_comboBox_zoom, &ZoomWidget::zoomIn);
-    connect(m_act_zoomOut, &QAction::triggered,
-            m_comboBox_zoom, &ZoomWidget::zoomOut);
+    connect(m_act_zoomOut, &QAction::triggered, m_comboBox_zoom, &ZoomWidget::zoomOut);
     connect(m_act_zoomReset, &QAction::triggered, this, &MainWindow::zoomReset);
-    connect(m_act_fitToWindow, &QAction::triggered,
-            m_picture_item, &PictureItem::fitToScreen);
-    connect(m_act_fitToWidth, &QAction::triggered,
-            m_picture_item, &PictureItem::fitWidth);
-    connect(m_act_fitToHeight, &QAction::triggered,
-            m_picture_item, &PictureItem::fitHeight);
+    connect(m_act_fitToWindow, &QAction::triggered, m_picture_item, &PictureItem::fitToScreen);
+    connect(m_act_fitToWidth, &QAction::triggered, m_picture_item, &PictureItem::fitWidth);
+    connect(m_act_fitToHeight, &QAction::triggered, m_picture_item, &PictureItem::fitHeight);
 
     connect(m_act_lockNone, &QAction::triggered, this, &MainWindow::lockNone);
     connect(m_act_lockZoom, &QAction::triggered, this, &MainWindow::lockZoom);
     connect(m_act_lockAutofit, &QAction::triggered, this, &MainWindow::lockAutofit);
-    connect(m_act_lockFitHeight, &QAction::triggered,
-            this, &MainWindow::lockFitHeight);
-    connect(m_act_lockFitWidth, &QAction::triggered,
-            this, &MainWindow::lockFitWidth);
+    connect(m_act_lockFitHeight, &QAction::triggered, this, &MainWindow::lockFitHeight);
+    connect(m_act_lockFitWidth, &QAction::triggered, this, &MainWindow::lockFitWidth);
 
     connect(m_act_about, &QAction::triggered, this, &MainWindow::about);
     connect(m_act_webSite, &QAction::triggered, this, &MainWindow::website);
 
-    connect(m_urlNavigator, &UrlNavigator::urlChanged,
-            m_view_files, &ViewFilesUnified::setLocationUrl);
-    connect(m_urlNavigator, &UrlNavigator::urlChanged,
-            this, &MainWindow::setLocationUrl);
-    connect(m_view_files, &ViewFilesUnified::urlChanged,
-            m_urlNavigator, &UrlNavigator::setLocationUrl);
-    connect(m_view_files, &ViewFilesUnified::urlChanged,
-            this, &MainWindow::setLocationUrl);
+    connect(
+        m_urlNavigator, &UrlNavigator::urlChanged, m_view_files, &ViewFilesUnified::setLocationUrl);
+    connect(m_urlNavigator, &UrlNavigator::urlChanged, this, &MainWindow::setLocationUrl);
+    connect(
+        m_view_files, &ViewFilesUnified::urlChanged, m_urlNavigator, &UrlNavigator::setLocationUrl);
+    connect(m_view_files, &ViewFilesUnified::urlChanged, this, &MainWindow::setLocationUrl);
 
-    connect(m_picture_item, &PictureItem::imageChanged,
-            this, &MainWindow::updateActions);
-    connect(m_picture_item, &PictureItem::zoomChanged,
-            m_comboBox_zoom, &ZoomWidget::on_zoomChanged);
-    connect(m_picture_item, &PictureItem::customContextMenuRequested,
-            this, &MainWindow::on_customContextMenuRequested);
+    connect(m_picture_item, &PictureItem::imageChanged, this, &MainWindow::updateActions);
+    connect(m_picture_item, &PictureItem::zoomChanged, m_comboBox_zoom, &ZoomWidget::on_zoomChanged);
+    connect(
+        m_picture_item,
+        &PictureItem::customContextMenuRequested,
+        this,
+        &MainWindow::on_customContextMenuRequested);
 
-    connect(m_comboBox_zoom, &ZoomWidget::zoomChanged,
-            m_picture_item, &PictureItem::setZoom);
+    connect(m_comboBox_zoom, &ZoomWidget::zoomChanged, m_picture_item, &PictureItem::setZoom);
 
     connect(m_act_refreshPath, &QAction::triggered, this, &MainWindow::refreshPath);
-    connect(m_act_showInFileBrowser, &QAction::triggered,
-            this, &MainWindow::showInFileBrowser);
+    connect(m_act_showInFileBrowser, &QAction::triggered, this, &MainWindow::showInFileBrowser);
     connect(m_act_dirUp, &QAction::triggered, m_view_files, &ViewFilesUnified::dirUp);
 
-    connect(m_act_bookmark_delete, &QAction::triggered,
-            this, &MainWindow::deleteBookmark);
-    connect(m_act_focus_location, &QAction::triggered,
-            m_urlNavigator, &UrlNavigator::focus);
+    connect(m_act_bookmark_delete, &QAction::triggered, this, &MainWindow::deleteBookmark);
+    connect(m_act_focus_location, &QAction::triggered, m_urlNavigator, &UrlNavigator::focus);
 
-    connect(m_menu_history, &QMenu::aboutToShow,
-            this, &MainWindow::populateHistoryMenu);
-    connect(m_menu_history, &QMenu::triggered,
-            this, &MainWindow::on_historyMenuTriggered);
+    connect(m_menu_history, &QMenu::aboutToShow, this, &MainWindow::populateHistoryMenu);
+    connect(m_menu_history, &QMenu::triggered, this, &MainWindow::on_historyMenuTriggered);
 
-    connect(m_menu_bookmarks, &QMenu::aboutToShow,
-            this, &MainWindow::populateBookmarks);
-    connect(m_menu_bookmarks, &QMenu::aboutToHide,
-            this, &MainWindow::on_bookmark_menu_aboutToHide);
-    connect(m_menu_bookmarks, &QMenu::customContextMenuRequested,
-            this, &MainWindow::on_bookmark_customContextMenuRequested);
-    connect(m_menu_bookmarks, &QMenu::triggered,
-            this, &MainWindow::on_bookmark_triggered);
+    connect(m_menu_bookmarks, &QMenu::aboutToShow, this, &MainWindow::populateBookmarks);
+    connect(m_menu_bookmarks, &QMenu::aboutToHide, this, &MainWindow::on_bookmark_menu_aboutToHide);
+    connect(
+        m_menu_bookmarks,
+        &QMenu::customContextMenuRequested,
+        this,
+        &MainWindow::on_bookmark_customContextMenuRequested);
+    connect(m_menu_bookmarks, &QMenu::triggered, this, &MainWindow::on_bookmark_triggered);
 
-    connect(m_urlNavigator, &UrlNavigator::historyChanged,
-            this, &MainWindow::on_urlHistoryChanged);
+    connect(m_urlNavigator, &UrlNavigator::historyChanged, this, &MainWindow::on_urlHistoryChanged);
 
-
-    foreach (QAction *action, QList<QAction*>() << m_act_back << m_act_forward)
-    {
+    foreach (QAction *action, QList<QAction *>() << m_act_back << m_act_forward) {
         QWidget *action_widget = m_toolbar->widgetForAction(action);
         action_widget->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(action_widget, &QWidget::customContextMenuRequested,
-                this, &MainWindow::on_historyMenuRequested);
+        connect(
+            action_widget,
+            &QWidget::customContextMenuRequested,
+            this,
+            &MainWindow::on_historyMenuRequested);
     }
 }
 
 void MainWindow::updateIcons()
 {
-    for (QHash<QAction*, QStringList>::iterator it = m_actions_icons.begin();
+    for (QHash<QAction *, QStringList>::iterator it = m_actions_icons.begin();
          it != m_actions_icons.end();
-         ++it)
-    {
+         ++it) {
         QAction *action = it.key();
         QStringList icons = it.value();
         QIcon icon;
 
-        for (QStringList::const_iterator icon_it = icons.constBegin();
-             icon_it != icons.constEnd();
-             ++icon_it)
-        {
+        for (QStringList::const_iterator icon_it = icons.constBegin(); icon_it != icons.constEnd();
+             ++icon_it) {
             icon = QIcon::fromTheme((*icon_it));
-            if (! icon.isNull())
-            {
+            if (!icon.isNull()) {
                 action->setIcon(icon);
                 break;
             }
         }
-        if (action->icon().isNull())
-        {
+        if (action->icon().isNull()) {
 #ifndef ANDROID
-            const QString icon_path_template = QString("%1/icons/default/%3/%2.png")
-                    .arg(QCoreApplication::applicationDirPath(), icons[0]);
+            const QString icon_path_template
+                = QString("%1/icons/default/%3/%2.png")
+                      .arg(QCoreApplication::applicationDirPath(), icons[0]);
 #else
-            const QString icon_path_template = QString(":/res/icons/default/%2/%1.png")
-                    .arg(icons[0]);
+            const QString icon_path_template
+                = QString(":/res/icons/default/%2/%1.png").arg(icons[0]);
 #endif
             const QString icon_path_22 = icon_path_template.arg("22x22");
             const QString icon_path_16 = icon_path_template.arg("16x16");
 
-            if (QFile::exists(icon_path_22))
-            {
+            if (QFile::exists(icon_path_22)) {
                 icon.addFile(icon_path_22, QSize(22, 22));
             }
-            if (QFile::exists(icon_path_16))
-            {
+            if (QFile::exists(icon_path_16)) {
                 icon.addFile(icon_path_16, QSize(16, 16));
             }
             action->setIcon(icon);
@@ -610,20 +552,16 @@ void MainWindow::populateBookmarks()
     /* Cache: If bookmarks menu is not empty that means
      * history did not change. */
     const auto actions = m_menu_bookmarks->actions();
-    if (!actions.last()->data().isNull())
-    {
+    if (!actions.last()->data().isNull()) {
         return;
     }
 
-    for (const Bookmark *bookmark : m_settings->getBookmarks())
-    {
-        QAction *act_bookmark = new QAction(bookmark->getName(),
-                                            m_menu_bookmarks);
+    for (const Bookmark *bookmark : m_settings->getBookmarks()) {
+        QAction *act_bookmark = new QAction(bookmark->getName(), m_menu_bookmarks);
         act_bookmark->setData(bookmark->getPath());
         m_menu_bookmarks->addAction(act_bookmark);
 #ifdef DEBUG_MAIN_WINDOW
-        DEBUGOUT << "added bookmark" << bookmark->text()
-                 << bookmark->data().toString();
+        DEBUGOUT << "added bookmark" << bookmark->text() << bookmark->data().toString();
 #endif
     }
 }
@@ -635,8 +573,9 @@ void MainWindow::on_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::on_bookmark_triggered(QAction *action)
 {
-    if (action->data().isNull())
-    { return; }
+    if (action->data().isNull()) {
+        return;
+    }
 #ifdef DEBUG_MAIN_WINDOW
     DEBUGOUT;
 #endif
@@ -645,8 +584,9 @@ void MainWindow::on_bookmark_triggered(QAction *action)
 
 void MainWindow::deleteBookmark()
 {
-    if (m_act_bookmark_active_item == nullptr)
-    { return; }
+    if (m_act_bookmark_active_item == nullptr) {
+        return;
+    }
 
     m_settings->deleteBookmark(m_act_bookmark_active_item->data().toString());
     m_menu_bookmarks->removeAction(m_act_bookmark_active_item);
@@ -661,9 +601,10 @@ bool MainWindow::spreadUrl(const QUrl &url)
         return true;
     } else {
         QMessageBox::critical(
-                    this, QApplication::applicationName(),
-                    tr("File not found: ").append(url.toLocalFile()),
-                    QMessageBox::Close);
+            this,
+            QApplication::applicationName(),
+            tr("File not found: ").append(url.toLocalFile()),
+            QMessageBox::Close);
         return false;
     }
 }
@@ -680,9 +621,8 @@ bool MainWindow::setLocationUrl(const QUrl &url)
     // TODO
     //m_act_dirUp->setEnabled(!fileinfo.isContainerRoot());
     this->setWindowTitle(
-                fi.fileName() + " - " +
-                QApplication::applicationName() + " " +
-                QApplication::applicationVersion());
+        fi.fileName() + " - " + QApplication::applicationName() + " "
+        + QApplication::applicationVersion());
 
     m_picture_item->setPixmap(fileinfo);
 
@@ -697,21 +637,22 @@ bool MainWindow::openUrl(const QUrl &url)
     return false;
 }
 
-bool MainWindow::openFilePath(const QString &path) {
+bool MainWindow::openFilePath(const QString &path)
+{
     return openUrl(QUrl::fromLocalFile(path));
 }
 
 bool MainWindow::openFile(const FileInfo &info)
-{ return openFilePath(info.getPath()); }
+{
+    return openFilePath(info.getPath());
+}
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasUrls())
-    {
+    if (event->mimeData()->hasUrls()) {
         const QString filePath = event->mimeData()->urls().first().toLocalFile();
         const bool supported = Helper::isSupportedFileType(filePath, m_data_loader);
-        if (supported)
-        {
+        if (supported) {
             event->acceptProposedAction();
         }
     }
@@ -724,7 +665,6 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event)
     return QMainWindow::dragMoveEvent(event);
 }
 
-
 void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 {
     event->accept();
@@ -733,8 +673,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    if (event->proposedAction() == Qt::CopyAction)
-    {
+    if (event->proposedAction() == Qt::CopyAction) {
         this->openUrl(event->mimeData()->urls().first());
     }
     event->acceptProposedAction();
@@ -743,27 +682,22 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::showEvent(QShowEvent *event)
 {
-    if (Helper::getFiltersImage().contains("svg"))
-    {
-        m_windowIcon = QIcon(QApplication::applicationDirPath()
-                             + "/icons/kiv.svg");
+    if (Helper::getFiltersImage().contains("svg")) {
+        m_windowIcon = QIcon(QApplication::applicationDirPath() + "/icons/kiv.svg");
         this->setWindowIcon(m_windowIcon);
     }
     return QMainWindow::showEvent(event);
 }
-
 
 void MainWindow::refreshPath()
 {
     this->openFile(m_view_files->getCurrentFileInfo());
 }
 
-
 void MainWindow::toggleSidebar(bool value)
 {
     m_view_files->setVisible(value);
-    if (m_act_fullscreen->isChecked())
-    {
+    if (m_act_fullscreen->isChecked()) {
         m_menu_main->setVisible(value);
         m_toolbar->setVisible(value);
     }
@@ -774,13 +708,9 @@ void MainWindow::toggleFullscreen(bool value)
     m_act_sidebar->setChecked(!value);
     this->menuBar()->setVisible(!value);
     m_toolbar->setVisible(!value);
-    if (value)
-    {
-
+    if (value) {
         showFullScreen();
-    }
-    else
-    {
+    } else {
 #ifdef linux
         /* Workaround for bug
          * https://bugreports.qt-project.org/browse/QTBUG-10594 */
@@ -792,20 +722,18 @@ void MainWindow::toggleFullscreen(bool value)
 
 void MainWindow::openFileDialog()
 {
-    const QString imageExtensions =
-            "*." + Helper::getFiltersImage().join(" *.");
-    const QString fileSystemPath = m_view_files->getCurrentFileInfo().getIdentifiers().parentIdentifier;
+    const QString imageExtensions = "*." + Helper::getFiltersImage().join(" *.");
+    const QString fileSystemPath
+        = m_view_files->getCurrentFileInfo().getIdentifiers().parentIdentifier;
     const QFileInfo fi(fileSystemPath);
     const QString folderPath = fi.isDir() ? fi.canonicalFilePath() : fi.canonicalPath();
 
     const QString fileName = QFileDialog::getOpenFileName(
-                this,
-                tr("Open File"),
-                folderPath,
-                tr("Zip files") + "(*.zip *.cbz);;" + tr("Images")
-                + " (" + imageExtensions + ")");
-    if (!fileName.isEmpty())
-    {
+        this,
+        tr("Open File"),
+        folderPath,
+        tr("Zip files") + "(*.zip *.cbz);;" + tr("Images") + " (" + imageExtensions + ")");
+    if (!fileName.isEmpty()) {
         this->openFilePath(fileName);
     }
 }
@@ -814,10 +742,8 @@ void MainWindow::saveAs()
 {
     const QString filePath = m_view_files->getCurrentFileInfo().getPath();
     const QFileInfo fi(filePath);
-    const QString fileName = QFileDialog::getSaveFileName(
-                this, tr("Save File") , fi.fileName());
-    if (fileName.isEmpty())
-    {
+    const QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), fi.fileName());
+    if (fileName.isEmpty()) {
         return;
     }
 
@@ -836,7 +762,8 @@ void MainWindow::saveAs()
 
 void MainWindow::showInFileBrowser()
 {
-    const QString fileSystemPath = m_view_files->getCurrentFileInfo().getIdentifiers().parentIdentifier;
+    const QString fileSystemPath
+        = m_view_files->getCurrentFileInfo().getIdentifiers().parentIdentifier;
     const QFileInfo fi(fileSystemPath);
     Helper::showInFileBrowser(fi);
 }
@@ -849,20 +776,15 @@ void MainWindow::addBookmark()
     const QString path = m_view_files->getCurrentFileInfo().getPath();
     dialog.setTextValue(path);
 
-    if (dialog.exec() != QDialog::Accepted)
-    {
+    if (dialog.exec() != QDialog::Accepted) {
         return;
     }
     const QString bookmarkName = dialog.textValue();
     const QString bookmarkPath = m_view_files->getCurrentFileInfo().getPath();
     bool result = m_settings->addBookmark(bookmarkName, bookmarkPath);
-    if (result == false)
-    {
-        QMessageBox::information(this, QApplication::applicationName(),
-                                 tr("Bookmark already exists"));
-    }
-    else
-    {
+    if (result == false) {
+        QMessageBox::information(this, QApplication::applicationName(), tr("Bookmark already exists"));
+    } else {
         QAction *bookmark = new QAction(bookmarkName, m_menu_bookmarks);
         bookmark->setData(bookmarkPath);
         m_menu_bookmarks->addAction(bookmark);
@@ -917,8 +839,7 @@ void MainWindow::rotateReset()
 void MainWindow::settingsDialog()
 {
     Settings_Dialog sd(m_settings, this);
-    if (sd.exec() == QDialog::Accepted)
-    {
+    if (sd.exec() == QDialog::Accepted) {
         /* Update settings */
         m_picture_item->settingsUpdated(m_settings->getData(), m_view_files->getCurrentFileInfo());
         updateSettings();
@@ -936,14 +857,11 @@ void MainWindow::about()
     aboutBox.setWindowTitle("About " + QApplication::applicationName());
     aboutBox.setTextFormat(Qt::RichText);
     aboutBox.setText(
-                QApplication::applicationName() + " " + tr("version") + " "
-                + QApplication::applicationVersion() + "<br><br>"
-                + tr("Author: ")
-                + QString::fromUtf8("Nikola Kocić")
-                + "<br><br>" + tr("Website: ")
-                + "<a href = \"https://github.com/nikola-kocic/KIV\">"
-                "https://github.com/nikola-kocic/KIV</a>"
-                );
+        QApplication::applicationName() + " " + tr("version") + " "
+        + QApplication::applicationVersion() + "<br><br>" + tr("Author: ")
+        + QString::fromUtf8("Nikola Kocić") + "<br><br>" + tr("Website: ")
+        + "<a href = \"https://github.com/nikola-kocic/KIV\">"
+          "https://github.com/nikola-kocic/KIV</a>");
     aboutBox.exec();
 }
 
@@ -955,12 +873,9 @@ void MainWindow::website()
 void MainWindow::toggleLargeIcons(bool b)
 {
     int size;
-    if (b)
-    {
+    if (b) {
         size = QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize);
-    }
-    else
-    {
+    } else {
         size = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     }
 
@@ -994,10 +909,10 @@ void MainWindow::updateActions()
 
 void MainWindow::on_bookmark_customContextMenuRequested(const QPoint &pos)
 {
-    if (QAction *action = m_menu_bookmarks->actionAt(pos))
-    {
-        if (action->data().isNull())
-        { return; }
+    if (QAction *action = m_menu_bookmarks->actionAt(pos)) {
+        if (action->data().isNull()) {
+            return;
+        }
 
         m_act_bookmark_active_item = action;
         m_menu_context_bookmark->popup(m_menu_bookmarks->mapToGlobal(pos));
@@ -1024,14 +939,14 @@ void MainWindow::on_view_mode_icons_triggered()
     m_view_files->setViewMode(FileViewMode::Icons);
 }
 
-void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
     if (m_ignoreMouseButtonEvent) {
         m_ignoreMouseButtonEvent = false;
         return;
     }
 
-    if (!isPosInPictureItem(event->globalPosition()))
-    {
+    if (!isPosInPictureItem(event->globalPosition())) {
         return;
     }
 
@@ -1044,9 +959,8 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 
     switch (button) {
     case Qt::MiddleButton: {
-        switch (m_settings->getMiddleClick())
-        {
-        case MiddleClickAction::Fullscreen :
+        switch (m_settings->getMiddleClick()) {
+        case MiddleClickAction::Fullscreen:
             m_act_fullscreen->toggle();
             break;
 
@@ -1076,8 +990,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
         break;
     }
     case Qt::LeftButton: {
-        switch (m_settings->getLeftClick())
-        {
+        switch (m_settings->getLeftClick()) {
         case LeftClickAction::ChangeImage: {
             const int widgetWidth = m_picture_item->width();
             const QPointF localPos = m_picture_item->mapFromGlobal(event->globalPosition());
@@ -1108,68 +1021,48 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (event->buttons() == Qt::LeftButton
-            && isPosInPictureItem(event->globalPosition())
-            && m_settings->getLeftClick() == LeftClickAction::BeginDrag)
-    {
+    if (event->buttons() == Qt::LeftButton && isPosInPictureItem(event->globalPosition())
+        && m_settings->getLeftClick() == LeftClickAction::BeginDrag) {
         m_act_fullscreen->toggle();
     }
 }
 
 void MainWindow::wheelEvent(QWheelEvent *event)
 {
-    if (!isPosInPictureItem(event->globalPosition().toPoint()))
-    {
+    if (!isPosInPictureItem(event->globalPosition().toPoint())) {
         return;
     }
 
     /* event->delta() > 0 == Up
        event->delta() < 0 == Down */
     if ((Qt::ControlModifier == event->modifiers())
-        ||((Qt::NoModifier == event->modifiers())
-           && (WheelAction::Zoom == m_settings->getWheel())))
-    {
-        if (event->angleDelta().y() < 0)
-        {
+        || ((Qt::NoModifier == event->modifiers())
+            && (WheelAction::Zoom == m_settings->getWheel()))) {
+        if (event->angleDelta().y() < 0) {
             m_comboBox_zoom->zoomOut();
-        }
-        else
-        {
+        } else {
             m_comboBox_zoom->zoomIn();
         }
-    }
-    else if (Qt::NoModifier == event->modifiers())
-    {
+    } else if (Qt::NoModifier == event->modifiers()) {
         /* If image can't be scrolled, change image if necessary */
-        if (WheelAction::ChangeImage == m_settings->getWheel())
-        {
-            if (event->angleDelta().y() < 0)
-            {
+        if (WheelAction::ChangeImage == m_settings->getWheel()) {
+            if (event->angleDelta().y() < 0) {
                 m_view_files->imageNext();
-            }
-            else
-            {
+            } else {
                 m_view_files->imagePrevious();
             }
         }
         /* Scroll image */
-        else if (WheelAction::Scroll == m_settings->getWheel())
-        {
+        else if (WheelAction::Scroll == m_settings->getWheel()) {
             m_picture_item->scrollImageVertical(event->angleDelta().y());
         }
-    }
-    else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers())
-    {
+    } else if ((Qt::ControlModifier | Qt::ShiftModifier) == event->modifiers()) {
         /* For standard scroll (+-120), zoom +-25% */
-        m_comboBox_zoom->setZoom(m_comboBox_zoom->getZoom()
-                                 * (1 + ((event->angleDelta().y() / 4.8) / 100)));
-    }
-    else if (Qt::ShiftModifier == event->modifiers())
-    {
+        m_comboBox_zoom->setZoom(
+            m_comboBox_zoom->getZoom() * (1 + ((event->angleDelta().y() / 4.8) / 100)));
+    } else if (Qt::ShiftModifier == event->modifiers()) {
         m_picture_item->scrollImageVertical(event->angleDelta().y());
-    }
-    else if (Qt::AltModifier == event->modifiers())
-    {
+    } else if (Qt::AltModifier == event->modifiers()) {
         m_picture_item->scrollImageHorizontal(event->angleDelta().y());
     }
 }
@@ -1177,10 +1070,8 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 void MainWindow::changeEvent(QEvent *event)
 {
     QWidget::changeEvent(event);
-    if (event->type() == QEvent::ActivationChange)
-    {
-        if (this->isActiveWindow())
-        {
+    if (event->type() == QEvent::ActivationChange) {
+        if (this->isActiveWindow()) {
             if (QApplication::mouseButtons() & Qt::LeftButton) {
                 m_ignoreMouseButtonEvent = true;
             }
@@ -1193,19 +1084,15 @@ void MainWindow::changeEvent(QEvent *event)
 void MainWindow::populateHistoryMenu()
 {
     /* Cache: If history menu is not empty that means history did not change. */
-    if (!m_menu_history->isEmpty())
-    {
+    if (!m_menu_history->isEmpty()) {
         return;
     }
     const QList<QUrl> history = m_urlNavigator->getHistory();
-    for (int i = 0; i < history.size(); ++i)
-    {
-        const QString path = QDir::toNativeSeparators(
-                    history.at(i).toLocalFile());
+    for (int i = 0; i < history.size(); ++i) {
+        const QString path = QDir::toNativeSeparators(history.at(i).toLocalFile());
         QAction *const action = m_menu_history->addAction(path);
         action->setData(i);
-        if (i == m_urlNavigator->historyIndex())
-        {
+        if (i == m_urlNavigator->historyIndex()) {
             action->setCheckable(true);
             action->setChecked(true);
         }
@@ -1229,8 +1116,7 @@ void MainWindow::on_urlHistoryChanged()
     m_menu_history->clear();
 
     int historySize = m_urlNavigator->historySize();
-    if (historySize <= 1)
-    {
+    if (historySize <= 1) {
         return;
     }
 

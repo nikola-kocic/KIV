@@ -1,8 +1,8 @@
 #include <QApplication>
 
 #include "archiveextractor.h"
-#include "picture_loader.h"
 #include "dataloader.h"
+#include "picture_loader.h"
 
 #include "widgets/main_window.h"
 

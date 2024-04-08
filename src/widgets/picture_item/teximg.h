@@ -55,20 +55,20 @@ private:
 
     void ComputeBitmapPow2Size(TileDim *tileDim);
     void InitTiles(TileDim *tileDim);
-
 };
 
-bool ClipTextureVertex(double texCrd1,
-                       double texCrd2,
-                       double vertexCrd1,
-                       double vertexCrd2,
-                       double texBorder1,
-                       double texBorder2,
-                       double texOffsetMin,
-                       double texScale,
-                       double &texClip1,
-                       double &texClip2,
-                       double &vertexClip1,
-                       double &vertexClip2);
+bool ClipTextureVertex(
+    double texCrd1,
+    double texCrd2,
+    double vertexCrd1,
+    double vertexCrd2,
+    double texBorder1,
+    double texBorder2,
+    double texOffsetMin,
+    double texScale,
+    double &texClip1,
+    double &texClip2,
+    double &vertexClip1,
+    double &vertexClip2);
 
-#endif  // TEXIMG_H
+#endif // TEXIMG_H

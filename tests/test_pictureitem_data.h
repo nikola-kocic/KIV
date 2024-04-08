@@ -22,7 +22,6 @@ private Q_SLOTS:
     void testZoomOut();
     void testRotate();
     void testZoomOutRotate();
-
 };
 
 #endif // TEST_PICTUREITEM_DATA_H

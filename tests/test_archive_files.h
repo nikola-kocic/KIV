@@ -1,21 +1,21 @@
 #ifndef TEST_ARCHIVE_FILES_H
 #define TEST_ARCHIVE_FILES_H
 
-#include <QObject>
 #include <QHash>
+#include <QObject>
 
+#include "archiveextractor.h"
 #include "fixtures.h"
 #include "include/IArchiveExtractor.h"
-#include "archiveextractor.h"
 
 class TestArchiveFiles : public QObject
 {
     Q_OBJECT
 public:
     explicit TestArchiveFiles(
-            const IArchiveExtractor *const archive_extractor,
-            const DirStructureFixture &tds,
-            QObject *parent=nullptr);
+        const IArchiveExtractor *const archive_extractor,
+        const DirStructureFixture &tds,
+        QObject *parent = nullptr);
 
 protected:
     const IArchiveExtractor *const m_archive_extractor;
@@ -24,7 +24,6 @@ protected:
     void commonCheck(const QString &archiveName, const DirStructureFixture &tds);
     void readExtractedFiles();
 };
-
 
 class TestArchiveFilesZip : public TestArchiveFiles
 {
@@ -38,7 +37,6 @@ private Q_SLOTS:
     void testZipZipBzip2();
     void testZipZipDeflate();
     void testZipZipStore();
-
 };
 
 class TestArchiveFilesRar4 : public TestArchiveFiles
@@ -49,6 +47,5 @@ class TestArchiveFilesRar4 : public TestArchiveFiles
 private Q_SLOTS:
     void initTestCase();
     void testRar4();
-
 };
 #endif // TEST_ARCHIVE_FILES_H

@@ -6,7 +6,7 @@
 #include "settings.h"
 
 namespace Ui {
-    class Settings_Dialog;
+class Settings_Dialog;
 }
 
 class Settings_Dialog : public QDialog
@@ -25,4 +25,4 @@ private:
     Settings *m_settings;
 };
 
-#endif  // SETTINGS_DIALOG_H
+#endif // SETTINGS_DIALOG_H

@@ -12,9 +12,10 @@ class ViewFilesUnified : public QTreeView
 {
     Q_OBJECT
 public:
-    ViewFilesUnified(const IArchiveExtractor * const archive_extractor,
-                     CustomFileSystemModel *modelFilesystem,
-                     QWidget *parent = nullptr);
+    ViewFilesUnified(
+        const IArchiveExtractor *const archive_extractor,
+        CustomFileSystemModel *modelFilesystem,
+        QWidget *parent = nullptr);
     void imageNext();
     void imagePrevious();
     bool setLocationUrl(const QUrl &url);
@@ -27,14 +28,13 @@ public:
 
 protected:
     CustomFileSystemModel *mModelFilesystem;
-    const IArchiveExtractor * const mArchiveExtractor;
+    const IArchiveExtractor *const mArchiveExtractor;
     NestedModel<QString> *mNestedModel;
     FileInfo m_fileinfo_current;
-    NodeNavigator* mNodeNavigator;
+    NodeNavigator *mNodeNavigator;
     QPersistentModelIndex mLastDirLoaded;
 
-    void on_filesystemView_currentRowChanged(const QModelIndex &current,
-                                             const QModelIndex &previous);
+    void on_filesystemView_currentRowChanged(const QModelIndex &current, const QModelIndex &previous);
 
 signals:
     void urlChanged(const QUrl &url);

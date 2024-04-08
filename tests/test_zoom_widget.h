@@ -5,7 +5,7 @@
 
 #include "widgets/zoom_widget.h"
 
-class TestZoomWidget: public QObject
+class TestZoomWidget : public QObject
 {
     Q_OBJECT
 

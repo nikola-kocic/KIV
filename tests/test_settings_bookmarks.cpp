@@ -3,11 +3,8 @@
 
 void TestSettingsBookmarks::init()
 {
-    m_qsettings = new QSettings(
-                QSettings::IniFormat,
-                QSettings::UserScope,
-                "KIV_unittest",
-                "KIV_unittest");
+    m_qsettings
+        = new QSettings(QSettings::IniFormat, QSettings::UserScope, "KIV_unittest", "KIV_unittest");
     m_qsettings->clear();
     m_settings = new Settings(m_qsettings);
 }
@@ -22,13 +19,12 @@ void TestSettingsBookmarks::testBookmarkAdd()
 {
     bool addResult = m_settings->addBookmark("b1name", "B:\\img1.jpg");
     QCOMPARE(addResult, true);
-    QList<Bookmark*> bookmarks = m_settings->getBookmarks();
-    QList<Bookmark*> expected;
+    QList<Bookmark *> bookmarks = m_settings->getBookmarks();
+    QList<Bookmark *> expected;
     expected.append(new Bookmark("b1name", "B:\\img1.jpg"));
     QCOMPARE(bookmarks.size(), 1);
     QCOMPARE(*(bookmarks.first()), *(expected.first()));
-    for (const Bookmark *const bookmark : expected)
-    {
+    for (const Bookmark *const bookmark : expected) {
         delete bookmark;
     }
 }
@@ -49,7 +45,7 @@ void TestSettingsBookmarks::testBookmarkDeleteFromMiddle()
 
     bool delResult = m_settings->deleteBookmark("B:\\img2.jpg");
     QCOMPARE(delResult, true);
-    QList<Bookmark*> bookmarks = m_settings->getBookmarks();
+    QList<Bookmark *> bookmarks = m_settings->getBookmarks();
     QCOMPARE(bookmarks.size(), 2);
     QCOMPARE(m_settings->getBookmarkCount(), 2);
     QCOMPARE(bookmarks.at(0)->getPath(), QString("B:\\img1.jpg"));
@@ -64,7 +60,7 @@ void TestSettingsBookmarks::testBookmarkDeleteFromEnd()
 
     bool delResult = m_settings->deleteBookmark("B:\\img3.jpg");
     QCOMPARE(delResult, true);
-    QList<Bookmark*> bookmarks = m_settings->getBookmarks();
+    QList<Bookmark *> bookmarks = m_settings->getBookmarks();
     QCOMPARE(bookmarks.size(), 2);
     QCOMPARE(m_settings->getBookmarkCount(), 2);
     QCOMPARE(bookmarks.at(0)->getPath(), QString("B:\\img1.jpg"));
@@ -79,7 +75,7 @@ void TestSettingsBookmarks::testBookmarkDeleteFromStart()
 
     bool delResult = m_settings->deleteBookmark("B:\\img1.jpg");
     QCOMPARE(delResult, true);
-    QList<Bookmark*> bookmarks = m_settings->getBookmarks();
+    QList<Bookmark *> bookmarks = m_settings->getBookmarks();
     QCOMPARE(bookmarks.size(), 2);
     QCOMPARE(m_settings->getBookmarkCount(), 2);
     QCOMPARE(bookmarks.at(0)->getPath(), QString("B:\\img2.jpg"));

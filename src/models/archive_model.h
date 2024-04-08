@@ -9,45 +9,40 @@
 #include <QVariant>
 
 #include "enums.h"
-#include "models/archive_item.h"
 #include "fileinfo.h"
-
+#include "models/archive_item.h"
 
 class ArchiveModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    explicit ArchiveModel(const std::vector<ArchiveFileInfo> &archive_files,
-                          QObject *const parent = nullptr);
+    explicit ArchiveModel(
+        const std::vector<ArchiveFileInfo> &archive_files, QObject *const parent = nullptr);
     ~ArchiveModel() override;
 
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
-    QVariant headerData(int section,
-                        Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row,
-                      int column,
-                      const QModelIndex &parent = QModelIndex()) const override;
+    QVariant headerData(
+        int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    QModelIndex getIndexFromPath(const QString &path) const;  // Use with info.getZipPath()
-    QModelIndex findIndexChild(const QString &text,
-                               const QModelIndex &root = QModelIndex()) const;
+    QModelIndex getIndexFromPath(const QString &path) const; // Use with info.getZipPath()
+    QModelIndex findIndexChild(const QString &text, const QModelIndex &root = QModelIndex()) const;
     QModelIndex createIndexMine(int arow, int acolumn, quintptr i) const;
-    QString getIndexIdentifier(const QModelIndex& index) const;
-
+    QString getIndexIdentifier(const QModelIndex &index) const;
 
 private:
-    ArchiveItem* AddNode(const QString &name,
-                         const QDateTime &date,
-                         const qint64 &bytes,
-                         const QString &path,
-                         const NodeType type,
-                         ArchiveItem *const parent = nullptr);
+    ArchiveItem *AddNode(
+        const QString &name,
+        const QDateTime &date,
+        const qint64 &bytes,
+        const QString &path,
+        const NodeType type,
+        ArchiveItem *const parent = nullptr);
     ArchiveItem *getItem(const QModelIndex &index) const;
 
     void populate(const std::vector<ArchiveFileInfo> &archive_files);
@@ -58,4 +53,4 @@ private:
     QIcon m_icon_file;
 };
 
-#endif  // ARCHIVE_MODEL_H
+#endif // ARCHIVE_MODEL_H
