@@ -22,19 +22,31 @@ void TestPictureItemRaster::cleanup()
     delete m_pictureitem;
 }
 
-void TestPictureItemRaster::testRenderNoImage()
-{
-    QPixmap expectedImg(m_viewSize);
-    QPainter pExpected(&expectedImg);
-    pExpected.fillRect(m_viewRect, m_data.m_color_clear);
-    pExpected.end();
-
-    QPixmap viewImg(m_viewSize);
-    QPainter p(&viewImg);
+void TestPictureItemRaster::compareToExpected(const QString& expectedPath) {
+    QPixmap viewPixmap(m_viewSize);
+    QPainter p(&viewPixmap);
     QPaintEvent e(m_viewRect);
     m_pictureitem->paint(p, &e);
     p.end();
-    QCOMPARE(expectedImg, viewImg);
+
+    const auto actualImage = viewPixmap.toImage();
+    const auto expectedImg = QImage(expectedPath).convertToFormat(actualImage.format());
+    QCOMPARE(expectedImg, actualImage);
+}
+
+void TestPictureItemRaster::testRenderNoImage()
+{
+    QPixmap expectedPixmap(m_viewSize);
+    QPainter pExpected(&expectedPixmap);
+    pExpected.fillRect(m_viewRect, m_data.m_color_clear);
+    pExpected.end();
+
+    QPixmap viewPixmap(m_viewSize);
+    QPainter p(&viewPixmap);
+    QPaintEvent e(m_viewRect);
+    m_pictureitem->paint(p, &e);
+    p.end();
+    QCOMPARE(expectedPixmap, viewPixmap);
 }
 
 void TestPictureItemRaster::testRenderNormal()
@@ -45,14 +57,7 @@ void TestPictureItemRaster::testRenderNormal()
     m_data.setWidgetSize(m_viewSize);
     m_data.updateSize();
 
-    QPixmap viewImg(m_viewSize);
-    QPainter p(&viewImg);
-    QPaintEvent e(m_viewRect);
-    m_pictureitem->paint(p, &e);
-    p.end();
-
-    QPixmap expectedImg(":/assets/expected-normal.png");
-    QCOMPARE(expectedImg, viewImg);
+    compareToExpected(":/assets/expected-normal.png");
 }
 
 void TestPictureItemRaster::testRenderZoomed()
@@ -64,14 +69,7 @@ void TestPictureItemRaster::testRenderZoomed()
     qreal out_zoom;
     m_data.setZoom(2.0, out_zoom);
 
-    QPixmap viewImg(m_viewSize);
-    QPainter p(&viewImg);
-    QPaintEvent e(m_viewRect);
-    m_pictureitem->paint(p, &e);
-    p.end();
-
-    QPixmap expectedImg(":/assets/expected-zoomed.png");
-    QCOMPARE(expectedImg, viewImg);
+    compareToExpected(":/assets/expected-zoomed.png");
 }
 
 void TestPictureItemRaster::testRenderZoomedCropped()
@@ -83,13 +81,5 @@ void TestPictureItemRaster::testRenderZoomedCropped()
     qreal out_zoom;
     m_data.setZoom(3.0, out_zoom);
 
-    QPixmap viewImg(m_viewSize);
-    QPainter p(&viewImg);
-    QPaintEvent e(m_viewRect);
-    m_pictureitem->paint(p, &e);
-    p.end();
-//    viewImg.save("D:/out.png");
-
-    QPixmap expectedImg(":/assets/expected-zoomed-cropped.png");
-    QCOMPARE(expectedImg, viewImg);
+    compareToExpected(":/assets/expected-zoomed-cropped.png");
 }

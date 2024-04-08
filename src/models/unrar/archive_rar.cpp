@@ -44,16 +44,25 @@ bool ArchiveRar::loadlib()
     }
 
     RAROpenArchiveEx = reinterpret_cast<RAROpenArchiveExT>(Lib->resolve("RAROpenArchiveEx"));
+    Q_ASSERT(RAROpenArchiveEx);
     RARCloseArchive = reinterpret_cast<RARCloseArchiveT>(Lib->resolve("RARCloseArchive"));
+    Q_ASSERT(RARCloseArchive);
     RARReadHeaderEx = reinterpret_cast<RARReadHeaderExT>(Lib->resolve("RARReadHeaderEx"));
+    Q_ASSERT(RARReadHeaderEx);
     RARProcessFileW = reinterpret_cast<RARProcessFileWT>(Lib->resolve("RARProcessFileW"));
+    Q_ASSERT(RARProcessFileW);
     RARSetCallback = reinterpret_cast<RARSetCallbackT>(Lib->resolve("RARSetCallback"));
+    Q_ASSERT(RARSetCallback);
     RARSetChangeVolProc = reinterpret_cast<RARSetChangeVolProcT>(
                 Lib->resolve("RARSetChangeVolProc"));
+    Q_ASSERT(RARSetChangeVolProc);
     RARSetProcessDataProc = reinterpret_cast<RARSetProcessDataProcT>(
                 Lib->resolve("RARSetProcessDataProc"));
+    Q_ASSERT(RARSetProcessDataProc);
     RARSetPassword = reinterpret_cast<RARSetPasswordT>(Lib->resolve("RARSetPassword"));
+    Q_ASSERT(RARSetPassword);
     RARGetDllVersion = reinterpret_cast<RARGetDllVersionT>(Lib->resolve("RARGetDllVersion"));
+    Q_ASSERT(RARGetDllVersion);
 
     return true;
 }
@@ -143,7 +152,9 @@ static int CALLBACK CallbackProc(unsigned int msg,
     case UCM_PROCESSDATA:
     {
         CallbackData* data = reinterpret_cast<CallbackData*>(UserData);
+        Q_ASSERT(data != nullptr);
         char* unpackedData = reinterpret_cast<char*>(unpackedDataParam);
+        Q_ASSERT(unpackedData != nullptr);
         data->buf->append(unpackedData, static_cast<int>(unpackedDataSize));
         if (data->maxSize != -1 && data->buf->size() >= data->maxSize)
         {
@@ -169,8 +180,7 @@ bool ArchiveRar::readFile(const QString &archiveName,
     const std::wstring arcNameW = archiveName.toStdWString();
     bool retval = true;
 
-    RAROpenArchiveDataEx OpenArchiveData;
-    memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
+    RAROpenArchiveDataEx OpenArchiveData{};
     OpenArchiveData.ArcNameW = arcNameW.c_str();
     OpenArchiveData.OpenMode = RAR_OM_EXTRACT;
 
@@ -185,13 +195,11 @@ bool ArchiveRar::readFile(const QString &archiveName,
     CallbackData callBackUserData = CallbackData(&buffer, maxSize);
     RARSetCallback(hArcData, CallbackProc, reinterpret_cast<LPARAM>(&callBackUserData));
 
-    RARHeaderDataEx HeaderData;
-    HeaderData.CmtBuf = nullptr;
-    memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
-
     int RHCode, PFCode;
-    while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+    do
     {
+        RARHeaderDataEx HeaderData{};
+        RHCode = RARReadHeaderEx(hArcData, &HeaderData);
         if (wcscmp(fileNameW.c_str(), HeaderData.FileNameW) == 0)
         {
             if (maxSize == -1)
@@ -219,7 +227,7 @@ bool ArchiveRar::readFile(const QString &archiveName,
             retval = false;
             break;
         }
-    }
+    } while (RHCode == 0);
 
     if (RHCode == ERAR_BAD_DATA)
     {
@@ -265,8 +273,7 @@ unsigned int ArchiveRar::getFileInfoList(
 {
     std::wstring path_wstr = path.toStdWString();
 
-    RAROpenArchiveDataEx OpenArchiveData;
-    memset(&OpenArchiveData, 0, sizeof(OpenArchiveData));
+    RAROpenArchiveDataEx OpenArchiveData{};
     OpenArchiveData.ArcNameW = path_wstr.c_str();
     OpenArchiveData.OpenMode = RAR_OM_LIST;
 
@@ -278,13 +285,10 @@ unsigned int ArchiveRar::getFileInfoList(
     }
 
     int RHCode, PFCode;
-    RARHeaderDataEx HeaderData;
-
-    HeaderData.CmtBuf = nullptr;
-    memset(&OpenArchiveData.Reserved, 0, sizeof(OpenArchiveData.Reserved));
-
-    while ((RHCode = RARReadHeaderEx(hArcData, &HeaderData)) == 0)
+    do
     {
+        RARHeaderDataEx HeaderData{};
+        RHCode = RARReadHeaderEx(hArcData, &HeaderData);
         list.push_back(createArchiveFileInfo(HeaderData));
 
 //#ifdef DEBUG_MODEL_FILES
@@ -296,7 +300,7 @@ unsigned int ArchiveRar::getFileInfoList(
             qWarning("RARProcessFileW RAR_SKIP error %d", PFCode);
             break;
         }
-    }
+    } while(RHCode == 0);
 
     if (RHCode == ERAR_BAD_DATA)
     {
