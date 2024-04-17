@@ -360,11 +360,12 @@ public:
             const TIdentifier parentIdentifier = getParentIndexIdentifier(parent);
             const QAbstractItemModel *childModel = mModelHandler->createChildModel(
                 mapToSource(parent));
-
-            beginInsertRows(parent, 0, childModel->rowCount());
-            mChildModels.insert(parentInternalId, childModel);
-            mParentIdentifiers.insert(parentInternalId, parentIdentifier);
-            endInsertRows();
+            if (childModel != nullptr) {
+                beginInsertRows(parent, 0, childModel->rowCount());
+                mChildModels.insert(parentInternalId, childModel);
+                mParentIdentifiers.insert(parentInternalId, parentIdentifier);
+                endInsertRows();
+            }
 
             return;
         }
@@ -418,7 +419,7 @@ protected:
         endRemoveColumns();
     }
     void _q_sourceDataChanged(
-        const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+        const QModelIndex &topLeft, const QModelIndex &bottomRight, const QList<int> &roles)
     {
         dataChanged(mapFromSource(topLeft), mapFromSource(bottomRight), roles);
     }

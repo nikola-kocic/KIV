@@ -49,15 +49,14 @@ QByteArray DataLoader::getFileData(const QString &file_path, int maxSize) const
 QByteArray DataLoader::getArchiveFileData(
     const QString &archive_path, const QString &archive_image_path, int maxSize) const
 {
-    QByteArray buff;
-    int success = m_archive_extractor->readFile(archive_path, archive_image_path, buff, maxSize);
+    const auto buff = m_archive_extractor->readFile(archive_path, archive_image_path, maxSize);
 
-    if (success != 0 || buff.isEmpty()) {
+    if (!buff || buff->isEmpty()) {
         return QByteArray();
     }
 
 #ifdef DEBUG_DATA_LOADER
     DEBUGOUT << "finished reading from archive" << file_info.getPath();
 #endif
-    return buff;
+    return *buff;
 }

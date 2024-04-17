@@ -2,18 +2,19 @@
 #define ZOOMWIDGET_H
 
 #include <QComboBox>
-#include <QVector>
+
+#include <vector>
 
 class ZoomWidget : public QComboBox
 {
     Q_OBJECT
 public:
-    explicit ZoomWidget(const QVector<qreal> defaultZoomSizes, QWidget *parent = nullptr);
-    qreal getZoom();
-    void on_zoomChanged(qreal current, qreal previous);
+    explicit ZoomWidget(std::vector<double> defaultZoomSizes, QWidget *parent = nullptr);
+    double getZoom();
+    void on_zoomChanged(double current, double previous);
     void zoomIn();
     void zoomOut();
-    void setZoom(qreal value);
+    void setZoom(double value);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -23,11 +24,11 @@ private:
     void on_textChanged();
     void on_activated(int index);
 
-    qreal m_zoomValue;
-    const QVector<qreal> m_defaultZoomSizes;
+    double m_zoomValue;
+    const std::vector<double> m_defaultZoomSizes;
 
 signals:
-    void zoomChanged(qreal value);
+    void zoomChanged(double value);
 };
 
 #endif // ZOOMWIDGET_H

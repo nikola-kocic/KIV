@@ -1,8 +1,9 @@
 #ifndef FIXTURES_H
 #define FIXTURES_H
 
+#include <QDir>
+
 #include <functional>
-#include <memory>
 #include <vector>
 
 #include "enums.h"
@@ -78,18 +79,18 @@ public:
         std::function<QString()> dirNameGiver,
         std::function<QDateTime(DirStructureFixtureElement)> dateGiver,
         std::function<quint32(DirStructureFixtureElement)> sizeGiver,
-        const QString &baseDir);
+        QDir baseDir);
     std::vector<ArchiveFileInfo> getDirs() const;
     std::vector<ArchiveFileInfo> getFiles() const;
-    QString getPath() const;
-    QString getBaseDir() const { return m_baseDir; }
+    QDir getPath() const;
+    const QDir &getBaseDir() const { return m_baseDir; }
 
 protected:
     const std::function<QString(DirStructureFixtureElement)> m_pathGiver;
     const std::function<QString()> m_dirNameGiver;
     const std::function<QDateTime(DirStructureFixtureElement)> m_dateGiver;
     const std::function<quint32(DirStructureFixtureElement)> m_sizeGiver;
-    const QString m_baseDir;
+    const QDir m_baseDir;
     ArchiveFileInfo get(DirStructureFixtureElement element) const;
 };
 

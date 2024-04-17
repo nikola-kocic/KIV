@@ -1,9 +1,7 @@
 #ifndef INIT_TEST_DATA_H
 #define INIT_TEST_DATA_H
 
-#include <functional>
-#include <memory>
-#include <vector>
+#include <QDir>
 #include <QString>
 
 #include "fixtures.h"
@@ -13,11 +11,11 @@ class InitTestArchives
     friend class InitTestData;
 
 protected:
-    InitTestArchives(const QString &src_dir)
+    InitTestArchives(const QDir &src_dir)
         : m_src_dir(src_dir)
     {}
 
-    QString m_src_dir;
+    QDir m_src_dir;
 
 public:
     void createZip() const;

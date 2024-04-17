@@ -2,7 +2,6 @@
 
 #include <QKeyEvent>
 #include <QLineEdit>
-#include <QVector>
 
 #include "helper.h"
 
@@ -11,10 +10,10 @@
 #include "helper.h"
 #endif
 
-ZoomWidget::ZoomWidget(const QVector<qreal> defaultZoomSizes, QWidget *parent)
-    : QComboBox(parent)
-    , m_zoomValue(1)
-    , m_defaultZoomSizes(defaultZoomSizes)
+ZoomWidget::ZoomWidget(std::vector<double> defaultZoomSizes, QWidget *parent)
+    : QComboBox{parent}
+    , m_zoomValue{1}
+    , m_defaultZoomSizes{std::move(defaultZoomSizes)}
 {
     //setEnabled(false);
     setInsertPolicy(QComboBox::NoInsert);
@@ -24,7 +23,7 @@ ZoomWidget::ZoomWidget(const QVector<qreal> defaultZoomSizes, QWidget *parent)
     setFocusPolicy(Qt::StrongFocus);
     lineEdit()->setCompleter(nullptr);
 
-    for (const qreal &z : m_defaultZoomSizes) {
+    for (const auto &z : m_defaultZoomSizes) {
         addItem(QString::number((z * 100), 'f', 0) + "%", z);
         if (qFuzzyCompare(z, 1) == true) {
             setCurrentIndex(count() - 1);
@@ -39,10 +38,10 @@ ZoomWidget::ZoomWidget(const QVector<qreal> defaultZoomSizes, QWidget *parent)
         &ZoomWidget::on_activated);
 }
 
-void ZoomWidget::on_zoomChanged(qreal current, qreal previous)
+void ZoomWidget::on_zoomChanged(double current, double previous)
 {
     m_zoomValue = current;
-    if (!m_defaultZoomSizes.contains(current)) {
+    if (!Helper::contains(m_defaultZoomSizes, current)) {
         /* Add current Zoom value to comboBox */
 
         const QString zoomText = QString::number((current * 100), 'f', 0) + "%";
@@ -66,7 +65,7 @@ void ZoomWidget::on_zoomChanged(qreal current, qreal previous)
         }
     }
 
-    if (!m_defaultZoomSizes.contains(previous)) {
+    if (!Helper::contains(m_defaultZoomSizes, previous)) {
         /* Remove previous Zoom value if it's not in default zoom sizes */
 
         for (int existingIndex = 0; existingIndex < count(); ++existingIndex) {
@@ -124,11 +123,11 @@ void ZoomWidget::focusOutEvent(QFocusEvent *event)
 
 void ZoomWidget::zoomIn()
 {
-    qreal zoomToApply = m_zoomValue * 1.25;
-    if (!m_defaultZoomSizes.isEmpty() && zoomToApply > m_defaultZoomSizes.first()
-        && m_zoomValue < m_defaultZoomSizes.last()) {
+    auto zoomToApply = m_zoomValue * 1.25;
+    if (!m_defaultZoomSizes.empty() && zoomToApply > m_defaultZoomSizes.front()
+        && m_zoomValue < m_defaultZoomSizes.back()) {
         const auto it = std::find_if(
-            m_defaultZoomSizes.constBegin(), m_defaultZoomSizes.constEnd(), [this](const qreal &z) {
+            m_defaultZoomSizes.cbegin(), m_defaultZoomSizes.cend(), [this](const qreal &z) {
                 return z > m_zoomValue;
             });
         if (it != m_defaultZoomSizes.end()) {
@@ -141,12 +140,12 @@ void ZoomWidget::zoomIn()
 
 void ZoomWidget::zoomOut()
 {
-    qreal zoomToApply = m_zoomValue / 1.25;
-    if (!m_defaultZoomSizes.isEmpty() && m_zoomValue > m_defaultZoomSizes.first()
-        && zoomToApply < m_defaultZoomSizes.last()) {
-        const auto rbegin{m_defaultZoomSizes.rend()};
-        const auto rend{m_defaultZoomSizes.rbegin()};
-        const auto it = std::find_if(rbegin, rend, [this](const qreal &z) {
+    auto zoomToApply = m_zoomValue / 1.25;
+    if (!m_defaultZoomSizes.empty() && m_zoomValue > m_defaultZoomSizes.front()
+        && zoomToApply < m_defaultZoomSizes.back()) {
+        const auto rbegin{m_defaultZoomSizes.rbegin()};
+        const auto rend{m_defaultZoomSizes.rend()};
+        const auto it = std::find_if(rbegin, rend, [this](const auto &z) {
             return z < m_zoomValue;
         });
         if (it != rend) {

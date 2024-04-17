@@ -40,13 +40,13 @@ const CommandData getImageCompressCommand(const QString &path)
     return CommandData("optipng", {"-quiet", "-strip", "all", path});
 }
 
-bool generateFolderContentFile(const QString &path)
+bool generateFolderContentFile(const QDir &path)
 {
-    const QString out_path = QDir::cleanPath(path + QDir::separator() + "content.txt");
+    const QString out_path = path.filePath("content.txt");
     const QString folder_content_command = QString("tree");
     const QStringList folder_content_command_args = {"-N", "-D", "--timefmt=%FT%T%z", "."};
-    QProcess p;
-    p.setWorkingDirectory(path);
+    auto p = QProcess{};
+    p.setWorkingDirectory(path.absolutePath());
     p.start(folder_content_command, folder_content_command_args);
     p.waitForFinished();
     QFile f(out_path);
@@ -57,13 +57,13 @@ bool generateFolderContentFile(const QString &path)
     return success;
 }
 
-bool executeCommand(const CommandData &command, const QString &workingDir)
+bool executeCommand(const CommandData &command, const QDir &workingDir)
 {
     bool success = false;
 #ifndef WIN32
     QProcess p;
     //qDebug() << command;
-    p.setWorkingDirectory(workingDir);
+    p.setWorkingDirectory(workingDir.absolutePath());
     p.start(command.program, command.arguments);
     success = p.waitForFinished();
     if (!success) {
@@ -82,7 +82,7 @@ bool executeCommand(const CommandData &command, const QString &workingDir)
     return success;
 }
 
-bool executeCommands(const QList<CommandData> &commands, const QString &workingDir)
+bool executeCommands(const std::vector<CommandData> &commands, const QDir &workingDir)
 {
     bool success = true;
     for (const CommandData &command : commands) {
@@ -95,63 +95,57 @@ void createFiles(
     const std::vector<ArchiveFileInfo> &folders,
     const std::vector<ArchiveFileInfo> &files,
     std::function<QString(ArchiveFileInfo)> fFilePath,
-    std::function<QString()> fWorkingDir)
+    std::function<QDir()> fWorkingDir)
 {
-    QList<CommandData> image_create_commands;
-    QList<CommandData> date_set_commands;
+    std::vector<CommandData> image_create_commands;
+    std::vector<CommandData> date_set_commands;
     for (const ArchiveFileInfo &afi : folders) {
         const QString path = fFilePath(afi);
         Q_ASSERT_X(QDir().mkpath(path), QString("makeTestData folders").toUtf8(), path.toUtf8());
-        date_set_commands.append(getDateSetCommand(path, afi.m_dateTime));
+        date_set_commands.push_back(getDateSetCommand(path, afi.m_dateTime));
     }
 
     for (const ArchiveFileInfo &afi : files) {
         const QString path = fFilePath(afi);
         if (!afi.m_name.endsWith(".txt")) {
-            image_create_commands.append(getImageCreateCommand(path));
-            image_create_commands.append(getImageCompressCommand(path));
+            image_create_commands.push_back(getImageCreateCommand(path));
+            image_create_commands.push_back(getImageCompressCommand(path));
         }
-        date_set_commands.append(getDateSetCommand(path, afi.m_dateTime));
+        date_set_commands.push_back(getDateSetCommand(path, afi.m_dateTime));
     }
-    const QString extracted_dir = fWorkingDir();
+    const auto extracted_dir = fWorkingDir();
     executeCommands(image_create_commands, extracted_dir);
     executeCommands(date_set_commands, extracted_dir);
     generateFolderContentFile(extracted_dir);
     executeCommands(date_set_commands, extracted_dir);
 }
 
-const QList<CommandData> getArchiveCommandsZip()
+const std::vector<CommandData> getArchiveCommandsZip()
 {
-    return QList<CommandData>()
-           << CommandData(
-                  "zip", {"--quiet", "-9", "-r", "-Z", "store", "../ZIP zip store 😼.zip", "."})
-           << CommandData(
-                  "zip", {"--quiet", "-9", "-r", "-Z", "bzip2", "../ZIP zip bzip2 😺.zip", "."})
-           << CommandData(
-                  "zip", {"--quiet", "-9", "-r", "-Z", "deflate", "../ZIP zip deflate 😻.zip", "."})
-           << CommandData("7za", {"a", "-mx=9", "-r", "-tzip", "../ZIP 7za deflate 😹.zip", "."})
-           << CommandData("rar", {"a", "-r", "-m5", "-ma5", "../RAR rar5 😸.rar", "."});
+    return {
+        CommandData{"zip", {"--quiet", "-9", "-r", "-Z", "store", "../ZIP zip store 😼.zip", "."}},
+        CommandData{"zip", {"--quiet", "-9", "-r", "-Z", "bzip2", "../ZIP zip bzip2 😺.zip", "."}},
+        CommandData{"zip", {"--quiet", "-9", "-r", "-Z", "deflate", "../ZIP zip deflate 😻.zip", "."}},
+        CommandData{"7za", {"a", "-mx=9", "-r", "-tzip", "../ZIP 7za deflate 😹.zip", "."}},
+        CommandData{"rar", {"a", "-r", "-m5", "-ma5", "../RAR rar5 😸.rar", "."}}};
 }
 
-const QList<CommandData> getArchiveCommandsRar4()
+const std::vector<CommandData> getArchiveCommandsRar4()
 {
-    return QList<CommandData>() << CommandData(
-               "rar", {"a", "-r", "-m5", "-ma4", "../RAR rar4 😷.rar", "."});
+    return {CommandData{"rar", {"a", "-r", "-m5", "-ma4", "../RAR rar4 😷.rar", "."}}};
 }
 
 } // namespace
 
 InitTestArchives InitTestData::makeTestData(const DirStructureFixture &dsf) const
 {
-    const std::vector<ArchiveFileInfo> folders = dsf.getDirs();
-    std::vector<ArchiveFileInfo> files = dsf.getFiles();
-    const QString &dir = dsf.getPath();
+    const auto folders = dsf.getDirs();
+    const auto files = dsf.getFiles();
+    const auto dir = dsf.getPath();
     createFiles(
         folders,
         files,
-        [&dir](ArchiveFileInfo afi) {
-            return QDir::cleanPath(dir + QDir::separator() + afi.m_name);
-        },
+        [&dir](ArchiveFileInfo afi) { return dir.filePath(afi.m_name); },
         [&dir]() { return dir; });
     return InitTestArchives(dir);
 }

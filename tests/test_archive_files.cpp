@@ -17,7 +17,7 @@ TestArchiveFiles::TestArchiveFiles(
 void TestArchiveFiles::readExtractedFiles()
 {
     for (ArchiveFileInfo &afi : m_tds.getFiles()) {
-        const QString path = m_tds.getPath() + QDir::separator() + afi.m_name;
+        const QString path = m_tds.getPath().filePath(afi.m_name);
         QFile f(path);
         QVERIFY2(f.open(QIODevice::ReadOnly), path.toUtf8());
         m_file_content[afi.m_name] = f.readAll();
@@ -27,19 +27,18 @@ void TestArchiveFiles::readExtractedFiles()
 
 void TestArchiveFiles::commonCheck(const QString &archiveName, const DirStructureFixture &tds)
 {
-    const QString archivePath = QDir::cleanPath(
-        m_tds.getBaseDir() + QDir::separator() + archiveName);
+    const QString archivePath = m_tds.getBaseDir().filePath(archiveName);
     for (ArchiveFileInfo &afi : tds.getFiles()) {
-        QByteArray buffer;
-        m_archive_extractor->readFile(archivePath, afi.m_name, buffer, -1);
+        const auto buffer = m_archive_extractor->readFile(archivePath, afi.m_name, -1);
+        QVERIFY(buffer.has_value());
         QString fileContentKey = afi.m_name;
-        QVERIFY2(buffer.size() > 0, QString(archivePath + "\n\n" + afi.m_name).toUtf8());
+        QVERIFY2(buffer->size() > 0, QString(archivePath + "\n\n" + afi.m_name).toUtf8());
         QVERIFY2(
             m_file_content[fileContentKey].size() > 0,
             QString(archivePath + "\n\n" + afi.m_name).toUtf8());
         if (buffer != m_file_content[fileContentKey]) {
             qDebug() << afi.m_name;
-            qDebug() << QString(buffer);
+            qDebug() << *buffer;
             qDebug() << QString(m_file_content[fileContentKey]);
         }
         //QVERIFY2(buffer == m_file_content[fileContentKey], afi.name.toUtf8());

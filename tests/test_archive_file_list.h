@@ -1,6 +1,7 @@
 #ifndef TEST_ARCHIVE_FILE_LIST_H
 #define TEST_ARCHIVE_FILE_LIST_H
 
+#include <QDir>
 #include <QObject>
 #include <QStringList>
 
@@ -16,12 +17,12 @@ public:
     TestArchiveFileList(
         const IArchiveExtractor *const archive_extractor,
         const DirStructureFixture &tds,
-        const QString &archives_dir,
+        const QDir &archives_dir,
         QObject *parent = nullptr);
 
 protected:
     const IArchiveExtractor *const m_archive_extractor;
-    const QString m_archives_dir;
+    const QDir m_archives_dir;
     const DirStructureFixture &m_tds;
 
     void commonCheck(const QString &archiveName, const DirStructureFixture &tds);

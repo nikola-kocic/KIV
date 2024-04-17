@@ -1,10 +1,12 @@
 #ifndef ARCHIVE_RAR_H
 #define ARCHIVE_RAR_H
 
-#include <memory>
 #include <vector>
 #include <QBuffer>
 #include <QLibrary>
+
+#include <optional>
+#include <vector>
 
 #include "enums.h"
 
@@ -16,9 +18,9 @@ public:
     static bool loadlib();
     static bool extract(
         const QString &archiveName, const QString &fileName, const QString &newFileName);
-    static bool readFile(
-        const QString &archiveName, const QString &fileName, QByteArray &buffer, int maxSize);
-    static unsigned int getFileInfoList(const QString &path, std::vector<ArchiveFileInfo> &list);
+    static std::optional<QByteArray> readFile(
+        const QString &archiveName, const QString &fileName, int maxSize);
+    static std::optional<std::vector<ArchiveFileInfo>> getFileInfoList(const QString &path);
     static ArchiveFileInfo createArchiveFileInfo(const RARHeaderDataEx HeaderData);
 
 private:

@@ -50,4 +50,6 @@ qt6_wrap_cpp(MOCS ${tests_MOCS})
 add_executable ( tests ${tests_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
 target_link_libraries ( tests kivimpl Qt6::Test )
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets/)
+set(ASSETS_PATH "${CMAKE_CURRENT_BINARY_DIR}/assets/")
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/ DESTINATION ${ASSETS_PATH})
+target_compile_definitions(tests PRIVATE ASSETS_PATH="${ASSETS_PATH}")

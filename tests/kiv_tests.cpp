@@ -44,9 +44,8 @@ int main(int argc, char **argv)
         err = qMax(err, QTest::qExec(&testNodeNavigator, app.arguments()));
     }
 
-    const QString base_dir(QDir::cleanPath(
-        QCoreApplication::applicationDirPath() + QDir::separator() + "assets" + QDir::separator()
-        + "images"));
+    auto base_dir = QDir(ASSETS_PATH);
+    assert(base_dir.cd("images"));
     DirStructureFixture
         dsf(DirStructureFixturePathsUnicodeOutsideBMP::getPath,
             DirStructureFixturePathsUnicodeOutsideBMP::getDirName,

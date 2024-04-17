@@ -10,12 +10,9 @@ class TestZoomWidgetNoDefaults : public QObject
     Q_OBJECT
 
 private:
-    ZoomWidget *m_zoomWidget;
-    QVector<qreal> m_defaultZoomValues;
+    ZoomWidget m_zoomWidget{{}};
 
 private Q_SLOTS:
-    void init();
-    void cleanup();
     void testZoomIn();
     void testZoomOut();
 };

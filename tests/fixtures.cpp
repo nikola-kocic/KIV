@@ -7,12 +7,12 @@ DirStructureFixture::DirStructureFixture(
     std::function<QString()> dirNameGiver,
     std::function<QDateTime(DirStructureFixtureElement)> dateGiver,
     std::function<quint32(DirStructureFixtureElement)> sizeGiver,
-    const QString &baseDir)
+    QDir baseDir)
     : m_pathGiver(pathGiver)
     , m_dirNameGiver(dirNameGiver)
     , m_dateGiver(dateGiver)
     , m_sizeGiver(sizeGiver)
-    , m_baseDir(baseDir)
+    , m_baseDir{std::move(baseDir)}
 {}
 
 std::vector<ArchiveFileInfo> DirStructureFixture::getDirs() const
@@ -47,9 +47,9 @@ std::vector<ArchiveFileInfo> DirStructureFixture::getFiles() const
     return v;
 }
 
-QString DirStructureFixture::getPath() const
+QDir DirStructureFixture::getPath() const
 {
-    return QDir::cleanPath(m_baseDir + QDir::separator() + m_dirNameGiver());
+    return m_baseDir.filePath(m_dirNameGiver());
 }
 
 ArchiveFileInfo DirStructureFixture::get(DirStructureFixtureElement element) const

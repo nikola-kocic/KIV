@@ -11,7 +11,8 @@ IArchiveExtractor::~IArchiveExtractor() {}
 
 ArchiveExtractor::ArchiveExtractor() {}
 
-int ArchiveExtractor::getFileInfoList(const QString &path, std::vector<ArchiveFileInfo> &list) const
+std::optional<std::vector<ArchiveFileInfo>> ArchiveExtractor::getFileInfoList(
+    const QString &path) const
 {
     QFile archiveFile(path);
 
@@ -19,7 +20,10 @@ int ArchiveExtractor::getFileInfoList(const QString &path, std::vector<ArchiveFi
     QuaZip zip(&archiveFile);
     if (zip.open(QuaZip::mdUnzip)) {
         zip.setFileNameCodec("UTF-8");
-        QList<QuaZipFileInfo> zipList = zip.getFileInfoList();
+        auto zipList = zip.getFileInfoList();
+        auto list = std::vector<ArchiveFileInfo>{};
+        list.reserve(zipList.size());
+        std::reverse(zipList.begin(), zipList.end());
         while (!zipList.empty()) {
             const QuaZipFileInfo fi = zipList.takeLast();
             list.emplace_back(fi.name, fi.dateTime, fi.uncompressedSize);
@@ -27,18 +31,15 @@ int ArchiveExtractor::getFileInfoList(const QString &path, std::vector<ArchiveFi
         zip.close();
         if (zip.getZipError() != UNZ_OK) {
             qWarning("testRead(): zip.close(): %d", zip.getZipError());
-            return 1;
         }
-        return 0;
+        return list;
     }
 
     // Try to open as RAR
     if (ArchiveRar::loadlib()) {
-        if (ArchiveRar::getFileInfoList(path, list) == 0) {
-            return 0;
-        }
+        return ArchiveRar::getFileInfoList(path);
     }
-    return 1;
+    return std::nullopt;
 }
 
 int ArchiveExtractor::extract(
@@ -53,36 +54,33 @@ int ArchiveExtractor::extract(
     return 0;
 }
 
-int ArchiveExtractor::readFile(
-    const QString &archiveName, const QString &fileName, QByteArray &buffer, int maxSize) const
+std::optional<QByteArray> ArchiveExtractor::readFile(
+    const QString &archiveName, const QString &fileName, int maxSize) const
 {
     QFile zipFile(archiveName);
     QuaZip zip(&zipFile);
     if (zip.open(QuaZip::mdUnzip)) {
         zip.setFileNameCodec("UTF-8");
-
-        if (zip.setCurrentFile(fileName)) {
-            QuaZipFile file(&zip);
-            if (file.open(QIODevice::ReadOnly)) {
-                if (maxSize == -1) {
-                    buffer = file.readAll();
-                } else {
-                    buffer = file.read(maxSize);
-                }
-            } else {
-                return 1;
-            }
+        if (!zip.setCurrentFile(fileName)) {
+            return std::nullopt;
+        }
+        QuaZipFile file(&zip);
+        if (!file.open(QIODevice::ReadOnly)) {
+            return std::nullopt;
+        }
+        QByteArray buffer;
+        if (maxSize == -1) {
+            buffer = file.readAll();
         } else {
-            return 1;
+            buffer = file.read(maxSize);
         }
+        return buffer;
     }
 
-    if (buffer.isEmpty()) {
-        if (ArchiveRar::loadlib()) {
-            // TODO: Check return value
-            ArchiveRar::readFile(archiveName, fileName, buffer, maxSize);
-        }
+    if (ArchiveRar::loadlib()) {
+        // TODO: Check return value
+        return ArchiveRar::readFile(archiveName, fileName, maxSize);
     }
 
-    return 0;
+    return std::nullopt;
 }

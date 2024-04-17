@@ -69,10 +69,13 @@ public:
     QAbstractItemModel *createChildModel(const QModelIndex &parentIndex) const override
     {
         const QString path = mFileSystemModel->filePath(parentIndex);
-        std::vector<ArchiveFileInfo> list;
-        mArchiveReader->getFileInfoList(path, list);
+        auto list = mArchiveReader->getFileInfoList(path);
+        if (!list) {
+            qWarning() << "Error opening archive " << path << Qt::endl;
+            return nullptr;
+        }
 
-        QAbstractItemModel *arm = new ArchiveModel(list);
+        QAbstractItemModel *arm = new ArchiveModel(*list);
         return arm;
     }
 

@@ -17,7 +17,7 @@ char *toString(const ArchiveFileInfo &afi)
 TestArchiveFileList::TestArchiveFileList(
     const IArchiveExtractor *const archive_extractor,
     const DirStructureFixture &tds,
-    const QString &archives_dir,
+    const QDir &archives_dir,
     QObject *parent)
     : QObject(parent)
     , m_archive_extractor(archive_extractor)
@@ -27,18 +27,18 @@ TestArchiveFileList::TestArchiveFileList(
 
 void TestArchiveFileList::commonCheck(const QString &archiveName, const DirStructureFixture &tds)
 {
-    std::vector<ArchiveFileInfo> list;
-    const QString archivePath = QDir::cleanPath(m_archives_dir + QDir::separator() + archiveName);
-    int success = m_archive_extractor->getFileInfoList(archivePath, list);
-    QCOMPARE(success, 0);
+    const auto archivePath = m_archives_dir.filePath(archiveName);
+    const auto list = m_archive_extractor->getFileInfoList(archivePath);
+    QVERIFY2(list.has_value(), archivePath.toUtf8());
 
     const auto cc = std::array{tds.getFiles(), tds.getDirs()};
     for (const auto &c : cc) {
         for (const auto &e : c) {
-            const auto aIt = std::find_if(list.cbegin(), list.cend(), [&e](const ArchiveFileInfo &x) {
-                return x.m_name == e.m_name;
-            });
-            QVERIFY2(aIt != list.end(), e.m_name.toUtf8());
+            const auto aIt
+                = std::find_if(list->cbegin(), list->cend(), [&e](const ArchiveFileInfo &x) {
+                      return x.m_name == e.m_name;
+                  });
+            QVERIFY2(aIt != list->end(), e.m_name.toUtf8());
             QCOMPARE((*aIt).m_dateTime, e.m_dateTime);
             QCOMPARE((*aIt), e);
         }

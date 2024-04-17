@@ -8,17 +8,14 @@ class ArchiveExtractor : public IArchiveExtractor
 public:
     explicit ArchiveExtractor();
 
-    virtual int getFileInfoList(
-        const QString &path, std::vector<ArchiveFileInfo> &list) const override;
+    virtual std::optional<std::vector<ArchiveFileInfo>> getFileInfoList(
+        const QString &path) const override;
     virtual int extract(
         const QString &archiveName,
         const QString &fileName,
         const QString &newFileName) const override;
-    virtual int readFile(
-        const QString &archiveName,
-        const QString &fileName,
-        QByteArray &buffer,
-        int maxSize) const override;
+    virtual std::optional<QByteArray> readFile(
+        const QString &archiveName, const QString &fileName, int maxSize) const override;
 };
 
 #endif // ARCHIVEEXTRACTOR_H
