@@ -708,14 +708,10 @@ void MainWindow::toggleFullscreen(bool value)
     this->menuBar()->setVisible(!value);
     m_toolbar->setVisible(!value);
     if (value) {
-        showFullScreen();
+        m_states_before_fullscreen = windowState();
+        setWindowState(m_states_before_fullscreen | Qt::WindowFullScreen);
     } else {
-#ifdef linux
-        /* Workaround for bug
-         * https://bugreports.qt-project.org/browse/QTBUG-10594 */
-        showNormal();
-#endif
-        showMaximized();
+        setWindowState(m_states_before_fullscreen & ~Qt::WindowFullScreen);
     }
 }
 

@@ -118,6 +118,7 @@ private:
 
     QHash<QAction *, QStringList> m_actions_icons;
 
+    Qt::WindowStates m_states_before_fullscreen;
     bool m_ignoreMouseButtonEvent;
 
     void updateActions();
